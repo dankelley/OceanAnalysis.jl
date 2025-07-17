@@ -17,9 +17,9 @@ Pkg.add("OceanAnalysis")
 
 ```julia
 using OceanAnalysis
-S = [30;32]
-T = [15;10]
-p = [0;100]
-ctd = Ctd(S, T, p)
+S = [30.0;32.0]
+T = [15.0;10.0]
+p = [0.0;100.0]
+ctd = Ctd(S, T, p, -50.0, 40.0)
 plotTS(ctd)
 ```
