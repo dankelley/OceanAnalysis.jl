@@ -12,6 +12,7 @@ export Ctd
 #. export Argo
 
 # Functions
+export Ctd
 export coordinateFromString
 export getElement
 export plotProfile
@@ -70,8 +71,18 @@ function coordinateFromString(s::String)
 end
 
 
+"""
+    Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64}, longitude::Float64=-30, latitude::Float64=30)
+
+Construct a `Ctd` structure, given vectors Practical Salinity, in-situ
+Temperature, and sea pressure, along with single numbers indicating longitude
+and latitude. Note that the last two are needed for the computation of Absolute
+Salinity, Conservative Temperature, sigma0 and spicines0, all of which are
+which are stored in the returned value alongside the three supplied vectors.
+
+"""
 # Convenience function, which carries out TEOS-10 computations
-function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64}, longitude::Float64=-30, latitude::Float64=30)
+function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64}, longitude::Float64=-30.0, latitude::Float64=30.0)
     SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
     CT = gsw_ct_from_t.(SA, temperature, pressure)
     spiciness0 = gsw_spiciness0.(SA, CT)
