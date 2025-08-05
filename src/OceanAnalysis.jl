@@ -118,7 +118,7 @@ See also [`plotTS`](@ref).
 """
 function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
     if debug
-        println("in plotProfile(ctd,which=\"$which\")")
+        println("in plotProfile(ctd,which=\"$which\",grid=$grid)")
     end
     S = ctd.salinity
     T = ctd.temperature
@@ -200,7 +200,7 @@ See also [`plotProfile`](@ref).
 """
 function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, grid=false, debug::Bool=false, kwargs...)
     if debug
-        println("in plotTS(ctd)")
+        println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, grid=$grid, etc.)")
     end
     S = ctd.salinity
     T = ctd.temperature
