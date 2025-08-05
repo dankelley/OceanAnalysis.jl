@@ -116,7 +116,7 @@ more on such issues.
 
 See also [`plotTS`](@ref).
 """
-function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
     if debug
         println("in plotProfile(ctd,which=\"$which\")")
     end
@@ -147,7 +147,7 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
             else
                 which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
             end,
-            yrot=90; kwargs...)
+            yrot=90, grid=grid; kwargs...)
     elseif which == "S" || which == "SA"
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -156,7 +156,7 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
             else
                 which == "SA" ? "Absolute Salinity [g/kg]" : "Practical Salinity"
             end,
-            yrot=90; kwargs...)
+            yrot=90, grid=grid; kwargs...)
     elseif which == "sigma0" # gsw formulation
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -165,7 +165,7 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
             else
                 "Potential Density Anomaly, σ₀ [kg/m³]"
             end,
-            yrot=90; kwargs...)
+            yrot=90, grid=grid; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -174,7 +174,7 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
             else
                 "Spiciness [kg/m³]"
             end,
-            yrot=90; kwargs...)
+            yrot=90, grid=grid; kwargs...)
     else
         println("Unrecognized 'which'='$(which). Try 'T', 'CT', 'S', 'SA', 'sigma0' or 'spiciness0'.")
     end
@@ -198,7 +198,7 @@ more on such issues.
 
 See also [`plotProfile`](@ref).
 """
-function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, debug::Bool=false, kwargs...)
+function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, grid=false, debug::Bool=false, kwargs...)
     if debug
         println("in plotTS(ctd)")
     end
@@ -211,7 +211,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, 
     plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        framestyle=:box, yrot=90; kwargs...)
+        framestyle=:box, yrot=90, grid=grid; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
