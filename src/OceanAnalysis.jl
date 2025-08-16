@@ -5,6 +5,7 @@ using DataFrames
 using GibbsSeaWater
 using Plots
 using CSV
+using Dierckx
 
 # Structs
 export Oce
@@ -438,9 +439,11 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     if debug
         println("in N2([Ctd object], name=$name")
     end
-    local p = o.pressure
+    local pressure = o.pressure
     local sigma0 = getElement(o, "sigma0")
-    return copy(p) # FIXME
+    #return copy(p) # FIXME
+    local spline = Spline1D(sigma0, pressure, w=ones(length(pressure)), k=3, bc="nearest", s=s)
+    return evaluate(spline, pressure)
 end
 
 
