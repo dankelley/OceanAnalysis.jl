@@ -389,7 +389,7 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 
 # %%
 """
-    getElement(ctd, string)
+    getElement(ctd, string; debug)
 """
 function getElement(o::Ctd, name::String; debug::Bool=false)
     rval = Nothing
@@ -398,6 +398,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     end
     if name == "salinity"
         rval = copy(o.salinity)
+        return (o.salinity)
     elseif name == "temperature"
         rval = copy(o.temperature)
     elseif name == "pressure"
