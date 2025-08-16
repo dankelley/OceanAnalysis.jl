@@ -423,7 +423,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
         rval = copy(gsw_sigma0.(SA, CT))
     end
     if debug
-        println("getElement() returning type ", typeof(rval))
+        println("   getElement() returning type ", typeof(rval))
     end
     return rval
 end
