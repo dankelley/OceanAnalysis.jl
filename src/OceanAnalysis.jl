@@ -393,7 +393,9 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 """
 function getElement(o::Ctd, name::String; debug::Bool=false)
     rval = Nothing
-    println("in getElement([Ctd object], name=$name")
+    if debug
+        println("in getElement([Ctd object], name=$name")
+    end
     if name == "salinity"
         rval = copy(o.salinity)
     elseif name == "temperature"
@@ -421,8 +423,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
         rval = copy(gsw_sigma0.(SA, CT))
     end
     if debug
-        println("getElement() typeof(rval):")
-        println(typeof(rval))
+        println("getElement() returning type ", typeof(rval))
     end
     return rval
 end
