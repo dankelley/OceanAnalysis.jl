@@ -398,7 +398,7 @@ function getElement(o::Ctd, name::String)
         println(typeof(o))
         println("typof(o.salinity):")
         println(typeof(o.salinity))
-        return o.salinity
+        return copy(o.salinity)
     elseif name == "temperature"
         return o.temperature
     elseif name == "pressure"
@@ -411,9 +411,7 @@ function getElement(o::Ctd, name::String)
     SP = o.salinity
     T = o.temperature
     p = o.pressure
-    lon = o.longitude
-    lat = o.latitude
-    SA = gsw_sa_from_sp.(SP, p, lon, lat)
+    SA = gsw_sa_from_sp.(SP, p, o.longitude, o.latitude)
     CT = gsw_ct_from_t.(SA, T, p)
     # it is likely a TEOS10 item
     if name == "SA"
