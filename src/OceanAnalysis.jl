@@ -15,6 +15,7 @@ export Ctd
 export Ctd
 export coordinateFromString
 export getElement
+export N2
 export plotProfile
 export plotTS
 export readArgo
