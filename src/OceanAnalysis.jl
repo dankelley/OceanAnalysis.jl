@@ -14,7 +14,8 @@ export Ctd
 # Functions
 export Ctd
 export coordinateFromString
-export getElement
+#DANDANDAN export getElement
+export get
 export plotProfile
 export plotTS
 export readArgo
@@ -389,9 +390,12 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 
 # %%
 """
-    getElement(ctd, string; debug)
+    getElement(ctd::Ctd, name::String; debug)
+
+Get an element from a Ctd object.
 """
-function getElement(o::Ctd, name::String; debug::Bool=false)
+#function getElement(o::Ctd, name::String; debug::Bool=false) DANDANDAN
+function get(o::Ctd, name::String; debug::Bool=false)
     if debug
         println("in getElement([Ctd object], name=$name")
     end
