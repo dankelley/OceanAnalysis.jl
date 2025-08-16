@@ -391,7 +391,7 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 """
     getElement(ctd, string)
 """
-function getElement(o::Ctd, name::String)
+function getElement(o::Ctd, name::String, bool::debug=false)
     rval = Nothing
     println("in getElement([Ctd object], name=$name")
     if name == "salinity"
@@ -420,8 +420,10 @@ function getElement(o::Ctd, name::String)
     elseif name == "sigma0"
         rval = copy(gsw_sigma0.(SA, CT))
     end
-    println("getElement() typeof(rval):")
-    println(typeof(rval))
+    if debug
+        println("getElement() typeof(rval):")
+        println(typeof(rval))
+    end
     return rval
 end
 
