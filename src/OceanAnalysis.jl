@@ -392,6 +392,7 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
     getElement(ctd, string)
 """
 function getElement(o::Ctd, name::String)
+    rval = Nothing
     println("in getElement([Ctd object], name=$name")
     if name == "salinity"
         println("typof(o):")
@@ -400,15 +401,15 @@ function getElement(o::Ctd, name::String)
         println(typeof(o.salinity))
         println("DAN:")
         println(o.salinity[1:3])
-        return copy(o.salinity)
+        rval = copy(o.salinity)
     elseif name == "temperature"
-        return o.temperature
+        rval = copy(o.temperature)
     elseif name == "pressure"
-        return o.pressure
+        rval = copy(o.pressure)
     elseif name == "longitude"
-        return o.longitude
+        rval = copy(o.longitude)
     elseif name == "latitude"
-        return o.latitude
+        rval = copy(o.latitude)
     end
     SP = o.salinity
     T = o.temperature
@@ -417,16 +418,15 @@ function getElement(o::Ctd, name::String)
     CT = gsw_ct_from_t.(SA, T, p)
     # it is likely a TEOS10 item
     if name == "SA"
-        return (SA)
+        rval = copy(SA)
     elseif name == "CT"
-        return (CT)
+        rval = copy (CT)
     elseif name == "spiciness0"
-        return (gsw_spiciness0.(SA, CT))
+        rval = copy(gsw_spiciness0.(SA, CT))
     elseif name == "sigma0"
-        return (gsw_sigma0.(SA, CT))
-    else
-        error("cannot look up $name")
+        rval = copy(gsw_sigma0.(SA, CT))
     end
+    rval
 end
 
 
