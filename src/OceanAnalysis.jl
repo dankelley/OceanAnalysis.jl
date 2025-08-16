@@ -442,13 +442,17 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     pressure = o.pressure
     sigma0 = getElement(o, "sigma0")
     i = sortperm(pressure)
+    println("DAN i")
+    println(i)
     ok = diff(pressure[i]) .> 0.0
     ok = [ok[1]; ok]
-    println("Original Pressure")
+    println("DAN ok")
+    println(ok)
+    println("DAN Original Pressure")
     println(pressure)
-    println("Transformed Pressure")
+    println("DAN Transformed Pressure")
     println(pressure[i][ok])
-    println("sum(ok): ", sum(ok))
+    println("DAN sum(ok): ", sum(ok))
     local spline = Spline1D(sigma0[i][ok], pressure[i][ok], w=ones(sum(ok)), k=3, bc="nearest", s=s)
     return evaluate(spline, pressure)
 end
