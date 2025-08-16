@@ -398,7 +398,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     end
     if name == "salinity"
         rval = copy(o.salinity) # FIXME: do we need to copy?
-        return o.salinity
+        return copy(o.salinity)
     elseif name == "temperature"
         rval = copy(o.temperature)
     elseif name == "pressure"
