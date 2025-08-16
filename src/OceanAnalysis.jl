@@ -439,10 +439,10 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     if debug
         println("in N2([Ctd object], name=$name")
     end
-    local pressure = o.pressure
-    local sigma0 = getElement(o, "sigma0")
-    #return copy(p) # FIXME
-    local spline = Spline1D(sigma0, pressure, w=ones(length(pressure)), k=3, bc="nearest", s=s)
+    pressure = o.pressure
+    sigma0 = getElement(o, "sigma0")
+    i = sortperm(pressure)
+    local spline = Spline1D(sigma0[i], pressure[i], w=ones(length(pressure)), k=3, bc="nearest", s=s)
     return evaluate(spline, pressure)
 end
 
