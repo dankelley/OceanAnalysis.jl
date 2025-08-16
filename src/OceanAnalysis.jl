@@ -398,24 +398,21 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
         println("in getElement([Ctd object], name=$name")
     end
     # Handle directly-stored items
-    println("DAN DAN DAN")
-    println(fieldnames(Ctd))
     nameSymbol = Symbol(name)
     if nameSymbol in fieldnames(Ctd)
-        println("DAN")
         return copy(getproperty(o, nameSymbol))
     end
-    if name == "salinity"
-        return copy(o.salinity)
-    elseif name == "temperature"
-        return copy(o.temperature)
-    elseif name == "pressure"
-        return copy(o.pressure)
-    elseif name == "longitude"
-        return copy(o.longitude)
-    elseif name == "latitude"
-        return copy(o.latitude)
-    end
+    #<> if name == "salinity"
+    #<>     return copy(o.salinity)
+    #<> elseif name == "temperature"
+    #<>     return copy(o.temperature)
+    #<> elseif name == "pressure"
+    #<>     return copy(o.pressure)
+    #<> elseif name == "longitude"
+    #<>     return copy(o.longitude)
+    #<> elseif name == "latitude"
+    #<>     return copy(o.latitude)
+    #<> end
     # Handle TEOS10 items
     local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
     local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
