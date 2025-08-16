@@ -14,8 +14,7 @@ export Ctd
 # Functions
 export Ctd
 export coordinateFromString
-#DANDANDAN export getElement
-export get
+export getElement
 export plotProfile
 export plotTS
 export readArgo
@@ -394,11 +393,11 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 
 Get an element from a Ctd object.
 """
-#function getElement(o::Ctd, name::String; debug::Bool=false) DANDANDAN
-function get(o::Ctd, name::String; debug::Bool=false)
+function getElement(o::Ctd, name::String; debug::Bool=false)
     if debug
         println("in getElement([Ctd object], name=$name")
     end
+    # Handle directly-stored items
     if name == "salinity"
         return copy(o.salinity)
     elseif name == "temperature"
@@ -410,12 +409,9 @@ function get(o::Ctd, name::String; debug::Bool=false)
     elseif name == "latitude"
         return copy(o.latitude)
     end
-    local SP = o.salinity
-    local T = o.temperature
-    local p = o.pressure
-    local SA = gsw_sa_from_sp.(SP, p, o.longitude, o.latitude)
-    local CT = gsw_ct_from_t.(SA, T, p)
-    # it is likely a TEOS10 item
+    # Handle TEOS10 items
+    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
+    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
     if name == "SA"
         return copy(SA)
     elseif name == "CT"
@@ -425,6 +421,7 @@ function get(o::Ctd, name::String; debug::Bool=false)
     elseif name == "sigma0"
         return copy(gsw_sigma0.(SA, CT))
     end
+    # The item is not handled, so return an empty result
     return Nothing
 end
 
