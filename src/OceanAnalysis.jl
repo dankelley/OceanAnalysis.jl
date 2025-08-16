@@ -420,7 +420,7 @@ function getElement(o::Ctd, name::String)
     if name == "SA"
         rval = copy(SA)
     elseif name == "CT"
-        rval = copy (CT)
+        rval = copy(CT)
     elseif name == "spiciness0"
         rval = copy(gsw_spiciness0.(SA, CT))
     elseif name == "sigma0"
