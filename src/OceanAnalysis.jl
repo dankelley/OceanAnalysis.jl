@@ -434,7 +434,7 @@ end
 
 Compute the square of the buoyancy frequency for a Ctd object.
 """
-function N2(o::Ctd, s:Float64=1.0; debug::Bool=false)
+function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     if debug
         println("in N2([Ctd object], name=$name")
     end
