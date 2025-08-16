@@ -6,6 +6,7 @@ using GibbsSeaWater
 using Plots
 using CSV
 using Dierckx
+using Statistics
 
 # Structs
 export Oce
