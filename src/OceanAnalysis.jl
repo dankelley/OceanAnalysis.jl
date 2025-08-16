@@ -466,7 +466,7 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     deriv = diff(sigma0p) ./ diff(pressure)
     println("1. deriv:")
     print(deriv)
-    deriv = [deriv[1], deriv]
+    deriv = [deriv[1]; deriv]
     println("2. deriv:")
     print(deriv)
     N2 = (g / rho0) * deriv
