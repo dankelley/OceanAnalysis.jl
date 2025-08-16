@@ -399,7 +399,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     end
     # Handle directly-stored items
     println("DAN DAN DAN")
-    println(fieldnames(ctd))
+    println(fieldnames(Ctd))
     if name in fieldnames(Ctd)
         println("DAN")
         return copy(getproperty(o, Symbol(name)))
