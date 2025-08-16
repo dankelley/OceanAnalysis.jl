@@ -398,7 +398,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
         println("in getElement([Ctd object], name=$name")
     end
     # Handle directly-stored items
-    if name in fieldnames(o)
+    if name in fieldnames(Ctd)
         println("DAN")
         return copy(getproperty(o, Symbol(name)))
     end
