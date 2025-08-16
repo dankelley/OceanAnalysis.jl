@@ -429,7 +429,7 @@ function getElement(o::Ctd, name::String)
     elseif name == "sigma0"
         rval = copy(gsw_sigma0.(SA, CT))
     end
-    rval
+    return rval
 end
 
 
