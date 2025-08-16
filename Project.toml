@@ -10,6 +10,7 @@ Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
 GibbsSeaWater = "9a22fb26-0b63-4589-b28e-8f9d0b5c3d05"
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 CSV = "0.10.15"
@@ -18,4 +19,5 @@ Dierckx = "0.5.4"
 GibbsSeaWater = "0.1.4"
 NCDatasets = "0.14.8"
 Plots = "1.40.13"
+Statistics = "1.11.1"
 julia = "1"
