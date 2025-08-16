@@ -11,8 +11,7 @@ is just learning Julia as a supplement to R.
 Start Julia and enter the following:
 
 ```julia
-]
-add https://github.com/dankelley/OceanAnalysis.jl
+using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 ```
 
 ### Official version
@@ -20,8 +19,7 @@ add https://github.com/dankelley/OceanAnalysis.jl
 Start Julia and enter the following:
 
 ```julia
-]
-add OceanAnalysis
+using Pkg ; Pkg.add("OceanAnalysis")
 ```
 
 # Usage Example
