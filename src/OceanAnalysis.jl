@@ -392,21 +392,19 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
     getElement(ctd, string; debug)
 """
 function getElement(o::Ctd, name::String; debug::Bool=false)
-    rval = Nothing
     if debug
         println("in getElement([Ctd object], name=$name")
     end
     if name == "salinity"
-        rval = copy(o.salinity) # FIXME: do we need to copy?
         return copy(o.salinity)
     elseif name == "temperature"
-        rval = copy(o.temperature)
+        return copy(o.temperature)
     elseif name == "pressure"
-        rval = copy(o.pressure)
+        return copy(o.pressure)
     elseif name == "longitude"
-        rval = copy(o.longitude)
+        return copy(o.longitude)
     elseif name == "latitude"
-        rval = copy(o.latitude)
+        return copy(o.latitude)
     end
     SP = o.salinity
     T = o.temperature
@@ -415,19 +413,15 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     CT = gsw_ct_from_t.(SA, T, p)
     # it is likely a TEOS10 item
     if name == "SA"
-        rval = copy(SA)
+        return copy(SA)
     elseif name == "CT"
-        rval = copy(CT)
+        return copy(CT)
     elseif name == "spiciness0"
-        rval = copy(gsw_spiciness0.(SA, CT))
+        return copy(gsw_spiciness0.(SA, CT))
     elseif name == "sigma0"
-        rval = copy(gsw_sigma0.(SA, CT))
+        return copy(gsw_sigma0.(SA, CT))
     end
-    if debug
-        println("   getElement() returning type ", typeof(rval))
-    end
-    return rval
+    return Nothing
 end
-
 
 end # module OceanAnalysis
