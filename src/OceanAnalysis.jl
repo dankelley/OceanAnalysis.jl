@@ -387,7 +387,6 @@ See also [`T90fromT68`](@ref).
 T90fromT48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
 T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1.00024
 
-# %%
 """
     getElement(ctd::Ctd, name::String; debug)
 
@@ -428,5 +427,20 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     # The item is not handled, so return an empty result
     return Nothing
 end
+
+"""
+    N2(ctd::Ctd, s::String=1; debug)
+
+Compute the square of the buoyancy frequency for a Ctd object.
+"""
+function N2(o::Ctd, s::String; debug::Bool=false)
+    if debug
+        println("in N2([Ctd object], name=$name")
+    end
+    local p = o.pressure
+    local sigma0 = getElement(o, "sigma0")
+    return copy(p) # FIXME
+end
+
 
 end # module OceanAnalysis
