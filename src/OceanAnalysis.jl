@@ -442,7 +442,9 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     pressure = o.pressure
     sigma0 = getElement(o, "sigma0")
     i = sortperm(pressure)
-    local spline = Spline1D(sigma0[i], pressure[i], w=ones(length(pressure)), k=3, bc="nearest", s=s)
+    ok = diff(pressure) .> 0.0
+    ok = [ok[1]; ok]
+    local spline = Spline1D(sigma0[i][ok], pressure[i][ok], w=ones(sum(ok)), k=3, bc="nearest", s=s)
     return evaluate(spline, pressure)
 end
 
