@@ -391,7 +391,7 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 """
     getElement(ctd, string)
 """
-function getElement(o::Ctd, name::String, debug::Bool=false)
+function getElement(o::Ctd, name::String; debug::Bool=false)
     rval = Nothing
     println("in getElement([Ctd object], name=$name")
     if name == "salinity"
