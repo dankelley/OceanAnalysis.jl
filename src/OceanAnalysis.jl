@@ -391,7 +391,7 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 """
     getElement(ctd, string)
 """
-function getElement(o::Ctd, name::String)
+function getElement(o::Ctd, name::String)j
     rval = Nothing
     println("in getElement([Ctd object], name=$name")
     if name == "salinity"
@@ -399,9 +399,12 @@ function getElement(o::Ctd, name::String)
         println(typeof(o))
         println("typof(o.salinity):")
         println(typeof(o.salinity))
-        println("DAN:")
+        println("DAN 1:")
         println(o.salinity[1:3])
         rval = copy(o.salinity)
+        println("DAN 2:")
+        println(rval[1:3])
+        rval = [1.0, 2.0, 3.0]
     elseif name == "temperature"
         rval = copy(o.temperature)
     elseif name == "pressure"
