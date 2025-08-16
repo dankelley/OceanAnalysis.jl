@@ -395,16 +395,7 @@ function getElement(o::Ctd, name::String)
     rval = Nothing
     println("in getElement([Ctd object], name=$name")
     if name == "salinity"
-        println("typof(o):")
-        println(typeof(o))
-        println("typof(o.salinity):")
-        println(typeof(o.salinity))
-        println("DAN 1:")
-        println(o.salinity[1:3])
         rval = copy(o.salinity)
-        println("DAN 2:")
-        println(rval[1:3])
-        rval = [1.0, 2.0, 3.0]
     elseif name == "temperature"
         rval = copy(o.temperature)
     elseif name == "pressure"
@@ -429,6 +420,8 @@ function getElement(o::Ctd, name::String)
     elseif name == "sigma0"
         rval = copy(gsw_sigma0.(SA, CT))
     end
+    println("getElement() typeof(rval):")
+    println(typeof(rval))
     return rval
 end
 
