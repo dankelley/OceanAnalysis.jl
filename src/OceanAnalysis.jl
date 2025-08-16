@@ -398,6 +398,8 @@ function getElement(o::Ctd, name::String)
         println(typeof(o))
         println("typof(o.salinity):")
         println(typeof(o.salinity))
+        println("DAN:")
+        println(o.salinity[1:3])
         return copy(o.salinity)
     elseif name == "temperature"
         return o.temperature
