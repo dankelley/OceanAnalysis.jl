@@ -406,11 +406,11 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     elseif name == "latitude"
         return copy(o.latitude)
     end
-    SP = o.salinity
-    T = o.temperature
-    p = o.pressure
-    SA = gsw_sa_from_sp.(SP, p, o.longitude, o.latitude)
-    CT = gsw_ct_from_t.(SA, T, p)
+    local SP = o.salinity
+    local T = o.temperature
+    local p = o.pressure
+    local SA = gsw_sa_from_sp.(SP, p, o.longitude, o.latitude)
+    local CT = gsw_ct_from_t.(SA, T, p)
     # it is likely a TEOS10 item
     if name == "SA"
         return copy(SA)
