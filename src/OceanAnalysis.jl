@@ -448,17 +448,11 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     ok = [ok[1]; ok]
     println("DAN ok")
     println(ok)
-    println("DAN Original Pressure")
-    println(pressure)
-    println("DAN Transformed Pressure")
-    println(pressure[i][ok])
-    println("DAN sum(ok): ", sum(ok))
-    println("DAN sum(!ok): ", sum(!ok))
-    pok = diff([pressure; 0]) .> 0.0
-    println("DAN pok: $pok")
-    println("bad count: ", sum(!pok))
-
-    local spline = Spline1D(sigma0[i][ok], pressure[i][ok], w=ones(sum(ok)), k=3, bc="nearest", s=s)
+    j = i[ok]
+    println("DAN j")
+    println(j)
+    println("length(i)=", length(i), ", length(j)=", length(j))
+    local spline = Spline1D(pressure[j], sigma0[j], w=ones(sum(ok)), k=3, bc="nearest", s=s)
     return evaluate(spline, pressure)
 end
 
