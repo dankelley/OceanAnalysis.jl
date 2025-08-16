@@ -453,6 +453,7 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     println("DAN Transformed Pressure")
     println(pressure[i][ok])
     println("DAN sum(ok): ", sum(ok))
+    println("DAN sum(!ok): ", sum(!ok))
     pok = diff([pressure; 0]) .> 0.0
     println("DAN pok: $pok")
     println("bad count: ", sum(!pok))
