@@ -394,7 +394,10 @@ T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1
 function getElement(o::Ctd, name::String)::Vector{Float64}
     println("in getElement([Ctd object], name=$name")
     if name == "salinity"
-        println("returning o.salinity")
+        println("typof(o):")
+        println(typeof(o))
+        println("typof(o.salinity):")
+        println(typeof(o.salinity))
         return o.salinity
     elseif name == "temperature"
         return o.temperature
