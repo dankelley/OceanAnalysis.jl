@@ -94,7 +94,7 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
 end
 
 """
-    plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
+    plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, debug::Bool=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -125,7 +125,7 @@ more on such issues.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, grid::Bool=true, debug::Bool=false, kwargs...)
     if debug
         println("in plotProfile(ctd,which=\"$which\",grid=$grid)")
     end
