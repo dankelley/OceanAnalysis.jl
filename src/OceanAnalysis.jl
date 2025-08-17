@@ -117,7 +117,7 @@ constructed with a blue line connecting points, but using e.g.
 will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on such issues.
 
-See also [`plotTS`](@ref).
+See also the [`plotTS`](@ref) function.
 """
 function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
     if debug
@@ -435,14 +435,15 @@ end
     N2(ctd::Ctd, s::Float64=0.15; debug)
 
 Compute N², the square of the buoyancy frequency, for a Ctd object, e.g.
-created by [`Ctd`](@ref) or [`readArgo`](@ref).  The value is inferred from a
-cubic spline fitted to sigma0 as a function of pressure.
+created by either the [`Ctd`](@ref) or [`readArgo`](@ref) function.  The value
+is inferred from a cubic spline fitted to sigma0 as a function of pressure.
 
 Smoothing is the tricky part of the analysis.  In the present version, it is
-done with `Dierckx:Spline1D()`, which is called with equal weights, `w`, for
-all points, with `k=3` to set the polynomial order to cubic, and with
-`bc="nearest"` to control what happens near boundaries. The user has no control
-over these things, although this might change in a future version of `N2()`.
+done with the `Dierckx::Spline1D()` function, which is called with equal
+weights, `w`, for all points, with `k=3` to set the polynomial order to cubic,
+and with `bc="nearest"` to control what happens near boundaries. The user has
+no control over these things, although this might change in a future version of
+`N2()`.
 
 The user's control rests in `s`, a smoothing parameter that is passed to
 `Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
