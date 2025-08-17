@@ -319,14 +319,15 @@ pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "ctd.cnv")
 header, metadata, data = readCtdCNV(f)
 ctd = Ctd(data.sal00,
-    T90fromT68(data.t068),
+    data.t090,
     data.pr,
     metadata["longitude"],
     metadata["latitude"])
 p1 = plotProfile(ctd, "SA")
 p2 = plotProfile(ctd, "CT")
-p3 = plotTS(ctd, "TS")
-plot(p1, p2, p3)
+p3 = plotTS(ctd)
+l = @layout [[a  b]; c]
+plot(p1, p2, p3, layout=l)
 ```
 """
 function readCtdCNV(filename::String, debug::Bool=false)
