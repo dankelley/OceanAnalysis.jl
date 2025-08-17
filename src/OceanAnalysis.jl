@@ -435,8 +435,8 @@ end
     N2(ctd::Ctd, s::Float64=0.15; debug)
 
 Compute N², the square of the buoyancy frequency, for a Ctd object, e.g.
-created by `Ctd()` or `readArgo()`.  The value is inferred from a cubic spline
-fitted to sigma0 as a function of pressure.
+created by [`Ctd`](@ref) or [`readArgo`](@ref).  The value is inferred from a
+cubic spline fitted to sigma0 as a function of pressure.
 
 Smoothing is the tricky part of the analysis.  In the present version, it is
 done with `Dierckx:Spline1D()`, which is called with equal weights, `w`, for
