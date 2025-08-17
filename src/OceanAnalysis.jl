@@ -124,6 +124,17 @@ will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ fo
 more on such issues.
 
 See also the [`plotTS`](@ref) function.
+
+# Examples
+```julia-repl
+using Plots,OceanAnalysis
+# I may create a function to handle the next two lines.
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1);
+plotProfile(d, "sigma0")
+```
+
 """
 function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, grid::Bool=true, debug::Bool=false, kwargs...)
     if debug

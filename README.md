@@ -37,6 +37,7 @@ plotTS(ctd)
 
 ### 0.0.3 (in development)
 
+* Add built-in data file `D4902911_095.nc`, and use it in an example for `plotProfile()`.
 * `getElement()` can now return `"N2"`.
 * `plotProfile()` can now plot `N2"`.
 
