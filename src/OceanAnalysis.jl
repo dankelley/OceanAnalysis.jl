@@ -503,12 +503,16 @@ function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
     sigma0p = evaluate(spline, pressure)
     rho0 = 1000.0 + mean(sigma0p)
     g = 9.8
-    deriv = diff(sigma0p) ./ diff(pressure)
-    deriv = [deriv; deriv[end]]
-    if debug
-        println("deriv:")
-        print(deriv)
-        println("g=$g, rho0=$rho0")
+    if false
+        deriv = diff(sigma0p) ./ diff(pressure)
+        deriv = [deriv; deriv[end]]
+        if debug
+            println("deriv:")
+            print(deriv)
+            println("g=$g, rho0=$rho0")
+        end
+    else
+        deriv = derivative(spline, pressure)
     end
     N2 = (g / rho0) * deriv
     if debug
