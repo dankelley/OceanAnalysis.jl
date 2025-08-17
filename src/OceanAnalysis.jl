@@ -440,9 +440,9 @@ a smoothed version of sigma0 as a function of pressure.
 
 Smoothing is the tricky part of the analysis.  In the present version, it is
 done with `Dierckx:Spline1D()`, which is called with equal weights, `w`, for
-all points, with `k=3` to set the polynomial order to cubic. The user has no
-control over these things, althought this might change in a future version of
-`N2()`.
+all points, with `k=3` to set the polynomial order to cubic, and with
+`bc="nearest"` to control what happens near boundaries. The user has no control
+over these things, although this might change in a future version of `N2()`.
 
 The user's control rests in `s`, a smoothing parameter that is passed to
 `Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
@@ -465,7 +465,7 @@ if isfile(file)
     s = 0.15 # experiment with this value
     N2val = N2(d, s)
     p2 = plot(1e4 * N2val, d.pressure, xlab="1e4 N^2", ylab="Pressure [dbar]",
-        yflip=true, dpi=500, legend=false, title="s=$s", titlefontsize=10)
+        yflip=true, dpi=500, legend=false)
 
     plot(p1, p2, layout=(1, 2))
 end
