@@ -37,8 +37,8 @@ plotTS(ctd)
 
 ### 0.0.3 (in development)
 
-* Change `plotProfile()` to accept `which="N2"` for plotting the square of the
-  buoyancy frequency.
+* `getElement()` can now return `"N2"`.
+* `plotProfile()` can now plot `N2"`.
 
 ### 0.0.2
 
