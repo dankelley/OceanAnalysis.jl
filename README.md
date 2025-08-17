@@ -2,7 +2,7 @@
 
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
 oceanographic data. It is at a very early stage of development by someone who
-is just learning Julia as a supplement to R.
+is in the early steps of exploring Julia as a supplement to R.
 
 ## Installation
 
