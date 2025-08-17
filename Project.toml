@@ -1,6 +1,6 @@
 name = "OceanAnalysis"
 uuid = "935d77d6-d85b-49cc-a465-c336e8287d34"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["dankelley <kelley.dan@gmail.com>"]
 
 [deps]
