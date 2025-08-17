@@ -432,7 +432,7 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
 end
 
 """
-    N2(ctd::Ctd, s::Float64=1; debug)
+    N2(ctd::Ctd, s::Float64=0.15; debug)
 
 Compute the square of the buoyancy frequency for a Ctd object, e.g. created by
 `Ctd()` or `readArgo()`.  The value of N^2 is inferred from first-differencing
