@@ -282,7 +282,7 @@ using OceanAnalysis, Plots
 argo_file = "/Users/kelley/data/argo/D4902911_095.nc"
 if isfile(argo_file)
     d = readArgo(argo_file)
-    plotProfile(d, which="SA", seriescolor=:black)
+    plotProfile(d, "SA", seriescolor=:black)
     plot!(d.salinity, d.pressure, seriescolor=:red)
 end
 ```
@@ -314,18 +314,19 @@ oceanographic software, especially the `gsw` package.
 
 # Examples
 ```julia-repl
-header, metadata, data = readCtdCNV("ctd.cnv")
+using Plots,OceanAnalysis
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "ctd.cnv")
+header, metadata, data = readCtdCNV(f)
 ctd = Ctd(data.sal00,
     T90fromT68(data.t068),
     data.pr,
     metadata["longitude"],
     metadata["latitude"])
-plotProfile(ctd, which="SA")
-savefig("readcnv_profile_SA.pdf")
-plotProfile(ctd, which="CT")
-savefig("readcnv_profile_CT.pdf")
-plotTS(ctd, which="TS")
-savefig("readcnv_TS.pdf")
+p1 = plotProfile(ctd, "SA")
+p2 = plotProfile(ctd, "CT")
+p3 = plotTS(ctd, "TS")
+plot(p1, p2, p3)
 ```
 """
 function readCtdCNV(filename::String, debug::Bool=false)
