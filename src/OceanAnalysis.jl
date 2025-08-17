@@ -455,10 +455,10 @@ function `oce::swN2()`.
 
 # Examples
 ```julia-repl
-file = "D4902911_095.nc"
+file = "D4902911_095.nc" # downloaded from an Argo server
 if isfile(file)
     using Plots, GibbsSeaWater, OceanAnalysis
-    d = readArgo(file, 1) # downloaded from an Argo server
+    d = readArgo(file, 1)
     p1 = plot(getElement(d, "sigma0"), d.pressure, xlab="sigma0", ylab="Pressure [dbar]",
         yflip=true, dpi=500, legend=false)
 
