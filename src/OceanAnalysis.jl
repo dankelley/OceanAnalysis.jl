@@ -185,7 +185,7 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
             end,
             yrot=90, grid=grid; kwargs...)
     elseif which == "N2"
-        dan = getElement(ctd, name="N2")
+        dan = getElement(ctd, "N2")
         println("next is N2?")
         println(dan)
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
@@ -418,33 +418,28 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     if debug
         println("in getElement([Ctd object], name=$name")
     end
-    # Handle directly-stored items
+    # Handle values stored directly in Ctd objects
     nameSymbol = Symbol(name)
     if nameSymbol in fieldnames(Ctd)
         return copy(getproperty(o, nameSymbol))
     end
-    #<> if name == "salinity"
-    #<>     return copy(o.salinity)
-    #<> elseif name == "temperature"
-    #<>     return copy(o.temperature)
-    #<> elseif name == "pressure"
-    #<>     return copy(o.pressure)
-    #<> elseif name == "longitude"
-    #<>     return copy(o.longitude)
-    #<> elseif name == "latitude"
-    #<>     return copy(o.latitude)
-    #<> end
-    # Handle TEOS10 items
-    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
-    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    # Handle items computable via functions of Ctd objects
+    if name == "N2"
+        return copy(N2(o))
+    end
+    # Handle TEOS10 variables
+    SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
     if name == "SA"
         return copy(SA)
-    elseif name == "CT"
+    end
+    CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    if name == "CT"
         return copy(CT)
+    end
+    if name == "sigma0"
+        return copy(gsw_sigma0.(SA, CT))
     elseif name == "spiciness0"
         return copy(gsw_spiciness0.(SA, CT))
-    elseif name == "sigma0"
-        return copy(gsw_sigma0.(SA, CT))
     end
     # The item is not handled, so return an empty result
     return Nothing
