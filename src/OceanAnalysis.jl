@@ -465,7 +465,7 @@ if isfile(file)
     s = 0.15 # experiment with this value
     N2val = N2(d, s)
     p2 = plot(1e4 * N2val, d.pressure, xlab="1e4 N^2", ylab="Pressure [dbar]",
-        yflip=true, dpi=500, legend=false, title="s=$s", titlefontsize=10)
+        yflip=true, dpi=500, legend=false)
 
     plot(p1, p2, layout=(1, 2))
 end
