@@ -434,7 +434,7 @@ end
 """
     N2(ctd::Ctd, s::Float64=0.15; debug)
 
-Compute the square of the buoyancy frequency, N², for a Ctd object, e.g.
+Compute N², the square of the buoyancy frequency, for a Ctd object, e.g.
 created by `Ctd()` or `readArgo()`.  The value is inferred from a cubic spline
 fitted to sigma0 as a function of pressure.
 
@@ -446,7 +446,7 @@ over these things, although this might change in a future version of `N2()`.
 
 The user's control rests in `s`, a smoothing parameter that is passed to
 `Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
-that yields N^2 curves that are similar to those computed with a default call to
+that yields N² curves that are similar to those computed with a default call to
 `swN2()` in the `oce` R package.  Users may elect to use larger `s` values for
 smoother curves, or smaller ones to get more detail.  It would be a mistake not
 to pair experiments with `s` values with plots. As a start, it might be useful
