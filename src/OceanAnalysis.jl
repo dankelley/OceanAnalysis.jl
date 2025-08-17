@@ -432,9 +432,16 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
 end
 
 """
-    N2(ctd::Ctd, s::String=1; debug)
+    N2(ctd::Ctd, s::Float64=1; debug)
 
-Compute the square of the buoyancy frequency for a Ctd object.
+Compute the square of the buoyancy frequency for a Ctd object.  The value
+is inferred from first-differencing a smoothed version of sigma0 as
+a function of pressure.  The smoothing parameter, `s`, is passed to
+Dierckx:Spline1D(), which does the smoothing.  Larger values of `s`
+yield smoother N^2 curves, and users ought to experiment with
+values other than the default. Note that `Dierckx:Spline1D()` is
+called with equal weights for all points, with `k=3`, and with
+`bc="nearest"`.
 """
 function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     if debug
@@ -444,18 +451,18 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
     sigma0 = getElement(o, "sigma0")
     i = sortperm(pressure)
     if debug
-        println("DAN i")
+        println("i follows")
         println(i)
     end
     ok = diff(pressure[i]) .> 0.0
     ok = [ok[1]; ok]
     if debug
-        println("DAN ok")
+        println("ok follows")
         println(ok)
     end
     j = i[ok]
     if debug
-        println("DAN j")
+        println("j follows")
         println(j)
         println("length(i)=", length(i), ", length(j)=", length(j))
     end
