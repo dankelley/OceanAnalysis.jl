@@ -434,16 +434,25 @@ end
 """
     N2(ctd::Ctd, s::Float64=1; debug)
 
-Compute the square of the buoyancy frequency for a Ctd object.  The value
-is inferred from first-differencing a smoothed version of sigma0 as
-a function of pressure.  The smoothing parameter, `s`, is passed to
-Dierckx:Spline1D(), which does the smoothing.  Larger values of `s`
-yield smoother N^2 curves, and users ought to experiment with
-values other than the default. Note that `Dierckx:Spline1D()` is
-called with equal weights for all points, with `k=3`, and with
-`bc="nearest"`.
+Compute the square of the buoyancy frequency for a Ctd object, e.g. created by
+`Ctd()` or `readArgo()`.  The value of N^2 is inferred from first-differencing
+a smoothed version of sigma0 as a function of pressure.
+
+Smoothing is the tricky part of the analysis.  In the present version, it is
+done with `Dierckx:Spline1D()`, which is called with equal weights, `w`, for
+all points, with `k=3` to set the polynomial order to cubic. The user has no
+control over these things, althought this might change in a future version of
+`N2()`.
+
+The user's control rests in `s`, a smoothing parameter that is passed to
+`Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
+that yields N^2 curves very similar to those computed with a default call to
+`swN2()` in the `oce` R package.  Users may elect to use larger `s` values for
+smoother curves, or smaller ones to get more detail.  It would be a mistake not
+to pair experiments with `s` values with plots.
+
 """
-function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
+function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
     if debug
         println("in N2([Ctd object], name=$name")
     end
