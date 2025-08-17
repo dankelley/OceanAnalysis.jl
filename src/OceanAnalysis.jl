@@ -449,32 +449,31 @@ The user's control rests in `s`, a smoothing parameter that is passed to
 that yields N^2 curves very similar to those computed with a default call to
 `swN2()` in the `oce` R package.  Users may elect to use larger `s` values for
 smoother curves, or smaller ones to get more detail.  It would be a mistake not
-to pair experiments with `s` values with plots. As a start, check out Reference
-1, which shows a comparison, for the sample code, with the results from 
-the R function `oce::swN2()`.
+to pair experiments with `s` values with plots. As a start, it might be useful
+to examine Reference 1, which compares the results of `N2()` with the R
+function `oce::swN2()`.
 
 # Examples
 ```julia-repl
-using Plots, GibbsSeaWater, OceanAnalysis
 file = "D4902911_095.nc"
-d = readArgo(file, 1) # downloaded from an Argo server
-p1 = plot(getElement(d, "sigma0"), d.pressure, xlab="sigma0", ylab="Pressure [dbar]",
-    yflip=true, dpi=500, legend=false)
+if isfile(file)
+    using Plots, GibbsSeaWater, OceanAnalysis
+    d = readArgo(file, 1) # downloaded from an Argo server
+    p1 = plot(getElement(d, "sigma0"), d.pressure, xlab="sigma0", ylab="Pressure [dbar]",
+        yflip=true, dpi=500, legend=false)
 
-s = 0.15 # experiment with this value
-N2val = N2(d, s)
-p2 = plot(1e4 * N2val, d.pressure, xlab="1e4 N^2", ylab="Pressure [dbar]",
-    yflip=true, dpi=500, legend=false, title="s=$s", titlefontsize=10)
+    s = 0.15 # experiment with this value
+    N2val = N2(d, s)
+    p2 = plot(1e4 * N2val, d.pressure, xlab="1e4 N^2", ylab="Pressure [dbar]",
+        yflip=true, dpi=500, legend=false, title="s=$s", titlefontsize=10)
 
-plot(p1, p2, layout=(1, 2))
+    plot(p1, p2, layout=(1, 2))
+end
 ```
 
 # References
 
-1. https://github.com/dankelley/OceanAnalysis.jl/issues/13 -- this is an issue
-   describing the need for this, the methodology, etc. Notice the diagram in
-   the screenshot included with the second comment.
-   https://github.com/dankelley/OceanAnalysis.jl/issues/13
+1. https://github.com/dankelley/OceanAnalysis.jl/issues/13
 
 """
 function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
