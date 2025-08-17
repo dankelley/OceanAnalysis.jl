@@ -22,7 +22,7 @@ Start Julia and enter the following:
 using Pkg ; Pkg.add("OceanAnalysis")
 ```
 
-# Usage Example
+## Usage Example
 
 ```julia
 using OceanAnalysis
@@ -32,3 +32,14 @@ p = [0.0;100.0]
 ctd = Ctd(S, T, p, -50.0, 40.0)
 plotTS(ctd)
 ```
+
+## History of major changes
+
+### 0.0.3 (in development)
+
+* Change `plotProfile()` to accept `which="N2"` for plotting the square of the
+  buoyancy frequency.
+
+### 0.0.2
+
+* Add `N2()` to compute the square of the buoyancy frequency.

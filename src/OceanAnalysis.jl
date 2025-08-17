@@ -100,12 +100,18 @@ Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
 axis and pressure on the y axis. Following oceanographic convention, pressure
 increases downwards on the page and the "x" axis is drawn at the top. The
-permitted values of `which` are `"T"` for in-situ temperature, `"CT"` for
-Conservative Temperature, `"S"` for Practical Salinity, `"SA"` for Absolute
-Salinity, `"sigma0"` for density anomaly referenced to the surface,in the
-TEOS10 formulation, or `"spiciness0"` for seawater spiciness referenced to the
-surface. The `seriestype` and other arguments have the same meaning as for
-general julia plots, e.g. using `seriestype=:path` joins the data points, and
+permitted values of `which` are
+`"CT"` for Conservative Temperature,
+`"N2"` for N², the square of the buoyancy frequency,
+`"S"` for Practical Salinity,
+`"SA"` for Absolute Salinity,
+`"sigma0"` for the TEOS10 formulation of density anomaly referenced to the surface,
+`"spiciness0"` for seawater spiciness referenced to the surface,
+or
+`"T"` for in-situ temperature.
+
+The `seriestype` and other arguments have the same meaning as for general julia
+plots, e.g. using `seriestype=:path` joins the data points, and
 `seriestype=:scatter` shows a symbol at each point.
 
 The `kwargs...` argument is used to represent other arguments that will be sent
@@ -178,8 +184,18 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
                 "Spiciness [kg/m³]"
             end,
             yrot=90, grid=grid; kwargs...)
+    elseif which == "N2"
+        plot(getElement(ctd, "N2"), y, ylabel=ylabel,
+            yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            xlabel=if abbreviate
+                "N²"
+            else
+                "N² [1/s²]"
+            end,
+            yrot=90, grid=grid; kwargs...)
+
     else
-        println("Unrecognized 'which'='$(which). Try 'T', 'CT', 'S', 'SA', 'sigma0' or 'spiciness0'.")
+        println("Unrecognized 'which'='$(which)'. Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
 end
 
