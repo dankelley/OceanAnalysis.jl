@@ -434,9 +434,9 @@ end
 """
     N2(ctd::Ctd, s::Float64=0.15; debug)
 
-Compute the square of the buoyancy frequency for a Ctd object, e.g. created by
-`Ctd()` or `readArgo()`.  The value of N^2 is inferred from first-differencing
-a smoothed version of sigma0 as a function of pressure.
+Compute the square of the buoyancy frequency, N², for a Ctd object, e.g.
+created by `Ctd()` or `readArgo()`.  The value is inferred from a cubic spline
+fitted to sigma0 as a function of pressure.
 
 Smoothing is the tricky part of the analysis.  In the present version, it is
 done with `Dierckx:Spline1D()`, which is called with equal weights, `w`, for
@@ -446,12 +446,11 @@ over these things, although this might change in a future version of `N2()`.
 
 The user's control rests in `s`, a smoothing parameter that is passed to
 `Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
-that yields N^2 curves very similar to those computed with a default call to
+that yields N^2 curves that are similar to those computed with a default call to
 `swN2()` in the `oce` R package.  Users may elect to use larger `s` values for
 smoother curves, or smaller ones to get more detail.  It would be a mistake not
 to pair experiments with `s` values with plots. As a start, it might be useful
-to examine Reference 1, which compares the results of `N2()` with the R
-function `oce::swN2()`.
+to examine Reference 1, which compares the R and Julia results.
 
 # Examples
 ```julia-repl
@@ -503,17 +502,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
     sigma0p = evaluate(spline, pressure)
     rho0 = 1000.0 + mean(sigma0p)
     g = 9.8
-    if false
-        deriv = diff(sigma0p) ./ diff(pressure)
-        deriv = [deriv; deriv[end]]
-        if debug
-            println("deriv:")
-            print(deriv)
-            println("g=$g, rho0=$rho0")
-        end
-    else
-        deriv = derivative(spline, pressure)
-    end
+    deriv = derivative(spline, pressure)
     N2 = (g / rho0) * deriv
     if debug
         println("N2")
