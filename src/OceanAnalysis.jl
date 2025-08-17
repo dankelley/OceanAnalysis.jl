@@ -185,12 +185,15 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
             end,
             yrot=90, grid=grid; kwargs...)
     elseif which == "N2"
+        dan = getElement(ctd, name="N2")
+        println("next is N2?")
+        println(dan)
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
             xlabel=if abbreviate
-                "N²"
+                "N2" #"N²"
             else
-                "N² [1/s²]"
+                "N2 [1/s^2]" # "N² [1/s²]"
             end,
             yrot=90, grid=grid; kwargs...)
 
