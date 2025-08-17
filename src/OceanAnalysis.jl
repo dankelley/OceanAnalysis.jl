@@ -118,7 +118,7 @@ The `kwargs...` argument is used to represent other arguments that will be sent
 to `plot()`.  For example, the default way to display the profile diagram is
 constructed with a blue line connecting points, but using e.g.
 
-    plotProfile(ctd, which="SA", seriestype=:scatter, seriescolor=:red)
+    plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
 
 will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on such issues.
@@ -138,7 +138,7 @@ plotProfile(d, "sigma0")
 """
 function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, grid::Bool=true, debug::Bool=false, kwargs...)
     if debug
-        println("in plotProfile(ctd,which=\"$which\",grid=$grid)")
+        println("in plotProfile(ctd, which=$which, grid=$grid)")
     end
     S = ctd.salinity
     T = ctd.temperature
