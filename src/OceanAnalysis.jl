@@ -439,11 +439,11 @@ created by either the [`Ctd`](@ref) or [`readArgo`](@ref) function.  The value
 is inferred from a cubic spline fitted to sigma0 as a function of pressure.
 
 Smoothing is the tricky part of the analysis.  In the present version, it is
-done with the `Dierckx::Spline1D()` function, which is called with equal
-weights, `w`, for all points, with `k=3` to set the polynomial order to cubic,
-and with `bc="nearest"` to control what happens near boundaries. The user has
-no control over these things, although this might change in a future version of
-`N2()`.
+done with the `Dierckx::Spline1D()` function (Reference 1), which is called
+with equal weights, `w`, for all points, with `k=3` to set the polynomial order
+to cubic, and with `bc="nearest"` to control what happens near boundaries. The
+user has no control over these things, although this might change in a future
+version of `N2()`.
 
 The user's control rests in `s`, a smoothing parameter that is passed to
 `Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
@@ -451,7 +451,7 @@ that yields N² curves that are similar to those computed with a default call to
 `swN2()` in the `oce` R package.  Users may elect to use larger `s` values for
 smoother curves, or smaller ones to get more detail.  It would be a mistake not
 to pair experiments with `s` values with plots. As a start, it might be useful
-to examine Reference 1, which compares the R and Julia results.
+to examine Reference 2, which compares the R and Julia results.
 
 # Examples
 ```julia-repl
@@ -473,7 +473,8 @@ end
 
 # References
 
-1. https://github.com/dankelley/OceanAnalysis.jl/issues/13
+1. https://github.com/JuliaMath/Dierckx.jl
+2. https://github.com/dankelley/OceanAnalysis.jl/issues/13
 
 """
 function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
