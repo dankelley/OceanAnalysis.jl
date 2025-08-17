@@ -466,7 +466,7 @@ function N2(o::Ctd, s::Float64=1.0; debug::Bool=false)
         println(j)
         println("length(i)=", length(i), ", length(j)=", length(j))
     end
-    local spline = Spline1D(pressure[j], sigma0[j], w=ones(sum(ok)), k=3, bc="nearest", s=s)
+    local spline = Spline1D(pressure[j], sigma0[j], w=ones(sum(ok)), k=3, bc="zero", s=s)
     sigma0p = evaluate(spline, pressure)
     rho0 = 1000.0 + mean(sigma0p)
     g = 9.8
