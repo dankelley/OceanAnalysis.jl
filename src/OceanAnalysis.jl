@@ -94,7 +94,7 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
 end
 
 """
-    plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
+    plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, color=:black, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -127,7 +127,7 @@ more on the many plotting controls available in Julia.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, color=:black, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
     #println(kwargs)
     if debug
         println("in plotProfile(ctd, \"$which\")")
@@ -154,7 +154,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     if which == "T" || which == "CT"
         plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
-            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            color=:black, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
             else
@@ -164,7 +164,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     elseif which == "S" || which == "SA"
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
-            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            color=:black, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
             else
@@ -176,7 +176,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         #println(keys(kwargs))
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
-            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            color=:black, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
             else
@@ -186,7 +186,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     elseif which == "spiciness0" # gsw formulation
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
-            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            color=:black, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "π [kg/m³]"
             else
@@ -196,7 +196,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     elseif which == "N2"
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
-            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            color=:black, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
@@ -210,7 +210,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
 end
 
 """
-    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, tickfontsize=8, labelfontsize=8, debug=false, kwargs...,)
+    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, color=:black, tickfontsize=8, labelfontsize=8, debug=false, kwargs...,)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 Contours of σ₀ are shown with dotted lines.  If `drawFreezing` is true, then
@@ -227,7 +227,7 @@ more on such issues.
 
 See also [`plotProfile`](@ref).
 """
-function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
+function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, color=:black, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
     if debug
         println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.)")
     end
@@ -240,7 +240,8 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, 
     plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        framestyle=:box, yrot=90, tickfontsize=tickfontsize, labelfontsize=8; kwargs...)
+        framestyle=:box, yrot=90,
+        color=color, tickfontsize=tickfontsize, labelfontsize=labelfontsize; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
