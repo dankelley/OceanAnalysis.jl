@@ -43,6 +43,14 @@ ctd = Ctd(S, T, p, -50.0, 40.0)
 plotTS(ctd)
 ```
 
+## Development testing
+
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.test()
+```
+
 ## History of breaking changes
 
 * None.
