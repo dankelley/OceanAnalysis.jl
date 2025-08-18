@@ -95,8 +95,8 @@ end
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
-    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-    debug=false, kwargs...)
+        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        debug=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -126,6 +126,8 @@ plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
 ```
 yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on the many plotting controls available in Julia.
+
+
 
 See also the [`plotTS`](@ref) function.
 """
@@ -283,15 +285,13 @@ docs here.
 # Examples
 ```julia-repl
 using OceanAnalysis, Plots
-# Read a file (which only exists on author's machine) and plot
-# a profile of Absolute Salinity in black ink, with superimposed
-# Practical Salinity in red ink.
-argo_file = "/Users/kelley/data/argo/D4902911_095.nc"
-if isfile(argo_file)
-    d = readArgo(argo_file)
-    plotProfile(d, "SA", seriescolor=:black)
-    plot!(d.salinity, d.pressure, seriescolor=:red)
-end
+# Read an Argo file and plot a profile of Absolute Salinity
+# (black) and Practical Salinity (red).
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1)
+plotProfile(d, "SA")
+plot!(d.salinity, d.pressure, seriescolor=:red)
 ```
 """
 function readArgo(filename, column=1, pmax=10000)
