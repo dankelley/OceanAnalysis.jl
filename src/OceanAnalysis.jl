@@ -190,7 +190,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
-                "N² [N⁻²]" # "N2 [1/s^2]"
+                "N² [s⁻²]" # "N2 [1/s^2]"
             end,
             yrot=90, grid=grid; kwargs...)
 
