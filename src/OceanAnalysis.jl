@@ -110,19 +110,23 @@ permitted values of `which` are
 and
 `"T"` for in-situ temperature.
 
-The `kwargs...` argument is used to represent other arguments that will be sent
-to `plot()`.  For example, the default way to display the profile diagram is
-constructed with a blue line connecting points, but using e.g.
+The default Julia font sizes on axes are overridden in this function, with
+9-point being used for both the numbers on axes (`labelticksize`) and the names
+of axes (`labelfontsize`).
 
-    plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
-
-will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
+The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
+example, the default way to display the profile diagram is constructed with a
+blue line connecting points, but using e.g.
+```julia-repl
+plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
+```
+yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on the many plotting controls available in Julia.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
-    println(kwargs)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, debug::Bool=false; tickfontsize=9, labelfontsize=9, kwargs...)
+    #println(kwargs)
     if debug
         println("in plotProfile(ctd, \"$which\")")
     end
@@ -164,10 +168,11 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             end,
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
-        println(kwargs)
-        println(keys(kwargs))
+        #println(kwargs)
+        #println(keys(kwargs))
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
             else
