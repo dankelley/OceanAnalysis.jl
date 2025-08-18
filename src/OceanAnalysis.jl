@@ -210,7 +210,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
 end
 
 """
-    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, debug=false, kwargs...,)
+    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, tickfontsize=8, labelfontsize=8, debug=false, kwargs...,)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 Contours of σ₀ are shown with dotted lines.  If `drawFreezing` is true, then
@@ -227,7 +227,7 @@ more on such issues.
 
 See also [`plotProfile`](@ref).
 """
-function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, debug::Bool=false, kwargs...)
+function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
     if debug
         println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.)")
     end
@@ -240,7 +240,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, 
     plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        framestyle=:box, yrot=90; kwargs...)
+        framestyle=:box, yrot=90, tickfontsize=tickfontsize, labelfontsize=8; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
