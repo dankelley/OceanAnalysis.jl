@@ -35,12 +35,17 @@ using Pkg ; Pkg.add("OceanAnalysis")
 ## Usage Example
 
 ```julia
-using OceanAnalysis
-S = [30.0;32.0]
-T = [15.0;10.0]
-p = [0.0;100.0]
-ctd = Ctd(S, T, p, -50.0, 40.0)
-plotTS(ctd)
+using OceanAnalysis, Plots
+# Read an Argo file
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1);
+# Plot profiles of Conservative Temperature, Absolute Salinity, and potential
+# density anomaly with respect to surface pressure.
+p1 = plotProfile(d, "CT")
+p2 = plotProfile(d, "SA")
+p3 = plotProfile(d, "sigma0")
+plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 
 ## Development testing
