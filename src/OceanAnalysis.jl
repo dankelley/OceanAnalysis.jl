@@ -94,34 +94,46 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
 end
 
 """
-    plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
+    plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
+    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    debug=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
 axis and pressure on the y axis. Following oceanographic convention, pressure
 increases downwards on the page and the "x" axis is drawn at the top. The
-permitted values of `which` are `"T"` for in-situ temperature, `"CT"` for
-Conservative Temperature, `"S"` for Practical Salinity, `"SA"` for Absolute
-Salinity, `"sigma0"` for density anomaly referenced to the surface,in the
-TEOS10 formulation, or `"spiciness0"` for seawater spiciness referenced to the
-surface. The `seriestype` and other arguments have the same meaning as for
-general julia plots, e.g. using `seriestype=:path` joins the data points, and
-`seriestype=:scatter` shows a symbol at each point.
+permitted values of `which` are
+`"CT"` for Conservative Temperature,
+`"N2"` for N², the square of the buoyancy frequency,
+`"S"` for Practical Salinity,
+`"SA"` for Absolute Salinity,
+`"sigma0"` for the TEOS10 formulation of density anomaly referenced to the surface,
+`"spiciness0"` for seawater spiciness referenced to the surface,
+and
+`"T"` for in-situ temperature.
 
-The `kwargs...` argument is used to represent other arguments that will be sent
-to `plot()`.  For example, the default way to display the profile diagram is
-constructed with a blue line connecting points, but using e.g.
+The default Julia font sizes on axes are overridden in this function, with
+8-point being used for both the numbers on axes (`tickfontize`) and the names
+of axes (`labelfontsize`).  (The `tickfontsize` matches the Julia default,
+but the `labelfontsize` is smaller than the Julia default. The idea is to
+not waste space with fonts that are larger than what journals require.)
 
-    plotProfile(ctd, which="SA", seriestype=:scatter, seriescolor=:red)
-
-will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
-more on such issues.
+The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
+example, the default way to display the profile diagram is constructed with a
+blue line connecting points, but using e.g.
+```julia-repl
+plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
+```
+yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
+more on the many plotting controls available in Julia.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
+    legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    debug::Bool=false, kwargs...)
     if debug
-        println("in plotProfile(ctd,which=\"$which\",grid=$grid)")
+        println("in plotProfile(ctd, \"$which\")")
     end
     S = ctd.salinity
     T = ctd.temperature
@@ -144,47 +156,66 @@ function plotProfile(ctd::Ctd; which::String="CT", vertical="pressure", legend=f
     end
     if which == "T" || which == "CT"
         plot(which == "CT" ? CT : T, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            yaxis=:flip, xmirror=true, framestyle=:box,
+            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
             else
                 which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            yaxis=:flip, xmirror=true, framestyle=:box,
+            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
             else
                 which == "SA" ? "Absolute Salinity [g/kg]" : "Practical Salinity"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
+        #println(kwargs)
+        #println(keys(kwargs))
         plot(sigma0, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            yaxis=:flip, xmirror=true, framestyle=:box,
+            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
             else
                 "Potential Density Anomaly, σ₀ [kg/m³]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            yaxis=:flip, xmirror=true, framestyle=:box,
+            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "π [kg/m³]"
             else
                 "Spiciness [kg/m³]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
+    elseif which == "N2"
+        plot(getElement(ctd, "N2"), y, ylabel=ylabel,
+            yaxis=:flip, xmirror=true, framestyle=:box,
+            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            xlabel=if abbreviate
+                "N²" # N2" #"N²"
+            else
+                "N² [s⁻²]" # "N2 [1/s^2]"
+            end,
+            yrot=90; kwargs...)
+
     else
-        println("Unrecognized 'which'='$(which). Try 'T', 'CT', 'S', 'SA', 'sigma0' or 'spiciness0'.")
+        println("Unrecognized 'which'='$(which)'. Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
 end
 
 """
-    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, debug=false, kwargs...,)
+    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
+        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        debug=false, kwargs...,)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 Contours of σ₀ are shown with dotted lines.  If `drawFreezing` is true, then
@@ -201,9 +232,11 @@ more on such issues.
 
 See also [`plotProfile`](@ref).
 """
-function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, grid=false, debug::Bool=false, kwargs...)
+function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
+    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    debug::Bool=false, kwargs...)
     if debug
-        println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, grid=$grid, etc.)")
+        println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.)")
     end
     S = ctd.salinity
     T = ctd.temperature
@@ -214,7 +247,8 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, 
     plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        framestyle=:box, yrot=90, grid=grid; kwargs...)
+        framestyle=:box, yrot=90,
+        gridstyle=gridstyle, color=color, tickfontsize=tickfontsize, labelfontsize=labelfontsize; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
@@ -255,7 +289,7 @@ using OceanAnalysis, Plots
 argo_file = "/Users/kelley/data/argo/D4902911_095.nc"
 if isfile(argo_file)
     d = readArgo(argo_file)
-    plotProfile(d, which="SA", seriescolor=:black)
+    plotProfile(d, "SA", seriescolor=:black)
     plot!(d.salinity, d.pressure, seriescolor=:red)
 end
 ```
@@ -293,11 +327,11 @@ ctd = Ctd(data.sal00,
     data.pr,
     metadata["longitude"],
     metadata["latitude"])
-plotProfile(ctd, which="SA")
+plotProfile(ctd, "SA")
 savefig("readcnv_profile_SA.pdf")
-plotProfile(ctd, which="CT")
+plotProfile(ctd, "CT")
 savefig("readcnv_profile_CT.pdf")
-plotTS(ctd, which="TS")
+plotTS(ctd, "TS")
 savefig("readcnv_TS.pdf")
 ```
 """
@@ -399,33 +433,28 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
     if debug
         println("in getElement([Ctd object], name=$name")
     end
-    # Handle directly-stored items
+    # Handle values stored directly in Ctd objects
     nameSymbol = Symbol(name)
     if nameSymbol in fieldnames(Ctd)
         return copy(getproperty(o, nameSymbol))
     end
-    #<> if name == "salinity"
-    #<>     return copy(o.salinity)
-    #<> elseif name == "temperature"
-    #<>     return copy(o.temperature)
-    #<> elseif name == "pressure"
-    #<>     return copy(o.pressure)
-    #<> elseif name == "longitude"
-    #<>     return copy(o.longitude)
-    #<> elseif name == "latitude"
-    #<>     return copy(o.latitude)
-    #<> end
-    # Handle TEOS10 items
-    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
-    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    # Handle items computable via functions of Ctd objects
+    if name == "N2"
+        return copy(N2(o))
+    end
+    # Handle TEOS10 variables
+    SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
     if name == "SA"
         return copy(SA)
-    elseif name == "CT"
+    end
+    CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    if name == "CT"
         return copy(CT)
+    end
+    if name == "sigma0"
+        return copy(gsw_sigma0.(SA, CT))
     elseif name == "spiciness0"
         return copy(gsw_spiciness0.(SA, CT))
-    elseif name == "sigma0"
-        return copy(gsw_sigma0.(SA, CT))
     end
     # The item is not handled, so return an empty result
     return Nothing
