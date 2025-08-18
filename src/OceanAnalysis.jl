@@ -107,12 +107,8 @@ permitted values of `which` are
 `"SA"` for Absolute Salinity,
 `"sigma0"` for the TEOS10 formulation of density anomaly referenced to the surface,
 `"spiciness0"` for seawater spiciness referenced to the surface,
-or
+and
 `"T"` for in-situ temperature.
-
-The `seriestype` and other arguments have the same meaning as for general julia
-plots, e.g. using `seriestype=:path` joins the data points, and
-`seriestype=:scatter` shows a symbol at each point.
 
 The `kwargs...` argument is used to represent other arguments that will be sent
 to `plot()`.  For example, the default way to display the profile diagram is
@@ -121,11 +117,11 @@ constructed with a blue line connecting points, but using e.g.
     plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
 
 will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
-more on such issues.
+more on the many plotting controls available in Julia.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
     if debug
         println("in plotProfile(ctd, \"$which\")")
     end
@@ -156,7 +152,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             else
                 which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -165,7 +161,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             else
                 which == "SA" ? "Absolute Salinity [g/kg]" : "Practical Salinity"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -174,7 +170,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             else
                 "Potential Density Anomaly, σ₀ [kg/m³]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -183,7 +179,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             else
                 "Spiciness [kg/m³]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
     elseif which == "N2"
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
@@ -192,7 +188,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             else
                 "N² [s⁻²]" # "N2 [1/s^2]"
             end,
-            yrot=90, grid=grid; kwargs...)
+            yrot=90; kwargs...)
 
     else
         println("Unrecognized 'which'='$(which)'. Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
@@ -217,9 +213,9 @@ more on such issues.
 
 See also [`plotProfile`](@ref).
 """
-function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, grid=false, debug::Bool=false, kwargs...)
+function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, abbreviate=false, debug::Bool=false, kwargs...)
     if debug
-        println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, grid=$grid, etc.)")
+        println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.)")
     end
     S = ctd.salinity
     T = ctd.temperature
@@ -230,7 +226,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, legend=false, 
     plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        framestyle=:box, yrot=90, grid=grid; kwargs...)
+        framestyle=:box, yrot=90; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
