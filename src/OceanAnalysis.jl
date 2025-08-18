@@ -165,7 +165,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=f
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         println(kwargs)
-        println(fieldnames(kwargs))
+        println(keys(kwargs))
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
             xlabel=if abbreviate
