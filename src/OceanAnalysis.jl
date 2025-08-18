@@ -90,7 +90,7 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
     CT = gsw_ct_from_t.(SA, temperature, pressure)
     spiciness0 = gsw_spiciness0.(SA, CT)
     sigma0 = gsw_sigma0.(SA, CT)
-    Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
 end
 
 """
