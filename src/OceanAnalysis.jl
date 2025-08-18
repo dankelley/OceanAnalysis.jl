@@ -94,7 +94,7 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
 end
 
 """
-    plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, debug::Bool=false, kwargs...)
+    plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -124,21 +124,10 @@ will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ fo
 more on such issues.
 
 See also the [`plotTS`](@ref) function.
-
-# Examples
-```julia-repl
-using Plots,OceanAnalysis
-# I may create a function to handle the next two lines.
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = readArgo(f, 1);
-plotProfile(d, "sigma0")
-```
-
 """
-function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, grid::Bool=true, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, grid=true, debug::Bool=false, kwargs...)
     if debug
-        println("in plotProfile(ctd, which=$which, grid=$grid)")
+        println("in plotProfile(ctd, \"$which\")")
     end
     S = ctd.salinity
     T = ctd.temperature
@@ -201,7 +190,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
-                "N² [1/s²]" # "N2 [1/s^2]"
+                "N² [N⁻²]" # "N2 [1/s^2]"
             end,
             yrot=90, grid=grid; kwargs...)
 
@@ -314,20 +303,18 @@ oceanographic software, especially the `gsw` package.
 
 # Examples
 ```julia-repl
-using Plots,OceanAnalysis
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "ctd.cnv")
-header, metadata, data = readCtdCNV(f)
+header, metadata, data = readCtdCNV("ctd.cnv")
 ctd = Ctd(data.sal00,
-    data.t090,
+    T90fromT68(data.t068),
     data.pr,
     metadata["longitude"],
     metadata["latitude"])
-p1 = plotProfile(ctd, "SA")
-p2 = plotProfile(ctd, "CT")
-p3 = plotTS(ctd)
-l = @layout [[a  b]; c]
-plot(p1, p2, p3, layout=l)
+plotProfile(ctd, "SA")
+savefig("readcnv_profile_SA.pdf")
+plotProfile(ctd, "CT")
+savefig("readcnv_profile_CT.pdf")
+plotTS(ctd, "TS")
+savefig("readcnv_TS.pdf")
 ```
 """
 function readCtdCNV(filename::String, debug::Bool=false)
