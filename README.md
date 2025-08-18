@@ -6,6 +6,14 @@ is in the early steps of exploring Julia as a supplement to R.
 
 ## Installation
 
+### Official version
+
+Start Julia and enter the following:
+
+```julia
+using Pkg ; Pkg.add("OceanAnalysis")
+```
+
 ### Development version
 
 #### Relatively stable (for users)
@@ -22,14 +30,6 @@ Start Julia and enter the following:
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
-```
-
-### Official version
-
-Start Julia and enter the following:
-
-```julia
-using Pkg ; Pkg.add("OceanAnalysis")
 ```
 
 ## Usage Example
@@ -64,11 +64,11 @@ Pkg.test()
 
 ### 0.0.3 (in development)
 
-#### Breaking changes
+#### 0.0.3 Breaking changes
 
 There are no breaking changes; all change are additions or bug fixes.
 
-#### Non-breaking changes
+#### 0.0.3 Non-breaking changes
 
 * Add built-in data file `ctd.cnv.nc`, and use it in an example in the `Ctd()` documentation.
 * Add built-in data file `D4902911_095.nc`, and use it in an example in the `plotProfile()` documentation.
@@ -77,10 +77,10 @@ There are no breaking changes; all change are additions or bug fixes.
 
 ### 0.0.2
 
-#### Breaking changes
+#### 0.0.2 Breaking changes
 
 There are no breaking changes; all change are additions or bug fixes.
 
-#### Non-breaking changes
+#### 0.0.2 Non-breaking changes
 
 * Add `N2()` to compute the square of the buoyancy frequency.
