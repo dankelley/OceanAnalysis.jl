@@ -94,7 +94,7 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
 end
 
 """
-    plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, debug::Bool=false, kwargs...)
+    plotProfile(ctd::Ctd, which::String="CT"; vertical="pressure", legend=false, abbreviate=false, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -111,8 +111,10 @@ and
 `"T"` for in-situ temperature.
 
 The default Julia font sizes on axes are overridden in this function, with
-9-point being used for both the numbers on axes (`labelticksize`) and the names
-of axes (`labelfontsize`).
+8-point being used for both the numbers on axes (`tickfontize`) and the names
+of axes (`labelfontsize`).  (The `tickfontsize` matches the Julia default,
+but the `labelfontsize` is smaller than the Julia default. The idea is to
+not waste space with fonts that are larger than what journals require.)
 
 The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
 example, the default way to display the profile diagram is constructed with a
@@ -125,7 +127,7 @@ more on the many plotting controls available in Julia.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, tickfontsize=9, labelfontsize=9, debug::Bool=false, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, tickfontsize=8, labelfontsize=8, debug::Bool=false, kwargs...)
     #println(kwargs)
     if debug
         println("in plotProfile(ctd, \"$which\")")
@@ -152,6 +154,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     if which == "T" || which == "CT"
         plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
             else
@@ -161,6 +164,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     elseif which == "S" || which == "SA"
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
             else
@@ -182,6 +186,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     elseif which == "spiciness0" # gsw formulation
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "π [kg/m³]"
             else
@@ -191,6 +196,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     elseif which == "N2"
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, legend=legend, framestyle=:box,
+            tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
