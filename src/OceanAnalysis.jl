@@ -125,7 +125,7 @@ more on the many plotting controls available in Julia.
 
 See also the [`plotTS`](@ref) function.
 """
-function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, debug::Bool=false; tickfontsize=9, labelfontsize=9, kwargs...)
+function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", legend::Bool=false, abbreviate::Bool=false, tickfontsize=9, labelfontsize=9, debug::Bool=false, kwargs...)
     #println(kwargs)
     if debug
         println("in plotProfile(ctd, \"$which\")")
