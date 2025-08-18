@@ -6,6 +6,14 @@ is in the early steps of exploring Julia as a supplement to R.
 
 ## Installation
 
+### Official version
+
+Start Julia and enter the following:
+
+```julia
+using Pkg ; Pkg.add("OceanAnalysis")
+```
+
 ### Development version
 
 #### Relatively stable (for users)
@@ -24,23 +32,20 @@ Start Julia and enter the following:
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
 ```
 
-### Official version
-
-Start Julia and enter the following:
-
-```julia
-using Pkg ; Pkg.add("OceanAnalysis")
-```
-
 ## Usage Example
 
 ```julia
-using OceanAnalysis
-S = [30.0;32.0]
-T = [15.0;10.0]
-p = [0.0;100.0]
-ctd = Ctd(S, T, p, -50.0, 40.0)
-plotTS(ctd)
+using OceanAnalysis, Plots
+# Read an Argo file
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1);
+# Plot profiles of Conservative Temperature, Absolute Salinity, and potential
+# density anomaly with respect to surface pressure.
+p1 = plotProfile(d, "CT")
+p2 = plotProfile(d, "SA")
+p3 = plotProfile(d, "sigma0")
+plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 
 ## Development testing
@@ -59,11 +64,11 @@ Pkg.test()
 
 ### 0.0.3 (in development)
 
-#### Breaking changes
+#### 0.0.3 Breaking changes
 
 There are no breaking changes; all change are additions or bug fixes.
 
-#### Non-breaking changes
+#### 0.0.3 Non-breaking changes
 
 * Add built-in data file `ctd.cnv.nc`, and use it in an example in the `Ctd()` documentation.
 * Add built-in data file `D4902911_095.nc`, and use it in an example in the `plotProfile()` documentation.
@@ -72,10 +77,10 @@ There are no breaking changes; all change are additions or bug fixes.
 
 ### 0.0.2
 
-#### Breaking changes
+#### 0.0.2 Breaking changes
 
 There are no breaking changes; all change are additions or bug fixes.
 
-#### Non-breaking changes
+#### 0.0.2 Non-breaking changes
 
 * Add `N2()` to compute the square of the buoyancy frequency.

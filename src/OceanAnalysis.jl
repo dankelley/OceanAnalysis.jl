@@ -75,7 +75,8 @@ end
 
 
 """
-    Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64}, longitude::Float64=-30, latitude::Float64=30)
+    Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
+        longitude::Float64=-30, latitude::Float64=30)
 
 Construct a `Ctd` structure, given vectors Practical Salinity, in-situ
 Temperature, and sea pressure, along with single numbers indicating longitude
@@ -90,13 +91,13 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
     CT = gsw_ct_from_t.(SA, temperature, pressure)
     spiciness0 = gsw_spiciness0.(SA, CT)
     sigma0 = gsw_sigma0.(SA, CT)
-    Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
 end
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
-    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-    debug=false, kwargs...)
+        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        debug=false, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -126,6 +127,21 @@ plotProfile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
 ```
 yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on the many plotting controls available in Julia.
+
+# Examples
+```julia-repl
+using OceanAnalysis, Plots
+# Read an Argo file
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1);
+# Plot profiles of Conservative Temperature, Absolute Salinity, and potential
+# density anomaly with respect to surface pressure.
+p1 = plotProfile(d, "CT")
+p2 = plotProfile(d, "SA")
+p3 = plotProfile(d, "sigma0")
+plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
+```
 
 See also the [`plotTS`](@ref) function.
 """
@@ -230,6 +246,17 @@ constructed with a blue line connecting TS values, but using e.g.
 will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on such issues.
 
+# Examples
+```julia-repl
+using OceanAnalysis, Plots
+# Read an Argo file
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1);
+# Plot TS diagram, using TEOS-10 variables.
+plotTS(d)
+```
+
 See also [`plotProfile`](@ref).
 """
 function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
@@ -275,23 +302,20 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
 end
 
 """
-argo = readArgo(filename, column=1, pmax=10000)
+    readArgo(filename, column=1)
 
-FIXME: when code is stablized (requires real-world testing), write more
-docs here.
+Read an Argo file and return a Ctd object.  This code is not yet stable.
 
 # Examples
 ```julia-repl
 using OceanAnalysis, Plots
-# Read a file (which only exists on author's machine) and plot
-# a profile of Absolute Salinity in black ink, with superimposed
-# Practical Salinity in red ink.
-argo_file = "/Users/kelley/data/argo/D4902911_095.nc"
-if isfile(argo_file)
-    d = readArgo(argo_file)
-    plotProfile(d, "SA", seriescolor=:black)
-    plot!(d.salinity, d.pressure, seriescolor=:red)
-end
+# Read an Argo file and plot a profile of Absolute Salinity
+# (black) and Practical Salinity (red).
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "D4902911_095.nc")
+d = readArgo(f, 1)
+first(d.pressure, 6)
+# See ?plotProfile for an example of how to plot
 ```
 """
 function readArgo(filename, column=1, pmax=10000)
@@ -321,18 +345,16 @@ oceanographic software, especially the `gsw` package.
 
 # Examples
 ```julia-repl
-header, metadata, data = readCtdCNV("ctd.cnv")
-ctd = Ctd(data.sal00,
-    T90fromT68(data.t068),
-    data.pr,
-    metadata["longitude"],
-    metadata["latitude"])
-plotProfile(ctd, "SA")
-savefig("readcnv_profile_SA.pdf")
-plotProfile(ctd, "CT")
-savefig("readcnv_profile_CT.pdf")
-plotTS(ctd, "TS")
-savefig("readcnv_TS.pdf")
+using OceanAnalysis, Plots
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+f = joinpath(pkgdir, "data", "ctd.cnv")
+header, metadata, data = readCtdCNV(f);
+ctd = Ctd(data.sal00, data.t090, data.pr,
+    metadata["longitude"], metadata["latitude"]);
+p1 = plotProfile(ctd, "SA")
+p2 = plotProfile(ctd, "CT")
+p3 = plotTS(ctd)
+plot(p1, p2, p3, layout=(1, 3))
 ```
 """
 function readCtdCNV(filename::String, debug::Bool=false)
@@ -481,24 +503,6 @@ that yields N² curves that are similar to those computed with a default call to
 smoother curves, or smaller ones to get more detail.  It would be a mistake not
 to pair experiments with `s` values with plots. As a start, it might be useful
 to examine Reference 2, which compares the R and Julia results.
-
-# Examples
-```julia-repl
-file = "D4902911_095.nc" # downloaded from an Argo server
-if isfile(file)
-    using Plots, GibbsSeaWater, OceanAnalysis
-    d = readArgo(file, 1)
-    p1 = plot(getElement(d, "sigma0"), d.pressure, xlab="sigma0", ylab="Pressure [dbar]",
-        yflip=true, dpi=500, legend=false)
-
-    s = 0.15 # experiment with this value
-    N2val = N2(d, s)
-    p2 = plot(1e4 * N2val, d.pressure, xlab="1e4 N^2", ylab="Pressure [dbar]",
-        yflip=true, dpi=500, legend=false)
-
-    plot(p1, p2, layout=(1, 2))
-end
-```
 
 # References
 
