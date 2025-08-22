@@ -30,15 +30,16 @@ abstract type Oce end
 struct Ctd <: Oce
     header::Vector{String}
     metadata::Dict{String, Any}
-    salinity::Vector{Float64}
-    temperature::Vector{Float64}
-    pressure::Vector{Float64}
-    longitude::Float64
-    latitude::Float64
-    SA::Vector{Float64}
-    CT::Vector{Float64}
-    sigma0::Vector{Float64}
-    spiciness0::Vector{Float64}
+    data::DataFrames.DataFrame
+#    salinity::Vector{Float64}
+#    temperature::Vector{Float64}
+#    pressure::Vector{Float64}
+#    longitude::Float64
+#    latitude::Float64
+#    SA::Vector{Float64}
+#    CT::Vector{Float64}
+#    sigma0::Vector{Float64}
+#    spiciness0::Vector{Float64}
 end
 
 #.struct Argo <: Ctd
@@ -361,7 +362,7 @@ plot(p1, p2, p3, layout=(1, 3))
 """
 function readCtdCNV(filename::String, debug::Bool=false)
     open(filename) do file
-        return readCtdCNV(file, debug)
+        readCtdCNV(file, debug)
     end
 end
 
@@ -425,7 +426,12 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     if debug
         println("NOTE: not yet renaming data or parsing units")
     end
-    return header, metadata, data
+    #return header, metadata, data
+    rval = Ctd()
+    rval.header = header
+    rval.metadata = metadata
+    rval.data = data
+    return rval
 end
 
 
