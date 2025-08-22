@@ -28,6 +28,8 @@ export T90fromT68
 abstract type Oce end
 
 struct Ctd <: Oce
+    header::Vector{String}
+    metadata::Dict{String, Any}
     salinity::Vector{Float64}
     temperature::Vector{Float64}
     pressure::Vector{Float64}
