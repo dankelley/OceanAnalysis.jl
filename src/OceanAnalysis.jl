@@ -175,7 +175,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     end
     dataNames = names(ctd.data)
     plotNames = dataNames[dataNames .!= "pr" .&& dataNames .!= "pressure"]
-    if !which in plotNames
+    if !(which in plotNames)
         error("plotProfile() cannot handle which='$which'; try one of: $plotNames")
     end
     println(plotNames)
