@@ -434,12 +434,12 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     if debug
         println("NOTE: not yet renaming data or parsing units")
     end
-    #return header, metadata, data
-    rval = Ctd()
-    rval.header = header
-    rval.metadata = metadata
-    rval.data = data
-    return rval
+    return header, metadata, data
+    #rval = Ctd()
+    #rval.header = header
+    #rval.metadata = metadata
+    #rval.data = data
+    #return rval
 end
 
 
