@@ -439,7 +439,7 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
         println("NOTE: not yet renaming data or parsing units")
     end
     #return header, metadata, data
-    Ctd(data.sal00, data.t068, data$pr, metadata.longitude, metadata.latitude)
+    Ctd(data.sal00, data.t068, data.pr, metadata.longitude, metadata.latitude)
     #rval = Ctd()
     #rval.header = header
     #rval.metadata = metadata
