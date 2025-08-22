@@ -490,14 +490,17 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
         return copy(N2(o))
     end
     # Handle TEOS10 variables
+    println("DAN 493")
     local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
     if name == "SA"
         return copy(SA)
     end
+    println("DAN 498")
     local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
     if name == "CT"
         return copy(CT)
     end
+    println("DAN 503")
     if name == "sigma0"
         return copy(gsw_sigma0.(SA, CT))
     elseif name == "spiciness0"
