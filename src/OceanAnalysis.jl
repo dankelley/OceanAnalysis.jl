@@ -161,7 +161,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Bool=false, kwargs...)
     if debug
-        println("in plotProfile(ctd, \"$which\")")
+        println("in plotProfile(ctd, '$which')")
     end
     S = ctd.salinity
     T = ctd.temperature
@@ -236,7 +236,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
 
     else
-        println("Unrecognized 'which'='$(which)'. Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
+        println("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
 end
 
@@ -417,7 +417,7 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     end
     ncols = length(split(lines[dataStart]))
     if ncols != length(dataNames)
-        error("ncols=$(ncols) does not match length(dataNames)=$(length(dataNames))")
+        error("ncols=$ncols does not match length(dataNames)=$(length(dataNames))")
     end
     nrows = length(lines) - dataStart + 1
     if debug
