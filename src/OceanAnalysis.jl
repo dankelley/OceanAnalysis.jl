@@ -28,18 +28,18 @@ export T90fromT68
 abstract type Oce end
 
 struct Ctd <: Oce
-    header::Vector{String}
-    metadata::Dict{String, Any}
-    data::DataFrames.DataFrame
-#    salinity::Vector{Float64}
-#    temperature::Vector{Float64}
-#    pressure::Vector{Float64}
-#    longitude::Float64
-#    latitude::Float64
-#    SA::Vector{Float64}
-#    CT::Vector{Float64}
-#    sigma0::Vector{Float64}
-#    spiciness0::Vector{Float64}
+    #header::Vector{String}
+    #metadata::Dict{String, Any}
+    #data::DataFrames.DataFrame
+    salinity::Vector{Float64}
+    temperature::Vector{Float64}
+    pressure::Vector{Float64}
+    longitude::Float64
+    latitude::Float64
+    SA::Vector{Float64}
+    CT::Vector{Float64}
+    sigma0::Vector{Float64}
+    spiciness0::Vector{Float64}
 end
 
 #.struct Argo <: Ctd
@@ -89,13 +89,21 @@ which are stored in the returned value alongside the three supplied vectors.
 
 """
 # Convenience function, which carries out TEOS-10 computations
-function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64}, longitude::Float64=-30.0, latitude::Float64=30.0)
-    SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    CT = gsw_ct_from_t.(SA, temperature, pressure)
-    spiciness0 = gsw_spiciness0.(SA, CT)
-    sigma0 = gsw_sigma0.(SA, CT)
-    return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
-end
+function Ctd(
+        #header::Vector{String},
+        #metadata::Dict{String, Any},
+        #data::Dataframes.Dataframe)
+        salinity::Vector{Float64},
+        temperature::Vector{Float64},
+        ressure::Vector{Float64},
+        longitude::Float64=-30.0,
+        latitude::Float64=30.0)
+        SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude),
+        CT = gsw_ct_from_t.(SA, temperature, pressure),
+        spiciness0 = gsw_spiciness0.(SA, CT),
+        sigma0 = gsw_sigma0.(SA, CT)
+        return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    end
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
