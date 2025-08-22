@@ -95,7 +95,7 @@ function Ctd(
         #data::Dataframes.Dataframe)
         salinity::Vector{Float64},
         temperature::Vector{Float64},
-        ressure::Vector{Float64},
+        pressure::Vector{Float64},
         longitude::Float64=-30.0,
         latitude::Float64=30.0)
         println("in Ctd() at line 101")
@@ -431,9 +431,6 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
         data[irow, :] = d
         irow = irow + 1
     end
-    if debug
-        println("dataNames: $dataNames")
-    end
     if "t068" in dataNames
         println("have t068")
     end
@@ -442,6 +439,7 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
         println("NOTE: not yet renaming data or parsing units")
     end
     return header, metadata, data
+    Ctd(data.sal00, data.t068, data$pr, metadata.longitude, metadata.latitude)
     #rval = Ctd()
     #rval.header = header
     #rval.metadata = metadata
