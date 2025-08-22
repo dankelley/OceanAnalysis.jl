@@ -100,10 +100,13 @@ function Ctd(
         latitude::Float64=30.0)
         println("in Ctd() at line 101")
         local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude),
+        println("in Ctd() at line 103")
         local CT = gsw_ct_from_t.(SA, temperature, pressure),
+        println("in Ctd() at line 105")
         spiciness0 = gsw_spiciness0.(SA, CT),
+        println("in Ctd() at line 107")
         sigma0 = gsw_sigma0.(SA, CT)
-        println("in Ctd() at line 106")
+        println("in Ctd() at line 109")
         return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
     end
 
