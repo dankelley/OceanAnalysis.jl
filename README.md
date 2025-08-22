@@ -35,18 +35,18 @@ using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="de
 ## Usage Example
 
 ```julia
+# Read a built-in CTD file, and plot a profile of Absolute Salinity
 using OceanAnalysis, Plots
-# Read an Argo file
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = readArgo(f, 1);
-# Plot profiles of Conservative Temperature, Absolute Salinity, and potential
-# density anomaly with respect to surface pressure.
-p1 = plotProfile(d, "CT")
-p2 = plotProfile(d, "SA")
-p3 = plotProfile(d, "sigma0")
+filename = joinpath(pkgdir, "data", "ctd.cnv")
+ctd = readCtdCNV(filename, !true)
+p1 = plotProfile(ctd, "SA")
+p2 = plotProfile(ctd, "CT")
+p3 = plotTS(ctd)
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
+
+![Example plot](example.png)
 
 ## Development testing
 

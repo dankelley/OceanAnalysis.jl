@@ -28,15 +28,18 @@ export T90fromT68
 abstract type Oce end
 
 struct Ctd <: Oce
-    salinity::Vector{Float64}
-    temperature::Vector{Float64}
-    pressure::Vector{Float64}
-    longitude::Float64
-    latitude::Float64
-    SA::Vector{Float64}
-    CT::Vector{Float64}
-    sigma0::Vector{Float64}
-    spiciness0::Vector{Float64}
+    header::Vector{String}
+    metadata::Dict{String, Any}
+    data::DataFrames.DataFrame
+    # salinity::Vector{Float64}
+    # temperature::Vector{Float64}
+    # pressure::Vector{Float64}
+    # longitude::Float64
+    # latitude::Float64
+    # SA::Vector{Float64}
+    # CT::Vector{Float64}
+    # sigma0::Vector{Float64}
+    # spiciness0::Vector{Float64}
 end
 
 #.struct Argo <: Ctd
@@ -86,13 +89,32 @@ which are stored in the returned value alongside the three supplied vectors.
 
 """
 # Convenience function, which carries out TEOS-10 computations
-function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64}, longitude::Float64=-30.0, latitude::Float64=30.0)
-    SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    CT = gsw_ct_from_t.(SA, temperature, pressure)
-    spiciness0 = gsw_spiciness0.(SA, CT)
-    sigma0 = gsw_sigma0.(SA, CT)
-    return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
-end
+function Ctd(
+        #header::Vector{String},
+        #metadata::Dict{String, Any},
+        #data::Dataframes.Dataframe)
+        salinity::Vector{Float64},
+        temperature::Vector{Float64},
+        pressure::Vector{Float64},
+        longitude::Float64=-30.0,
+        latitude::Float64=30.0)
+    #println("salinity $salinity")
+    #println("pressure $pressure")
+    #println("longitude $longitude")
+    #println("latitude $latitude")
+        #println("in Ctd() at line 101")
+        local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
+    #println("SA $SA")
+        #println("in Ctd() at line 103")
+        local CT = gsw_ct_from_t.(SA, temperature, pressure)
+    #println("CT $CT")
+        #println("in Ctd() at line 105")
+        spiciness0 = gsw_spiciness0.(SA, CT),
+        #println("in Ctd() at line 107")
+        sigma0 = gsw_sigma0.(SA, CT)
+        #println("in Ctd() at line 109")
+        return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    end
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
@@ -149,17 +171,22 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Bool=false, kwargs...)
     if debug
-        println("in plotProfile(ctd, \"$which\")")
+        println("in plotProfile(ctd, '$which')")
     end
-    S = ctd.salinity
-    T = ctd.temperature
-    p = ctd.pressure
+    dataNames = names(ctd.data)
+    plotNames = dataNames[dataNames .!= "pr" .&& dataNames .!= "pressure"]
+    if !(which in plotNames)
+        error("plotProfile() cannot handle which='$which'; try one of: $plotNames")
+    end
+    S = ctd.data.salinity
+    T = ctd.data.temperature
+    p = ctd.data.pressure
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    SA = gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
-    CT = gsw_ct_from_t.(SA, T, p)
-    sigma0 = gsw_sigma0.(SA, CT)
+    SA = ctd.data.SA #gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
+    CT = ctd.data.CT #gsw_ct_from_t.(SA, T, p)
+    sigma0 = ctd.data.sigma0 #gsw_sigma0.(SA, CT)
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
         y = p
@@ -224,7 +251,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
 
     else
-        println("Unrecognized 'which'='$(which)'. Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
+        println("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
 end
 
@@ -265,10 +292,12 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     if debug
         println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.)")
     end
-    S = ctd.salinity
-    T = ctd.temperature
-    p = ctd.pressure
-    SA = gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
+    S = ctd.data.salinity
+    T = ctd.data.temperature
+    p = ctd.data.pressure
+    lon = ctd.metadata["longitude"]
+    lat = ctd.metadata["latitude"]
+    SA = gsw_sa_from_sp.(S, p, lon, lat)
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
     plot(SA, CT, legend=legend,
@@ -358,12 +387,18 @@ plot(p1, p2, p3, layout=(1, 3))
 ```
 """
 function readCtdCNV(filename::String, debug::Bool=false)
+    if (debug)
+        println("in readCtdCNV(filename,debug)")
+    end
     open(filename) do file
-        return readCtdCNV(file, debug)
+        readCtdCNV(file, debug)
     end
 end
 
 function readCtdCNV(stream::IOStream, debug::Bool=false)
+    if (debug)
+        println("in readCtdCNV(stream,debug)")
+    end
     lines = readlines(stream)
     header = ""
     dataStart = 0
@@ -399,18 +434,16 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     end
     ncols = length(split(lines[dataStart]))
     if ncols != length(dataNames)
-        error("ncols=$(ncols) does not match length(dataNames)=$(length(dataNames))")
+        error("ncols=$ncols does not match length(dataNames)=$(length(dataNames))")
     end
     nrows = length(lines) - dataStart + 1
     if debug
+        println("datanames: $dataNames")
         println("will try to read nrows=$(nrows), ncols=$(ncols)")
     end
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
     for i in dataStart:length(lines)
-        if debug
-            println("reading row $(i)")
-        end
         d = parse.(Float64, split(lines[i]))
         data[irow, :] = d
         irow = irow + 1
@@ -419,7 +452,35 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     if debug
         println("NOTE: not yet renaming data or parsing units")
     end
-    return header, metadata, data
+    # Add standard columns
+    if "pr" in names(data)
+        data.pressure = data.pr
+    else
+        error("No 'pr' column in CNV file; available names are ", names(data))
+    end
+    if "sal00" in names(data)
+        data.salinity = data.sal00
+    else
+        error("No 'sal00' column in CNV file; available names are ", names(data))
+    end
+    if "t068" in dataNames
+        data.temperature = T90fromT68(data.t068)
+    elseif "t090" in dataNames
+        data.temperature = data.t090
+    else
+        error("No 't068' column in CNV file; available names are ", names(data))
+    end
+    #println("DAN 1")
+    data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
+    #println("DAN 2")
+    data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
+    #println("DAN 3")
+    data.sigma0 = gsw_sigma0.(data.SA, data.CT)
+    #println("DAN 4")
+    data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
+    #println("DAN 5")
+    #println("names(data): ", names(data))
+    Ctd(header, metadata, data)
 end
 
 
@@ -465,14 +526,17 @@ function getElement(o::Ctd, name::String; debug::Bool=false)
         return copy(N2(o))
     end
     # Handle TEOS10 variables
-    SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
+    println("DAN 493")
+    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
     if name == "SA"
         return copy(SA)
     end
-    CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    println("DAN 498")
+    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
     if name == "CT"
         return copy(CT)
     end
+    println("DAN 503")
     if name == "sigma0"
         return copy(gsw_sigma0.(SA, CT))
     elseif name == "spiciness0"
@@ -514,8 +578,8 @@ function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
     if debug
         println("in N2([Ctd object], name=$name")
     end
-    pressure = o.pressure
-    sigma0 = getElement(o, "sigma0")
+    pressure = o.data.pressure
+    sigma0 = o.data.sigma0
     i = sortperm(pressure)
     if debug
         println("i follows")
