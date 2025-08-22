@@ -98,21 +98,21 @@ function Ctd(
         pressure::Vector{Float64},
         longitude::Float64=-30.0,
         latitude::Float64=30.0)
-    println("salinity $salinity")
-    println("pressure $pressure")
-    println("longitude $longitude")
-    println("latitude $latitude")
-        println("in Ctd() at line 101")
+    #println("salinity $salinity")
+    #println("pressure $pressure")
+    #println("longitude $longitude")
+    #println("latitude $latitude")
+        #println("in Ctd() at line 101")
         local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    println("SA $SA")
-        println("in Ctd() at line 103")
+    #println("SA $SA")
+        #println("in Ctd() at line 103")
         local CT = gsw_ct_from_t.(SA, temperature, pressure)
-    println("CT $CT")
-        println("in Ctd() at line 105")
+    #println("CT $CT")
+        #println("in Ctd() at line 105")
         spiciness0 = gsw_spiciness0.(SA, CT),
-        println("in Ctd() at line 107")
+        #println("in Ctd() at line 107")
         sigma0 = gsw_sigma0.(SA, CT)
-        println("in Ctd() at line 109")
+        #println("in Ctd() at line 109")
         return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
     end
 
@@ -292,9 +292,9 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     if debug
         println("in plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.)")
     end
-    S = ctd.salinity
-    T = ctd.temperature
-    p = ctd.pressure
+    S = ctd.data.salinity
+    T = ctd.data.temperature
+    p = ctd.data.pressure
     SA = gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
