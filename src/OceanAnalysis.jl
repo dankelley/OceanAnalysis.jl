@@ -28,18 +28,18 @@ export T90fromT68
 abstract type Oce end
 
 struct Ctd <: Oce
-    #header::Vector{String}
-    #metadata::Dict{String, Any}
-    #data::DataFrames.DataFrame
-    salinity::Vector{Float64}
-    temperature::Vector{Float64}
-    pressure::Vector{Float64}
-    longitude::Float64
-    latitude::Float64
-    SA::Vector{Float64}
-    CT::Vector{Float64}
-    sigma0::Vector{Float64}
-    spiciness0::Vector{Float64}
+    header::Vector{String}
+    metadata::Dict{String, Any}
+    data::DataFrames.DataFrame
+    # salinity::Vector{Float64}
+    # temperature::Vector{Float64}
+    # pressure::Vector{Float64}
+    # longitude::Float64
+    # latitude::Float64
+    # SA::Vector{Float64}
+    # CT::Vector{Float64}
+    # sigma0::Vector{Float64}
+    # spiciness0::Vector{Float64}
 end
 
 #.struct Argo <: Ctd
@@ -448,8 +448,9 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     if debug
         println("NOTE: not yet renaming data or parsing units")
     end
+    Ctd(header, metadata, data)
     #return header, metadata, data
-    Ctd(data.sal00, data.t068, data.pr, metadata["longitude"], metadata["latitude"])
+    #>>Ctd(data.sal00, data.t068, data.pr, metadata["longitude"], metadata["latitude"])
     #rval = Ctd()
     #rval.header = header
     #rval.metadata = metadata
