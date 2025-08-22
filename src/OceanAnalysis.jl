@@ -570,8 +570,8 @@ function N2(o::Ctd, s::Float64=0.15; debug::Bool=false)
     if debug
         println("in N2([Ctd object], name=$name")
     end
-    pressure = o.pressure
-    sigma0 = getElement(o, "sigma0")
+    pressure = o.data.pressure
+    sigma0 = o.data.sigma0
     i = sortperm(pressure)
     if debug
         println("i follows")
