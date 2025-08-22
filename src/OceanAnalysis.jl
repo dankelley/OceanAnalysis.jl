@@ -403,7 +403,7 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     end
     nrows = length(lines) - dataStart + 1
     if debug
-        println(dataNames)
+        println("datanames: $dataNames")
         println("will try to read nrows=$(nrows), ncols=$(ncols)")
     end
     data = Array{Float64,2}(undef, nrows, ncols)
