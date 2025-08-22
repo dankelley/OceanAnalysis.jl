@@ -90,6 +90,7 @@ which are stored in the returned value alongside the three supplied vectors.
 """
 # Convenience function, which carries out TEOS-10 computations
 function Ctd(
+        println("in Ctd() at line 93")
         #header::Vector{String},
         #metadata::Dict{String, Any},
         #data::Dataframes.Dataframe)
@@ -102,7 +103,6 @@ function Ctd(
         CT = gsw_ct_from_t.(SA, temperature, pressure),
         spiciness0 = gsw_spiciness0.(SA, CT),
         sigma0 = gsw_sigma0.(SA, CT)
-        println("in Ctd() line 92")
         return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
     end
 
@@ -370,12 +370,18 @@ plot(p1, p2, p3, layout=(1, 3))
 ```
 """
 function readCtdCNV(filename::String, debug::Bool=false)
+    if (debug)
+        println("in readCtdCNV(filename,debug)")
+    end
     open(filename) do file
         readCtdCNV(file, debug)
     end
 end
 
 function readCtdCNV(stream::IOStream, debug::Bool=false)
+    if (debug)
+        println("in readCtdCNV(stream,debug)")
+    end
     lines = readlines(stream)
     header = ""
     dataStart = 0
