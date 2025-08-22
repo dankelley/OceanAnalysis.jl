@@ -98,6 +98,10 @@ function Ctd(
         pressure::Vector{Float64},
         longitude::Float64=-30.0,
         latitude::Float64=30.0)
+    println("salinity $salinity")
+    println("pressure $pressure")
+    println("longitude $longitude")
+    println("latitude $latitude")
         println("in Ctd() at line 101")
         local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude),
         println("in Ctd() at line 103")
