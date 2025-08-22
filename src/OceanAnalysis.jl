@@ -104,8 +104,10 @@ function Ctd(
     println("latitude $latitude")
         println("in Ctd() at line 101")
         local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude),
+    println("SA $SA")
         println("in Ctd() at line 103")
         local CT = gsw_ct_from_t.(SA, temperature, pressure),
+    println("CT $CT")
         println("in Ctd() at line 105")
         spiciness0 = gsw_spiciness0.(SA, CT),
         println("in Ctd() at line 107")
