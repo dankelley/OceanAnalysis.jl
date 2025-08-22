@@ -102,6 +102,7 @@ function Ctd(
         CT = gsw_ct_from_t.(SA, temperature, pressure),
         spiciness0 = gsw_spiciness0.(SA, CT),
         sigma0 = gsw_sigma0.(SA, CT)
+        println("in Ctd() line 92")
         return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
     end
 
