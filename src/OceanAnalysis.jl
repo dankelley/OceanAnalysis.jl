@@ -448,6 +448,15 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     if debug
         println("NOTE: not yet renaming data or parsing units")
     end
+    # Add standard columns
+    if "fuckpr" in names(data)
+        data.pressure = data.pr
+    else
+        error("No 'pr' column in CNV file; available names are ", names(data))
+    end
+
+    # Add columns for "pressure" (just renamed, with data as"salinity" (Practical Salinity) and "temperature" (in its-90 scale)
+    # Add columns for teos-10 variables "SA" and "CT"
     Ctd(header, metadata, data)
     #return header, metadata, data
     #>>Ctd(data.sal00, data.t068, data.pr, metadata["longitude"], metadata["latitude"])
