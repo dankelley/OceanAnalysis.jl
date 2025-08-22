@@ -295,7 +295,9 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
-    SA = gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
+    lon = ctd.metadata["longitude"]
+    lat = ctd.metadata["latitude"]
+    SA = gsw_sa_from_sp.(S, p, lon, lat)
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
     plot(SA, CT, legend=legend,
