@@ -462,7 +462,7 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     else
         error("No 't068' column in CNV file; available names are ", names(data))
     end
-    data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata.longitude, metadata.latitude)
+    data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     Ctd(header, metadata, data)
 end
