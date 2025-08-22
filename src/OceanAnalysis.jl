@@ -463,6 +463,8 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     end
     if "t068" in dataNames
         data.temperature = T90fromT68(data.t068)
+    elseif "t090" in dataNames
+        data.temperature = data.t090
     else
         error("No 't068' column in CNV file; available names are ", names(data))
     end
