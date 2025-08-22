@@ -464,6 +464,8 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
     end
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
+    data.sigma0 = gsw_sigma0.(data.SA, data.CT)
+    data.spiciness0 = gsw_spiciness0(data.SA, data.CT)
     Ctd(header, metadata, data)
 end
 
