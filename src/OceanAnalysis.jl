@@ -413,6 +413,12 @@ function readCtdCNV(stream::IOStream, debug::Bool=false)
         data[irow, :] = d
         irow = irow + 1
     end
+    if debug
+        println("dataNames: $dataNames")
+    end
+    if "t068" in dataNames
+        println("have t068")
+    end
     data = DataFrame(data, dataNames)
     if debug
         println("NOTE: not yet renaming data or parsing units")
