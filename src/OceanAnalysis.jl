@@ -173,6 +173,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     if debug
         println("in plotProfile(ctd, '$which')")
     end
+    dataNames = names(ctd.data)
+    plotNames = dataNames[dataNames .!= "pr" .&& dataNames .!= "pressure"]
+    println(plotNames)
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
