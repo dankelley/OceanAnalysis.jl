@@ -90,7 +90,6 @@ which are stored in the returned value alongside the three supplied vectors.
 """
 # Convenience function, which carries out TEOS-10 computations
 function Ctd(
-        println("in Ctd() at line 93")
         #header::Vector{String},
         #metadata::Dict{String, Any},
         #data::Dataframes.Dataframe)
@@ -99,6 +98,7 @@ function Ctd(
         ressure::Vector{Float64},
         longitude::Float64=-30.0,
         latitude::Float64=30.0)
+        println("in Ctd() at line 101")
         SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude),
         CT = gsw_ct_from_t.(SA, temperature, pressure),
         spiciness0 = gsw_spiciness0.(SA, CT),
