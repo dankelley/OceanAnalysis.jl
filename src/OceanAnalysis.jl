@@ -173,15 +173,15 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     if debug
         println("in plotProfile(ctd, '$which')")
     end
-    S = ctd.salinity
-    T = ctd.temperature
-    p = ctd.pressure
+    S = ctd.data.salinity
+    T = ctd.data.temperature
+    p = ctd.data.pressure
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    SA = gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
-    CT = gsw_ct_from_t.(SA, T, p)
-    sigma0 = gsw_sigma0.(SA, CT)
+    SA = ctd.data.SA #gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
+    CT = ctd.data.CT #gsw_ct_from_t.(SA, T, p)
+    sigma0 = ctd.data.sigma0 #gsw_sigma0.(SA, CT)
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
         y = p
