@@ -1,4 +1,4 @@
-# Read a built-in CTD file, and plot a profile of Absolute Salinity
+# Read a built-in CTD file, and plot some standard diagrams
 using OceanAnalysis, Plots, Measures
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 filename = joinpath(pkgdir, "data", "ctd.cnv")
