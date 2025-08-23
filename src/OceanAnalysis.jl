@@ -132,7 +132,7 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         println("$ds     assembling data")
     end
     data = DataFrame(salinity=salinity, temperature=temperature,
-        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spicness0)
+        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
     if debug > 0
         println("$ds     creating Ctd object")
     end
