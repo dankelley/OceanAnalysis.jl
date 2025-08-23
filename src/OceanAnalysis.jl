@@ -94,9 +94,9 @@ function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataf
         longitude::Float64=-30.0, latitude::Float64=30.0,
         debug::Bool=false)
     println("Ctd()")
-    println("  salinity $salinity")
-    println("  temperature $temperature")
-    println("  pressure $pressure")
+    println("  salinity length: ", length(salinity))
+    println("  temperature length: ", length(temperature))
+    println("  pressure length: ", length(pressure))
     println("  longitude $longitude")
     println("  latitude $latitude")
         #println("in Ctd() at line 101")
