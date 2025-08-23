@@ -216,7 +216,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     end
     if which == "T" || which == "CT"
         if debug > 0
-            println("$ds   about to plot $which")
+            println("$ds     about to plot $which")
         end
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -229,7 +229,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
         if debug > 0
-            println("$ds   about to plot $which")
+            println("$ds     about to plot $which")
         end
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -242,7 +242,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         if debug > 0
-            println("$ds   about to plot $which")
+            println("$ds     about to plot $which")
         end
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -255,7 +255,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         if debug > 0
-            println("$ds   about to plot $which")
+            println("$ds     about to plot $which")
         end
         rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -268,7 +268,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "N2"
         if debug > 0
-            println("$ds   about to plot $which")
+            println("$ds     about to plot $which")
         end
         rval = plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -399,28 +399,28 @@ function readArgo(filename, column=1; debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
         println("$ds readArgo() START")
-        println("$ds   opened file '$filename' successfully")
+        println("$ds     opened file '$filename' successfully")
     end
     p = convert(Vector{Float64}, d["PRES"][:, column])
     if debug > 0
-        println("$ds   p length: ", length(p))
+        println("$ds     p length: ", length(p))
     end
     S = convert(Vector{Float64}, d["PSAL"][:, column])
     if debug > 0
-        println("$ds   S length: ", length(S))
+        println("$ds     S length: ", length(S))
     end
     T = convert(Vector{Float64}, d["TEMP"][:, column])
     if debug > 0
-        println("$ds   T length: ", length(T))
+        println("$ds     T length: ", length(T))
     end
     lon = convert(Float64, d["LONGITUDE"][1])
     if debug > 0
-        println("$ds   lon: $lon")
+        println("$ds     lon: $lon")
     end
     lat = convert(Float64, d["LATITUDE"][1])
     if debug > 0
-        println("$ds   lat: $lat")
-        println("$ds   about to call as_Ctd() ...")
+        println("$ds     lat: $lat")
+        println("$ds     about to call as_Ctd() ...")
     end
     rval = as_Ctd(S, T, p, lon, lat, debug - 1)
     if debug > 0
@@ -506,8 +506,8 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     end
     nrows = length(lines) - dataStart + 1
     if debug > 0
-        println("$ds   datanames: $dataNames")
-        println("$ds   about to read nrows=$(nrows), ncols=$(ncols)")
+        println("$ds     datanames: $dataNames")
+        println("$ds     about to read nrows=$(nrows), ncols=$(ncols)")
     end
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
@@ -519,7 +519,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     data = DataFrame(data, dataNames)
     # Add standard columns
     if debug > 0
-        println("$ds   adding columns with standard names (e.g. 'pressure' for 'pr')")
+        println("$ds     adding columns with standard names (e.g. 'pressure' for 'pr')")
     end
     if "pr" in names(data)
         data.pressure = data.pr
@@ -539,7 +539,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         error("No 't068' column in CNV file; available names are ", names(data))
     end
     if debug > 0
-        println("$ds   adding SA, CT, sigma0 and spiciness0")
+        println("$ds     adding SA, CT, sigma0 and spiciness0")
     end
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
@@ -547,7 +547,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     metadata["header"] = header
     if debug > 0
-        println("$ds   combining metadata and data into a Ctd object")
+        println("$ds     combining metadata and data into a Ctd object")
     end
     rval = Ctd(metadata, data)
     if debug > 0
