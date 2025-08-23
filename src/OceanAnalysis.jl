@@ -227,9 +227,6 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
             end,
             yrot=90; kwargs...)
-        if debug > 0
-            println("$ds plotProfile() END")
-        end
     elseif which == "S" || which == "SA"
         if debug > 0
             println("$ds   about to plot $which")
@@ -243,9 +240,6 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 which == "SA" ? "Absolute Salinity [g/kg]" : "Practical Salinity"
             end,
             yrot=90; kwargs...)
-        if debug > 0
-            println("$ds plotProfile() END")
-        end
     elseif which == "sigma0" # gsw formulation
         if debug > 0
             println("$ds   about to plot $which")
@@ -259,9 +253,6 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 "Potential Density Anomaly, σ₀ [kg/m³]"
             end,
             yrot=90; kwargs...)
-        if debug > 0
-            println("$ds plotProfile() END")
-        end
     elseif which == "spiciness0" # gsw formulation
         if debug > 0
             println("$ds   about to plot $which")
@@ -275,9 +266,6 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 "Spiciness [kg/m³]"
             end,
             yrot=90; kwargs...)
-        if debug > 0
-            println("$ds plotProfile() END")
-        end
     elseif which == "N2"
         if debug > 0
             println("$ds   about to plot $which")
@@ -291,9 +279,6 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 "N² [s⁻²]" # "N2 [1/s^2]"
             end,
             yrot=90; kwargs...)
-        if debug > 0
-            println("$ds plotProfile() END")
-        end
     else
         println("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
