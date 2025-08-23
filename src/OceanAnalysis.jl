@@ -24,6 +24,8 @@ export readArgo
 export readCtdCNV
 export T90fromT48
 export T90fromT68
+export debug_decrement
+export debug_space
 
 abstract type Oce end
 
@@ -41,10 +43,6 @@ struct Ctd <: Oce
     # sigma0::Vector{Float64}
     # spiciness0::Vector{Float64}
 end
-
-#.struct Argo <: Ctd
-#.    filename::String
-#.end
 
 function debug_decrement(debug)
     debug > 0 ? debug - 1 : 0
