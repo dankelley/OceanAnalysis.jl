@@ -469,7 +469,6 @@ function readCtdCNV(stream::IOStream, debug::Int64=0)
             break
         end
     end
-    metadata["header"] = header
     if dataStart == 0
         error("This file has no *END* line, so columns cannot be identified")
     end
@@ -524,6 +523,7 @@ function readCtdCNV(stream::IOStream, debug::Int64=0)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     #println("DAN 5")
     #println("names(data): ", names(data))
+    metadata["header"] = header
     rval = Ctd(metadata, data)
     if debug > 0
         println("$ds readCtdCNV() END")
