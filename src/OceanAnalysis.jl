@@ -226,7 +226,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     end
     if which == "T" || which == "CT"
         if debug > 0
-            println("$ds     about to plot $which")
+            println("$ds     drawing $which")
         end
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -239,7 +239,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
         if debug > 0
-            println("$ds     about to plot $which")
+            println("$ds     drawing $which")
         end
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -252,7 +252,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         if debug > 0
-            println("$ds     about to plot $which")
+            println("$ds     drawing $which")
         end
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -265,7 +265,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         if debug > 0
-            println("$ds     about to plot $which")
+            println("$ds     drawing $which")
         end
         rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -278,7 +278,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "N2"
         if debug > 0
-            println("$ds     about to plot $which")
+            println("$ds     drawing $which")
         end
         rval = plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -516,7 +516,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     nrows = length(lines) - dataStart + 1
     if debug > 0
         println("$ds     datanames: $dataNames")
-        println("$ds     about to read nrows=$(nrows), ncols=$(ncols)")
+        println("$ds     reading nrows=$(nrows), ncols=$(ncols)")
     end
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
