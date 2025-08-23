@@ -346,8 +346,10 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    println("$ds plotTS() END")
-end
+    if debug > 0
+        println("$ds plotTS() END")
+    end
+end # plotTS()
 
 """
     readArgo(filename, column=1)
