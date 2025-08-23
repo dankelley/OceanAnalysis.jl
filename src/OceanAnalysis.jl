@@ -224,6 +224,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
             end,
             yrot=90; kwargs...)
+        if debug > 0
+            println("$ds plotProfile() END")
+        end
     elseif which == "S" || which == "SA"
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -234,9 +237,10 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 which == "SA" ? "Absolute Salinity [g/kg]" : "Practical Salinity"
             end,
             yrot=90; kwargs...)
+        if debug > 0
+            println("$ds plotProfile() END")
+        end
     elseif which == "sigma0" # gsw formulation
-        #println(kwargs)
-        #println(keys(kwargs))
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -246,6 +250,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 "Potential Density Anomaly, σ₀ [kg/m³]"
             end,
             yrot=90; kwargs...)
+        if debug > 0
+            println("$ds plotProfile() END")
+        end
     elseif which == "spiciness0" # gsw formulation
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -256,6 +263,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 "Spiciness [kg/m³]"
             end,
             yrot=90; kwargs...)
+        if debug > 0
+            println("$ds plotProfile() END")
+        end
     elseif which == "N2"
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -266,7 +276,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
                 "N² [s⁻²]" # "N2 [1/s^2]"
             end,
             yrot=90; kwargs...)
-
+        if debug > 0
+            println("$ds plotProfile() END")
+        end
     else
         println("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
