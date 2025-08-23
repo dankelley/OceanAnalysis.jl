@@ -91,41 +91,46 @@ which are stored in the returned value alongside the three supplied vectors.
 """
 # Convenience function, which carries out TEOS-10 computations
 function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Float64=-30.0, latitude::Float64=30.0,
+    longitude::Float64=-30.0, latitude::Float64=30.0;
     debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
         println("$ds as_Ctd() START")
-        println("  $ds salinity length: ", length(salinity))
-        println("  $ds temperature length: ", length(temperature))
-        println("  $ds pressure length: ", length(pressure))
-        println("  $ds longitude length: ", length(longitude))
-        println("  $ds latitude length: ", length(latitude))
+        println("     $ds salinity length: ", length(salinity))
+        println("     $ds temperature length: ", length(temperature))
+        println("     $ds pressure length: ", length(pressure))
+        println("     $ds longitude length: ", length(longitude))
+        println("     $ds latitude length: ", length(latitude))
     end
     #println("in Ctd() at line 101")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
     if debug > 0
-        println("  $ds SA length: ", length(SA))
+        println("$ds     SA length: ", length(SA))
     end
     #println("in Ctd() at line 103")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
     if debug > 0
-        println("  $ds CT length: ", length(CT))
+        println("$ds     CT length: ", length(CT))
     end
     #println("in Ctd() at line 105")
     spiciness0 = gsw_spiciness0.(SA, CT)
     if debug > 0
-        println("  $ds spiciness0 length: ", length(spiciness0))
+        println("$ds     spiciness0 length: ", length(spiciness0))
     end
     #println("in Ctd() at line 107")
     sigma0 = gsw_sigma0.(SA, CT)
     if debug > 0
-        println("  $ds sigma0 length: ", length(sigma0))
+        println("$ds     sigma0 length: ", length(sigma0))
     end
-    #println("in Ctd() at line 109")
-    # Next uses a constructor (FIXME: is that true?)
-    #ctd = as_Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
-    error("FIXME: need to set up metadata and data")
+    if debug > 0
+        println("$ds     assembling metadata")
+    end
+    if debug > 0
+        println("$ds     assembling data")
+    end
+    error("FIXME: code above")
+    #stop("FIXME: assemble meta
+    #ctd = as_Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0, debug=debug - 1)
     if debug > 0
         println("$ds Ctd() END")
     end
