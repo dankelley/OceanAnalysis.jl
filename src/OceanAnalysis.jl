@@ -92,7 +92,7 @@ which are stored in the returned value alongside the three supplied vectors.
 function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataframes.Dataframe)
         salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
         longitude::Float64=-30.0, latitude::Float64=30.0,
-        debug::Bool false)
+        debug::Bool debug=false)
     println("Ctd()")
     println("  salinity $salinity")
     println("  temperature $temperature")
