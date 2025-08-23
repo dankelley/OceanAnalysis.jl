@@ -373,12 +373,16 @@ function readArgo(filename, column=1, debug::Bool=false)
     if debug
         println("  read lat=$lat")
     end
-    Ctd(S, T, p, lon, lat)
+    rval = Ctd(S, T, p, lon, lat)
+    if debug
+        println("readArgo() END")
+    end
+    rval
 end
 
 
 """
-header, metadata, data = readCtdCNV(filename)
+    ctd = readCtdCNV(filename)
 
 Read a CTD file named `filename` that is in SeaBird CNV format. This returns
 `header` (a vector of strings, one per line from the start down to a line
