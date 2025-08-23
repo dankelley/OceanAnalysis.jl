@@ -406,32 +406,31 @@ plotTS(d)
 """
 function readArgo(filename, column=1; debug::Int64=0)
     d = NCDataset(filename, "r")
+    if debug > 0
+        println("$ds readArgo(filename=\"$filename\", column=$column, debug=$debug) START")
+    end
     ds = debug_space(debug)
+    pressure = convert(Vector{Float64}, d["PRES"][:, column])
     if debug > 0
-        println("$ds readArgo() START")
-        println("$ds     opened file '$filename' successfully")
+        println("$ds     pressure length: ", length(pressure))
     end
-    p = convert(Vector{Float64}, d["PRES"][:, column])
+    salinity = convert(Vector{Float64}, d["PSAL"][:, column])
     if debug > 0
-        println("$ds     p length: ", length(p))
+        println("$ds     salinity length: ", length(salinity))
     end
-    S = convert(Vector{Float64}, d["PSAL"][:, column])
+    temperature = convert(Vector{Float64}, d["TEMP"][:, column])
     if debug > 0
-        println("$ds     S length: ", length(S))
+        println("$ds     temperature length: ", length(temperature))
     end
-    T = convert(Vector{Float64}, d["TEMP"][:, column])
+    longitude = convert(Float64, d["LONGITUDE"][1])
     if debug > 0
-        println("$ds     T length: ", length(T))
+        println("$ds     longitude: $longitude")
     end
-    lon = convert(Float64, d["LONGITUDE"][1])
+    latitude = convert(Float64, d["LATITUDE"][1])
     if debug > 0
-        println("$ds     lon: $lon")
+        println("$ds     latitude: $latitude")
     end
-    lat = convert(Float64, d["LATITUDE"][1])
-    if debug > 0
-        println("$ds     lat: $lat")
-    end
-    rval = as_Ctd(S, T, p, lon, lat, debug=debug - 1)
+    rval = as_Ctd(salinity, temperature, pressure, longitude, latitude, debug=debug - 1)
     if debug > 0
         println("$ds readArgo() END")
     end
