@@ -81,13 +81,25 @@ Pkg.test()
 
 ## History of changes
 
-### 0.0.3 (in development)
+### 0.1.0 (semi-usable)
 
-#### 0.0.3 Breaking changes
+**Breaking changes**
+
+None.
+
+**Non-breaking changes**
+
+* Increase second version digit to indicate that the package is suitable for testing on real data.
+
+
+
+### 0.0.3 (early exploration)
+
+**Breaking changes**
 
 There are no breaking changes; all change are additions or bug fixes.
 
-#### 0.0.3 Non-breaking changes
+**Non-breaking changes**
 
 * Add built-in data file `ctd.cnv.nc`, and use it in an example in the `Ctd()` documentation.
 * Add built-in data file `D4902911_095.nc`, and use it in an example in the `plotProfile()` documentation.
