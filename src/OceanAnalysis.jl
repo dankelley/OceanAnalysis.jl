@@ -126,7 +126,8 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         println("$ds     assembling metadata")
     end
     metadata = Dict{String,Any}()
-    metadata["type"] = "argo" # FIXME: add cycle, date, etc
+    metadata["longitude"] = longitude
+    metadata["latitude"] = latitude
     if debug > 0
         println("$ds     assembling data")
     end
@@ -435,7 +436,7 @@ function readArgo(filename, column=1; debug::Int64=0)
         println("$ds readArgo() END")
     end
     rval
-end
+end # readArgo()
 
 
 """
