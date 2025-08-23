@@ -539,7 +539,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         error("No 't068' column in CNV file; available names are ", names(data))
     end
     if debug > 0
-        println("$ds     adding SA, CT, sigma0 and spiciness0")
+        println("$ds     adding columns for SA, CT, sigma0 and spiciness0")
     end
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
