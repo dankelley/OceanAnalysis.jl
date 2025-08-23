@@ -373,7 +373,7 @@ function readArgo(filename, column=1, debug::Bool=false)
     if debug
         println("  read lat=$lat")
     end
-    rval = Ctd(S, T, p, lon, lat)
+    rval = Ctd(S, T, p, lon, lat, debug)
     if debug
         println("readArgo() END")
     end
