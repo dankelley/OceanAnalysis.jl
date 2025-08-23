@@ -97,11 +97,11 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     println("debug=$debug, ds='$ds'")
     if debug > 0
         println("$ds as_Ctd(<ctd>, debug=$debug) START")
-        println("     $ds salinity length: ", length(salinity))
-        println("     $ds temperature length: ", length(temperature))
-        println("     $ds pressure length: ", length(pressure))
-        println("     $ds longitude length: ", length(longitude))
-        println("     $ds latitude length: ", length(latitude))
+        println("$ds     salinity length: ", length(salinity))
+        println("$ds     temperature length: ", length(temperature))
+        println("$ds     pressure length: ", length(pressure))
+        println("$ds     longitude length: ", length(longitude))
+        println("$ds     latitude length: ", length(latitude))
     end
     #println("in Ctd() at line 101")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
