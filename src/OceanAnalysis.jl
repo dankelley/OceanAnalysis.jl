@@ -10,11 +10,11 @@ using Statistics
 
 # Structs
 export Oce
-#export Ctd
+export Ctd
 #. export Argo
 
 # Functions
-export Ctd
+export as_Ctd
 export coordinateFromString
 export getElement
 export N2
@@ -90,7 +90,7 @@ which are stored in the returned value alongside the three supplied vectors.
 
 """
 # Convenience function, which carries out TEOS-10 computations
-function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
+function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0,
     debug::Int64=0)
     ds = debug_space(debug)
@@ -124,12 +124,12 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
     end
     #println("in Ctd() at line 109")
     # Next uses a constructor (FIXME: is that true?)
-    rval = Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    ctd = as_Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
     if debug > 0
         println("$ds Ctd() END")
     end
-    rval
-end # Ctd(salinity, ...)
+    ctd
+end # as_Ctd(salinity, ...)
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
@@ -392,8 +392,9 @@ function readArgo(filename, column=1; debug::Int64=0)
     lat = convert(Float64, d["LATITUDE"][1])
     if debug > 0
         println("$ds   lat: $lat")
+        println("$ds   about to call as_Ctd() ...")
     end
-    rval = Ctd(S, T, p, lon, lat, debug - 1)
+    rval = as_Ctd(S, T, p, lon, lat, debug - 1)
     if debug > 0
         println("$ds readArgo() END")
     end
