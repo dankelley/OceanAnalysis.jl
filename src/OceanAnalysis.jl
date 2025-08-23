@@ -375,25 +375,25 @@ function readArgo(filename, column=1; debug::Int64=0)
     end
     p = convert(Vector{Float64}, d["PRES"][:, column])
     if debug > 0
-        println("$ds  read p, of length ", length(p))
+        println("$ds   read p, of length ", length(p))
     end
     S = convert(Vector{Float64}, d["PSAL"][:, column])
     if debug > 0
-        println("$ds  read S, of length ", length(S))
+        println("$ds   read S, of length ", length(S))
     end
     T = convert(Vector{Float64}, d["TEMP"][:, column])
     if debug > 0
-        println("$ds  read T, of length ", length(T))
+        println("$ds   read T, of length ", length(T))
     end
     lon = convert(Float64, d["LONGITUDE"][1])
     if debug > 0
-        println("$ds  read lon=$lon")
+        println("$ds   read lon=$lon")
     end
     lat = convert(Float64, d["LATITUDE"][1])
     if debug > 0
-        println("$ds  read lat=$lat")
+        println("$ds   read lat=$lat")
     end
-    rval = Ctd(S, T, p, lon, lat, debug)
+    rval = Ctd(S, T, p, lon, lat, debug - 1)
     if debug > 0
         println("$ds readArgo() END")
     end
