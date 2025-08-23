@@ -443,13 +443,13 @@ p3 = plotTS(ctd)
 plot(p1, p2, p3, layout=(1, 3))
 ```
 """
-function readCtdCNV(filename::String)
+function readCtdCNV(filename::String; debug::Int64=0)
     open(filename) do file
-        readCtdCNV(file)
+        readCtdCNV(file, debug=debug)
     end
 end
 
-function readCtdCNV(stream::IOStream, debug::Int64=0)
+function readCtdCNV(stream::IOStream; debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
         println("$ds  readCtdCNV(stream, ...) START")
