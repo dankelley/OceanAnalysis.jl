@@ -427,7 +427,7 @@ function readArgo(filename, column=1; debug::Int64=0)
         println("$ds     lat: $lat")
         println("$ds     about to call as_Ctd() ...")
     end
-    rval = as_Ctd(S, T, p, lon, lat, debug - 1)
+    rval = as_Ctd(S, T, p, lon, lat, debug=debug - 1)
     if debug > 0
         println("$ds readArgo() END")
     end
