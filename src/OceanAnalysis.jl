@@ -29,7 +29,7 @@ export debug_space
 abstract type Oce end
 
 struct Ctd <: Oce
-    header::Vector{String}
+    #header::Vector{String}
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
     # salinity::Vector{Float64}
@@ -124,7 +124,8 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     end
     #println("in Ctd() at line 109")
     # Next uses a constructor (FIXME: is that true?)
-    ctd = as_Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    #ctd = as_Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+    error("FIXME: need to set up metadata and data")
     if debug > 0
         println("$ds Ctd() END")
     end
@@ -428,10 +429,7 @@ p3 = plotTS(ctd)
 plot(p1, p2, p3, layout=(1, 3))
 ```
 """
-function readCtdCNV(filename::String, debug::Bool=false)
-    if (debug)
-        println("in readCtdCNV(filename,debug)")
-    end
+function readCtdCNV(filename::String)
     open(filename) do file
         readCtdCNV(file, debug)
     end
@@ -440,7 +438,7 @@ end
 function readCtdCNV(stream::IOStream, debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds  readCtdCNV(stream,debug) START")
+        println("$ds  readCtdCNV(stream, ...) START")
     end
     lines = readlines(stream)
     header = ""
@@ -469,6 +467,7 @@ function readCtdCNV(stream::IOStream, debug::Int64=0)
             break
         end
     end
+    metadata["header"] = header
     if dataStart == 0
         error("This file has no *END* line, so columns cannot be identified")
     end
@@ -523,7 +522,7 @@ function readCtdCNV(stream::IOStream, debug::Int64=0)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     #println("DAN 5")
     #println("names(data): ", names(data))
-    rval = Ctd(header, metadata, data)
+    rval = Ctd(metadata, data)
     if debug > 0
         println("$ds readCtdCNV() END")
     end
