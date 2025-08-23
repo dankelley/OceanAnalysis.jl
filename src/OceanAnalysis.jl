@@ -129,7 +129,7 @@ function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::
         println("$ds Ctd() END")
     end
     rval
-end
+end # Ctd(salinity, ...)
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
