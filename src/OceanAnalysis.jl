@@ -301,7 +301,7 @@ end
 
 """
     plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8;
         debug=false, kwargs...,)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
@@ -332,11 +332,7 @@ See also [`plotProfile`](@ref).
 """
 function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-    debug::Int64=0, kwargs...)
-    ds = debug_space(debug)
-    if debug > 0
-        println("$ds plotTS(ctd, drawFreezing=$drawFreezing, drawSpiciness=$drawSpiciness, etc.) START")
-    end
+    kwargs...)
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
@@ -372,9 +368,6 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
         CTf = gsw_ct_freezing.(SAf, pf, saturation_fraction)
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
-    end
-    if debug > 0
-        println("$ds plotTS() END")
     end
 end # plotTS()
 
