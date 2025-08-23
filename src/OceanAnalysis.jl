@@ -405,11 +405,11 @@ plotTS(d)
 ```
 """
 function readArgo(filename, column=1; debug::Int64=0)
-    d = NCDataset(filename, "r")
+    ds = debug_space(debug)
     if debug > 0
         println("$ds readArgo(filename=\"$filename\", column=$column, debug=$debug) START")
     end
-    ds = debug_space(debug)
+    d = NCDataset(filename, "r")
     pressure = convert(Vector{Float64}, d["PRES"][:, column])
     if debug > 0
         println("$ds     pressure length: ", length(pressure))
