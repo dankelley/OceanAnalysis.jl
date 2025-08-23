@@ -501,9 +501,6 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         irow = irow + 1
     end
     data = DataFrame(data, dataNames)
-    if debug > 0
-        println("$ds  NOTE: not yet renaming data or parsing units")
-    end
     # Add standard columns
     if debug > 0
         println("$ds   adding columns with standard names (e.g. 'pressure' for 'pr')")
