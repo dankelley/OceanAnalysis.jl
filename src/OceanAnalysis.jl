@@ -94,7 +94,6 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     longitude::Float64=-30.0, latitude::Float64=30.0;
     debug::Int64=0)
     ds = debug_space(debug)
-    println("debug=$debug, ds='$ds'")
     if debug > 0
         println("$ds as_Ctd(<ctd>, debug=$debug) START")
         println("$ds     salinity length: ", length(salinity))
