@@ -347,7 +347,7 @@ d = readArgo(f)
 plotTS(d)
 ```
 """
-function readArgo(filename, column=1, debug::Bool=false)
+function readArgo(filename, column=1; debug::Bool=false)
     d = NCDataset(filename, "r")
     if debug
         println("readArgo() START")

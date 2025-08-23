@@ -2,7 +2,7 @@
 using OceanAnalysis, Plots, Measures
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 filename = joinpath(pkgdir, "data", "D4902911_095.nc")
-ctd = readArgo(filename, true)
+ctd = readArgo(filename, debug=true)
 #print(ctd)
 if false
     p1 = plotProfile(ctd, "SA")
