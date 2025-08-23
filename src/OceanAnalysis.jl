@@ -215,6 +215,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         error("vertical must be either \"pressure\" or \"density\"")
     end
     if which == "T" || which == "CT"
+        if debug > 0
+            println("$ds   about to plot $which")
+        end
         plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -228,6 +231,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             println("$ds plotProfile() END")
         end
     elseif which == "S" || which == "SA"
+        if debug > 0
+            println("$ds   about to plot $which")
+        end
         plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -241,6 +247,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             println("$ds plotProfile() END")
         end
     elseif which == "sigma0" # gsw formulation
+        if debug > 0
+            println("$ds   about to plot $which")
+        end
         plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -254,6 +263,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             println("$ds plotProfile() END")
         end
     elseif which == "spiciness0" # gsw formulation
+        if debug > 0
+            println("$ds   about to plot $which")
+        end
         plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -267,6 +279,9 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             println("$ds plotProfile() END")
         end
     elseif which == "N2"
+        if debug > 0
+            println("$ds   about to plot $which")
+        end
         plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
