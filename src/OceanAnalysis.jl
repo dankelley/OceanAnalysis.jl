@@ -43,7 +43,7 @@ struct Ctd <: Oce
     # spiciness0::Vector{Float64}
 end
 
-function debug_space(debug, max=3)
+function debug_space(debug::Int64, max::Int64=3)
     0 < debug <= max ? repeat("  ", max - debug) : ""
 end
 
