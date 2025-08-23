@@ -44,7 +44,7 @@ struct Ctd <: Oce
 end
 
 function debug_space(debug::Int64, max::Int64=3)
-    0 < debug <= max ? repeat("  ", max - debug) : ""
+    0 < debug <= max ? repeat("    ", max - debug) : ""
 end
 
 """
