@@ -44,13 +44,8 @@ struct Ctd <: Oce
     # spiciness0::Vector{Float64}
 end
 
-function debug_decrement(debug)
-    debug > 0 ? debug - 1 : 0
-end
-
 function debug_space(debug, max=4)
-    nspaces = max - debug
-    nspaces > 0 ? repeat(" ", nspaces) : ""
+    debug > 0 ? repeat("  ", max - debug) : ""
 end
 
 """
