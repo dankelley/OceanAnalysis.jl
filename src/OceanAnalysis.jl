@@ -43,7 +43,7 @@ struct Ctd <: Oce
     # spiciness0::Vector{Float64}
 end
 
-function debug_space(debug, max=4)
+function debug_space(debug, max=3)
     0 < debug <= max ? repeat("  ", max - debug) : ""
 end
 
@@ -96,7 +96,7 @@ function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataf
     debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds Ctd()")
+        println("$ds Ctd() START")
         println("  $ds salinity length: ", length(salinity))
         println("  $ds temperature length: ", length(temperature))
         println("  $ds pressure length: ", length(pressure))
@@ -126,7 +126,7 @@ function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataf
     #println("in Ctd() at line 109")
     rval = Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0, debug=debug - 1)
     if debug > 0
-        println("ds Ctd() END")
+        println("$ds Ctd() END")
     end
     rval
 end
