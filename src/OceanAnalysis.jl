@@ -334,7 +334,9 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     ds = debug_space(debug)
-    println("$ds plotTS() START")
+    if debug
+        println("$ds plotTS() START")
+    end
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
@@ -383,7 +385,9 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    println("$ds plotTS() END")
+    if debug
+        println("$ds plotTS() END")
+    end
     rval
 end # plotTS()
 
