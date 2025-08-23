@@ -10,7 +10,7 @@ using Statistics
 
 # Structs
 export Oce
-export Ctd
+#export Ctd
 #. export Argo
 
 # Functions
@@ -90,8 +90,7 @@ which are stored in the returned value alongside the three supplied vectors.
 
 """
 # Convenience function, which carries out TEOS-10 computations
-function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataframes.Dataframe)
-    salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
+function Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0,
     debug::Int64=0)
     ds = debug_space(debug)
@@ -124,7 +123,8 @@ function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataf
         println("  $ds sigma0 length: ", length(sigma0))
     end
     #println("in Ctd() at line 109")
-    rval = Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0, debug=debug - 1)
+    # Next uses a constructor (FIXME: is that true?)
+    rval = Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
     if debug > 0
         println("$ds Ctd() END")
     end
@@ -375,23 +375,23 @@ function readArgo(filename, column=1; debug::Int64=0)
     end
     p = convert(Vector{Float64}, d["PRES"][:, column])
     if debug > 0
-        println("$ds   read p, of length ", length(p))
+        println("$ds   p length: ", length(p))
     end
     S = convert(Vector{Float64}, d["PSAL"][:, column])
     if debug > 0
-        println("$ds   read S, of length ", length(S))
+        println("$ds   S length: ", length(S))
     end
     T = convert(Vector{Float64}, d["TEMP"][:, column])
     if debug > 0
-        println("$ds   read T, of length ", length(T))
+        println("$ds   T length: ", length(T))
     end
     lon = convert(Float64, d["LONGITUDE"][1])
     if debug > 0
-        println("$ds   read lon=$lon")
+        println("$ds   lon: $lon")
     end
     lat = convert(Float64, d["LATITUDE"][1])
     if debug > 0
-        println("$ds   read lat=$lat")
+        println("$ds   lat: $lat")
     end
     rval = Ctd(S, T, p, lon, lat, debug - 1)
     if debug > 0
