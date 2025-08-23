@@ -46,6 +46,15 @@ end
 #.    filename::String
 #.end
 
+function debug_decrement(debug)
+    debug > 0 ? debug - 1 : 0
+end
+
+function debug_space(debug, max=4)
+    nspaces = max - debug
+    nspaces > 0 ? repeat(" ", nspaces) : ""
+end
+
 """
     degree = coordinateFromString(s::String)
 
