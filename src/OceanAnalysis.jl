@@ -218,7 +218,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         if debug > 0
             println("$ds   about to plot $which")
         end
-        plot(which == "CT" ? CT : T, y, ylabel=ylabel,
+        rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
@@ -231,7 +231,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         if debug > 0
             println("$ds   about to plot $which")
         end
-        plot(which == "SA" ? SA : S, y, ylabel=ylabel,
+        rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
@@ -244,7 +244,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         if debug > 0
             println("$ds   about to plot $which")
         end
-        plot(sigma0, y, ylabel=ylabel,
+        rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -257,7 +257,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         if debug > 0
             println("$ds   about to plot $which")
         end
-        plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
+        rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -270,7 +270,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         if debug > 0
             println("$ds   about to plot $which")
         end
-        plot(getElement(ctd, "N2"), y, ylabel=ylabel,
+        rval = plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -280,8 +280,12 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             end,
             yrot=90; kwargs...)
     else
-        println("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
+        error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
+    if debug > 0
+        println("$ds plotProfile() END")
+    end
+    rval
 end
 
 """
@@ -445,7 +449,7 @@ end
 function readCtdCNV(stream::IOStream; debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds  readCtdCNV(stream, ...) START")
+        println("$ds readCtdCNV(stream, ...) START")
     end
     lines = readlines(stream)
     header = ""
@@ -486,8 +490,8 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     end
     nrows = length(lines) - dataStart + 1
     if debug > 0
-        println("$ds  datanames: $dataNames")
-        println("$ds  will try to read nrows=$(nrows), ncols=$(ncols)")
+        println("$ds   datanames: $dataNames")
+        println("$ds   about to read nrows=$(nrows), ncols=$(ncols)")
     end
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
@@ -501,6 +505,9 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         println("$ds  NOTE: not yet renaming data or parsing units")
     end
     # Add standard columns
+    if debug > 0
+        println("$ds   adding columns with standard names (e.g. 'pressure' for 'pr')")
+    end
     if "pr" in names(data)
         data.pressure = data.pr
     else
@@ -518,17 +525,17 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     else
         error("No 't068' column in CNV file; available names are ", names(data))
     end
-    #println("DAN 1")
+    if debug > 0
+        println("$ds   adding SA, CT, sigma0 and spiciness0")
+    end
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
-    #println("DAN 2")
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
-    #println("DAN 3")
     data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-    #println("DAN 4")
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    #println("DAN 5")
-    #println("names(data): ", names(data))
     metadata["header"] = header
+    if debug > 0
+        println("$ds   combining metadata and data into a Ctd object")
+    end
     rval = Ctd(metadata, data)
     if debug > 0
         println("$ds readCtdCNV() END")
