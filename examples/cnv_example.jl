@@ -2,9 +2,9 @@
 using OceanAnalysis, Plots, Measures
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 filename = joinpath(pkgdir, "data", "ctd.cnv")
-ctd = readCtdCNV(filename, !true)
+ctd = readCtdCNV(filename)
 p1 = plotProfile(ctd, "SA")
 p2 = plotProfile(ctd, "CT")
 p3 = plotTS(ctd)
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
-savefig("example.png")
+savefig("cnv_example.png")
