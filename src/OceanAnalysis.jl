@@ -126,16 +126,21 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     if debug > 0
         println("$ds     assembling metadata")
     end
+    metadata = Dict{String,Any}()
+    metadata["type"] = "argo" # FIXME: add cycle, date, etc
     if debug > 0
         println("$ds     assembling data")
     end
-    error("FIXME: code above")
-    #stop("FIXME: assemble meta
-    #ctd = as_Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0, debug=debug - 1)
+    data = DataFrame(salinity=salinity, temperature=temperature,
+        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spicness0)
     if debug > 0
-        println("$ds Ctd() END")
+        println("$ds     creating Ctd object")
     end
-    ctd
+    rval = Ctd(metadata, data)
+    if debug > 0
+        println("$ds as_Ctd() END")
+    end
+    rval
 end # as_Ctd(salinity, ...)
 
 """
@@ -426,7 +431,6 @@ function readArgo(filename, column=1; debug::Int64=0)
     lat = convert(Float64, d["LATITUDE"][1])
     if debug > 0
         println("$ds     lat: $lat")
-        println("$ds     about to call as_Ctd() ...")
     end
     rval = as_Ctd(S, T, p, lon, lat, debug=debug - 1)
     if debug > 0
