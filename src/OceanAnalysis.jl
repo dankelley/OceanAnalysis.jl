@@ -331,10 +331,10 @@ plotTS(d)
 See also [`plotProfile`](@ref).
 """
 function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
-    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8;
+    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     ds = debug_space(debug)
-    if debug
+    if debug > 0
         println("$ds plotTS() START")
     end
     S = ctd.data.salinity
@@ -385,7 +385,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    if debug
+    if debug > 0
         println("$ds plotTS() END")
     end
     rval
