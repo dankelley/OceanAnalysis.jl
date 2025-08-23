@@ -333,7 +333,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
     if debug > 0
-        println("$ds  drawing data")
+        println("$ds     drawing data")
     end
     rval = plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
@@ -346,7 +346,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     if debug > 0
-        println("$ds  adding sigma0 contours")
+        println("$ds     adding sigma0 contours")
     end
     contour!(SAc, CTc, (SAc, CTc) -> gsw_sigma0(SAc, CTc), color=:gray84, linewidth=0.5,
         levels=range(22, 30, step=0.2),
@@ -354,7 +354,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     # ... then (optionally) add spiciness contours ...
     if drawSpiciness
         if debug > 0
-            println("$ds  adding spiciness0 contours")
+            println("$ds     adding spiciness0 contours")
         end
         contour!(SAc, CTc, (SAc, CTc) -> gsw_spiciness0(SAc, CTc), color=:gray74, linewidth=0.5,
             levels=range(-10, 10, step=0.2),
@@ -363,7 +363,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     # ... and finally (optionally) add a freezing-temperature line.
     if drawFreezing
         if debug > 0
-            println("$ds  adding freezing line")
+            println("$ds     adding freezing line")
         end
         pf = 0.0 # let user specify this?
         SAf = range(xlim[1], xlim[2], length=100)
