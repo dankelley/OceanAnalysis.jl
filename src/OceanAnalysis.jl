@@ -431,7 +431,7 @@ plot(p1, p2, p3, layout=(1, 3))
 """
 function readCtdCNV(filename::String)
     open(filename) do file
-        readCtdCNV(file, debug)
+        readCtdCNV(file)
     end
 end
 
