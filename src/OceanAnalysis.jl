@@ -29,7 +29,7 @@ abstract type Oce end
 
 struct Ctd <: Oce
     header::Vector{String}
-    metadata::Dict{String, Any}
+    metadata::Dict{String,Any}
     data::DataFrames.DataFrame
     # salinity::Vector{Float64}
     # temperature::Vector{Float64}
@@ -90,28 +90,30 @@ which are stored in the returned value alongside the three supplied vectors.
 """
 # Convenience function, which carries out TEOS-10 computations
 function Ctd(#header::Vector{String}, #metadata::Dict{String, Any}, #data::Dataframes.Dataframe)
-        salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-        longitude::Float64=-30.0, latitude::Float64=30.0,
-        debug::Bool=false)
+    salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
+    longitude::Float64=-30.0, latitude::Float64=30.0,
+    debug::Bool=false)
     println("Ctd()")
     println("  salinity length: ", length(salinity))
     println("  temperature length: ", length(temperature))
     println("  pressure length: ", length(pressure))
     println("  longitude length: ", length(longitude))
     println("  latitude length: ", length(latitude))
-        #println("in Ctd() at line 101")
-        local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-        println("SA $SA")
-        #println("in Ctd() at line 103")
-        local CT = gsw_ct_from_t.(SA, temperature, pressure)
-        println("CT $CT")
-        #println("in Ctd() at line 105")
-        spiciness0 = gsw_spiciness0.(SA, CT),
-        #println("in Ctd() at line 107")
-        sigma0 = gsw_sigma0.(SA, CT)
-        #println("in Ctd() at line 109")
-        return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
-    end
+    #println("in Ctd() at line 101")
+    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
+    println("SA length: ", length(SA))
+    #println("in Ctd() at line 103")
+    local CT = gsw_ct_from_t.(SA, temperature, pressure)
+    println("CT length: ", length(CT))
+    #println("in Ctd() at line 105")
+    spiciness0 = gsw_spiciness0.(SA, CT),
+    println("spiciness0 length: ", length(spiciness0))
+    #println("in Ctd() at line 107")
+    sigma0 = gsw_sigma0.(SA, CT)
+    println("sigma0 length: ", length(sigma0))
+    #println("in Ctd() at line 109")
+    return Ctd(salinity, temperature, pressure, longitude, latitude, SA, CT, sigma0, spiciness0)
+end
 
 """
     plotProfile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
@@ -171,7 +173,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         println("in plotProfile(ctd, '$which')")
     end
     dataNames = names(ctd.data)
-    plotNames = dataNames[dataNames .!= "pr" .&& dataNames .!= "pressure"]
+    plotNames = dataNames[dataNames.!="pr".&&dataNames.!="pressure"]
     if !(which in plotNames)
         error("plotProfile() cannot handle which='$which'; try one of: $plotNames")
     end
@@ -330,7 +332,9 @@ end
 """
     readArgo(filename, column=1)
 
-Read an Argo file and return a Ctd object.  This code is not yet stable.
+Read an Argo file and return a Ctd object.  As of 2025-08-23, this code is
+still in rapid development; please report problems as issues on
+<www.github.com/dankelley/OceanAnalysis.jl/issues>.
 
 # Examples
 ```julia-repl
@@ -339,20 +343,36 @@ using OceanAnalysis, Plots
 # (black) and Practical Salinity (red).
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = readArgo(f, 1)
-first(d.pressure, 6)
-# See ?plotProfile for an example of how to plot
+d = readArgo(f)
+plotTS(d)
 ```
 """
-function readArgo(filename, column=1, pmax=10000)
+function readArgo(filename, column=1, debug::Bool=false)
     d = NCDataset(filename, "r")
-    p = d["PRES"][:, column]
-    look = p .< pmax
-    p = convert(Vector{Float64}, p[look])
-    S = convert(Vector{Float64}, d["PSAL"][look, column])
-    T = convert(Vector{Float64}, d["TEMP"][look, column])
+    if debug
+        println("readArgo() START")
+        println("  opened file '$filename' successfully")
+    end
+    p = convert(Vector{Float64}, d["PRES"][:, column])
+    if debug
+        println("  read p, of length ", length(p))
+    end
+    S = convert(Vector{Float64}, d["PSAL"][:, column])
+    if debug
+        println("  read S, of length ", length(S))
+    end
+    T = convert(Vector{Float64}, d["TEMP"][:, column])
+    if debug
+        println("  read T, of length ", length(T))
+    end
     lon = convert(Float64, d["LONGITUDE"][1])
+    if debug
+        println("  read lon=$lon")
+    end
     lat = convert(Float64, d["LATITUDE"][1])
+    if debug
+        println("  read lat=$lat")
+    end
     Ctd(S, T, p, lon, lat)
 end
 
