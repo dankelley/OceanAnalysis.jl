@@ -170,7 +170,7 @@ p3 = plot_profile(d, "sigma0")
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 
-See also the [`plotTS`](@ref) function.
+See also the [`plot_TS`](@ref) function.
 """
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
@@ -263,7 +263,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
 end
 
 """
-    plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
+    plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
         legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8;
         debug=false, kwargs...,)
 
@@ -275,7 +275,7 @@ The `kwargs...` argument is used to represent other arguments that will be sent
 to `plot()`.  For example, the default way to display the TS diagram is
 constructed with a blue line connecting TS values, but using e.g.
 
-    plotTS(ctd, seriestype=:scatter, seriescolor=:red)
+    plot_TS(ctd, seriestype=:scatter, seriescolor=:red)
 
 will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on such issues.
@@ -288,7 +288,7 @@ pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
 d = read_argo(f, 1);
 # Plot TS diagram, using TEOS-10 variables.
-plotTS(d)
+plot_TS(d)
 ```
 
 See also [`plot_profile`](@ref).
@@ -296,7 +296,7 @@ See also [`plot_profile`](@ref).
 function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
-    oad(debug, "plotTS() START")
+    oad(debug, "plot_TS() START")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
@@ -337,9 +337,9 @@ function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fa
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    oad(debug, " plotTS() END")
+    oad(debug, " plot_TS() END")
     rval
-end # plotTS()
+end # plot_TS()
 
 """
     read_argo(filename, column=1)
@@ -356,7 +356,7 @@ using OceanAnalysis, Plots
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
 d = read_argo(f)
-plotTS(d)
+plot_TS(d)
 ```
 """
 function read_argo(filename, column=1; debug::Int64=0)
