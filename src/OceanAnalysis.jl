@@ -289,7 +289,7 @@ plot_TS(d)
 
 See also [`plot_profile`](@ref).
 """
-function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
+function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
@@ -317,14 +317,14 @@ function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fa
         levels=range(22, 30, step=0.2),
         cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
-    if drawSpiciness
+    if draw_spiciness
         oad(debug, "    drawing spiciness0 contours")
         contour!(SAc, CTc, (SAc, CTc) -> gsw_spiciness0(SAc, CTc), color=:gray74, linewidth=0.5,
             levels=range(-10, 10, step=0.2),
             cbar=false, clabels=true)
     end
     # ... and finally (optionally) add a freezing-temperature line.
-    if drawFreezing
+    if draw_freezing
         oad(debug, "    adding freezing line")
         pf = 0.0 # let user specify this?
         SAf = range(xlim[1], xlim[2], length=100)
