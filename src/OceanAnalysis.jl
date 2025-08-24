@@ -295,7 +295,7 @@ See also [`plot_profile`](@ref).
 function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
-    oad(debug, "plot_TS() START")
+    oad(debug, "plot_TS(<ctd>) START")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
