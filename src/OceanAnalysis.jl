@@ -580,6 +580,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     oad(debug, "DAN 2 pi=$pi")
     oad(debug, "DAN 3 pi=", pi)
     oad(debug, "DAN 4 pi=", pi, "ok?")
+    println("DAN 4 pi=", pi, "ok?")
     rval
 end
 
