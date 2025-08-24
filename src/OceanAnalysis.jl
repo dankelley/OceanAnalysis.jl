@@ -94,6 +94,7 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "as_Ctd(<ctd>, debug=$debug) START")
     oad(debug, "_salinity length: ", length(salinity))
     oad(debug, "_temperature length: ", length(temperature))
+    error("DAN testing")
     oad(debug, "_pressure length: ", length(pressure))
     oad(debug, "_longitude length: ", length(longitude))
     oad(debug, "_latitude length: ", length(latitude))
