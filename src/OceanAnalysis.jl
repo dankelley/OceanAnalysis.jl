@@ -48,9 +48,9 @@ function debug_space(debug::Int64, max::Int64=3)
 end
 
 function oad(debug::Int64=0, args...)
-    global danny
-    println("danny $danny")
     if debug > 0
+        ds = debug_space(debug)
+        print(ds)
         for arg in args
             print(arg)
         end
@@ -106,50 +106,50 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds as_Ctd(<ctd>, debug=$debug) START")
-        println("$ds     salinity length: ", length(salinity))
-        println("$ds     temperature length: ", length(temperature))
-        println("$ds     pressure length: ", length(pressure))
-        println("$ds     longitude length: ", length(longitude))
-        println("$ds     latitude length: ", length(latitude))
+        oad(debug, "$ds as_Ctd(<ctd>, debug=$debug) START")
+        oad(debug, "$ds     salinity length: ", length(salinity))
+        oad(debug, "$ds     temperature length: ", length(temperature))
+        oad(debug, "$ds     pressure length: ", length(pressure))
+        oad(debug, "$ds     longitude length: ", length(longitude))
+        oad(debug, "$ds     latitude length: ", length(latitude))
     end
-    #println("in Ctd() at line 101")
+    #oad(debug, "in Ctd() at line 101")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
     if debug > 0
-        println("$ds     SA length: ", length(SA))
+        oad(debug, "$ds     SA length: ", length(SA))
     end
-    #println("in Ctd() at line 103")
+    #oad(debug, "in Ctd() at line 103")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
     if debug > 0
-        println("$ds     CT length: ", length(CT))
+        oad(debug, "$ds     CT length: ", length(CT))
     end
-    #println("in Ctd() at line 105")
+    #oad(debug, "in Ctd() at line 105")
     spiciness0 = gsw_spiciness0.(SA, CT)
     if debug > 0
-        println("$ds     spiciness0 length: ", length(spiciness0))
+        oad(debug, "$ds     spiciness0 length: ", length(spiciness0))
     end
-    #println("in Ctd() at line 107")
+    #oad(debug, "in Ctd() at line 107")
     sigma0 = gsw_sigma0.(SA, CT)
     if debug > 0
-        println("$ds     sigma0 length: ", length(sigma0))
+        oad(debug, "$ds     sigma0 length: ", length(sigma0))
     end
     if debug > 0
-        println("$ds     assembling metadata")
+        oad(debug, "$ds     assembling metadata")
     end
     metadata = Dict{String,Any}()
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
     if debug > 0
-        println("$ds     assembling data")
+        oad(debug, "$ds     assembling data")
     end
     data = DataFrame(salinity=salinity, temperature=temperature,
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
     if debug > 0
-        println("$ds     creating Ctd object")
+        oad(debug, "$ds     creating Ctd object")
     end
     rval = Ctd(metadata, data)
     if debug > 0
-        println("$ds as_Ctd() END")
+        oad(debug, "$ds as_Ctd() END")
     end
     rval
 end # as_Ctd(salinity, ...)
@@ -210,7 +210,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     debug::Int64=0, kwargs...)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds plotProfile(ctd, '$which') START")
+        oad(debug, "$ds plotProfile(ctd, '$which') START")
     end
     dataNames = names(ctd.data)
     plotNames = dataNames[dataNames.!="pr".&&dataNames.!="pressure"]
@@ -238,7 +238,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
     end
     if which == "T" || which == "CT"
         if debug > 0
-            println("$ds     drawing $which")
+            oad(debug, "$ds     drawing $which")
         end
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -251,7 +251,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
         if debug > 0
-            println("$ds     drawing $which")
+            oad(debug, "$ds     drawing $which")
         end
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -264,7 +264,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         if debug > 0
-            println("$ds     drawing $which")
+            oad(debug, "$ds     drawing $which")
         end
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -277,7 +277,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         if debug > 0
-            println("$ds     drawing $which")
+            oad(debug, "$ds     drawing $which")
         end
         rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -290,7 +290,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
             yrot=90; kwargs...)
     elseif which == "N2"
         if debug > 0
-            println("$ds     drawing $which")
+            oad(debug, "$ds     drawing $which")
         end
         rval = plot(getElement(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -305,7 +305,7 @@ function plotProfile(ctd::Ctd, which::String="CT"; vertical::String="pressure", 
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
     if debug > 0
-        println("$ds plotProfile() END")
+        oad(debug, "$ds plotProfile() END")
     end
     rval
 end
@@ -346,7 +346,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     debug::Int64=0, kwargs...)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds plotTS() START")
+        oad(debug, "$ds plotTS() START")
     end
     S = ctd.data.salinity
     T = ctd.data.temperature
@@ -357,7 +357,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
     if debug > 0
-        println("$ds     drawing data")
+        oad(debug, "$ds     drawing data")
     end
     rval = plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
@@ -370,7 +370,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     if debug > 0
-        println("$ds     drawing sigma0 contours")
+        oad(debug, "$ds     drawing sigma0 contours")
     end
     contour!(SAc, CTc, (SAc, CTc) -> gsw_sigma0(SAc, CTc), color=:gray84, linewidth=0.5,
         levels=range(22, 30, step=0.2),
@@ -378,7 +378,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     # ... then (optionally) add spiciness contours ...
     if drawSpiciness
         if debug > 0
-            println("$ds     drawing spiciness0 contours")
+            oad(debug, "$ds     drawing spiciness0 contours")
         end
         contour!(SAc, CTc, (SAc, CTc) -> gsw_spiciness0(SAc, CTc), color=:gray74, linewidth=0.5,
             levels=range(-10, 10, step=0.2),
@@ -387,7 +387,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
     # ... and finally (optionally) add a freezing-temperature line.
     if drawFreezing
         if debug > 0
-            println("$ds     adding freezing line")
+            oad(debug, "$ds     adding freezing line")
         end
         pf = 0.0 # let user specify this?
         SAf = range(xlim[1], xlim[2], length=100)
@@ -397,7 +397,7 @@ function plotTS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fal
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
     if debug > 0
-        println("$ds plotTS() END")
+        oad(debug, "$ds plotTS() END")
     end
     rval
 end # plotTS()
@@ -423,32 +423,32 @@ plotTS(d)
 function readArgo(filename, column=1; debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds readArgo(filename=\"$filename\", column=$column, debug=$debug) START")
+        oad(debug, "$ds readArgo(filename=\"$filename\", column=$column, debug=$debug) START")
     end
     d = NCDataset(filename, "r")
     pressure = convert(Vector{Float64}, d["PRES"][:, column])
     if debug > 0
-        println("$ds     pressure length: ", length(pressure))
+        oad(debug, "$ds     pressure length: ", length(pressure))
     end
     salinity = convert(Vector{Float64}, d["PSAL"][:, column])
     if debug > 0
-        println("$ds     salinity length: ", length(salinity))
+        oad(debug, "$ds     salinity length: ", length(salinity))
     end
     temperature = convert(Vector{Float64}, d["TEMP"][:, column])
     if debug > 0
-        println("$ds     temperature length: ", length(temperature))
+        oad(debug, "$ds     temperature length: ", length(temperature))
     end
     longitude = convert(Float64, d["LONGITUDE"][1])
     if debug > 0
-        println("$ds     longitude: $longitude")
+        oad(debug, "$ds     longitude: $longitude")
     end
     latitude = convert(Float64, d["LATITUDE"][1])
     if debug > 0
-        println("$ds     latitude: $latitude")
+        oad(debug, "$ds     latitude: $latitude")
     end
     rval = as_Ctd(salinity, temperature, pressure, longitude, latitude, debug=debug - 1)
     if debug > 0
-        println("$ds readArgo() END")
+        oad(debug, "$ds readArgo() END")
     end
     rval
 end # readArgo()
@@ -488,9 +488,7 @@ end
 
 function readCtdCNV(stream::IOStream; debug::Int64=0)
     ds = debug_space(debug)
-    if debug > 0
-        println("$ds readCtdCNV(stream, ...) START")
-    end
+    oad(debug, "readCtdCNV(stream, ...) START")
     lines = readlines(stream)
     header = ""
     dataStart = 0
@@ -529,10 +527,8 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         error("ncols=$ncols does not match length(dataNames)=$(length(dataNames))")
     end
     nrows = length(lines) - dataStart + 1
-    if debug > 0
-        println("$ds     datanames: $dataNames")
-        println("$ds     reading nrows=$(nrows), ncols=$(ncols)")
-    end
+    oad(debug, "     datanames: $dataNames")
+    oad(debug, "     reading nrows=$(nrows), ncols=$(ncols)")
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
     for i in dataStart:length(lines)
@@ -542,9 +538,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     end
     data = DataFrame(data, dataNames)
     # Add standard columns
-    if debug > 0
-        println("$ds     adding columns with standard names (e.g. 'pressure' for 'pr')")
-    end
+    oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in names(data)
         data.pressure = data.pr
     else
@@ -562,20 +556,15 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     else
         error("No 't068' column in CNV file; available names are ", names(data))
     end
-    if debug > 0
-        println("$ds     adding columns for SA, CT, sigma0 and spiciness0")
-    end
+    oad(debug, "     adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     data.sigma0 = gsw_sigma0.(data.SA, data.CT)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     metadata["header"] = header
-    if debug > 0
-        println("$ds     combining metadata and data into a Ctd object")
-    end
+    oad(debug, "     combining metadata and data into a Ctd object")
     rval = Ctd(metadata, data)
-    danny < -12345
-    oad(debug, "$ds readCtdCNV() END")
+    oad(debug, "readCtdCNV() END")
     rval
 end
 
@@ -607,7 +596,7 @@ Get an element from a Ctd object.
 function getElement(o::Ctd, name::String; debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds getElement([Ctd object], name=$name) START")
+        oad(debug, "$ds getElement([Ctd object], name=$name) START")
     end
     # Handle values stored directly in Ctd objects
     nameSymbol = Symbol(name)
@@ -667,7 +656,7 @@ to examine Reference 2, which compares the R and Julia results.
 function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     ds = debug_space(debug)
     if debug > 0
-        println("$ds N2([Ctd object]) START")
+        oad(debug, "$ds N2([Ctd object]) START")
     end
     pressure = o.data.pressure
     sigma0 = o.data.sigma0
@@ -675,7 +664,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     ok = diff(pressure[i]) .> 0.0
     ok = [ok[1]; ok]
     if debug > 0
-        println("$ds ok length: ", length(ok))
+        oad(debug, "$ds ok length: ", length(ok))
     end
     j = i[ok]
     local spline = Spline1D(pressure[j], sigma0[j], w=ones(sum(ok)), k=3, bc="nearest", s=s)
@@ -685,8 +674,8 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     deriv = derivative(spline, pressure)
     N2 = (g / rho0) * deriv
     if debug > 0
-        println("$ds  N2 length: ", length(N2))
-        println("$ds N2() END")
+        oad(debug, "$ds  N2 length: ", length(N2))
+        oad(debug, "$ds N2() END")
     end
     return N2
 end
