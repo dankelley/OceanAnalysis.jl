@@ -468,7 +468,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         error("No 'sal00' column in CNV file; available names are ", names(data))
     end
     if "t068" in data_names
-        data.temperature = T90fromT68.(data.t068)
+        data.temperature = T90_fromT_68.(data.t068)
     elseif "t090" in data_names
         data.temperature = data.t090
     else
@@ -487,23 +487,23 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
 end
 
 """
-    T90 = T90fromT68(T68::Float64)
+    T90 = T90_from_T68(T68::Float64)
 
 Convert a temperature from the T68 scale to the T90 scale.
 
-See also [`T90fromT48`](@ref).
+See also [`T90_from_T48`](@ref).
 """
-T90fromT68(T48::Float64) = T48 / 1.00024
+T90_from_T68(T48::Float64) = T48 / 1.00024
 #T90fromT68(T48::Vector{Float64}) = T48 ./ 1.00024
 
 """
-    T90 = T90fromT48(T48::Float64)
+    T90 = T90_from_T48(T48::Float64)
 
 Convert a temperature from the T48 scale to the T90 scale.
 
-See also [`T90fromT68`](@ref).
+See also [`T90_from_T68`](@ref).
 """
-T90fromT48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
+T90_from_T48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
 #T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1.00024
 
 """

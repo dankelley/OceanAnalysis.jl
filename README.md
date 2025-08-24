@@ -112,3 +112,15 @@ There are no breaking changes; all change are additions or bug fixes.
 #### Non-breaking changes
 
 * Add `N2()` to compute the square of the buoyancy frequency.
+
+# Developer notes
+
+## Running tests
+
+Type the following in a Julia console:
+
+```julia
+activate .
+test
+```
+
