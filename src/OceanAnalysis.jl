@@ -92,7 +92,7 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     longitude::Float64=-30.0, latitude::Float64=30.0;
     debug::Int64=0)
     oad(debug, "as_Ctd(<ctd>, debug=$debug) START")
-    oad(debug, "_salinity length: $(length(salinity))")
+    #oad(debug, "    salinity length: $(length(salinity))")
     #println("_temperature length: ", @eval length(temperature))
     #oad(debug, "_pressure length: ", @eval length(pressure))
     #oad(debug, "_longitude length: ", @eval length(longitude))
