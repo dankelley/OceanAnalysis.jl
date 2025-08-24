@@ -114,7 +114,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
     oad(debug, "    creating Ctd object")
     rval = Ctd(metadata, data)
-    oad(debug, "    as_ctd() END")
+    oad(debug, "    END as_ctd()")
     rval
 end # as_ctd(salinity, ...)
 
@@ -255,7 +255,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     else
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
-    oad(debug, "    plot_profile() END")
+    oad(debug, "    END plot_profile()")
     rval
 end
 
@@ -334,7 +334,7 @@ function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fa
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    oad(debug, "    plot_TS() END")
+    oad(debug, "    END plot_TS()")
     rval
 end # plot_TS()
 
@@ -370,7 +370,7 @@ function read_argo(filename, column=1; debug::Int64=0)
     latitude = convert(Float64, d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude, debug=debug + 1)
-    oad(debug, "    read_argo() END")
+    oad(debug, "    END read_argo()")
     rval
 end # read_argo()
 
@@ -482,7 +482,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     metadata["header"] = header
     oad(debug, "    combining metadata and data into a Ctd object")
     rval = Ctd(metadata, data)
-    oad(debug, "    read_ctd_cnv() END")
+    oad(debug, "    END read_ctd_cnv()")
     rval
 end
 
@@ -584,7 +584,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     deriv = derivative(spline, pressure)
     N2 = (g / rho0) * deriv
     oad(debug, "    N2 length: $(length(N2))")
-    oad(debug, "N2() END")
+    oad(debug, "    END N2()")
     return N2
 end
 
