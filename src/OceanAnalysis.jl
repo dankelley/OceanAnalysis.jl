@@ -47,6 +47,17 @@ function debug_space(debug::Int64, max::Int64=3)
     0 < debug <= max ? repeat("    ", max - debug) : ""
 end
 
+function OAD()
+    println("DAN in OAD()")
+end
+
+function oad(debug::Int64=0, args...)
+    println("---in oad")
+    if debug > 0
+        println(args)
+    end
+end
+
 """
     degree = coordinateFromString(s::String)
 
@@ -566,6 +577,12 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     if debug > 0
         println("$ds readCtdCNV() END")
     end
+    OAD()
+    oad(debug, "DAN 1")
+    pi = 3.1
+    oad(debug, "DAN 2 pi=$pi")
+    oad(debug, "DAN 3 pi=", pi)
+    oad(debug, "DAN 4 pi=", pi, "ok?")
     rval
 end
 

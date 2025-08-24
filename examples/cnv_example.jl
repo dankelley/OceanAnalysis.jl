@@ -2,7 +2,7 @@
 using OceanAnalysis, Plots, Measures
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 filename = joinpath(pkgdir, "data", "ctd.cnv")
-ctd = readCtdCNV(filename)
+ctd = readCtdCNV(filename, debug=1)
 p1 = plotProfile(ctd, "SA")
 p2 = plotProfile(ctd, "CT")
 p3 = plotTS(ctd)
