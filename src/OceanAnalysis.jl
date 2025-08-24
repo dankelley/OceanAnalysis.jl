@@ -38,7 +38,7 @@ function oad(debug::Int64=0, args...)
         initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
         print(initial_spaces)
         for arg in args
-            argnew = replace(arg, "~", "    ")
+            argnew = replace(arg, "~" => "    ")
             print(argnew)
         end
         print("\n")
