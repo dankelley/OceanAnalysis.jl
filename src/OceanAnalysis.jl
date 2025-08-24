@@ -34,10 +34,7 @@ end
 
 function oad(debug::Int64=0, args...)
     if debug > 0
-        max = 2
-        initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
-        #initial_spaces = ""
-        print(initial_spaces)
+        print(repeat("    ", debug))
         for arg in args
             print(arg)
         end
@@ -372,7 +369,7 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "    longitude: $longitude")
     latitude = convert(Float64, d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
-    rval = as_ctd(salinity, temperature, pressure, longitude, latitude, debug=debug - 1)
+    rval = as_ctd(salinity, temperature, pressure, longitude, latitude, debug=debug + 1)
     oad(debug, "read_argo() END")
     rval
 end # read_argo()
