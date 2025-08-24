@@ -34,12 +34,10 @@ end
 
 function oad(debug::Int64=0, args...)
     if debug > 0
-        max = 4
+        max = 2
         initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
         print(initial_spaces)
         for arg in args
-            #argnew = replace(arg, "_" => "    ")
-            #print(argnew)
             print(arg)
         end
         print("\n")
@@ -361,18 +359,18 @@ plotTS(d)
 ```
 """
 function read_argo(filename, column=1; debug::Int64=0)
-    oad(debug, " read_argo(filename=\"$filename\", column=$column, debug=$debug) START")
+    oad(debug, "read_argo(filename=\"$filename\", column=$column, debug=$debug) START")
     d = NCDataset(filename, "r")
     pressure = convert(Vector{Float64}, d["PRES"][:, column])
-    oad(debug, "_pressure length: ", length(pressure))
+    oad(debug, "    pressure length: ", length(pressure))
     salinity = convert(Vector{Float64}, d["PSAL"][:, column])
-    oad(debug, "_salinity length: ", length(salinity))
+    oad(debug, "    salinity length: ", length(salinity))
     temperature = convert(Vector{Float64}, d["TEMP"][:, column])
-    oad(debug, "_temperature length: ", length(temperature))
+    oad(debug, "    temperature length: ", length(temperature))
     longitude = convert(Float64, d["LONGITUDE"][1])
-    oad(debug, "_longitude: $longitude")
+    oad(debug, "    longitude: $longitude")
     latitude = convert(Float64, d["LATITUDE"][1])
-    oad(debug, "_latitude: $latitude")
+    oad(debug, "    latitude: $latitude")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude, debug=debug - 1)
     oad(debug, "read_argo() END")
     rval
