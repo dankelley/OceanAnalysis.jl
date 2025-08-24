@@ -175,7 +175,7 @@ See also the [`plotTS`](@ref) function.
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
-    oad(debug, " plot_profile(ctd, '$which') START")
+    oad(debug, "plot_profile(ctd, '$which') START")
     dataNames = names(ctd.data)
     plotNames = dataNames[dataNames.!="pr".&&dataNames.!="pressure"]
     if !(which in plotNames)
@@ -201,7 +201,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         error("vertical must be either \"pressure\" or \"density\"")
     end
     if which == "T" || which == "CT"
-        oad(debug, "_drawing $which")
+        oad(debug, "    drawing $which")
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -212,7 +212,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
-        oad(debug, "_drawing $which")
+        oad(debug, "    drawing $which")
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -223,7 +223,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
-        oad(debug, "_drawing $which")
+        oad(debug, "    drawing $which")
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -234,7 +234,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
-        oad(debug, "_drawing $which")
+        oad(debug, "    drawing $which")
         rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -245,7 +245,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "N2"
-        oad(debug, "_drawing $which")
+        oad(debug, "    drawing $which")
         rval = plot(get_element(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -305,7 +305,7 @@ function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fa
     SA = gsw_sa_from_sp.(S, p, lon, lat)
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
-    oad(debug, "_drawing data")
+    oad(debug, "    drawing data")
     rval = plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
@@ -316,20 +316,20 @@ function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fa
     ylim = ylims()
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
-    oad(debug, "_drawing sigma0 contours")
+    oad(debug, "    drawing sigma0 contours")
     contour!(SAc, CTc, (SAc, CTc) -> gsw_sigma0(SAc, CTc), color=:gray84, linewidth=0.5,
         levels=range(22, 30, step=0.2),
         cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
     if drawSpiciness
-        oad(debug, "_drawing spiciness0 contours")
+        oad(debug, "    drawing spiciness0 contours")
         contour!(SAc, CTc, (SAc, CTc) -> gsw_spiciness0(SAc, CTc), color=:gray74, linewidth=0.5,
             levels=range(-10, 10, step=0.2),
             cbar=false, clabels=true)
     end
     # ... and finally (optionally) add a freezing-temperature line.
     if drawFreezing
-        oad(debug, "_adding freezing line")
+        oad(debug, "    adding freezing line")
         pf = 0.0 # let user specify this?
         SAf = range(xlim[1], xlim[2], length=100)
         saturation_fraction = 0.0

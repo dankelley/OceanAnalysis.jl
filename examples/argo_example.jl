@@ -4,7 +4,7 @@ using OceanAnalysis, Plots, Measures
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
     "D4902911_095.nc")
 # %%
-ctd = read_argo(filename, debug=1)
+ctd = read_argo(filename, debug=2)
 # %%
 p1 = plot_profile(ctd, "SA", debug=1)
 p2 = plot_profile(ctd, "CT", debug=1)
