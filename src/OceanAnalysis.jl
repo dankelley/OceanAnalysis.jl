@@ -296,7 +296,7 @@ See also [`plot_profile`](@ref).
 function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
-    oad(debug, " plotTS() START")
+    oad(debug, "plotTS() START")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
@@ -363,11 +363,11 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     d = NCDataset(filename, "r")
     pressure = convert(Vector{Float64}, d["PRES"][:, column])
-    oad(debug, "    pressure length: ", length(pressure))
+    oad(debug, "    pressure length: $(length(pressure))")
     salinity = convert(Vector{Float64}, d["PSAL"][:, column])
-    oad(debug, "    salinity length: ", length(salinity))
+    oad(debug, "    salinity length: $(length(salinity))")
     temperature = convert(Vector{Float64}, d["TEMP"][:, column])
-    oad(debug, "    temperature length: ", length(temperature))
+    oad(debug, "    temperature length: $(length(temperature))")
     longitude = convert(Float64, d["LONGITUDE"][1])
     oad(debug, "    longitude: $longitude")
     latitude = convert(Float64, d["LATITUDE"][1])
@@ -580,7 +580,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     i = sortperm(pressure)
     ok = diff(pressure[i]) .> 0.0
     ok = [ok[1]; ok]
-    oad(debug, "    ok length: ", length(ok))
+    oad(debug, "    ok length: $(length(ok))")
     j = i[ok]
     local spline = Spline1D(pressure[j], sigma0[j], w=ones(sum(ok)), k=3, bc="nearest", s=s)
     sigma0p = evaluate(spline, pressure)
@@ -588,7 +588,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     g = 9.8
     deriv = derivative(spline, pressure)
     N2 = (g / rho0) * deriv
-    oad(debug, "    N2 length: ", length(N2))
+    oad(debug, "    N2 length: $(length(N2))")
     oad(debug, "N2() END")
     return N2
 end
