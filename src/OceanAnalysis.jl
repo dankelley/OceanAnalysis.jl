@@ -482,7 +482,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     metadata["header"] = header
     oad(debug, "    combining metadata and data into a Ctd object")
     rval = Ctd(metadata, data)
-    oad(debug, "read_ctd_cnv() END")
+    oad(debug, "    read_ctd_cnv() END")
     rval
 end
 
