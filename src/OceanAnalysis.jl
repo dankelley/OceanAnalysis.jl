@@ -50,8 +50,9 @@ end
 function oad(debug::Int64=0, args...)
     if debug > 0
         for arg in args
-            println(arg)
+            print(arg)
         end
+        print("\n")
     end
 end
 
