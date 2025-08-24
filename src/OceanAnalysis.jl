@@ -34,7 +34,7 @@ end
 
 function oad(debug::Int64=0, args...)
     if debug > 0
-        print(repeat("    ", debug))
+        print(repeat("    ", debug - 1))
         for arg in args
             print(arg)
         end
