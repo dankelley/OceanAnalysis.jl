@@ -172,12 +172,13 @@ See also the [`plot_TS`](@ref) function.
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
-    oad(debug, "plot_profile(ctd, '$which') START")
+    oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
     if !(which in plot_names)
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
+    oad(debug, "    assembling data")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
@@ -187,6 +188,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     SA = ctd.data.SA #gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
     CT = ctd.data.CT #gsw_ct_from_t.(SA, T, p)
     sigma0 = ctd.data.sigma0 #gsw_sigma0.(SA, CT)
+    oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
         y = p
