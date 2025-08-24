@@ -35,7 +35,8 @@ end
 function oad(debug::Int64=0, args...)
     if debug > 0
         max = 2
-        initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
+        #initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
+        initial_spaces = ""
         print(initial_spaces)
         for arg in args
             print(arg)
