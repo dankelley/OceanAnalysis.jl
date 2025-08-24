@@ -38,7 +38,7 @@ function oad(debug::Int64=0, args...)
         initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
         print(initial_spaces)
         for arg in args
-            argnew = replace(arg, "~" => "    ")
+            argnew = replace(arg, "^" => "    ")
             print(argnew)
         end
         print("\n")
@@ -93,9 +93,9 @@ function as_Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     debug::Int64=0)
     if debug > 0
         oad(debug, "as_Ctd(<ctd>, debug=$debug) START")
-        oad(debug, "    salinity length: ", length(salinity))
+        oad(debug, "^salinity length: ", length(salinity))
         oad(debug, "    temperature length: ", length(temperature))
-        oad(debug, "    pressure length: ", length(pressure))
+        oad(debug, "^pressure length: ", length(pressure))
         oad(debug, "    longitude length: ", length(longitude))
         oad(debug, "    latitude length: ", length(latitude))
     end
