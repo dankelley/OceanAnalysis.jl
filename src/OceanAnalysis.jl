@@ -48,6 +48,7 @@ function debug_space(debug::Int64, max::Int64=3)
 end
 
 function oad(debug::Int64=0, args...)
+    println("danny $danny")
     if debug > 0
         for arg in args
             print(arg)
@@ -572,7 +573,8 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         println("$ds     combining metadata and data into a Ctd object")
     end
     rval = Ctd(metadata, data)
-    oad("$ds readCtdCNV() END")
+    danny < -12345
+    oad(debug, "$ds readCtdCNV() END")
     rval
 end
 
