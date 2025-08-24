@@ -1,5 +1,4 @@
-using OceanAnalysis
-using Test
+using OceanAnalysis, Test
 
 @testset "coordinate_from_string()" begin
     @test coordinate_from_string("1.5") == 1.5
@@ -16,11 +15,19 @@ end
 # test results with 15 digits in R.)
 @testset "T90_from_T48()" begin
     @test T90_from_T48(1.0) ≈ 0.9993245621051 atol = 1e-14
-    @test T90_from_T48([1.0; 2.0]) ≈ [0.9993245621051; 1.9986579220987] atol = 1e-14
+    @test T90_from_T48.([1.0; 2.0]) ≈ [0.9993245621051; 1.9986579220987] atol = 1e-14
 end
 
 @testset "T90_from_T68()" begin
     @test T90_from_T68(1.0) ≈ 0.9997600575862 atol = 1e-13
-    @test T90_from_T68([1.0; 2.0]) ≈ [0.9997600575862; 1.9995201151724] atol = 1e-13
+    @test T90_from_T68.([1.0; 2.0]) ≈ [0.9997600575862; 1.9995201151724] atol = 1e-13
+end
+
+@testset "read_ctd_cnv()" begin
+    filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+    ctd = read_ctd_cnv(filename)
+    @test ctd.metadata["longitude"] ≈ -63.643883333333335 atol = 1e-13
+    @test ctd.metadata["latitude"] ≈  44.684266666666666 atol = 1e-13
+    @test 42 == length(ctd.metadata["header"])
 end
 
