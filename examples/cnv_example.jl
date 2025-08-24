@@ -1,10 +1,10 @@
-# Read a built-in CTD file, and plot some standard diagrams
+# Read a built-in CTD file, and plot some hydrographic diagrams
 using OceanAnalysis, Plots, Measures
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "ctd.cnv")
-ctd = readCtdCNV(filename)
-p1 = plotProfile(ctd, "SA")
-p2 = plotProfile(ctd, "CT")
-p3 = plotTS(ctd)
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
+    "ctd.cnv")
+ctd = read_ctd_cnv(filename)
+p1 = plot_profile(ctd, "SA")
+p2 = plot_profile(ctd, "CT")
+p3 = plot_TS(ctd)
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
 savefig("cnv_example.png")

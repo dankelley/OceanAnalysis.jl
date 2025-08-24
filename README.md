@@ -8,7 +8,8 @@ is in the early steps of exploring Julia as a supplement to R.
 
 ### Official version
 
-Start Julia and enter the following:
+Once (if) the package is accepted by the Julia archive system, you may install
+it by typing the following in a Julia console.
 
 ```julia
 using Pkg ; Pkg.add("OceanAnalysis")
@@ -16,9 +17,9 @@ using Pkg ; Pkg.add("OceanAnalysis")
 
 ### Development version
 
-#### Relatively stable (for users)
+#### Somewhat stable (for early users)
 
-Start Julia and enter the following:
+Type the following in a Julia console.
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
@@ -26,92 +27,88 @@ using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 
 #### Unstable (for developers)
 
-Start Julia and enter the following:
+Type the following in a Julia console.
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
 ```
 
-## Usage Example
+## Usage Examples
 
-### Ctd file in CNV format
+### CTD file
 
 ```julia
-# Read a built-in CTD file, and plot some standard diagrams
+# Read a built-in CTD file, and plot some hydrographic diagrams
 using OceanAnalysis, Plots, Measures
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "ctd.cnv")
-ctd = readCtdCNV(filename)
-p1 = plotProfile(ctd, "SA")
-p2 = plotProfile(ctd, "CT")
-p3 = plotTS(ctd)
-plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin = 0.25cm)
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
+    "ctd.cnv")
+ctd = read_ctd_cnv(filename)
+p1 = plot_profile(ctd, "SA")
+p2 = plot_profile(ctd, "CT")
+p3 = plot_TS(ctd)
+plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
 ```
 
 ![Sample plot of CTD data in a .cnv file](examples/cnv_example.png)
-
 
 ### Argo file
 
 ```julia
 # Read a built-in Argo file, and plot some hydrographic diagrams
 using OceanAnalysis, Plots, Measures
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "D4902911_095.nc")
-ctd = readArgo(filename)
-p1 = plotProfile(ctd, "SA")
-p2 = plotProfile(ctd, "CT")
-p3 = plotTS(ctd)
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
+    "D4902911_095.nc")
+ctd = read_argo(filename)
+p1 = plot_profile(ctd, "SA")
+p2 = plot_profile(ctd, "CT")
+p3 = plot_TS(ctd)
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
 ```
 
 ![Sample plot of Argo data](examples/argo_example.png)
 
-## Development testing
-
-```julia
-using Pkg
-Pkg.activate(".")
-Pkg.test()
-```
-
-## History of breaking changes
-
-* None.
-
 ## History of changes
 
-### 0.1.0 (semi-usable)
+### 0.1.0
 
-**Breaking changes**
+This version is in use by the author, and may also be suitable for other users
+who are comfortable with the possibility of changes to function names and
+arguments.
 
-None.
+#### Breaking changes
 
-**Non-breaking changes**
+* Switch to snake-case for function names and argument names. For example, the
+  name of `plotTS()` was changed to `plot_TS()`, and its argument
+`drawFreezing` was changed to `draw_freezing`.  The point of this is to fit
+what seems to be the Julia convention, which has the benefit of reinforcing to
+the user that this is distinct from the oce R package, which uses the
+camel-case notation.
 
-* Increase second version digit to indicate that the package is suitable for testing on real data.
+#### Non-breaking changes
 
+* Increase second version digit to indicate that the package is becoming
+  suitable for testing on real data.
+* Simplify coding with respect to debugging information.
 
+### 0.0.3
 
-### 0.0.3 (early exploration)
-
-**Breaking changes**
+#### Breaking changes
 
 There are no breaking changes; all change are additions or bug fixes.
 
-**Non-breaking changes**
+#### Non-breaking changes
 
 * Add built-in data file `ctd.cnv.nc`, and use it in an example in the `Ctd()` documentation.
-* Add built-in data file `D4902911_095.nc`, and use it in an example in the `plotProfile()` documentation.
-* `getElement()` can now return `"N2"`.
-* `plotProfile()` can now plot `N2"`.
+* Add built-in data file `D4902911_095.nc`, and use it in an example in the `plot_profile()` documentation.
+* `get_element()` can now return `"N2"`.
+* `plot_profile()` can now plot `N2"`.
 
 ### 0.0.2
 
-#### 0.0.2 Breaking changes
+#### Breaking changes
 
 There are no breaking changes; all change are additions or bug fixes.
 
-#### 0.0.2 Non-breaking changes
+#### Non-breaking changes
 
 * Add `N2()` to compute the square of the buoyancy frequency.
