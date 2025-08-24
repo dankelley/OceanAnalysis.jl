@@ -572,15 +572,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
         println("$ds     combining metadata and data into a Ctd object")
     end
     rval = Ctd(metadata, data)
-    if debug > 0
-        println("$ds readCtdCNV() END")
-    end
-    oad(debug, "DAN 1")
-    pi = 3.1
-    oad(debug, "DAN 2 pi=$pi")
-    oad(debug, "DAN 3 pi=", pi)
-    oad(debug, "DAN 4 pi=", pi, "ok?")
-    println("DAN 4 pi=", pi, "ok?")
+    oad("$ds readCtdCNV() END")
     rval
 end
 
