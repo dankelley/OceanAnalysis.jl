@@ -48,6 +48,7 @@ function debug_space(debug::Int64, max::Int64=3)
 end
 
 function oad(debug::Int64=0, args...)
+    global danny
     println("danny $danny")
     if debug > 0
         for arg in args
