@@ -38,7 +38,8 @@ function oad(debug::Int64=0, args...)
         initial_spaces = 0 < debug <= max ? repeat("    ", max - debug) : ""
         print(initial_spaces)
         for arg in args
-            print(arg)
+            argnew = replace(arg, "~", "    ")
+            print(argnew)
         end
         print("\n")
     end
@@ -472,7 +473,7 @@ function readCtdCNV(stream::IOStream; debug::Int64=0)
     end
     data = DataFrame(data, dataNames)
     # Add standard columns
-    oad(debug, "   adding columns with standard names (e.g. 'pressure' for 'pr')")
+    oad(debug, "~adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in names(data)
         data.pressure = data.pr
     else
