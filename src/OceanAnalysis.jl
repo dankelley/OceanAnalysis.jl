@@ -114,7 +114,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
     oad(debug, "    creating Ctd object")
     rval = Ctd(metadata, data)
-    oad(debug, "as_ctd() END")
+    oad(debug, "    as_ctd() END")
     rval
 end # as_ctd(salinity, ...)
 
@@ -173,10 +173,10 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(ctd, '$which') START")
-    dataNames = names(ctd.data)
-    plotNames = dataNames[dataNames.!="pr".&&dataNames.!="pressure"]
-    if !(which in plotNames)
-        error("plot_profile() cannot handle which='$which'; try one of: $plotNames")
+    data_names = names(ctd.data)
+    plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
+    if !(which in plot_names)
+        error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
     S = ctd.data.salinity
     T = ctd.data.temperature
@@ -255,7 +255,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     else
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
-    oad(debug, "plot_profile() END")
+    oad(debug, "    plot_profile() END")
     rval
 end
 
@@ -334,7 +334,7 @@ function plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=fa
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    oad(debug, " plot_TS() END")
+    oad(debug, "    plot_TS() END")
     rval
 end # plot_TS()
 
@@ -370,13 +370,13 @@ function read_argo(filename, column=1; debug::Int64=0)
     latitude = convert(Float64, d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude, debug=debug + 1)
-    oad(debug, "read_argo() END")
+    oad(debug, "    read_argo() END")
     rval
 end # read_argo()
 
 
 """
-    ctd = readCtdCNV(filename)
+    ctd = read_ctd_cnv(filename)
 
 Read a CTD file named `filename` that is in SeaBird CNV format. This returns
 `header` (a vector of strings, one per line from the start down to a line
@@ -391,10 +391,8 @@ oceanographic software, especially the `gsw` package.
 ```julia-repl
 using OceanAnalysis, Plots
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "ctd.cnv")
-header, metadata, data = readCtdCNV(f);
-ctd = Ctd(data.sal00, data.t090, data.pr,
-    metadata["longitude"], metadata["latitude"]);
+filename = joinpath(pkgdir, "data", "ctd.cnv")
+ctd = read_ctd_cnv(filename)
 p1 = plot_profile(ctd, "SA")
 p2 = plot_profile(ctd, "CT")
 p3 = plot_TS(ctd)
@@ -411,15 +409,15 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
     header = ""
-    dataStart = 0
-    dataNames = Vector{String}()
+    data_start = 0
+    data_names = Vector{String}()
     metadata = Dict{String,Any}()
     for i in eachindex(lines)
         line = chomp(lines[i])
         if occursin(r"^# name ", line)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
-            push!(dataNames, name)
+            push!(data_names, name)
         end
         if occursin(r"^\*\*.*:", line)
             tokens = split(line, ":")
@@ -431,32 +429,32 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             metadata[item] = value
         end
         if occursin(r"^\*END\*$", line)
-            dataStart = i + 1
+            data_start = i + 1
             header = lines[1:i]
             break
         end
     end
-    if dataStart == 0
+    if data_start == 0
         error("This file has no *END* line, so columns cannot be identified")
     end
-    if length(dataNames) == 0
+    if length(data_names) == 0
         error("No '# name' lines in header, so columns cannot be identifed")
     end
-    ncols = length(split(lines[dataStart]))
-    if ncols != length(dataNames)
-        error("ncols=$ncols does not match length(dataNames)=$(length(dataNames))")
+    ncols = length(split(lines[data_start]))
+    if ncols != length(data_names)
+        error("ncols=$ncols does not match length(data_names)=$(length(data_names))")
     end
-    nrows = length(lines) - dataStart + 1
-    oad(debug, "    datanames: $dataNames")
+    nrows = length(lines) - data_start + 1
+    oad(debug, "    datanames: $data_names")
     oad(debug, "    reading nrows=$(nrows), ncols=$(ncols)")
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
-    for i in dataStart:length(lines)
+    for i in data_start:length(lines)
         d = parse.(Float64, split(lines[i]))
         data[irow, :] = d
         irow = irow + 1
     end
-    data = DataFrame(data, dataNames)
+    data = DataFrame(data, data_names)
     # Add standard columns
     oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in names(data)
@@ -469,9 +467,9 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     else
         error("No 'sal00' column in CNV file; available names are ", names(data))
     end
-    if "t068" in dataNames
+    if "t068" in data_names
         data.temperature = T90fromT68.(data.t068)
-    elseif "t090" in dataNames
+    elseif "t090" in data_names
         data.temperature = data.t090
     else
         error("No 't068' column in CNV file; available names are ", names(data))
