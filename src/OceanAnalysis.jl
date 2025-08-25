@@ -289,7 +289,9 @@ plot_TS(d)
 
 See also [`plot_profile`](@ref).
 """
-function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false, abbreviate=false,
+function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
+    sigma0_levels=0.0,
+    abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
@@ -314,7 +316,7 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false, abbreviate=
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    drawing sigma0 contours")
     contour!(SAc, CTc, (SAc, CTc) -> gsw_sigma0(SAc, CTc), color=:gray84, linewidth=0.5,
-        levels=range(22, 30, step=0.2),
+        levels=sigma0_levels == (0.0) ? range(22, 30, step=0.2) : sigma0_levels,
         cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
     if draw_spiciness
