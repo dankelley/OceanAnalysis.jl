@@ -308,7 +308,8 @@ end
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        seriestype=:scatter, legend=false, color=:black,
+        gridstyle=:dash, tickfontsize=8, labelfontsize=8,
         debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
@@ -347,7 +348,8 @@ See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
-    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    seriestype=:scatter, legend=false, color=:black,
+    gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     local S = ctd.data.salinity
@@ -363,6 +365,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
         framestyle=:box, yrot=90,
+        seriestype=seriestype,
         gridstyle=gridstyle, color=color, tickfontsize=tickfontsize, labelfontsize=labelfontsize; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
