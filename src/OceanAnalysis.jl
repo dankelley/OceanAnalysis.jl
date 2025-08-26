@@ -522,21 +522,28 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
         end
-        # set default longitudes in the Atlantic Ocean, if not in the file
-        metadata["longitude"] = -30
         metadata["latitude"] = 45
         if occursin(r"^\*\*.*:", line)
-            #println("line with colon: '$line'")
+            println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
             value = replace(tokens[2], r"^ *" => "")
             if occursin(r"^longitude", item) || occursin(r"^latitude", item)
                 value = coordinate_from_string(String(value))
-                println("got value='$value' for item='$item'")
+                println("got value='$value' for item='$item' (known to be longitude or latitude)")
                 metadata[item] = value
             else
+                println("got value='$value' for item='$item' (known not to be longitude or latitude)")
                 metadata[item] = value
             end
+        end
+        # set location to a spot in the Atlantic Ocean, if not in the file.  (Otherwise, we
+        # cannot compute CT, SA etc.
+        if !latitude in keys(metadata)
+            metadata["latitude"] = 30
+        end
+        if !longitude in keys(metadata)
+            metadata["longitude"] = -30
         end
         if occursin(r"\*END\*", line)
             data_start = i + 1
