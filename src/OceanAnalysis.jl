@@ -373,6 +373,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         else
             levels = []
         end
+    else
         oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
     if length(levels) > 0
@@ -394,6 +395,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         else
             levels = []
         end
+    else
         oad(debug, "        case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
     end
     if length(levels) > 0
