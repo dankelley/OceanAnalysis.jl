@@ -380,7 +380,6 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
             cbar=false, clabels=true)
     end
-    return ()
     # ... then (optionally) add spiciness contours ...
     oad(debug, "    processing spiciness0 contours")
     spiciness0c = gsw_spiciness0.(SAc', CTc)
