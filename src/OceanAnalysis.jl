@@ -368,9 +368,7 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     println("size(sigma0c) $(size(sigma0c))")
     println("pretty(sigma0c) $(pretty(sigma0c))")
     levels = length(sigma0_levels) > 0 ? sigma0_levels : pretty(sigma0c)
-    println("1 levels $(levels)")
-    levels = [levels]
-    println("2 levels $(levels)")
+    oad(1, "    levels $(levels)")
 
     contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
         cbar=false, clabels=true)
