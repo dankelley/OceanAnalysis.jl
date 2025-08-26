@@ -366,8 +366,8 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     oad(debug, "    drawing sigma0 contours")
     sigma0c = gsw_sigma0.(SAc', CTc)
     if true
-        oad(1, "    length(sigma0levels): $(length(sigma0levels))")
-        oad(1, "    typeof(sigma0levels): $(typeof(sigma0levels))")
+        oad(1, "    length(sigma0_levels): $(length(sigma0_levels))")
+        oad(1, "    typeof(sigma0_levels): $(typeof(sigma0_levels))")
     end
     levels = length(sigma0_levels) > 0 ? sigma0_levels : pretty(sigma0c)
     oad(debug, "    levels $(levels)")
