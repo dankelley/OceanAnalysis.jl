@@ -336,17 +336,16 @@ plot_TS(d)
 
 See also [`plot_profile`](@ref).
 """
-function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
-    sigma0_levels=[],
-    abbreviate=false,
+function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
+    draw_freezing=true, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
-    S = ctd.data.salinity
-    T = ctd.data.temperature
-    p = ctd.data.pressure
-    lon = ctd.metadata["longitude"]
-    lat = ctd.metadata["latitude"]
+    local S = ctd.data.salinity
+    local T = ctd.data.temperature
+    local p = ctd.data.pressure
+    local lon = ctd.metadata["longitude"]
+    local lat = ctd.metadata["latitude"]
     SA = gsw_sa_from_sp.(S, p, lon, lat)
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
@@ -367,21 +366,39 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     if length(sigma0_levels) == 0
         oad(debug, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c)
-    elseif length(sigma0_levels) == 1 && isinteger(sigma0_levels)
-        oad(debug, "    case 2: sigma0_levels is a single integer, so it suggests number of sigma0 contour levels")
-        levels = pretty(sigma0c, sigma0_levels)
-    else
+    elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
+        oad(debug, "    case 2: sigma0_levels is a single integer")
+        if sigma0_levels > 0
+            levels = pretty(sigma0c, sigma0_levels)
+        else
+            levels = []
+        end
         oad(debug, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
     oad(debug, "    levels $(levels)")
-    println("** FIXME ** let user give spiciness0_levels")
-    contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
-        cbar=false, clabels=true)
+    if length(sigma0_levels) > 0
+        contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
+            cbar=false, clabels=true)
+    end
     # ... then (optionally) add spiciness contours ...
-    if draw_spiciness
-        oad(debug, "    drawing spiciness0 contours")
-        contour!(SAc, CTc, (SAc, CTc) -> gsw_spiciness0(SAc, CTc), color=:gray74, linewidth=0.5,
-            levels=range(-10, 10, step=0.2),
+    oad(debug, "    drawing spiciness0 contours")
+    spiciness0c = gsw_spiciness0.(SAc', CTc)
+    local levels = spiciness0_levels
+    if length(spiciness0_levels) == 0
+        oad(debug, "    case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
+        levels = pretty(spiciness0c)
+    elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
+        oad(debug, "    case 2: spiciness0_levels is a single integer")
+        if spiciness0_levels > 0
+            levels = pretty(spiciness0c, spiciness0_levels)
+        else
+            levels = []
+        end
+        oad(debug, "    case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
+    end
+    oad(debug, "    levels $(levels)")
+    if length(spiciness0_levels) > 0
+        contour!(SAc, CTc, spiciness0c, color=:gray50, linewidth=1.0, levels=levels,
             cbar=false, clabels=true)
     end
     # ... and finally (optionally) add a freezing-temperature line.
