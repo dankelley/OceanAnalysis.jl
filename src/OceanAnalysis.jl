@@ -366,7 +366,6 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
         yrot=90, framestyle=framestyle,
-        color=color,
         seriestype=seriestype, seriescolor=seriescolor, seriesalpha=seriesalpha,
         gridstyle=gridstyle, color=color, tickfontsize=tickfontsize,
         labelfontsize=labelfontsize; kwargs...)
