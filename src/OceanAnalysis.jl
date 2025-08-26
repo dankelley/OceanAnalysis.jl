@@ -213,6 +213,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 See also the [`plot_TS`](@ref) function.
 """
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
+    sigma0_levels=nothing,
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
@@ -361,8 +362,10 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    drawing sigma0 contours")
-    contour!(SAc, CTc, (SAc, CTc) -> gsw_sigma0(SAc, CTc), color=:gray50, linewidth=1.0,
-        levels=sigma0_levels == (0.0) ? range(22, 30, step=0.2) : sigma0_levels,
+    sigma0c = (SAc, CTc) -> gsw_sigma0(SAc, CTc)
+    println(sigma0c)
+    contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0,
+        levels=isnothing(sigma0_levels) ? pretty(sigma0c) : sigma0_levels,
         cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
     if draw_spiciness

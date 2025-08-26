@@ -11,11 +11,23 @@ gf = collect(minimum(zg):0.05:maximum(zg))
 gc = collect(minimum(zg):0.10:maximum(zg))
 gf_trimmed = collect(setdiff(gf, gc))
 
-contour(xg, yg, zg, linecolor=:red, cbar=false, contour_labels=false, levels=gf_trimmed,
+p1 = contour(xg, yg, zg, linecolor=:red, cbar=false, contour_labels=false, levels=gf_trimmed,
     margin=1cm, framestyle=:box)
 contour!(xg, yg, zg, linecolor=:blue, cbar=false, contour_labels=true, levels=gc)
-annotate!(0.5 * 1.07, 0.33, text("0.6", 8, col=:red))
-savefig("contour_test_j.png")
+RHS = 0.5
+Y = 0.33
+annotate!(RHS * 1.04, Y, text("0.6", :left, 8))
+savefig("contour_test_j_1.png")
+
+p2 = contour(xg, yg, zg, margin=1cm, framestyle=:box)
+savefig("contour_test_j_2.png")
+
+levels = pretty(zg)
+println(levels)
+p2 = contour(xg, yg, zg, levels=levels, margin=1cm, framestyle=:box)
+savefig("contour_test_j_3.png")
+
+
 
 # %%
 # Idea for finding margin placements for isopycnal labels
