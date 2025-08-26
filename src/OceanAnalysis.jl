@@ -104,8 +104,8 @@ confusing strings, so this function is not always helpful.
 coordinate_from_string("1.5")   # 1.5
 coordinate_from_string("1 30")  # 1.5
 coordinate_from_string("1S 30") # -1.5
-coordinate_from_string("27* 14.072 N")
-coordinate_from_string("111* 31.440 W")
+coordinate_from_string("27* 14.072 N") # 27.234533333333335
+coordinate_from_string("111* 31.440 W") # -111.524
 ```
 """
 function coordinate_from_string(s::String)
