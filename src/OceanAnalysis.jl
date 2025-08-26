@@ -104,11 +104,15 @@ confusing strings, so this function is not always helpful.
 coordinate_from_string("1.5")   # 1.5
 coordinate_from_string("1 30")  # 1.5
 coordinate_from_string("1S 30") # -1.5
+coordinate_from_string("27* 14.072 N")
+coordinate_from_string("111* 31.440 W")
 ```
 """
 function coordinate_from_string(s::String)
+    # ** Latitude: 27* 14.072 N
+    # ** Longitude: 111* 31.440 W
     sign = occursin(r"[wWsS]", s) ? -1.0 : 1.0
-    s = replace(s, r"[nNsSeEwW]" => "")
+    s = replace(s, r"[nNsSeEwW\*]" => "")
     tokens = split(s)
     if length(tokens) == 1
         return sign * parse(Float64, s)
