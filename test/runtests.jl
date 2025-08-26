@@ -27,7 +27,24 @@ end
     filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
     ctd = read_ctd_cnv(filename)
     @test ctd.metadata["longitude"] ≈ -63.643883333333335 atol = 1e-13
-    @test ctd.metadata["latitude"] ≈  44.684266666666666 atol = 1e-13
+    @test ctd.metadata["latitude"] ≈ 44.684266666666666 atol = 1e-13
     @test 42 == length(ctd.metadata["header"])
 end
 
+@testset "pretty() tests for consistency with R" begin
+    e = 0.0:2.0:16
+    p = pretty(1:15)
+    @test e == p
+
+    e = 0.0:5.0:15.0
+    p = pretty(1:15, 4)
+    @test e == p
+
+    e = 0.0:10.0:20.0
+    p = pretty(1:20, 2)
+    @test e == p
+
+    e = 0.0:2.0:20.0
+    p = pretty(1:20, 10)
+    @test e == p
+end

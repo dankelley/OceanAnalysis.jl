@@ -86,9 +86,10 @@ camel-case notation.
 
 #### Non-breaking changes
 
-* Increase second version digit to indicate that the package is becoming
+* Add `pretty()`, for use in contouring (especially for `plot_TS()`).
+* Change the second digit of version string to indicate that the package is becoming
   suitable for testing on real data.
-* Simplify coding with respect to debugging information.
+* Change the internal handling of the `debug` argument to functions.
 
 ### 0.0.3
 
