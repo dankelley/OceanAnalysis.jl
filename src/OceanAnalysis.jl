@@ -558,8 +558,10 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in names(data)
         data.pressure = data.pr
+    elseif "prCM" in names(data)
+        data.pressure = data.prDM
     else
-        error("No 'pr' column in CNV file; available names are ", names(data))
+        error("No 'pr' or 'prDM' column in CNV file; available names are ", names(data))
     end
     if "sal00" in names(data)
         data.salinity = data.sal00
