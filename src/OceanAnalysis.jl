@@ -505,14 +505,14 @@ end
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "read_ctd_cnv(stream, ...) START dan")
     lines = readlines(stream)
-    oad(debug, "    $(length(lines)) lines in file")
+    #oad(debug, "    $(length(lines)) lines in file")
     header = ""
     data_start = 0
     data_names = Vector{String}()
     metadata = Dict{String,Any}()
     for i in eachindex(lines)
-        line = chomp(lines[i])
-        println("lines[$i]='$(lines[i])' -> '$line'")
+        line = lines[i]
+        #println("lines[$i]='$(lines[i])' -> '$line'")
         if occursin(r"^# name ", line)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
@@ -527,7 +527,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             end
             metadata[item] = value
         end
-        if occursin(r"^\*END\*$", line)
+        if occursin(r"\*END\*", line)
             data_start = i + 1
             header = lines[1:i]
             break
