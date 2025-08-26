@@ -308,7 +308,7 @@ end
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false,
-        framestyle=:box, color=:black, seriestype=:scatter, ms=3,
+        framestyle=:box, color=:black, seriestype=:scatter, ms=2,
         legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
         debug::Int64=0, kwargs...)
 
@@ -348,7 +348,7 @@ See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
-    framestyle=:box, color=:black, seriestype=:scatter, ms=3,
+    framestyle=:box, color=:black, seriestype=:scatter, ms=2,
     legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
