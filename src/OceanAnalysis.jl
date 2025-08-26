@@ -507,7 +507,7 @@ function read_ctd_cnv(filename::String; debug::Int64=0)
 end
 
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
-    oad(debug, "read_ctd_cnv(stream, ...) START dan")
+    oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
     header = ""
@@ -570,7 +570,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data[irow, :] = d
         irow = irow + 1
     end
-    data = DataFrame(data, data_names)
+    data = DataFrame(data, data_names, makeunique=true)
     # Add standard columns
     oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in names(data)
