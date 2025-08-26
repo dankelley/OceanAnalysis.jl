@@ -340,7 +340,7 @@ plot_TS(d)
 See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
-    sigma0_levels=0.0,
+    sigma0_levels=nothing,
     abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
