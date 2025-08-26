@@ -522,7 +522,6 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
         end
-        metadata["latitude"] = 45
         if occursin(r"^\*\*.*:", line)
             println("line with colon: '$line'")
             tokens = split(line, ":")
