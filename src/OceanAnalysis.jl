@@ -365,7 +365,7 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    drawing sigma0 contours")
-    sigma0c = (SAc, CTc) -> gsw_sigma0(SAc, CTc)
+    sigma0c = gsw_sigma0.(SAc', CTc)
     println("sigma0c follows")
     println(sigma0c)
     println("pretty(sigma0c) follows")
