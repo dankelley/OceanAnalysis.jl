@@ -503,14 +503,16 @@ function read_ctd_cnv(filename::String; debug::Int64=0)
 end
 
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
-    oad(debug, "read_ctd_cnv(stream, ...) START")
+    oad(debug, "read_ctd_cnv(stream, ...) START dan")
     lines = readlines(stream)
+    oad(debug, "    $(length(lines)) lines in file")
     header = ""
     data_start = 0
     data_names = Vector{String}()
     metadata = Dict{String,Any}()
     for i in eachindex(lines)
         line = chomp(lines[i])
+        println("lines[$i]=$(lines[i]) -> $line")
         if occursin(r"^# name ", line)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
@@ -565,7 +567,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         error("No 'sal00' column in CNV file; available names are ", names(data))
     end
     if "t068" in data_names
-        data.temperature = T90_fromT_68.(data.t068)
+        data.temperature = T90_from_T68.(data.t068)
     elseif "t090" in data_names
         data.temperature = data.t090
     else
