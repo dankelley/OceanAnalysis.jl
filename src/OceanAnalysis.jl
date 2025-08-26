@@ -20,6 +20,7 @@ export get_element
 export N2
 export plot_profile
 export plot_TS
+export pretty
 export read_argo
 export read_ctd_cnv
 export T90_from_T48
@@ -41,6 +42,51 @@ function oad(debug::Int64=0, args...)
         print("\n")
     end
 end
+
+"""
+Calculate sub-intervals with 125 scaling, as in R function of same name
+
+This is needed because contour() in Julia (Reference 1) does not use
+simple numbers for auto-computed levels.
+
+# Examples
+```julia-repl
+# Example that could come up in a TS diagram, where the
+# first argument is a range of sigma0 values for the plot.
+pretty([22.299, 25.091])
+```
+
+# References
+
+1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
+"""
+function pretty(x, n=5; debug::Bool=false)
+    min, max = extrema(x)
+    dx = (max - min) / n
+    fac = 10^floor(log10(dx))
+    dx0 = dx / fac # dx0 should be between 1 and 10
+    if !(1.0 <= dx0 <= 10.0)
+        error("dx0 = $dx0 is not between 1.0 and 10.0")
+    end
+    if 0.0 <= dx0 < 1.5
+        dx00 = 1.0
+    elseif 1.5 <= dx0 < 3.5
+        dx00 = 2.0
+    elseif 3.5 <= dx0 < 7.5
+        dx00 = 5.0
+    else
+        dx00 = 10.0
+    end
+    dxnew = dx00 * fac
+    # round() cleans up trailing-digits error
+    minnew = round(dxnew * floor(min / dxnew), sigdigits=5)
+    maxnew = minnew + dxnew * ceil((max - minnew) / dxnew)
+    if debug
+        println("fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
+    end
+    return range(minnew, maxnew, step=dxnew)
+end
+
 
 """
     degree = coordinate_from_string(s::String)
