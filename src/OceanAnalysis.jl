@@ -369,13 +369,18 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
         oad(1, "    length(sigma0_levels): $(length(sigma0_levels))")
         oad(1, "    typeof(sigma0_levels): $(typeof(sigma0_levels))")
     end
-    if length(sigma0_levels) == 1 && isint(levels)
-        stop("bark ")
+    if length(sigma0_levels) == 0
+        oad(1, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
+        levels = pretty(sigma0c)
+    elseif length(sigma0_levels) == 1 && isinteger(levels)
+        oad(1, "    case 2: sigma0_levels is a single integer, so it suggests number of sigma0 contour levels")
+        levels = pretty(sigma0c, sigma0_levels)
+    else
+        oad(1, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
+        levels = sigma0_levels
     end
-    levels = length(sigma0_levels) > 0 ? sigma0_levels : pretty(sigma0c)
     oad(debug, "    levels $(levels)")
-    println("** FIXME ** let user give #levels or levels for sigma0")
-    println("** FIXME ** let user give #levels or levels for spiciness0")
+    println("** FIXME ** let user give spiciness0_levels")
     contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
         cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
