@@ -368,11 +368,12 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     sigma0c = gsw_sigma0.(SAc', CTc)
     println("size(sigma0c) $(size(sigma0c))")
     println("pretty(sigma0c) $(pretty(sigma0c))")
-    if false # FIXME
-        contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0,
-            levels=isnothing(sigma0_levels) ? pretty(sigma0c) : sigma0_levels,
-            cbar=false, clabels=true)
-    end
+    dan = isnothing(sigma0_levels) ? pretty(sigma0c) : sigma0_levels
+    println("dan $(dan)")
+
+    contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0,
+        levels=isnothing(sigma0_levels) ? pretty(sigma0c) : sigma0_levels,
+        cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
     if draw_spiciness
         oad(debug, "    drawing spiciness0 contours")
