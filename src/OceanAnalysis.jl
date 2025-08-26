@@ -532,7 +532,8 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             value = replace(tokens[2], r"^ *" => "")
             if occursin(r"^longitude", item) || occursin(r"^latitude", item)
                 println("try to get longitude or latitude from '$line'")
-                value = coordinate_from_string(value)
+                value = coordinate_from_string(String(value))
+                println("got value='$value' for item='$item'")
             end
             metadata[item] = value
         end
