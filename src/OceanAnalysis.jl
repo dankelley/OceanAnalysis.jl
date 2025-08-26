@@ -163,9 +163,9 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
 end # as_ctd(salinity, ...)
 
 """
-    plot_profile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-        debug=false, kwargs...)
+    plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
+        abbreviate::Bool=false, legend::Bool=false,
+        tickfontsize=8, labelfontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -214,7 +214,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 See also the [`plot_TS`](@ref) function.
 """
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
-    legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    legend::Bool=false, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
@@ -306,13 +306,15 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
 end
 
 """
-    plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8;
-        debug=false, kwargs...,)
+    plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
+        draw_freezing=true, abbreviate=false,
+        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
-Contours of σ₀ are shown with dotted lines.  If `drawFreezing` is true, then
-the freezing-point curve is added, with a dashed blue line type.
+Contours of sigma0 are shown by default, and contours of spiciness0 may be
+added if desired.  If `drawFreezing` is true, then the freezing-point curve is
+added.
 
 The `kwargs...` argument is used to represent other arguments that will be sent
 to `plot()`.  For example, the default way to display the TS diagram is
