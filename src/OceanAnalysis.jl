@@ -367,13 +367,13 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     sigma0c = gsw_sigma0.(SAc', CTc)
     levels = sigma0_levels
     if length(sigma0_levels) == 0
-        oad(1, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
+        oad(debug, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c)
     elseif length(sigma0_levels) == 1 && isinteger(levels)
-        oad(1, "    case 2: sigma0_levels is a single integer, so it suggests number of sigma0 contour levels")
+        oad(debug, "    case 2: sigma0_levels is a single integer, so it suggests number of sigma0 contour levels")
         levels = pretty(sigma0c, sigma0_levels)
     else
-        oad(1, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
+        oad(debug, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
     oad(debug, "    levels $(levels)")
     println("** FIXME ** let user give spiciness0_levels")
