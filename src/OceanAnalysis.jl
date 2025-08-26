@@ -518,6 +518,9 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
         end
+        # set default longitudes in the Atlantic Ocean, if not in the file
+        metadata["longitude"] = -30
+        metadata["latitude"] = 45
         if occursin(r"^\*\*.*:", line)
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
