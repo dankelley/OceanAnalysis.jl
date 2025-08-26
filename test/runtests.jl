@@ -8,8 +8,8 @@ using OceanAnalysis, Test
     @test coordinate_from_string("1 30") == 1.5
     @test coordinate_from_string("1.5S") == -1.5
     @test coordinate_from_string("s1 30") == -1.5
-    @test coordinate_from_string("27* 14.072 N") ≈ 27.234533333333335 atol::Float64 = 1e-5
-    @test coordinate_from_string("111* 31.440 W") ≈ -111.524 atol::Float64 = 1e-5
+    @test coordinate_from_string("27* 14.072 N") ≈ 27.234533333333335 atol = 1e-5
+    @test coordinate_from_string("111* 31.440 W") ≈ -111.524 atol = 1e-5
 end
 
 # FIXME: how to know how many digits will be best on other machines? This
