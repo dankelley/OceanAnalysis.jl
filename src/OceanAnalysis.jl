@@ -369,6 +369,9 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
         oad(1, "    length(sigma0_levels): $(length(sigma0_levels))")
         oad(1, "    typeof(sigma0_levels): $(typeof(sigma0_levels))")
     end
+    if length(sigma0_levels) == 1 && isint(levels)
+        stop("bark ")
+    end
     levels = length(sigma0_levels) > 0 ? sigma0_levels : pretty(sigma0c)
     oad(debug, "    levels $(levels)")
     println("** FIXME ** let user give #levels or levels for sigma0")
