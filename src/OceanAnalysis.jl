@@ -523,16 +523,16 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             push!(data_names, name)
         end
         if occursin(r"^\*\*.*:", line)
-            println("line with colon: '$line'")
+            #println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
             value = replace(tokens[2], r"^ *" => "")
             if occursin(r"^longitude", item) || occursin(r"^latitude", item)
                 value = coordinate_from_string(String(value))
-                println("got value='$value' for item='$item' (known to be longitude or latitude)")
+                #println("got value='$value' for item='$item' (known to be longitude or latitude)")
                 metadata[item] = value
             else
-                println("got value='$value' for item='$item' (known not to be longitude or latitude)")
+                #println("got value='$value' for item='$item' (known not to be longitude or latitude)")
                 metadata[item] = value
             end
         end
