@@ -340,7 +340,7 @@ plot_TS(d)
 See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
-    sigma0_levels=nothing,
+    sigma0_levels=NaN,
     abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
@@ -368,7 +368,7 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     sigma0c = gsw_sigma0.(SAc', CTc)
     println("size(sigma0c) $(size(sigma0c))")
     println("pretty(sigma0c) $(pretty(sigma0c))")
-    dan = isnothing(sigma0_levels) ? pretty(sigma0c) : sigma0_levels
+    dan = isnan(sigma0_levels) ? pretty(sigma0c) : sigma0_levels
     println("dan $(dan)")
 
     contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0,
