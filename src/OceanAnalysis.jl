@@ -505,6 +505,7 @@ end
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
+    oad(debug, "    $(length(lines)) lines in file")
     header = ""
     data_start = 0
     data_names = Vector{String}()
