@@ -84,7 +84,7 @@ function pretty(x, n=5; debug::Bool=false)
     if debug
         println("fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
     end
-    return range(minnew, maxnew, step=dxnew)
+    return collect(range(minnew, maxnew, step=dxnew))
 end
 
 
