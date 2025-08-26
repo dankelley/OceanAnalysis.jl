@@ -503,7 +503,7 @@ function read_ctd_cnv(filename::String; debug::Int64=0)
 end
 
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
-    oad(debug, "read_ctd_cnv(stream, ...) START")
+    oad(debug, "read_ctd_cnv(stream, ...) START dan")
     lines = readlines(stream)
     oad(debug, "    $(length(lines)) lines in file")
     header = ""
