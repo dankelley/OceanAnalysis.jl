@@ -365,18 +365,18 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    drawing sigma0 contours")
     sigma0c = gsw_sigma0.(SAc', CTc)
-    levels = sigma0_levels
+    local levels = sigma0_levels
     if length(sigma0_levels) == 0
-        #oad(debug, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
+        oad(debug, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c)
     elseif length(sigma0_levels) == 1 && isinteger(sigma0_levels)
-        #oad(debug, "    case 2: sigma0_levels is a single integer, so it suggests number of sigma0 contour levels")
+        oad(debug, "    case 2: sigma0_levels is a single integer, so it suggests number of sigma0 contour levels")
         levels = pretty(sigma0c, sigma0_levels)
     else
-        #oad(debug, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
+        oad(debug, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
-    #oad(debug, "    levels $(levels)")
-    #    println("** FIXME ** let user give spiciness0_levels")
+    oad(debug, "    levels $(levels)")
+    println("** FIXME ** let user give spiciness0_levels")
     contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
         cbar=false, clabels=true)
     # ... then (optionally) add spiciness contours ...
