@@ -365,10 +365,7 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    drawing sigma0 contours")
     sigma0c = gsw_sigma0.(SAc', CTc)
-    if true
-        oad(1, "    length(sigma0_levels): $(length(sigma0_levels))")
-        oad(1, "    typeof(sigma0_levels): $(typeof(sigma0_levels))")
-    end
+    levels = sigma0_levels
     if length(sigma0_levels) == 0
         oad(1, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c)
@@ -377,7 +374,6 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false,
         levels = pretty(sigma0c, sigma0_levels)
     else
         oad(1, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
-        levels = sigma0_levels
     end
     oad(debug, "    levels $(levels)")
     println("** FIXME ** let user give spiciness0_levels")
