@@ -375,13 +375,13 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         end
         oad(debug, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
-    oad(debug, "    levels $(levels)")
     if length(sigma0_levels) > 0
+        oad(debug, "    drawing sigma0 contours at levels $(levels)")
         contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
             cbar=false, clabels=true)
     end
     # ... then (optionally) add spiciness contours ...
-    oad(debug, "    drawing spiciness0 contours")
+    oad(debug, "    processing spiciness0 contours")
     spiciness0c = gsw_spiciness0.(SAc', CTc)
     local levels = spiciness0_levels
     if length(spiciness0_levels) == 0
@@ -396,8 +396,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         end
         oad(debug, "    case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
     end
-    oad(debug, "    levels $(levels)")
     if length(spiciness0_levels) > 0
+        oad(debug, "    draw spiciness0 contours at levels $(levels)")
         contour!(SAc, CTc, spiciness0c, color=:gray50, linewidth=1.0, levels=levels,
             cbar=false, clabels=true)
     end
