@@ -360,20 +360,20 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     ylim = ylims()
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
-    oad(debug, "    drawing sigma0 contours")
+    oad(debug, "    processing sigma0 contours")
     sigma0c = gsw_sigma0.(SAc', CTc)
     local levels = sigma0_levels
     if length(sigma0_levels) == 0
-        oad(debug, "    case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
+        oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c)
     elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
-        oad(debug, "    case 2: sigma0_levels is a single integer")
+        oad(debug, "        case 2: sigma0_levels is a single integer")
         if sigma0_levels > 0
             levels = pretty(sigma0c, sigma0_levels)
         else
             levels = []
         end
-        oad(debug, "    case 3: sigma0_levels is a vector of sigma0 levels for contouring")
+        oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
     if length(levels) > 0
         oad(debug, "    drawing sigma0 contours at levels $(levels)")
@@ -385,16 +385,16 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     spiciness0c = gsw_spiciness0.(SAc', CTc)
     local levels = spiciness0_levels
     if length(spiciness0_levels) == 0
-        oad(debug, "    case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
+        oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
         levels = pretty(spiciness0c)
     elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
-        oad(debug, "    case 2: spiciness0_levels is a single integer")
+        oad(debug, "        case 2: spiciness0_levels is a single integer")
         if spiciness0_levels > 0
             levels = pretty(spiciness0c, spiciness0_levels)
         else
             levels = []
         end
-        oad(debug, "    case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
+        oad(debug, "        case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
     end
     if length(levels) > 0
         oad(debug, "    draw spiciness0 contours at levels $(levels)")
