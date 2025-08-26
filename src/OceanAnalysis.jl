@@ -539,10 +539,10 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         end
         # set location to a spot in the Atlantic Ocean, if not in the file.  (Otherwise, we
         # cannot compute CT, SA etc.
-        if !latitude in keys(metadata)
+        if !"latitude" in keys(metadata)
             metadata["latitude"] = 30
         end
-        if !longitude in keys(metadata)
+        if !"longitude" in keys(metadata)
             metadata["longitude"] = -30
         end
         if occursin(r"\*END\*", line)
