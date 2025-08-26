@@ -20,6 +20,7 @@ export get_element
 export N2
 export plot_profile
 export plot_TS
+export pretty
 export read_argo
 export read_ctd_cnv
 export T90_from_T48
@@ -41,6 +42,52 @@ function oad(debug::Int64=0, args...)
         print("\n")
     end
 end
+
+"""
+Calculate sub-intervals with 125 scaling, as in R function of same name
+
+This is needed because contour() in Julia (Reference 1) does not use
+simple numbers for auto-computed levels.
+
+# Examples
+```julia-repl
+# Example that could come up in a TS diagram, where the
+# first argument is a range of sigma0 values for the plot.
+pretty([22.299, 25.091])
+```
+
+# References
+
+1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
+"""
+function pretty(x, n=5; debug::Bool=false)
+    min, max = extrema(x)
+    dx = (max - min) / n
+    fac = 10^floor(log10(dx))
+    dx0 = dx / fac # dx0 should be between 1 and 10
+    if !(1.0 <= dx0 <= 10.0)
+        error("dx0 = $dx0 is not between 1.0 and 10.0")
+    end
+    if 0.0 <= dx0 < 1.5
+        dx00 = 1.0
+    elseif 1.5 <= dx0 < 3.5
+        dx00 = 2.0
+    elseif 3.5 <= dx0 < 7.5
+        dx00 = 5.0
+    else
+        dx00 = 10.0
+    end
+    dxnew = dx00 * fac
+    # round() cleans up trailing-digits error
+    minnew = round(dxnew * floor(min / dxnew), sigdigits=5)
+    maxnew = minnew + dxnew * ceil((max - minnew) / dxnew)
+    if debug
+        println("fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
+    end
+    rval = collect(range(minnew, maxnew, step=dxnew))
+    return rval
+end
+
 
 """
     degree = coordinate_from_string(s::String)
@@ -116,9 +163,9 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
 end # as_ctd(salinity, ...)
 
 """
-    plot_profile(ctd::Ctd, which="CT"; vertical="pressure", abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-        debug=false, kwargs...)
+    plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
+        abbreviate::Bool=false, legend::Bool=false,
+        tickfontsize=8, labelfontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -167,7 +214,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 See also the [`plot_TS`](@ref) function.
 """
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
-    legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    legend::Bool=false, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
@@ -259,13 +306,15 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
 end
 
 """
-    plot_TS(ctd::Ctd; drawFreezing=true, drawSpiciness=false, abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8;
-        debug=false, kwargs...,)
+    plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
+        draw_freezing=true, abbreviate=false,
+        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
-Contours of σ₀ are shown with dotted lines.  If `drawFreezing` is true, then
-the freezing-point curve is added, with a dashed blue line type.
+Contours of sigma0 are shown by default, and contours of spiciness0 may be
+added if desired.  If `drawFreezing` is true, then the freezing-point curve is
+added.
 
 The `kwargs...` argument is used to represent other arguments that will be sent
 to `plot()`.  For example, the default way to display the TS diagram is
@@ -289,15 +338,16 @@ plot_TS(d)
 
 See also [`plot_profile`](@ref).
 """
-function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false, abbreviate=false,
+function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
+    draw_freezing=true, abbreviate=false,
     legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
-    S = ctd.data.salinity
-    T = ctd.data.temperature
-    p = ctd.data.pressure
-    lon = ctd.metadata["longitude"]
-    lat = ctd.metadata["latitude"]
+    local S = ctd.data.salinity
+    local T = ctd.data.temperature
+    local p = ctd.data.pressure
+    local lon = ctd.metadata["longitude"]
+    local lat = ctd.metadata["latitude"]
     SA = gsw_sa_from_sp.(S, p, lon, lat)
     CT = gsw_ct_from_t.(SA, T, p)
     # We start with the measurements ... 
@@ -312,16 +362,52 @@ function plot_TS(ctd::Ctd; draw_freezing=true, draw_spiciness=false, abbreviate=
     ylim = ylims()
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
-    oad(debug, "    drawing sigma0 contours")
-    contour!(SAc, CTc, (SAc, CTc) -> gsw_sigma0(SAc, CTc), color=:gray84, linewidth=0.5,
-        levels=range(22, 30, step=0.2),
-        cbar=false, clabels=true)
-    # ... then (optionally) add spiciness contours ...
-    if draw_spiciness
-        oad(debug, "    drawing spiciness0 contours")
-        contour!(SAc, CTc, (SAc, CTc) -> gsw_spiciness0(SAc, CTc), color=:gray74, linewidth=0.5,
-            levels=range(-10, 10, step=0.2),
+    oad(debug, "    processing sigma0 contours")
+    sigma0c = gsw_sigma0.(SAc', CTc)
+    local levels = sigma0_levels
+    if length(sigma0_levels) == 0
+        oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
+        levels = pretty(sigma0c)
+    elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
+        oad(debug, "        case 2: sigma0_levels is a single integer")
+        if sigma0_levels > 0
+            levels = pretty(sigma0c, sigma0_levels)
+        else
+            levels = []
+        end
+    else
+        oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
+    end
+    if length(levels) > 0
+        oad(debug, "        drawing sigma0 contours at levels $(levels)")
+        contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
             cbar=false, clabels=true)
+    else
+        oad(debug, "        not drawing sigma0 contours")
+    end
+    # ... then (optionally) add spiciness contours ...
+    oad(debug, "    processing spiciness0 contours")
+    spiciness0c = gsw_spiciness0.(SAc', CTc)
+    local levels = spiciness0_levels
+    if length(spiciness0_levels) == 0
+        oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
+        levels = pretty(spiciness0c)
+    elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
+        oad(debug, "        case 2: spiciness0_levels is a single integer")
+        if spiciness0_levels > 0
+            levels = pretty(spiciness0c, spiciness0_levels)
+        else
+            levels = []
+        end
+    else
+        oad(debug, "        case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
+    end
+    if length(levels) > 0
+        oad(debug, "    drawing spiciness0 contours at levels $(levels)")
+        contour!(SAc, CTc, spiciness0c, color=:gray50, linewidth=1.0, levels=levels,
+            cbar=false, clabels=true)
+    else
+        oad(debug, "        not drawing spiciness0 contours")
     end
     # ... and finally (optionally) add a freezing-temperature line.
     if draw_freezing
@@ -468,7 +554,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         error("No 'sal00' column in CNV file; available names are ", names(data))
     end
     if "t068" in data_names
-        data.temperature = T90fromT68.(data.t068)
+        data.temperature = T90_fromT_68.(data.t068)
     elseif "t090" in data_names
         data.temperature = data.t090
     else
@@ -487,23 +573,23 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
 end
 
 """
-    T90 = T90fromT68(T68::Float64)
+    T90 = T90_from_T68(T68::Float64)
 
 Convert a temperature from the T68 scale to the T90 scale.
 
-See also [`T90fromT48`](@ref).
+See also [`T90_from_T48`](@ref).
 """
-T90fromT68(T48::Float64) = T48 / 1.00024
+T90_from_T68(T48::Float64) = T48 / 1.00024
 #T90fromT68(T48::Vector{Float64}) = T48 ./ 1.00024
 
 """
-    T90 = T90fromT48(T48::Float64)
+    T90 = T90_from_T48(T48::Float64)
 
 Convert a temperature from the T48 scale to the T90 scale.
 
-See also [`T90fromT68`](@ref).
+See also [`T90_from_T68`](@ref).
 """
-T90fromT48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
+T90_from_T48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
 #T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1.00024
 
 """
