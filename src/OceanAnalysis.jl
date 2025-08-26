@@ -308,31 +308,39 @@ end
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false,
-        legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+        framestyle=:box, color=:black, seriestype=:scatter, ms=2,
+        legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
         debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
-Contours of sigma0 are shown by default, and contours of spiciness0 may be
-added if desired.  If `drawFreezing` is true, then the freezing-point curve is
-added.
 
-The `kwargs...` argument is used to represent other arguments that will be sent
-to `plot()`.  For example, the default way to display the TS diagram is
-constructed with a blue line connecting TS values, but using e.g.
+By default, contours of sigma0 are shown, but contours of spiciness0 are not
+shown. The parameters `sigma0_levels` and `spiciness0_levels` control
+contouring. Setting the respective value to 0 prevents contouring.  Setting it
+to a positive integer provides a suggestion for the number of levels, with the
+actual number being set by [`pretty`](@ref)), which is provided with the
+integer.  Setting it to an empty vector, i.e. `[]`, causes automatic selection
+of levels, again with `[pretty`](@ref).  And, finally, setting it to a vector
+of numbers specifies those numbers as the levels.
 
-    plot_TS(ctd, seriestype=:scatter, seriescolor=:red)
+By default, a freezing-point line is drawn (if it is within the range of the
+data); this drawing is turned off if `draw_freezing` is set to false.
 
-will use red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
-more on such issues.
+By default, axis names are written in long form; set `abbreviate=true` for
+shorter versions.
+
+Information about the analysis is printed if `debug` is set to true.
+
+Apart from that, the other parameters have the usual meanings for Julia plots.
+For example, `color` is set to black, to override the Julia default, etc.
 
 # Examples
 ```julia-repl
+# Display hydrographic properties stored in a built-in Argo file
 using OceanAnalysis, Plots
-# Read an Argo file
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = read_argo(f, 1);
-# Plot TS diagram, using TEOS-10 variables.
+d = read_argo(f, 1)
 plot_TS(d)
 ```
 
@@ -340,7 +348,8 @@ See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
-    legend=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
+    framestyle=:box, color=:black, seriestype=:scatter, ms=2,
+    legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     local S = ctd.data.salinity
@@ -355,8 +364,10 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     rval = plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        framestyle=:box, yrot=90,
-        gridstyle=gridstyle, color=color, tickfontsize=tickfontsize, labelfontsize=labelfontsize; kwargs...)
+        yrot=90, framestyle=framestyle,
+        seriestype=seriestype, ms=ms,
+        gridstyle=gridstyle, color=color, tickfontsize=tickfontsize,
+        labelfontsize=labelfontsize; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
