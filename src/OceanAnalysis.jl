@@ -216,7 +216,6 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 See also the [`plot_TS`](@ref) function.
 """
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
-    sigma0_levels=nothing,
     legend::Bool=false, color=:black, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
