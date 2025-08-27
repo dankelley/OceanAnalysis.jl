@@ -664,7 +664,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-    data.sigma0[sigma0<0.0] = NaN
+    data.sigma0[data.sigma0.<0.0] = NaN
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     metadata["header"] = header
     oad(debug, "    combining metadata and data into a Ctd object")
