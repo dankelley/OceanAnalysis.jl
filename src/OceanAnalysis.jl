@@ -535,8 +535,9 @@ function read_argo(filename, column=1; debug::Int64=0)
 end # read_argo()
 
 function get_nc_value(item)
-    item[ismissing.(item)] .= NaN
     println("length(item): $(length(item))")
+    println("typeof(item): $(typeof(item))")
+    item[ismissing.(item)] .= NaN
     if length(item) > 1
         println("is a vector")
         return convert(Vector{Float64}, item)
