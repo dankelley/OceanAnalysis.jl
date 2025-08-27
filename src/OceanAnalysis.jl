@@ -110,7 +110,7 @@ function pretty(x, n=5; debug::Int64=0)
     min, max = extrema(filter(!isnan, x))
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        warn("pretty() got max=min=$min, so returning empty vector")
+        @warn("pretty() got max=min=$min, so returning empty vector")
         return []
     end
     dx = (max - min) / n
