@@ -51,28 +51,28 @@ end
     Compute sea pressure (dbar) from depth (m) and latitude (deg).
 """
 function pressure_from_depth(depth::Float64, latitude::Float64=45.0)
-    return gsw_p_from_z(-depth, latitude)
+    return gsw_p_from_z(-depth, latitude, 0.0, 0.0)
 end
 
 """
     Compute sea pressure (dbar) from vertical coordinate (m) and latitude (deg).
 """
 function pressure_from_z(z::Float64, latitude::Float64=45.0)
-    return gsw_p_from_z(z, latitude)
+    return gsw_p_from_z(z, latitude, 0.0, 0.0)
 end
 
 """
     Compute seawater depth (m) from sea pressure (dbar)
 """
 function depth_from_pressure(pressure::Float64, latitude::Float64=45.0)
-    return -gsw_z_from_p(pressure, latitude)
+    return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
 
 """
     Compute vertical coordinate (m) from sea pressure (dbar)
 """
 function z_from_pressure(pressure::Float64, latitude::Float64=45.0)
-    return gsw_z_from_p(pressure, latitude)
+    return gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
 
 
