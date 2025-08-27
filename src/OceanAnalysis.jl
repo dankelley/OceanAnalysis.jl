@@ -44,6 +44,36 @@ function oad(debug::Int64=0, args...)
 end
 
 """
+    Compute sea pressure (dbar) from depth (m) and latitude (deg).
+"""
+function pressure_from_depth(depth::Float64, latitude::Float64=45.0)
+    return gsw_p_from_z(-depth, latitude)
+end
+
+"""
+    Compute sea pressure (dbar) from vertical coordinate (m) and latitude (deg).
+"""
+function pressure_from_depth(z::Float64, latitude::Float64=45.0)
+    return gsw_p_from_z(z, latitude)
+end
+
+"""
+    Compute seawater depth (m) from sea pressure (dbar)
+"""
+function depth_from_pressure(pressure::Float64, latitude::Float64=45.0)
+    return -gsw_z_from_p(pressure, latitude)
+end
+
+"""
+    Compute vertical coordinate (m) from sea pressure (dbar)
+"""
+function z_from_pressure(pressure::Float64, latitude::Float64=45.0)
+    return gsw_z_from_p(pressure, latitude)
+end
+
+
+
+"""
 Calculate sub-intervals with 125 scaling, as in R function of same name
 
 This is needed because contour() in Julia (Reference 1) does not use
