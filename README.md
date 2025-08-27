@@ -87,9 +87,10 @@ camel-case notation.
 #### Non-breaking changes
 
 * Add `pretty()`, for use in contouring (especially for `plot_TS()`).
+* Add `depth_from_pressure()`, `z_from_pressure()`, `pressure_from_depth()`,
+  and `pressure_from_z()`.
 * Change the second digit of version string to indicate that the package is becoming
-  suitable for testing on real data.
-* Change the internal handling of the `debug` argument to functions.
+  suitable for at least exploratory testing on real data.
 
 ### 0.0.3
 
