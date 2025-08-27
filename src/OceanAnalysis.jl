@@ -605,20 +605,21 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         irow = irow + 1
     end
     data = DataFrame(data, data_names, makeunique=true)
+    data_names = names(data)
     # Add standard columns
     oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
-    if "pr" in names(data)
+    if "pr" in data_names
         data.pressure = data.pr
-    elseif "prDM" in names(data)
+    elseif "prDM" in data_names
         data.pressure = data.prDM
-    elseif "prSM" in names(data)
+    elseif "prSM" in data_names
         data.pressure = data.prSM
-    elseif "depSM" in names(data)
+    elseif "depSM" in data_names
         data.pressure = pressure_from_depth.(data.depSM)
     else
         error("No 'pr', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
-    if "sal00" in names(data)
+    if "sal00" in data_names
         data.salinity = data.sal00
     else
         error("No 'sal00' column in CNV file; found ", names(data))
@@ -631,6 +632,8 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.temperature = data.t090C
     elseif "t190C" in data_names
         data.temperature = data.t190C
+    elseif "tv290C" in data_names
+        data.temperature = data.tv290C
     else
         error("No 't068', 't090', 't090C' or 't190C' in CNV file; found ", names(data))
     end
