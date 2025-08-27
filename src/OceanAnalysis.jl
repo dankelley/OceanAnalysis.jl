@@ -53,9 +53,9 @@ end
     Compute Practical Salinity from conductiity (S/m), temperature (degC) and pressure (dbar).
 """
 #gsw::gsw_SP_from_C(C0 * conductivity, temperature, pressure)
-function salinity_from_conductivity(conductivity::Float64,
+function salinity_from_conductivity(conductivity_ratio::Float64,
     temperature::Float64, pressure::Float64)
-    return gsw_sp_from_c(conductivity, temperature, pressure)
+    return gsw_sp_from_c(conductivity_ratio, temperature, pressure)
 end
 
 
@@ -632,9 +632,9 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         error("No 'pr', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
     if "c0mS/cm" in data_names
-        data.conductivity = 0.1 * data[:, "c1mS/cm"]
+        data.conductivity_ratio = data[:, "c0mS/cm"] / 42.914
     elseif "c1mS/cm" in data_names
-        data.conductivity = 0.1 * data[:, "c0mS/cm"]
+        data.conductivity_ratio = data[:, "c1mS/cm"] / 42.914
     end
     if "t068" in data_names
         data.temperature = T90_from_T68.(data.t068)
