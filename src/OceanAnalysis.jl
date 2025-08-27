@@ -614,12 +614,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     elseif "depSM" in names(data)
         data.pressure = pressure_from_depth.(data.depSM)
     else
-        error("No 'pr', 'prDM' or 'depSM' in CNV file; found $(names(data))")
+        error("No 'pr', 'prDM' or 'depSM' in CNV file; found ", names(data))
     end
     if "sal00" in names(data)
         data.salinity = data.sal00
     else
-        error("No 'sal00' column in CNV file; found $(names(data))")
+        error("No 'sal00' column in CNV file; found ", names(data))
     end
     if "t068" in data_names
         data.temperature = T90_from_T68.(data.t068)
@@ -630,7 +630,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     elseif "t190C" in data_names
         data.temperature = data.t190C
     else
-        error("No 't068', 't090', 't090C' or 't190C' column in CNV file; available names are ", names(data))
+        error("No 't068', 't090', 't090C' or 't190C' in CNV file; found ", names(data))
     end
     oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
