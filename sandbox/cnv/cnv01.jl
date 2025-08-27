@@ -1,16 +1,14 @@
 using OceanAnalysis, Glob, Plots
 files = glob("*.cnv", "/Users/kelley/Dropbox/oce-working-notes/cnv")
 files = sort(files)
-files_short_name = replace.(files, r".*/" => "", ".cnv" => "")
 bad = 0
-for i in 1:length(files)
-    #println("$file")
+for (i, file) in enumerate(files)
     file = files[i]
-    file_short_name = files_short_name[i]
+    file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try
         d = read_ctd_cnv(file)
         plot_TS(d, title=file, titlefont=font(9))
-        png = "conv01_$(file_short_name).png"
+        png = "cnv01_$(file_short_name).png"
         println(png)
         savefig(png)
     catch e

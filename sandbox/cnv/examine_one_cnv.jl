@@ -22,5 +22,5 @@ p2 = plot_TS(d)
 
 # %%
 plot(p1, p2, layout=(1, 2))
-#savefig("negative_pressure_j.png")
+savefig("examine_one_cnv_j.png")
 
