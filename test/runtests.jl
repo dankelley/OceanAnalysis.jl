@@ -18,6 +18,10 @@ using OceanAnalysis, Test
     @test coordinate_from_string("111* 31.440 W") ≈ -(111 + 31.440 / 60) atol = 1e-5
 end
 
+@testset "conductivity and salinity" begin
+    @test salinity_from_conductivity(34.5487, 28.7856, 10.0) ≈ 20.009869599086951 atol = 1e-10
+end
+
 @testset "pressure, depth and z" begin
     @test z_from_pressure(10.0) ≈ -9.91860027692906 atol = 1e-14
     @test pressure_from_z(-9.918600276929064) ≈ 10.0 atol = 1e-14

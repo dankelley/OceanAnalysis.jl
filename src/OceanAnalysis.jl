@@ -632,9 +632,9 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         error("No 'pr', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
     if "c0mS/cm" in data_names # FIXME: allow S/m etc; convert here to store mS/cm for gsw
-        data.conductivity_ratio = data[:, "c0mS/cm"]
+        data.conductivity = data[:, "c0mS/cm"]
     elseif "c1mS/cm" in data_names
-        data.conductivity_ratio = data[:, "c1mS/cm"]
+        data.conductivity = data[:, "c1mS/cm"]
     end
     if "t068" in data_names
         data.temperature = T90_from_T68.(data.t068)
@@ -654,8 +654,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     if "sal00" in data_names
         data.salinity = data.sal00
     else
-        # FIXME: if have conductivity, can use that
-        error("No 'sal00' column in CNV file; found ", names(data))
+        if "conductivity" in names(data)
+            println("DANNNNNN")
+            data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
+        else
+            error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
+        end
     end
     oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
