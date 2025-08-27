@@ -25,6 +25,10 @@ export read_argo
 export read_ctd_cnv
 export T90_from_T48
 export T90_from_T68
+export depth_from_pressure
+export z_from_pressure
+export pressure_from_depth
+export pressure_from_z
 
 abstract type Oce end
 
@@ -42,6 +46,36 @@ function oad(debug::Int64=0, args...)
         print("\n")
     end
 end
+
+"""
+    Compute sea pressure (dbar) from depth (m) and latitude (deg).
+"""
+function pressure_from_depth(depth::Float64, latitude::Float64=45.0)
+    return gsw_p_from_z(-depth, latitude, 0.0, 0.0)
+end
+
+"""
+    Compute sea pressure (dbar) from vertical coordinate (m) and latitude (deg).
+"""
+function pressure_from_z(z::Float64, latitude::Float64=45.0)
+    return gsw_p_from_z(z, latitude, 0.0, 0.0)
+end
+
+"""
+    Compute seawater depth (m) from sea pressure (dbar)
+"""
+function depth_from_pressure(pressure::Float64, latitude::Float64=45.0)
+    return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
+end
+
+"""
+    Compute vertical coordinate (m) from sea pressure (dbar)
+"""
+function z_from_pressure(pressure::Float64, latitude::Float64=45.0)
+    return gsw_z_from_p(pressure, latitude, 0.0, 0.0)
+end
+
+
 
 """
 Calculate sub-intervals with 125 scaling, as in R function of same name
@@ -104,11 +138,15 @@ confusing strings, so this function is not always helpful.
 coordinate_from_string("1.5")   # 1.5
 coordinate_from_string("1 30")  # 1.5
 coordinate_from_string("1S 30") # -1.5
+coordinate_from_string("27* 14.072 N") # 27.234533333333335
+coordinate_from_string("111* 31.440 W") # -111.524
 ```
 """
 function coordinate_from_string(s::String)
+    # ** Latitude: 27* 14.072 N
+    # ** Longitude: 111* 31.440 W
     sign = occursin(r"[wWsS]", s) ? -1.0 : 1.0
-    s = replace(s, r"[nNsSeEwW]" => "")
+    s = replace(s, r"[nNsSeEwW\*]" => "")
     tokens = split(s)
     if length(tokens) == 1
         return sign * parse(Float64, s)
@@ -503,31 +541,44 @@ function read_ctd_cnv(filename::String; debug::Int64=0)
 end
 
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
-    oad(debug, "read_ctd_cnv(stream, ...) START dan")
+    oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
-    oad(debug, "    $(length(lines)) lines in file")
+    #oad(debug, "    $(length(lines)) lines in file")
     header = ""
     data_start = 0
     data_names = Vector{String}()
     metadata = Dict{String,Any}()
     for i in eachindex(lines)
-        line = chomp(lines[i])
-        println("lines[$i]=$(lines[i]) -> $line")
+        line = lines[i]
+        #println("lines[$i]='$(lines[i])' -> '$line'")
         if occursin(r"^# name ", line)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
         end
         if occursin(r"^\*\*.*:", line)
+            #println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
             value = replace(tokens[2], r"^ *" => "")
             if occursin(r"^longitude", item) || occursin(r"^latitude", item)
-                value = coordinate_from_string(value)
+                value = coordinate_from_string(String(value))
+                #println("got value='$value' for item='$item' (known to be longitude or latitude)")
+                metadata[item] = value
+            else
+                #println("got value='$value' for item='$item' (known not to be longitude or latitude)")
+                metadata[item] = value
             end
-            metadata[item] = value
         end
-        if occursin(r"^\*END\*$", line)
+        # set location to a spot in the Atlantic Ocean, if not in the file.  (Otherwise, we
+        # cannot compute CT, SA etc.
+        if !("latitude" in keys(metadata))
+            metadata["latitude"] = 30
+        end
+        if !("longitude" in keys(metadata))
+            metadata["longitude"] = -30
+        end
+        if occursin(r"\*END\*", line)
             data_start = i + 1
             header = lines[1:i]
             break
@@ -553,13 +604,15 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data[irow, :] = d
         irow = irow + 1
     end
-    data = DataFrame(data, data_names)
+    data = DataFrame(data, data_names, makeunique=true)
     # Add standard columns
     oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in names(data)
         data.pressure = data.pr
+    elseif "prDM" in names(data)
+        data.pressure = data.prDM
     else
-        error("No 'pr' column in CNV file; available names are ", names(data))
+        error("No 'pr' or 'prDM' column in CNV file; available names are ", names(data))
     end
     if "sal00" in names(data)
         data.salinity = data.sal00
@@ -570,8 +623,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.temperature = T90_from_T68.(data.t068)
     elseif "t090" in data_names
         data.temperature = data.t090
+    elseif "t090C" in data_names
+        data.temperature = data.t090C
+    elseif "t190C" in data_names
+        data.temperature = data.t190C
     else
-        error("No 't068' column in CNV file; available names are ", names(data))
+        error("No 't068', 't090', 't090C' or 't190C' column in CNV file; available names are ", names(data))
     end
     oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
