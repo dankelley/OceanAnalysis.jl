@@ -524,7 +524,7 @@ function read_argo(filename, column=1; debug::Int64=0)
     longitude = get_nc_value(d["LONGITUDE"][1])
     oad(debug, "    longitude: $longitude")
     #latitude = convert(Float64, d["LATITUDE"][1])
-    longitude = get_nc_value(d["LATITUDE"][1])
+    latitude = get_nc_value(d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
         debug=debug > 0 ? debug + 1 : 0)
