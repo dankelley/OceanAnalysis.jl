@@ -634,8 +634,10 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.temperature = data.t190C
     elseif "tv290C" in data_names
         data.temperature = data.tv290C
+    elseif "tv268C" in data_names
+        data.temperature = data.tv268C
     else
-        error("No 't068', 't090', 't090C' or 't190C' in CNV file; found ", names(data))
+        error("No 't068', 't090', 't090C', 't190C', 't290C', 'tv268C' in CNV file; found ", names(data))
     end
     oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
