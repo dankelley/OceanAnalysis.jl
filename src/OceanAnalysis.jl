@@ -521,9 +521,11 @@ function read_argo(filename, column=1; debug::Int64=0)
     temperature = get_nc_value(d["TEMP"][:, column])
     oad(debug, "    temperature length: $(length(temperature))")
     #longitude = convert(Float64, d["LONGITUDE"][1])
+    oad(debug, "    about to try to get longitude")
     longitude = get_nc_value(d["LONGITUDE"][1])
     oad(debug, "    longitude: $longitude")
     #latitude = convert(Float64, d["LATITUDE"][1])
+    oad(debug, "    about to try to get latitude")
     latitude = get_nc_value(d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
@@ -534,6 +536,7 @@ end # read_argo()
 
 function get_nc_value(item)
     item[ismissing.(item)] .= NaN
+    println("length(item): $(length(item))")
     if length(item) > 1
         println("is a vector")
         return convert(Vector{Float64}, item)
