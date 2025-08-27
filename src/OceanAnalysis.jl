@@ -538,6 +538,7 @@ function get_nc_value(item)
         return convert(Vector{Float64}, item)
     else
         return convert(Vector, item)
+    end
 end
 
 
