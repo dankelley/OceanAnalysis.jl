@@ -614,12 +614,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     elseif "depSM" in names(data)
         data.pressure = pressure_from_depth.(data.depSM)
     else
-        error("No 'pr', 'prDM' or 'depSM' in CNV file; names are $(names(data))")
+        error("No 'pr', 'prDM' or 'depSM' in CNV file; found $(names(data))")
     end
     if "sal00" in names(data)
         data.salinity = data.sal00
     else
-        error("No 'sal00' column in CNV file; available names are ", names(data))
+        error("No 'sal00' column in CNV file; found $(names(data))")
     end
     if "t068" in data_names
         data.temperature = T90_from_T68.(data.t068)
