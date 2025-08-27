@@ -655,7 +655,6 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.salinity = data.sal00
     else
         if "conductivity" in names(data)
-            println("DANNNNNN")
             data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
         else
             error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
