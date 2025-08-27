@@ -14,3 +14,6 @@ s0 = d.data.sigma0
 # %%
 extrema(filter(!isnan, s0))
 
+# %%
+plot_TS(d)
+
