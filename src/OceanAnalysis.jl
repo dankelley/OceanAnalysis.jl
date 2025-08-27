@@ -25,6 +25,10 @@ export read_argo
 export read_ctd_cnv
 export T90_from_T48
 export T90_from_T68
+export depth_from_pressure
+export z_from_pressure
+export pressure_from_depth
+export pressure_from_z
 
 abstract type Oce end
 
@@ -53,7 +57,7 @@ end
 """
     Compute sea pressure (dbar) from vertical coordinate (m) and latitude (deg).
 """
-function pressure_from_depth(z::Float64, latitude::Float64=45.0)
+function pressure_from_z(z::Float64, latitude::Float64=45.0)
     return gsw_p_from_z(z, latitude)
 end
 
