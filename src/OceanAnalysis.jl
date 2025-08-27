@@ -539,7 +539,7 @@ function get_nc_value(item)
         return convert(Vector{Float64}, item)
     else
         println("is a scalar")
-        return convert(Vector, item)
+        return convert(Float64, item)
     end
 end
 
