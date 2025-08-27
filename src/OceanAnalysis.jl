@@ -57,8 +57,7 @@ function salinity_from_conductivity(conductivity::Float64,
     temperature::Float64, pressure::Float64)
     rval = gsw_sp_from_c(conductivity, temperature, pressure)
     # gswteos-10.h:#define GSW_INVALID_VALUE       9e15    /* error return from gsw_saar et al. */
-    rval[rval.>1e15] .= NaN
-    return rval
+    return (rval > 1e15 ? NaN : rval)
 end
 
 
