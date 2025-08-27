@@ -47,6 +47,17 @@ function oad(debug::Int64=0, args...)
     end
 end
 
+
+"""
+    Compute Practical Salinity from conductiity (S/m), temperature (degC) and pressure (dbar).
+"""
+#gsw::gsw_SP_from_C(C0 * conductivity, temperature, pressure)
+function salinity_from_conductivity(conductivity::Float64,
+    temperature::Float64, pressure::Float64)
+    return gsw_SP_from_C(conductivity, temperature, pressure)
+end
+
+
 """
     Compute sea pressure (dbar) from depth (m) and latitude (deg).
 """
@@ -619,10 +630,10 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     else
         error("No 'pr', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
-    if "sal00" in data_names
-        data.salinity = data.sal00
-    else
-        error("No 'sal00' column in CNV file; found ", names(data))
+    if "c0mS/cm" in data_names
+        data.conductivity = 0.1 * data[:, "c1mS/cm"]
+    elseif "c1mS/cm" in data_names
+        data.conductivity = 0.1 * data[:, "c0mS/cm"]
     end
     if "t068" in data_names
         data.temperature = T90_from_T68.(data.t068)
@@ -638,6 +649,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.temperature = data.tv268C
     else
         error("No 't068', 't090', 't090C', 't190C', 't290C', 'tv268C' in CNV file; found ", names(data))
+    end
+    if "sal00" in data_names
+        data.salinity = data.sal00
+    else
+        # FIXME: if have conductivity, can use that
+        error("No 'sal00' column in CNV file; found ", names(data))
     end
     oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
