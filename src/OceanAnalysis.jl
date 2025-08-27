@@ -108,7 +108,7 @@ pretty([22.299, 25.091])
 """
 function pretty(x, n=5; debug::Int64=0)
     min, max = extrema(filter(!isnan, x))
-    oad(debug + 0, "pretty() got min=$min and max=$max")
+    oad(1, "pretty() got min=$min and max=$max")
     dx = (max - min) / n
     fac = 10^floor(log10(dx))
     dx0 = dx / fac # dx0 should be between 1 and 10
