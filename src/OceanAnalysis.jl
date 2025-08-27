@@ -134,9 +134,7 @@ function pretty(x, n=5; debug::Int64=0)
     # round() cleans up trailing-digits error
     minnew = round(dxnew * floor(min / dxnew), sigdigits=5)
     maxnew = minnew + dxnew * ceil((max - minnew) / dxnew)
-    if debug
-        println("fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
-    end
+    oad(debug, "fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
     rval = collect(range(minnew, maxnew, step=dxnew))
     return rval
 end
