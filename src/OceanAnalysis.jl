@@ -611,10 +611,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.pressure = data.pr
     elseif "prDM" in names(data)
         data.pressure = data.prDM
+    elseif "prSM" in names(data)
+        data.pressure = data.prSM
     elseif "depSM" in names(data)
         data.pressure = pressure_from_depth.(data.depSM)
     else
-        error("No 'pr', 'prDM' or 'depSM' in CNV file; found ", names(data))
+        error("No 'pr', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
     if "sal00" in names(data)
         data.salinity = data.sal00
