@@ -110,7 +110,7 @@ function pretty(x, n=5; debug::Int64=0)
     min, max = extrema(filter(!isnan, x))
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        println("pretty() got max=min=$min so cannot construct levels")
+        warn("pretty() got max=min=$min, so returning empty vector")
         return []
     end
     dx = (max - min) / n
@@ -433,7 +433,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     local levels = sigma0_levels
     if length(sigma0_levels) == 0
         oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
-        levels = pretty(sigma0c)
+        levels = pretty(sigma0c) # returns [] if min=max
     elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
         oad(debug, "        case 2: sigma0_levels is a single integer")
         if sigma0_levels > 0
