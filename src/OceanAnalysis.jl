@@ -535,8 +535,10 @@ end # read_argo()
 function get_nc_value(item)
     item[ismissing.(item)] .= NaN
     if length(item) > 1
+        println("is a vector")
         return convert(Vector{Float64}, item)
     else
+        println("is a scalar")
         return convert(Vector, item)
     end
 end
