@@ -511,7 +511,8 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     d = NCDataset(filename, "r")
     oad(debug, "    file holds $(keys(d))")
-    local pressure = convert(Vector{Float64}, d["PRES"][:, column])
+    #pressure = convert(Vector{Float64}, d["PRES"][:, column])
+    pressure = get_nc_value(d["PRES"][:, column])
     oad(debug, "    pressure length: $(length(pressure))")
     local salinity = convert(Vector{Float64}, d["PSAL"][:, column])
     oad(debug, "    salinity length: $(length(salinity))")
@@ -526,6 +527,11 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "    END read_argo()")
     rval
 end # read_argo()
+
+function get_nc_value(item)
+    item[ismissing.(item)] .= NaN
+    return convert(Vector{Float64}, item)
+end
 
 
 """
