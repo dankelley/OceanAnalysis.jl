@@ -16,19 +16,20 @@ export Ctd
 # Functions
 export as_ctd
 export coordinate_from_string
+export depth_from_pressure
 export get_element
 export N2
 export plot_profile
 export plot_TS
+export pressure_from_depth
+export pressure_from_z
 export pretty
 export read_argo
 export read_ctd_cnv
+export salinity_from_conductivity
 export T90_from_T48
 export T90_from_T68
-export depth_from_pressure
 export z_from_pressure
-export pressure_from_depth
-export pressure_from_z
 
 abstract type Oce end
 
