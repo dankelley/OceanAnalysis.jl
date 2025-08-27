@@ -55,7 +55,7 @@ end
 #gsw::gsw_SP_from_C(C0 * conductivity, temperature, pressure)
 function salinity_from_conductivity(conductivity::Float64,
     temperature::Float64, pressure::Float64)
-    return gsw_SP_from_C(conductivity, temperature, pressure)
+    return gsw_sp_from_c(conductivity, temperature, pressure)
 end
 
 
