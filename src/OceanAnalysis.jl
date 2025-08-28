@@ -550,7 +550,11 @@ function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
     if length(item) > 1
+        println("DAN 1")
+        println("type: $(typeof(item)))")
+        println(item)
         rval = convert(Vector{Float64}, item)
+        println("DAN 2")
         rval[rval.>1.0e15] .= NaN
     else
         #println("is a scalar")
