@@ -557,14 +557,13 @@ function read_argo(filename, column=1; debug::Int64=0)
     #longitude = convert(Float64, d["LONGITUDE"][1])
     oad(debug, "    about to try to get longitude")
 
-    println("DAN 1 ", typeof(d["LONGITUDE"][1]))
-    DAN = d["LONGITUDE"][1]
-    println("DAN 2", DAN)
-    println("DAN 3", DAN > 1e15)
-    println("DAN 4", DAN .> 1e15)
-    println("DAN 5", DAN[DAN.>1e15])
-    DAN[DAN.>1e15] .= 9.999
-    println("DAN 6", DAN)
+    #println("DAN 1 ", typeof(d["LONGITUDE"][1]))
+    #DAN = d["LONGITUDE"][1]
+    #println("DAN 2", DAN)
+    #println("DAN 3", DAN > 1e15)
+    #println("DAN 4", DAN .> 1e15)
+    #DAN[DAN.>1e15] .= 9.999
+    #println("DAN 6", DAN)
 
     longitude = get_nc_value(d["LONGITUDE"][1])
     oad(debug, "    longitude: $longitude")
