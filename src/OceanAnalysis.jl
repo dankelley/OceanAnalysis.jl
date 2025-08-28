@@ -75,7 +75,7 @@ end
 
 """
 function fix_gsw_bad_code!(x)
-    bad = rval .> 1e15
+    bad = x .> 1e15
     if any(bad)
         x[bad] .= NaN
     end
