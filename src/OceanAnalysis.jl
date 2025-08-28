@@ -1,6 +1,7 @@
 module OceanAnalysis
 
 using NCDatasets
+using Dates
 using DataFrames
 using GibbsSeaWater
 using Plots
@@ -531,6 +532,8 @@ function read_argo(filename, column=1; debug::Int64=0)
 
     datetime = join(d["DATE_CREATION"])
     println("datetime '$datetime'")
+    time = DateTime(datetime, dateformat"yyyymmddHHMMSS")
+    println("time $time")
 
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
         debug=debug > 0 ? debug + 1 : 0)
