@@ -189,14 +189,16 @@ which are stored in the returned value alongside the three supplied vectors.
 """
 # Convenience function, which carries out TEOS-10 computations
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Float64=-30.0, latitude::Float64=30.0;
-    debug::Int64=0)
+    longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     oad(debug, "    given salinity, of length: $(length(salinity))")
     oad(debug, "    given temperature, of length: $(length(temperature))")
     oad(debug, "    given pressure, of length: $(length(pressure))")
     oad(debug, "    given longitude, of length: $(length(longitude))")
     oad(debug, "    given latitude, of length: $(length(latitude))")
+    print("ismissing(time): $(ismissing(time))")
+    oad(debug, "    given time: $(time)")
+    println(typeof(time))
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
     oad(debug, "    created SA, of length: $(length(SA))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
@@ -529,19 +531,10 @@ function read_argo(filename, column=1; debug::Int64=0)
     #oad(debug, "    about to try to get latitude")
     latitude = get_nc_value(d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
-
-    println("DAN 1")
-    datetime = join(d["DATE_CREATION"])
-    println("DAN 2")
-    println("datetime '$datetime'")
-    println("DAN 3")
-    time = DateTime(datetime, dateformat"yyyymmddHHMMSS")
-    println("DAN 4")
-    println("time $time")
-    println("DAN 5 (done with time)")
-
+    time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+    oad(debug, "    time: $time")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-        debug=debug > 0 ? debug + 1 : 0)
+        time = time, debug=debug > 0 ? debug + 1 : 0)
     oad(debug, "END read_argo()")
     rval
 end # read_argo()
