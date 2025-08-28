@@ -197,9 +197,9 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given longitude (length: $(length(longitude)))")
     oad(debug, "    given latitude (length: $(length(latitude)))")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    oad(debug, "    FIRST  created SA (length: $(length(SA)), ends: $(tail(SA, 6))")
+    oad(debug, "    FIRST  created SA (length: $(length(SA)), ends: $(last(SA, 6))")
     SA[SA.>1e15] = NaN
-    oad(debug, "    LATER created SA (length: $(length(SA)), ends: $(tail(SA, 6))")
+    oad(debug, "    LATER created SA (length: $(length(SA)), ends: $(last(SA, 6))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
     oad(debug, "    created CT (length: $(length(CT)), max: $(maximum(filter(!isnan, CT))))")
     sigma0 = gsw_sigma0.(SA, CT)
