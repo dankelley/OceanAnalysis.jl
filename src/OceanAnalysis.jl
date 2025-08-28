@@ -60,7 +60,10 @@ end
 """
 function fix_gsw_bad_code(x)
     rval = copy(x)
-    rval[rval.>1e15] .= NaN
+    bad = rval .> 1e15
+    if any(bad)
+        rval[bad] .= NaN
+    end
     rval
 end
 
@@ -72,9 +75,10 @@ end
 
 """
 function fix_gsw_bad_code!(x)
-    println("DAN 1 in fix!")
-    x[x.>1e15] .= NaN
-    println("DAN 2 in fix!")
+    bad = rval .> 1e15
+    if any(bad)
+        x[bad] .= NaN
+    end
     x
 end
 
