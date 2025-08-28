@@ -191,9 +191,9 @@ which are stored in the returned value alongside the three supplied vectors.
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
-    oad(debug, "    given salinity, of length: $(length(salinity))")
-    oad(debug, "    given temperature, of length: $(length(temperature))")
-    oad(debug, "    given pressure, of length: $(length(pressure))")
+    oad(debug, "    given salinity, of length: $(length(salinity)) and max: $(maximum(filter(!isnan, salinity)))")
+    oad(debug, "    given temperature, of length: $(length(temperature)) and max: $(maximum(filter(!isnan, temperature)))")
+    oad(debug, "    given pressure, of length: $(length(pressure)) and max: $(maximum(filter(!isnan, pressure)))")
     oad(debug, "    given longitude, of length: $(length(longitude))")
     oad(debug, "    given latitude, of length: $(length(latitude))")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
