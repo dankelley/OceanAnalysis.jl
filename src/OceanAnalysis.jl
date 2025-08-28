@@ -705,10 +705,14 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     end
     oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
+    # Bad values are flagged as 9.0e15, but we check on > 1.0e15
+    data.SA[data.SA.>1.0e15] .= NaN
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
+    data.CT[data.CT.>1.0e15] .= NaN
     data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-    data.sigma0[data.sigma0.<0.0] .= NaN
+    data.sigma0[data.CT.>1.0e15] .= NaN
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
+    data.spiciness0[data.CT.>1.0e15] .= NaN
     metadata["header"] = header
     oad(debug, "    combining metadata and data into a Ctd object")
     rval = Ctd(metadata, data)
