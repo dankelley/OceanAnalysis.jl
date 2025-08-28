@@ -224,8 +224,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given longitude (length: $(length(longitude)))")
     oad(debug, "    given latitude (length: $(length(latitude)))")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code
-    oad(debug, "    created SA (length: $(length(SA)), ends: $(last(SA, 6))")
-    error("CHECK DAN")
+    oad(debug, "    DAN DAN DAN created SA (length: $(length(SA)), ends: $(last(SA, 6))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
     CT[CT.>1e15] .= NaN
     oad(debug, "    created CT (length: $(length(CT)), max: $(maximum(filter(!isnan, CT))))")
