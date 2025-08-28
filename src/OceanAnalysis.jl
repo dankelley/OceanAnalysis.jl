@@ -49,10 +49,11 @@ function oad(debug::Int64=0, args...)
     end
 end
 
-export fix_gsw_bad_code!
-function fix_gsw_bad_code!(x)
-    x[x.>1e15] .= NaN
-    x
+export fix_gsw_bad_code
+function fix_gsw_bad_code(x)
+    rval = x
+    rval[rval.>1e15] .= NaN
+    rval
 end
 
 """
