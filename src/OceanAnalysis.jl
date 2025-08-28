@@ -18,6 +18,8 @@ export Ctd
 export as_ctd
 export coordinate_from_string
 export depth_from_pressure
+export fix_gsw_bad_code
+export fix_gsw_bad_code!
 export get_element
 export N2
 export plot_profile
@@ -49,12 +51,31 @@ function oad(debug::Int64=0, args...)
     end
 end
 
-export fix_gsw_bad_code
+"""
+    Change any values of x that equal the GSW 'missing' code (9e15) to NaN
+
+    A copy is returned, with x unaltered.  See [`fix_gsw_bad_code!`](@ref) for an
+    in-place version.
+
+"""
 function fix_gsw_bad_code(x)
     rval = copy(x)
     rval[rval.>1e15] .= NaN
     rval
 end
+
+"""
+    In-place change any values of x that equal the GSW 'missing' code (9e15) to NaN
+
+    This alters x.  See [`fix_gsw_bad_code`](@ref) for a version that does
+    not alter x.
+
+"""
+function fix_gsw_bad_code!(x)
+    x[x.>1e15] .= NaN
+    x
+end
+
 
 """
     Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and pressure (dbar).
@@ -202,9 +223,9 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure (length: $(length(pressure)), max: $(maximum(filter(!isnan, pressure))))")
     oad(debug, "    given longitude (length: $(length(longitude)))")
     oad(debug, "    given latitude (length: $(length(latitude)))")
-    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    SA[SA.>1e15] .= NaN
+    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code()
     oad(debug, "    created SA (length: $(length(SA)), ends: $(last(SA, 6))")
+    stop("CHECK DAN")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
     CT[CT.>1e15] .= NaN
     oad(debug, "    created CT (length: $(length(CT)), max: $(maximum(filter(!isnan, CT))))")
