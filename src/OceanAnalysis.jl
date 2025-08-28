@@ -229,11 +229,11 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
     oad(debug, "    created SA (length: $(length(SA)), ends: $(last(SA, 6))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
-    oad(debug, "    created CT (length: $(length(CT)), max: $(maximum(filter(!isnan, CT))))")
+    oad(debug, "    created CT (length: $(length(CT)), ends: $(last(CT, 6))")
     sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created sigma0 (length: $(length(sigma0)), max: $(maximum(filter(!isnan, sigma0))))")
+    oad(debug, "    created sigma0 (length: $(length(sigma0)), ends: $(last(sigma0, 6))")
     spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created spiciness0 (length: $(length(spiciness0)), max: $(maximum(filter(!isnan, spiciness0))))")
+    oad(debug, "    created spiciness0 (length: $(length(spiciness0)), ends: $(last(spiciness0, 6))")
     oad(debug, "    assembling .data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
