@@ -550,15 +550,18 @@ function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
     if length(item) > 1
-        println("DAN 1")
-        println("type: $(typeof(item)))")
+        println("DAN 1 type: $(typeof(item)))")
         println(item)
         item[ismissing.(item)] .= NaN
-        println("type: $(typeof(item)))")
-        println(item)
+        println("DAN 2 type: $(typeof(item)))")
+        println(last(item, 5))
         rval = convert(Vector{Float64}, item)
-        println("DAN 2")
+        println("DAN 3 type: $(typeof(item)))")
+        println(last(item, 5))
         rval[rval.>1.0e15] .= NaN
+        println("DAN 4 type: $(typeof(item)))")
+        println(last(item, 5))
+        println("\n")
     else
         #println("is a scalar")
         rval = convert(Float64, item)
