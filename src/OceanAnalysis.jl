@@ -530,10 +530,15 @@ function read_argo(filename, column=1; debug::Int64=0)
     latitude = get_nc_value(d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
 
+    println("DAN 1")
     datetime = join(d["DATE_CREATION"])
+    println("DAN 2")
     println("datetime '$datetime'")
+    println("DAN 3")
     time = DateTime(datetime, dateformat"yyyymmddHHMMSS")
+    println("DAN 4")
     println("time $time")
+    println("DAN 5 (done with time)")
 
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
         debug=debug > 0 ? debug + 1 : 0)
