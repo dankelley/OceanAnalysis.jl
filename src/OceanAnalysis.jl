@@ -72,7 +72,9 @@ end
 
 """
 function fix_gsw_bad_code!(x)
+    println("DAN 1 in fix!")
     x[x.>1e15] .= NaN
+    println("DAN 2 in fix!")
     x
 end
 
