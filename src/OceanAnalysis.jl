@@ -550,14 +550,11 @@ function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
     if length(item) > 1
-        #item[item.>1e15] .= NaN
-        item[ismissing.(item)] .= NaN
-        println("max $(maximum(filter(!isnan, item)))")
-        #println("is a vector")
+        item[item.>1.0e15] .= NaN
         return convert(Vector{Float64}, item)
     else
         #println("is a scalar")
-        if ismissing(item)
+        if item > 1.0e15
             item = NaN
         end
         return convert(Float64, item)
@@ -709,11 +706,6 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     data.sigma0 = gsw_sigma0.(data.SA, data.CT)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    # Bad values are flagged as 9.0e15, but we check on > 1.0e15
-    data.SA[data.SA.>1.0e15] .= NaN
-    data.CT[data.CT.>1.0e15] .= NaN
-    data.sigma0[data.sigma0.>1.0e15] .= NaN
-    data.spiciness0[data.spiciness0.>1.0e15] .= NaN
     oad(debug, "    combining .metadata and .data into a Ctd object")
     rval = Ctd(metadata, data)
     oad(debug, "END read_ctd_cnv()")
