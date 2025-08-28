@@ -531,7 +531,7 @@ function read_argo(filename, column=1; debug::Int64=0)
     #oad(debug, "    about to try to get latitude")
     latitude = get_nc_value(d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
-    println("DAN in read_argo S ends with $(last(salinity))")
+    println("DAN in read_argo S ends with $(last(salinity, 10))")
     time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
     oad(debug, "    time: $time")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
