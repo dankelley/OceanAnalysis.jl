@@ -534,15 +534,24 @@ function read_argo(filename, column=1; debug::Int64=0)
     time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
     oad(debug, "    time: $time")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-        time = time, debug=debug > 0 ? debug + 1 : 0)
+        time=time, debug=debug > 0 ? debug + 1 : 0)
     oad(debug, "END read_argo()")
     rval
 end # read_argo()
 
+"""
+    Transform an item from a NetCDF file into a more useable object
+
+    This converts the item into either a `Float64` object or `Vector{Float64}` object,
+    depending on its length.  Also, values equal to the NetCDF "bad" flag for easier 
+    Values exceeding 1e14 that `ismissing()` finds to be flags
+"""
 function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
+    println("max $(maximum(item))")
     if length(item) > 1
+        #item[item.>1e15] .= NaN
         item[ismissing.(item)] .= NaN
         #println("is a vector")
         return convert(Vector{Float64}, item)
