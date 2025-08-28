@@ -51,7 +51,7 @@ end
 
 export fix_gsw_bad_code
 function fix_gsw_bad_code(x)
-    rval = x
+    rval = copy(x)
     rval[rval.>1e15] .= NaN
     rval
 end
