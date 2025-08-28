@@ -544,34 +544,16 @@ plot_TS(d)
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     local d = NCDataset(filename, "r")
-    #oad(debug, "    file holds $(keys(d))")
-    #pressure = convert(Vector{Float64}, d["PRES"][:, column])
     pressure = get_nc_value(d["PRES"][:, column])
     oad(debug, "    pressure length: $(length(pressure))")
-    #salinity = convert(Vector{Float64}, d["PSAL"][:, column])
     salinity = get_nc_value(d["PSAL"][:, column])
     oad(debug, "    salinity length: $(length(salinity))")
-    #temperature = convert(Vector{Float64}, d["TEMP"][:, column])
     temperature = get_nc_value(d["TEMP"][:, column])
     oad(debug, "    temperature length: $(length(temperature))")
-
-    #println("DAN 1 ", typeof(d["LONGITUDE"][1]))
-    #DAN = d["LONGITUDE"][1]
-    #println("DAN 2", DAN)
-    #println("DAN 3", DAN > 1e15)
-    #println("DAN 4", DAN .> 1e15)
-    #DAN[DAN.>1e15] .= 9.999
-    #println("DAN 6", DAN)
-
-    oad(debug, "    about to try to get longitude")
-    #longitude = convert(Float64, d["LONGITUDE"][1])
     longitude = get_nc_value(d["LONGITUDE"][1])
     oad(debug, "    longitude: $longitude")
-    #latitude = convert(Float64, d["LATITUDE"][1])
-    #oad(debug, "    about to try to get latitude")
     latitude = get_nc_value(d["LATITUDE"][1])
     oad(debug, "    latitude: $latitude")
-    #println("DAN in read_argo S ends with $(last(salinity, 10))")
     time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
     oad(debug, "    time: $time")
     rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
@@ -588,8 +570,6 @@ end # read_argo()
     Values exceeding 1e14 that `ismissing()` finds to be flags
 """
 function get_nc_value(item)
-    #println("length(item): $(length(item))")
-    #println("typeof(item): $(typeof(item))")
     bad = ismissing.(item)
     if any(bad)
         item[ismissing.(item)] .= NaN
