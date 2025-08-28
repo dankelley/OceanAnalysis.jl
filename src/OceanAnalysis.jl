@@ -49,6 +49,10 @@ function oad(debug::Int64=0, args...)
     end
 end
 
+function fix_gsw_bad(x)
+    x[x.>1e15] .= NaN
+    x
+end
 
 """
     Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and pressure (dbar).
@@ -292,7 +296,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
     SA = ctd.data.SA #gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
+    SA[SA.>1e15] .= NaN
     CT = ctd.data.CT #gsw_ct_from_t.(SA, T, p)
+    CT[CT.>1e15] .= NaN
     sigma0 = ctd.data.sigma0 #gsw_sigma0.(SA, CT)
     oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
@@ -420,7 +426,9 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     local lon = ctd.metadata["longitude"]
     local lat = ctd.metadata["latitude"]
     SA = gsw_sa_from_sp.(S, p, lon, lat)
+    SA[SA.>1e15] .= NaN
     CT = gsw_ct_from_t.(SA, T, p)
+    CT[CT.>1e15] .= NaN
     # We start with the measurements ... 
     oad(debug, "    drawing data")
     rval = plot(SA, CT, legend=legend,
