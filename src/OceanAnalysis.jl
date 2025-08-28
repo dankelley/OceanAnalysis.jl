@@ -590,7 +590,10 @@ end # read_argo()
 function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
-    item[ismissing.(item)] .= NaN
+    bad = ismissing.(item)
+    if any(bad)
+        item[ismissing.(item)] .= NaN
+    end
     if length(item) > 1
         rval = convert(Vector{Float64}, item)
     else
