@@ -207,7 +207,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    assembling .data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
-    oad(debug, "    assembling .metadata")
+    oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
