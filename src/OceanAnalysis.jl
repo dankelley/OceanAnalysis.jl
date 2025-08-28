@@ -549,10 +549,10 @@ end # read_argo()
 function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
-    println("max $(maximum(filter(!isnan, item)))")
     if length(item) > 1
         #item[item.>1e15] .= NaN
         item[ismissing.(item)] .= NaN
+        println("max $(maximum(filter(!isnan, item)))")
         #println("is a vector")
         return convert(Vector{Float64}, item)
     else
