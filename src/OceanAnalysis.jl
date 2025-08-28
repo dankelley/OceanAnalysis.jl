@@ -575,13 +575,13 @@ end # read_argo()
 function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
+    item[ismissing.(item)] .= NaN
     if length(item) > 1
-        item[ismissing.(item)] .= NaN
-        rval = convert(Vector{Float64}, item) |> fix_gsw_bad_code!
+        rval = convert(Vector{Float64}, item)
     else
-        rval = convert(Float64, item) |> fix_gsw_bad_code!
+        rval = convert(Float64, item)
     end
-    return rval
+    return rval |> fix_gsw_bad_code!
 end
 
 
