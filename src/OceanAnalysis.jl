@@ -554,8 +554,6 @@ function read_argo(filename, column=1; debug::Int64=0)
     #temperature = convert(Vector{Float64}, d["TEMP"][:, column])
     temperature = get_nc_value(d["TEMP"][:, column])
     oad(debug, "    temperature length: $(length(temperature))")
-    #longitude = convert(Float64, d["LONGITUDE"][1])
-    oad(debug, "    about to try to get longitude")
 
     #println("DAN 1 ", typeof(d["LONGITUDE"][1]))
     #DAN = d["LONGITUDE"][1]
@@ -565,6 +563,8 @@ function read_argo(filename, column=1; debug::Int64=0)
     #DAN[DAN.>1e15] .= 9.999
     #println("DAN 6", DAN)
 
+    oad(debug, "    about to try to get longitude")
+    #longitude = convert(Float64, d["LONGITUDE"][1])
     longitude = get_nc_value(d["LONGITUDE"][1])
     oad(debug, "    longitude: $longitude")
     #latitude = convert(Float64, d["LATITUDE"][1])
