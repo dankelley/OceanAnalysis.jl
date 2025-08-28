@@ -196,9 +196,6 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure, of length: $(length(pressure))")
     oad(debug, "    given longitude, of length: $(length(longitude))")
     oad(debug, "    given latitude, of length: $(length(latitude))")
-    print("ismissing(time): $(ismissing(time))")
-    oad(debug, "    given time: $(time)")
-    println(typeof(time))
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
     oad(debug, "    created SA, of length: $(length(SA))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
@@ -207,14 +204,17 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    created spiciness0, of length: $(length(spiciness0))")
     sigma0 = gsw_sigma0.(SA, CT)
     oad(debug, "    created sigma0, of length: $(length(sigma0))")
-    oad(debug, "    assembling metadata")
+    oad(debug, "    assembling .data (a DataFrame) from the above")
+    data = DataFrame(salinity=salinity, temperature=temperature,
+        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
+    oad(debug, "    assembling .metadata")
     metadata = Dict{String,Any}()
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
-    oad(debug, "    assembling data")
-    data = DataFrame(salinity=salinity, temperature=temperature,
-        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
-    oad(debug, "    creating Ctd object")
+    if !ismissing(time)
+        metadata["time"] = time
+    end
+    oad(debug, "    assembling .data and .metadata into a Ctd object")
     rval = Ctd(metadata, data)
     oad(debug, "END as_ctd()")
     rval
