@@ -6,6 +6,7 @@ authors = ["dankelley <kelley.dan@gmail.com>"]
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
 GibbsSeaWater = "9a22fb26-0b63-4589-b28e-8f9d0b5c3d05"
 Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
@@ -17,6 +18,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 CSV = "0.10.15"
 DataFrames = "1.7.0"
+Dates = "1.11.0"
 Dierckx = "0.5.4"
 GibbsSeaWater = "0.1.4"
 Measures = "0.3.2"
