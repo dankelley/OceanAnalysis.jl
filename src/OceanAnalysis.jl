@@ -197,14 +197,16 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given longitude (length: $(length(longitude)))")
     oad(debug, "    given latitude (length: $(length(latitude)))")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    oad(debug, "    FIRST  created SA (length: $(length(SA)), ends: $(last(SA, 6))")
     SA[SA.>1e15] .= NaN
-    oad(debug, "    LATER created SA (length: $(length(SA)), ends: $(last(SA, 6))")
+    oad(debug, "    created SA (length: $(length(SA)), ends: $(last(SA, 6))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure)
+    CT[CT.>1e15] .= NaN
     oad(debug, "    created CT (length: $(length(CT)), max: $(maximum(filter(!isnan, CT))))")
     sigma0 = gsw_sigma0.(SA, CT)
+    sigma0[sigma0.>1e15] .= NaN
     oad(debug, "    created sigma0 (length: $(length(sigma0)), max: $(maximum(filter(!isnan, sigma0))))")
     spiciness0 = gsw_spiciness0.(SA, CT)
+    spiciness0[spiciness0.>1e15] .= NaN
     oad(debug, "    created spiciness0 (length: $(length(spiciness0)), max: $(maximum(filter(!isnan, spiciness0))))")
     oad(debug, "    assembling .data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
@@ -553,18 +555,18 @@ function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
     if length(item) > 1
-        println("DAN 1 type: $(typeof(item)))")
-        println(item)
+        #println("DAN 1 type: $(typeof(item)))")
+        #println(item)
         item[ismissing.(item)] .= NaN
-        println("DAN 2 type: $(typeof(item)))")
-        println(last(item, 5))
+        #println("DAN 2 type: $(typeof(item)))")
+        #println(last(item, 5))
         rval = convert(Vector{Float64}, item)
-        println("DAN 3 type: $(typeof(item)))")
-        println(last(item, 5))
+        #println("DAN 3 type: $(typeof(item)))")
+        #println(last(item, 5))
         rval[rval.>1.0e15] .= NaN
-        println("DAN 4 type: $(typeof(item)))")
-        println(last(item, 5))
-        println("\n")
+        #println("DAN 4 type: $(typeof(item)))")
+        #println(last(item, 5))
+        #println("\n")
     else
         #println("is a scalar")
         rval = convert(Float64, item)
