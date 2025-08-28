@@ -602,6 +602,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     header = ""
     data_start = 0
     data_names = Vector{String}()
+    oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
     for i in eachindex(lines)
         line = lines[i]
@@ -659,10 +660,11 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data[irow, :] = d
         irow = irow + 1
     end
+    metadata["header"] = header
+    oad(debug, "    assembling .data (a DataFrame)")
     data = DataFrame(data, data_names, makeunique=true)
     data_names = names(data)
     # Add standard columns
-    oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
     if "pr" in data_names
         data.pressure = data.pr
     elseif "prDM" in data_names
@@ -703,18 +705,16 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
         end
     end
-    oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
+    data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
+    data.sigma0 = gsw_sigma0.(data.SA, data.CT)
+    data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     # Bad values are flagged as 9.0e15, but we check on > 1.0e15
     data.SA[data.SA.>1.0e15] .= NaN
-    data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     data.CT[data.CT.>1.0e15] .= NaN
-    data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-    data.sigma0[data.CT.>1.0e15] .= NaN
-    data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    data.spiciness0[data.CT.>1.0e15] .= NaN
-    metadata["header"] = header
-    oad(debug, "    combining metadata and data into a Ctd object")
+    data.sigma0[data.sigma0.>1.0e15] .= NaN
+    data.spiciness0[data.spiciness0.>1.0e15] .= NaN
+    oad(debug, "    combining .metadata and .data into a Ctd object")
     rval = Ctd(metadata, data)
     oad(debug, "END read_ctd_cnv()")
     rval
