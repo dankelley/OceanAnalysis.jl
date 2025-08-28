@@ -81,11 +81,8 @@ end
     Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and pressure (dbar).
 """
 #gsw::gsw_SP_from_C(C0 * conductivity, temperature, pressure)
-function salinity_from_conductivity(conductivity::Float64,
-    temperature::Float64, pressure::Float64)
-    rval = gsw_sp_from_c(conductivity, temperature, pressure)
-    # gswteos-10.h:#define GSW_INVALID_VALUE       9e15    /* error return from gsw_saar et al. */
-    return (rval > 1e15 ? NaN : rval)
+function salinity_from_conductivity(conductivity::Float64, temperature::Float64, pressure::Float64)
+    gsw_sp_from_c(conductivity, temperature, pressure)
 end
 
 
@@ -223,16 +220,13 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure (length: $(length(pressure)), max: $(maximum(filter(!isnan, pressure))))")
     oad(debug, "    given longitude (length: $(length(longitude)))")
     oad(debug, "    given latitude (length: $(length(latitude)))")
-    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code
-    oad(debug, "    DAN DAN DAN created SA (length: $(length(SA)), ends: $(last(SA, 6))")
-    local CT = gsw_ct_from_t.(SA, temperature, pressure)
-    CT[CT.>1e15] .= NaN
+    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
+    oad(debug, "    created SA (length: $(length(SA)), ends: $(last(SA, 6))")
+    local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
     oad(debug, "    created CT (length: $(length(CT)), max: $(maximum(filter(!isnan, CT))))")
-    sigma0 = gsw_sigma0.(SA, CT)
-    sigma0[sigma0.>1e15] .= NaN
+    sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
     oad(debug, "    created sigma0 (length: $(length(sigma0)), max: $(maximum(filter(!isnan, sigma0))))")
-    spiciness0 = gsw_spiciness0.(SA, CT)
-    spiciness0[spiciness0.>1e15] .= NaN
+    spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
     oad(debug, "    created spiciness0 (length: $(length(spiciness0)), max: $(maximum(filter(!isnan, spiciness0))))")
     oad(debug, "    assembling .data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
@@ -317,11 +311,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    SA = ctd.data.SA #gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
-    SA[SA.>1e15] .= NaN
-    CT = ctd.data.CT #gsw_ct_from_t.(SA, T, p)
-    CT[CT.>1e15] .= NaN
-    sigma0 = ctd.data.sigma0 #gsw_sigma0.(SA, CT)
+    SA = ctd.data.SA |> fix_gsw_bad_code!
+    CT = ctd.data.CT |> fix_gsw_bad_code!
+    sigma0 = ctd.data.sigma0
     oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
@@ -368,7 +360,8 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         oad(debug, "    drawing $which")
-        rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
+        rval = plot(gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!,
+            y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -447,10 +440,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     local p = ctd.data.pressure
     local lon = ctd.metadata["longitude"]
     local lat = ctd.metadata["latitude"]
-    SA = gsw_sa_from_sp.(S, p, lon, lat)
-    SA[SA.>1e15] .= NaN
-    CT = gsw_ct_from_t.(SA, T, p)
-    CT[CT.>1e15] .= NaN
+    SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
+    CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     # We start with the measurements ... 
     oad(debug, "    drawing data")
     rval = plot(SA, CT, legend=legend,
@@ -466,7 +457,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    processing sigma0 contours")
-    sigma0c = gsw_sigma0.(SAc', CTc)
+    sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
     local levels = sigma0_levels
     if length(sigma0_levels) == 0
         oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
@@ -490,7 +481,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     end
     # ... then (optionally) add spiciness contours ...
     oad(debug, "    processing spiciness0 contours")
-    spiciness0c = gsw_spiciness0.(SAc', CTc)
+    spiciness0c = gsw_spiciness0.(SAc', CTc) |> fix_gsw_bad_code!
     local levels = spiciness0_levels
     if length(spiciness0_levels) == 0
         oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
@@ -585,24 +576,10 @@ function get_nc_value(item)
     #println("length(item): $(length(item))")
     #println("typeof(item): $(typeof(item))")
     if length(item) > 1
-        #println("DAN 1 type: $(typeof(item)))")
-        #println(item)
         item[ismissing.(item)] .= NaN
-        #println("DAN 2 type: $(typeof(item)))")
-        #println(last(item, 5))
-        rval = convert(Vector{Float64}, item)
-        #println("DAN 3 type: $(typeof(item)))")
-        #println(last(item, 5))
-        rval[rval.>1.0e15] .= NaN
-        #println("DAN 4 type: $(typeof(item)))")
-        #println(last(item, 5))
-        #println("\n")
+        rval = convert(Vector{Float64}, item) |> fix_gsw_bad_code!
     else
-        #println("is a scalar")
-        rval = convert(Float64, item)
-        if rval > 1.0e15
-            rval = NaN
-        end
+        rval = convert(Float64, item) |> fix_gsw_bad_code!
     end
     return rval
 end
@@ -795,18 +772,20 @@ function get_element(o::Ctd, name::String; debug::Int64=0)
         return copy(N2(o))
     end
     # Handle TEOS10 variables
-    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
+    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude) |> fix_gsw_bad_code!
     if name == "SA"
         return copy(SA)
     end
-    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure) |> fix_gsw_bad_code!
     if name == "CT"
         return copy(CT)
     end
     if name == "sigma0"
-        return copy(gsw_sigma0.(SA, CT))
+        return copy(gsw_sigma0.(SA, CT)) |> fix_gsw_bad_code!
+
     elseif name == "spiciness0"
-        return copy(gsw_spiciness0.(SA, CT))
+        return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
+
     end
     # The item is not handled, so return an empty result
     return Nothing
