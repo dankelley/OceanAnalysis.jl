@@ -1,4 +1,4 @@
-using OceanAnalysis, Test
+using OceanAnalysis, Test, Dates
 
 # My macOS 64-bit M4 machine likes tests to 14 digits but has problems
 # with 15 digits.  I set some test values from R/oce, printing with 15 digits,
@@ -50,9 +50,11 @@ end
 @testset "read_argo()" begin
     filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc")
     argo = read_argo(filename)
-    @test argo.metadata["longitude"] ≈ -63.643883333333335 atol = 1e-13
-    @test argo.metadata["latitude"] ≈ 44.684266666666666 atol = 1e-13
-    @test 42 == length(argo.data["pressure"])
+    @test argo.metadata["longitude"] ≈ -66.38298 atol = 1e-13
+    @test argo.metadata["latitude"] ≈ 40.45216 atol = 1e-13
+    @test argo.metadata["time"] == Dates.DateTime("2021-01-28T18:01:24")
+    @test 1014 == length(argo.data["pressure"])
+    @test collect(first(argo.data)) ≈ [34.913; 19.513; 0.48; 35.0786; 19.5079; 24.8272; 3.31464] atol = 0.0001
 end
 
 
