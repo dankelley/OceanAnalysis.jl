@@ -540,6 +540,8 @@ Read an Argo file and return a Ctd object.  As of 2025-08-23, this code is
 still in rapid development; please report problems as issues on
 <www.github.com/dankelley/OceanAnalysis.jl/issues>.
 
+An error is issued if the file lacks pressure, salinity, or temperature data.
+
 # Examples
 ```julia-repl
 using OceanAnalysis, Plots
@@ -557,37 +559,37 @@ function read_argo(filename, column=1; debug::Int64=0)
         if haskey(d, "TEMP")
             pressure = get_nc_value(d["PRES"][:, column])
         else
-            @warn("This argo file lacks pressure ('PRES') data")
+            error("This argo file lacks pressure ('PRES') data")
         end
         oad(debug, "    read pressure length: $(length(pressure))")
         if haskey(d, "PSAL")
             salinity = get_nc_value(d["PSAL"][:, column])
         else
-            @warn("This argo file lacks salinity ('PSAL') data")
+            error("This argo file lacks salinity ('PSAL') data")
         end
         oad(debug, "    read salinity length: $(length(salinity))")
         if haskey(d, "TEMP")
             temperature = get_nc_value(d["TEMP"][:, column])
         else
-            @warn("This argo file lacks temperature ('TEMP') data")
+            error("This argo file lacks temperature ('TEMP') data")
         end
         oad(debug, "    read temperature length: $(length(temperature))")
         if haskey(d, "LONGITUDE")
             longitude = get_nc_value(d["LONGITUDE"][1])
         else
-            @warn("This argo file lacks longitude ('LONGITUDE') data")
+            error("This argo file lacks longitude ('LONGITUDE') data")
         end
         oad(debug, "    read longitude: $longitude")
         if haskey(d, "LATITUDE")
             latitude = get_nc_value(d["LATITUDE"][1])
         else
-            @warn("This argo file lacks latitude ('LATITUDE') data")
+            error("This argo file lacks latitude ('LATITUDE') data")
         end
         oad(debug, "    read latitude: $latitude")
         if haskey(d, "DATE_CREATION")
             time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
-            @warn("This argo file lacks time ('DATE_CREATION') data")
+            error("This argo file lacks time ('DATE_CREATION') data")
         end
         oad(debug, "    read time: $time")
         oad(debug, "    calling as_ctd() to construct base ctd object")
