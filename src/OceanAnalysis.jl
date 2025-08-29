@@ -557,37 +557,37 @@ function read_argo(filename, column=1; debug::Int64=0)
         if haskey(d, "TEMP")
             pressure = get_nc_value(d["PRES"][:, column])
         else
-            error("This argo file lacks pressure ('PRES') data")
+            @warn("This argo file lacks pressure ('PRES') data")
         end
         oad(debug, "    read pressure length: $(length(pressure))")
         if haskey(d, "PSAL")
             salinity = get_nc_value(d["PSAL"][:, column])
         else
-            error("This argo file lacks salinity ('PSAL') data")
+            @warn("This argo file lacks salinity ('PSAL') data")
         end
         oad(debug, "    read salinity length: $(length(salinity))")
         if haskey(d, "TEMP")
             temperature = get_nc_value(d["TEMP"][:, column])
         else
-            error("This argo file lacks temperature ('TEMP') data")
+            @warn("This argo file lacks temperature ('TEMP') data")
         end
         oad(debug, "    read temperature length: $(length(temperature))")
         if haskey(d, "LONGITUDE")
             longitude = get_nc_value(d["LONGITUDE"][1])
         else
-            error("This argo file lacks longitude ('LONGITUDE') data")
+            @warn("This argo file lacks longitude ('LONGITUDE') data")
         end
         oad(debug, "    read longitude: $longitude")
         if haskey(d, "LATITUDE")
             latitude = get_nc_value(d["LATITUDE"][1])
         else
-            error("This argo file lacks latitude ('LATITUDE') data")
+            @warn("This argo file lacks latitude ('LATITUDE') data")
         end
         oad(debug, "    read latitude: $latitude")
         if haskey(d, "DATE_CREATION")
             time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
-            error("This argo file lacks time ('DATE_CREATION') data")
+            @warn("This argo file lacks time ('DATE_CREATION') data")
         end
         oad(debug, "    read time: $time")
         oad(debug, "    calling as_ctd() to construct base ctd object")

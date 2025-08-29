@@ -12,7 +12,7 @@ for file in files
             d = read_argo(file, debug=1)
             println("data starts: $(first(d.data, 3))")
         catch e
-            println("problem with file ($e)")
+            println("    $e")
         end
         # data = NCDataset(file, "r") do ds
         #     if haskey(ds, "PSAL")
