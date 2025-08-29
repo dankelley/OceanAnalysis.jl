@@ -53,7 +53,7 @@ end
     @test argo.metadata["longitude"] ≈ -66.38298 atol = 1e-13
     @test argo.metadata["latitude"] ≈ 40.45216 atol = 1e-13
     @test argo.metadata["time"] == Dates.DateTime("2021-01-28T18:01:24")
-    @test 1014 == length(argo.data["pressure"])
+    @test 1014 == length(argo.data.pressure)
     @test collect(first(argo.data)) ≈ [34.913; 19.513; 0.48; 35.0786; 19.5079; 24.8272; 3.31464] atol = 0.0001
 end
 
