@@ -554,37 +554,37 @@ plot_TS(d)
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     NCDataset(filename, "r") do d
-        if haskey(ds, "TEMP")
+        if haskey(d, "TEMP")
             pressure = get_nc_value(d["PRES"][:, column])
         else
             error("This argo file lacks pressure ('PRES') data")
         end
         oad(debug, "    read pressure length: $(length(pressure))")
-        if haskey(ds, "PSAL")
+        if haskey(d, "PSAL")
             salinity = get_nc_value(d["PSAL"][:, column])
         else
             error("This argo file lacks salinity ('PSAL') data")
         end
         oad(debug, "    read salinity length: $(length(salinity))")
-        if haskey(ds, "TEMP")
+        if haskey(d, "TEMP")
             temperature = get_nc_value(d["TEMP"][:, column])
         else
             error("This argo file lacks temperature ('TEMP') data")
         end
         oad(debug, "    read temperature length: $(length(temperature))")
-        if haskey(ds, "LONGITUDE")
+        if haskey(d, "LONGITUDE")
             longitude = get_nc_value(d["LONGITUDE"][1])
         else
             error("This argo file lacks longitude ('LONGITUDE') data")
         end
         oad(debug, "    read longitude: $longitude")
-        if haskey(ds, "LATITUDE")
+        if haskey(d, "LATITUDE")
             latitude = get_nc_value(d["LATITUDE"][1])
         else
             error("This argo file lacks latitude ('LATITUDE') data")
         end
         oad(debug, "    read latitude: $latitude")
-        if haskey(ds, "DATE_CREATION")
+        if haskey(d, "DATE_CREATION")
             time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
             error("This argo file lacks time ('DATE_CREATION') data")
