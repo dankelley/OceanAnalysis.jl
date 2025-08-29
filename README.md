@@ -19,7 +19,9 @@ using Pkg ; Pkg.add("OceanAnalysis")
 
 #### Somewhat stable (for early users)
 
-Type the following in a Julia console.
+Type the following in a Julia console to use the "main" branch from the
+development website. This is updated after significant changes to the "develop"
+branch (that have passed the built-in test suite).
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
@@ -27,7 +29,9 @@ using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 
 #### Unstable (for developers)
 
-Type the following in a Julia console.
+Type the following in a Julia console to use the "develop" branch from the
+development website.  This is updated very frequently, because the author tests
+changes using this method.
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
@@ -119,9 +123,11 @@ There are no breaking changes; all change are additions or bug fixes.
 
 ## Running tests
 
-Type the following in a Julia console:
+There is a small test suite built into the package.  To run it, type the
+following in a Julia console:
 
 ```julia
+]
 activate .
 test
 ```

@@ -47,6 +47,15 @@ end
     @test 42 == length(ctd.metadata["header"])
 end
 
+@testset "read_argo()" begin
+    filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc")
+    argo = read_argo(filename)
+    @test argo.metadata["longitude"] ≈ -63.643883333333335 atol = 1e-13
+    @test argo.metadata["latitude"] ≈ 44.684266666666666 atol = 1e-13
+    @test 42 == length(argo.data["pressure"])
+end
+
+
 @testset "pretty() tests for consistency with R" begin
     e = 0.0:2.0:16
     p = pretty(1:15)

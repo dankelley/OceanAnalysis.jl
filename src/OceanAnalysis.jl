@@ -600,8 +600,8 @@ function read_argo(filename, column=1; debug::Int64=0)
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
         rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
         oad(debug, "END read_argo()")
+        return rval
     end
-    rval
 end # read_argo()
 
 """
