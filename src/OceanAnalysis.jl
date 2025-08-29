@@ -557,7 +557,7 @@ function read_argo(filename, column=1; debug::Int64=0)
     println("DAN 1 ", d["CYCLE_NUMBER"][1])
     println("DAN 2 ", d["PLATFORM_NUMBER"][1])
     tmp = d["PLATFORM_NUMBER"][:, 1]
-    tmp[ismissing.(tmp)] = ""
+    tmp[ismissing.(tmp)] .= ""
     tmp = join(tmp)
     println("DAN 3 '$tmp'")
     pressure = get_nc_value(d["PRES"][:, column])
