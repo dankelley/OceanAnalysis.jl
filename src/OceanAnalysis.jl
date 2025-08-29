@@ -553,27 +553,52 @@ plot_TS(d)
 """
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
-    local d = NCDataset(filename, "r")
-    pressure = get_nc_value(d["PRES"][:, column])
-    oad(debug, "    read pressure length: $(length(pressure))")
-    salinity = get_nc_value(d["PSAL"][:, column])
-    oad(debug, "    read salinity length: $(length(salinity))")
-    temperature = get_nc_value(d["TEMP"][:, column])
-    oad(debug, "    read temperature length: $(length(temperature))")
-    longitude = get_nc_value(d["LONGITUDE"][1])
-    oad(debug, "    read longitude: $longitude")
-    latitude = get_nc_value(d["LATITUDE"][1])
-    oad(debug, "    read latitude: $latitude")
-    time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
-    oad(debug, "    read time: $time")
-    oad(debug, "    calling as_ctd() to construct base ctd object")
-    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-        time=time, debug=debug > 0 ? debug + 1 : 0)
-    oad(debug, "    extending ctd object .metadata by adding argo-specific items")
-    rval.metadata["filename"] = filename
-    rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
-    rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
-    oad(debug, "END read_argo()")
+    NCDataset(filename, "r") do d
+        if haskey(ds, "TEMP")
+            pressure = get_nc_value(d["PRES"][:, column])
+        else
+            error("This argo file lacks pressure ('PRES') data")
+        end
+        oad(debug, "    read pressure length: $(length(pressure))")
+        if haskey(ds, "PSAL")
+            salinity = get_nc_value(d["PSAL"][:, column])
+        else
+            error("This argo file lacks salinity ('PSAL') data")
+        end
+        oad(debug, "    read salinity length: $(length(salinity))")
+        if haskey(ds, "TEMP")
+            temperature = get_nc_value(d["TEMP"][:, column])
+        else
+            error("This argo file lacks temperature ('TEMP') data")
+        end
+        oad(debug, "    read temperature length: $(length(temperature))")
+        if haskey(ds, "LONGITUDE")
+            longitude = get_nc_value(d["LONGITUDE"][1])
+        else
+            error("This argo file lacks longitude ('LONGITUDE') data")
+        end
+        oad(debug, "    read longitude: $longitude")
+        if haskey(ds, "LATITUDE")
+            latitude = get_nc_value(d["LATITUDE"][1])
+        else
+            error("This argo file lacks latitude ('LATITUDE') data")
+        end
+        oad(debug, "    read latitude: $latitude")
+        if haskey(ds, "DATE_CREATION")
+            time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+        else
+            error("This argo file lacks time ('DATE_CREATION') data")
+        end
+        oad(debug, "    read time: $time")
+        oad(debug, "    calling as_ctd() to construct base ctd object")
+        rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
+            time=time, debug=debug > 0 ? debug + 1 : 0)
+        oad(debug, "    extending ctd object .metadata by adding argo-specific items")
+        rval.metadata["filename"] = filename
+        rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
+        rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
+        oad(debug, "END read_argo()")
+    end
     rval
 end # read_argo()
 
