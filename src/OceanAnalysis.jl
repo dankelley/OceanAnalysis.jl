@@ -624,6 +624,24 @@ function get_nc_value(item)
     return rval |> fix_gsw_bad_code!
 end
 
+function get_nc_value(d, name)
+    if !name in keys(d)
+        error("This NetCDF file has no variable named \"$name\"")
+    end
+    item = d[name]
+    bad = ismissing.(item)
+    if any(bad)
+        item[ismissing.(item)] .= NaN
+    end
+    if length(item) > 1
+        rval = convert(Vector{Float64}, item)
+    else
+        rval = convert(Float64, item)
+    end
+    return rval |> fix_gsw_bad_code!
+end
+
+
 
 """
     ctd = read_ctd_cnv(filename)
