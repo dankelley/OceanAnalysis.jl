@@ -41,6 +41,16 @@ struct Ctd <: Oce
     data::DataFrames.DataFrame
 end
 
+"""
+    Split Argo "id_cycle" into components id and cycle
+"""
+function argo_id_cycle(idcycle::String="D123_321")
+    splitat = firstindex("_", idcycle)[1]
+    id = idcycle[1:splitat-1]
+    cycle = idcycle[splitat+1:end]
+    id, cycle
+end
+
 function oad(debug::Int64=0, args...)
     if debug > 0
         print(repeat("    ", debug - 1))
@@ -544,6 +554,7 @@ plot_TS(d)
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     local d = NCDataset(filename, "r")
+    println("DAN ", d["CYCLE_NUMBER"])
     pressure = get_nc_value(d["PRES"][:, column])
     oad(debug, "    pressure length: $(length(pressure))")
     salinity = get_nc_value(d["PSAL"][:, column])

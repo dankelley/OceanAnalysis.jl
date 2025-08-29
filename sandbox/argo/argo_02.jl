@@ -10,9 +10,9 @@ m = 10
 look = rand(1:nfiles, m)
 for i in look
     file = files[i]
-    println("$i: $file")
     try
         local d = read_argo(file)#, debug=1)
+        println("$file: $(length(d.data.pressure)) levels on $(d.metadata["time"]) at $(round(d.metadata["latitude"], digits=4))N, $(round(d.metadata["longitude"], digits=4))E")
     catch
         println("$e")
     end
