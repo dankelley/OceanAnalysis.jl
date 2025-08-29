@@ -553,7 +553,7 @@ plot_TS(d)
 """
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
-    NCDataset(filename, "r") do d
+    data = NCDataset(filename, "r") do d
         if haskey(d, "TEMP")
             pressure = get_nc_value(d["PRES"][:, column])
         else

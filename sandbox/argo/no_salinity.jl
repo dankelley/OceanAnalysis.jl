@@ -8,7 +8,11 @@ using NCDatasets
 file = "BR4902576_017.nc"
 if isfile(file)
     println("File: ", file, "\n")
-    d = read_argo(file, debug=1)
+    try
+        d = read_argo(file, debug=1)
+    catch e
+        println("problem with file ($e)")
+    end
     println("data starts: $(first(d.data, 3))")
     # data = NCDataset(file, "r") do ds
     #     if haskey(ds, "PSAL")
