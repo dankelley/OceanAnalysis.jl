@@ -676,12 +676,15 @@ function get_nc_value(d, name)
     #println("DAN 5")
     #println("DAN typeof $(typeof(item)) for name=\"$name\"")
     # this does not work if typeof(item) != "Dates.DateTime"
-    if name != "JULD"
-        if length(item) > 1
-            rval = convert(Vector{Float64}, item)
-        else
-            rval = convert(Float64, item)
-        end
+    println("DAN 1")
+    if length(item) > 1
+        println("DAN 2a")
+        rval = convert(Vector{Float64}, item)
+        println("DAN 2b")
+    else
+        println("DAN 3a")
+        rval = convert(Float64, item)
+        println("DAN 3b")
     end
     #println("DAN 5 (all done)")
     return rval
