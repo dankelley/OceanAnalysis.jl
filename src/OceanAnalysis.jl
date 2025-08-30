@@ -36,6 +36,9 @@ export z_from_pressure
 
 abstract type Oce end
 
+"""
+    The Ctd object, a struct holding a Dict named `metadata` and a DataFrame named `data`.
+"""
 struct Ctd <: Oce
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
@@ -228,8 +231,6 @@ Conservative Temperature (`CT`), potential density anomaly relative to the
 surface pressure (`sigma0`) and spiciness with respect to surface pressure
 (`spiciness0`).  The object also holds a `metadata` element that holds
 `longitude`, `latitude` and `time`.
-
-This function is used by [`read_ctd_cnv`](@ref) and [`read_argo`](@ref).
 
 # Arguments
 - `salinity` a vector of salinities, in Practical Salinity units.
