@@ -672,7 +672,7 @@ function get_nc_value(d, name)
         item[ismissing.(item)] .= NaN
     end
     TEST = sum(isfinite.(item))
-    println("$name TEST $TEST)
+    println("$name TEST $TEST")
     #println("DAN 4")
     #println(item)
     #println("DAN 5")
