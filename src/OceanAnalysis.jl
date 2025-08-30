@@ -576,7 +576,6 @@ function read_argo(filename, column=1; debug::Int64=0)
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
             rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
-            oad(debug, "    read date_creation: $date_creation")
         end
         rval.metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
