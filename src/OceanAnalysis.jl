@@ -603,12 +603,12 @@ function read_argo(filename, column=1; debug::Int64=0)
         if ismissing(longitude)
             error("No non-missing longitude data in Argo file $filename")
         end
-        oad(1, "    read longitude: $longitude")
+        oad(debug, "    read longitude: $longitude")
         latitude = get_nc_value(d, "LATITUDE")
         if ismissing(longitude)
             error("No non-missing longitude data in Argo file $filename")
         end
-        oad(1, "    read latitude: $latitude")
+        oad(debug, "    read latitude: $latitude")
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
         oad(debug, "    calling as_ctd() to construct base ctd object")
@@ -653,11 +653,8 @@ function get_nc_value(d, name)
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
-    println("DAN in get_nc_value() with name='$name'")
-    #println("DAN 1")
-    #println("get_nc_value(d, \"$name\"")
+    #println("DAN in get_nc_value() with name='$name'")
     local item = d[name]
-    #println("  item=$item")
     ndim = ndims(item)
     println("DAN ndim=$ndim")
     if ndim == 1
@@ -667,38 +664,29 @@ function get_nc_value(d, name)
     else
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
-    println("DAN 2")
+    #println("DAN 2")
     bad = ismissing.(item)
-    println("DAN 3 got $(sum(bad)) bad value(s) out of total $(length(bad)) value(s)")
+    #println("DAN 3 got $(sum(bad)) bad value(s) out of total $(length(bad)) value(s)")
     if any(bad)
-        println("DAN 3.1")
+        #println("DAN 3.1")
         if all(ismissing.(item))
-            println("ALL DATA ARE MISSING")
+            #println("ALL DATA ARE MISSING")
             return item
         end
         item[ismissing.(item)] .= NaN
-        println("DAN 3.2")
+        #println("DAN 3.2")
     end
-    println("DAN 4")
-    TEST = sum(isfinite.(item))
-    println("DAN 5 TEST=$TEST")
     #println("DAN 4")
-    #println(item)
-    #println("DAN 5")
-    #println("DAN typeof $(typeof(item)) for name=\"$name\"")
-    # this does not work if typeof(item) != "Dates.DateTime"
-    if all(isnan.(item))
-        rval = item
+    #TEST = sum(isfinite.(item))
+    #println("DAN 5 TEST=$TEST")
+    if length(item) > 1
+        #println("DAN 2a")
+        rval = convert(Vector{Float64}, item)
+        #println("DAN 2b")
     else
-        if length(item) > 1
-            println("DAN 2a")
-            rval = convert(Vector{Float64}, item)
-            println("DAN 2b")
-        else
-            println("DAN 3a")
-            rval = convert(Float64, item)
-            println("DAN 3b")
-        end
+        #println("DAN 3a")
+        rval = convert(Float64, item)
+        #println("DAN 3b")
     end
     return rval
 end
