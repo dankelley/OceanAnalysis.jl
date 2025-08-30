@@ -656,7 +656,6 @@ function get_nc_value(d, name)
     #println("DAN in get_nc_value() with name='$name'")
     local item = d[name]
     ndim = ndims(item)
-    println("DAN ndim=$ndim")
     if ndim == 1
         item = item[1]
     elseif ndim == 2
@@ -664,29 +663,17 @@ function get_nc_value(d, name)
     else
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
-    #println("DAN 2")
     bad = ismissing.(item)
-    #println("DAN 3 got $(sum(bad)) bad value(s) out of total $(length(bad)) value(s)")
     if any(bad)
-        #println("DAN 3.1")
         if all(ismissing.(item))
-            #println("ALL DATA ARE MISSING")
             return item
         end
         item[ismissing.(item)] .= NaN
-        #println("DAN 3.2")
     end
-    #println("DAN 4")
-    #TEST = sum(isfinite.(item))
-    #println("DAN 5 TEST=$TEST")
     if length(item) > 1
-        #println("DAN 2a")
         rval = convert(Vector{Float64}, item)
-        #println("DAN 2b")
     else
-        #println("DAN 3a")
         rval = convert(Float64, item)
-        #println("DAN 3b")
     end
     return rval
 end
