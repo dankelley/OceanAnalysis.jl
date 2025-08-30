@@ -647,12 +647,13 @@ function get_nc_value(d, name)
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
+    println("DAN in get_nc_value() with name='$name'")
     #println("DAN 1")
     #println("get_nc_value(d, \"$name\"")
     local item = d[name]
     #println("  item=$item")
     ndim = ndims(item)
-    #println("  ndim=$ndim")
+    println("DAN ndim=$ndim")
     if ndim == 1
         item = item[1]
     elseif ndim == 2
@@ -660,25 +661,21 @@ function get_nc_value(d, name)
     else
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
-    #println("  item=$item after grabbing first")
-    #println("DANNY size $(size(item))")
-    #println("DANNY ndimx $(ndims(item))")
-    #println("DANNY first 3: $(first(item, 3))")
-    #println("DAN 2")
+    println("DAN 2")
     bad = ismissing.(item)
-    #println("DAN 3")
+    println("DAN 3")
     if any(bad)
         #println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
+    println("DAN 4")
     TEST = sum(isfinite.(item))
-    println("$name TEST $TEST")
+    println("DAN 5 TEST=$TEST")
     #println("DAN 4")
     #println(item)
     #println("DAN 5")
     #println("DAN typeof $(typeof(item)) for name=\"$name\"")
     # this does not work if typeof(item) != "Dates.DateTime"
-    println("DAN 1")
     if length(item) > 1
         println("DAN 2a")
         rval = convert(Vector{Float64}, item)
