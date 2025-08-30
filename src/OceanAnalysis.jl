@@ -1,5 +1,10 @@
 """
-    DAN boy
+The OceanAnalysis module is intended to help with the analysis of oceanographic
+data. It is in a preliminary form, providing help with only two file
+types: Argo NetCDF files and CTD files in the Seabird CNV format.  In neither
+case does it read all the data.  If you need more powerful tools for
+reading and analysing oceanographic data, consider using the `oce` package
+in the R language, which over a decade old and supports many data types.
 """
 module OceanAnalysis
 
