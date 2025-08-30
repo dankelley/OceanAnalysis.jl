@@ -637,7 +637,6 @@ function get_nc_value(d, name)
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
     println("  item=$item after grabbing first")
-    println("  type is $(typeof(item))")
     #println("DANNY size $(size(item))")
     #println("DANNY ndimx $(ndims(item))")
     #println("DANNY first 3: $(first(item, 3))")
@@ -652,6 +651,7 @@ function get_nc_value(d, name)
     println(item)
     println("DAN 5")
     if typeof(item) != "Dates.DateTime"
+        println("Not a Dates.DateTime")
         if length(item) > 1
             rval = convert(Vector{Float64}, item)
         else
