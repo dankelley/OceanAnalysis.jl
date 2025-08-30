@@ -636,6 +636,8 @@ function get_nc_value(d, name)
     else
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
+    println("  item=$item after grabbing first")
+    println("  type is $(typeof(item))")
     #println("DANNY size $(size(item))")
     #println("DANNY ndimx $(ndims(item))")
     #println("DANNY first 3: $(first(item, 3))")
