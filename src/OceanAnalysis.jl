@@ -634,7 +634,8 @@ function get_nc_value(d, name)
     end
     println("DAN 1")
     local item = d[name]
-    println("DANNY $(size(item))")
+    println("DANNY size $(size(item))")
+    println("DANNY ndimx $(ndims(item))")
     println("DANNY first 3: $(first(item, 3))")
     println("DAN 2")
     bad = ismissing.(item)
