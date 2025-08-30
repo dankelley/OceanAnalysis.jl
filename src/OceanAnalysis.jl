@@ -232,15 +232,16 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
 `longitude`, `latitude` and `time`.
 
 # Arguments
-- `salinity` a vector of salinities, in Practical Salinity units.
-- `temperature` a vector of in-situ temperatures, in degrees Celsius.
-- `pressure` a vector of sea pressures, in dbar.
-- `longitude` a single number for longitude, in degrees East. If not provided, this defaults
+- `salinity::Vector{Float64}` measured salinity values, in Practical Salinity units.
+- `temperature::Vector{Float64}` measured temperature values, in degrees Celsius.
+- `pressure::Vector{Float64}` measured sea pressure, in dbar.
+- `longitude::Vector` observation longitude, in degrees East. If not provided, this defaults
     to -30 (i.e. -30E, or 30W, in the North Atlantic).
-- `latitude` a single number for latitude, in degrees North. If not provided, this defaults
+- `latitude::Float64` observation latitude, in degrees North. If not provided, this defaults
     to 30 (i.e. 30N, in the North Atlantic).
-- `time` an optional Date.DateTime value indicating the sampling time.
-- `debug` an optional Int64 value indicating whether to print debugging output during processing.
+- `time::Date.DateTime` an optional indication of the measurement start time.
+- `debug::Int64` an optional value that, if it exceeds 0, indicates that
+debugging output should be printed during processing.
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
