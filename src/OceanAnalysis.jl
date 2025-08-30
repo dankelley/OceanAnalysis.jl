@@ -246,7 +246,7 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
     debugging output should be printed during processing.
 
 # Examples
-```julia-repl
+```jldoctest
 julia> as_ctd([32.],[15.],[0.],-63.,40.)
 Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
  Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
