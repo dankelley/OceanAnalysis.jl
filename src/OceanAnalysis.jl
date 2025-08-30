@@ -651,10 +651,12 @@ function get_nc_value(d, name)
     println("DAN 4")
     println(item)
     println("DAN 5")
-    if length(item) > 1
-        rval = convert(Vector{Float64}, item)
-    else
-        rval = convert(Float64, item)
+    if typeof(item) != "Dates.DateTime"
+        if length(item) > 1
+            rval = convert(Vector{Float64}, item)
+        else
+            rval = convert(Float64, item)
+        end
     end
     println("DAN 5 (all done)")
     return rval
