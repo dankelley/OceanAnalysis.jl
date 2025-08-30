@@ -244,6 +244,16 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
 - `time::Date.DateTime` an optional indication of the measurement start time.
 - `debug::Int64` an optional value that, if it exceeds 0, indicates that
     debugging output should be printed during processing.
+
+# Examples
+```julia-repl
+julia> as_ctd([32.],[15.],[0.],-63.,40.)
+Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
+ Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
+     │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
+─────┼────────────────────────────────────────────────────────────────────────
+   1 │     32.0         15.0       0.0  32.1516  15.0642  23.6653   0.0686905)
+```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time=nothing, debug::Int64=0)
