@@ -555,7 +555,7 @@ plot_TS(d)
 """
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
-    rval = nothing
+    local rval = nothing
     NCDataset(filename, "r") do d
         pressure = get_nc_value(d, "PRES")
         oad(debug, "    read $(length(pressure)) pressure values; first are $(first(pressure,3))")
@@ -589,6 +589,7 @@ function read_argo(filename, column=1; debug::Int64=0)
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         rval.metadata["date_creation"] = date_creation
         rval.metadata["filename"] = filename
+        # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
         rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
     end
