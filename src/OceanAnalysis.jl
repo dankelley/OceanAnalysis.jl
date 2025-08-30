@@ -231,11 +231,12 @@ which are stored in the returned value alongside the three supplied vectors.
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
-    oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
-    oad(debug, "    given temperature (length: $(length(temperature)), max: $(maximum(filter(!isnan, temperature))))")
-    oad(debug, "    given pressure (length: $(length(pressure)), max: $(maximum(filter(!isnan, pressure))))")
-    oad(debug, "    given longitude (length: $(length(longitude)))")
-    oad(debug, "    given latitude (length: $(length(latitude)))")
+    #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
+    oad(debug, "    given salinity (length: $(length(salinity)), starts: $(first(salinity,3))")
+    oad(debug, "    given temperature (length: $(length(temperature)), starts: $(first(temperature,3))")
+    oad(debug, "    given pressure (length: $(length(pressure)), starts: $(first(pressure,3))")
+    oad(debug, "    given longitude: $(length(longitude))")
+    oad(debug, "    given latitude: $(length(latitude))")
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
     oad(debug, "    created SA (length: $(length(SA)), starts: $(first(SA, 3))")
     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
@@ -243,7 +244,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
     oad(debug, "    created sigma0 (length: $(length(sigma0)), starts: $(first(sigma0, 3))")
     spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created spiciness0 (length: $(length(spiciness0)), start: $(first(spiciness0, 3))")
+    oad(debug, "    created spiciness0 (length: $(length(spiciness0)), starts: $(first(spiciness0, 3))")
     oad(debug, "    assembling .data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
