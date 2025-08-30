@@ -574,7 +574,7 @@ function read_argo(filename, column=1; debug::Int64=0)
 
         # double JULD(N_PROF) ;
         # JULD:units = "days since 1950-01-01 00:00:00 UTC" ;
-        juld = get_nc_values(d, "JULD")
+        juld = get_nc_value(d, "JULD")
         println("JULD: $juld")
 
 
