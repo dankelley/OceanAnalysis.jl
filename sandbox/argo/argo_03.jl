@@ -15,7 +15,7 @@ for f in (f1, f2)
         println("  low-level inference: cycle '$cycle'")
 
         # The above was inserted into OceanAnalysis, as shown below
-        d = read_argo(f)
+        d = read_argo(f, debug=1)
         println("  metadata: $(d.metadata)")
         println("\n")
     end

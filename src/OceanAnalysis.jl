@@ -558,39 +558,24 @@ function read_argo(filename, column=1; debug::Int64=0)
     rval = nothing
     NCDataset(filename, "r") do d
         pressure = get_nc_value(d, "PRES")
-        if haskey(d, "PRES")
-            pressureOLD = get_nc_value(d["PRES"][:, column])
-        else
-            error("This argo file lacks pressure ('PRES') data")
-        end
-        #println("DAN new pressure: $tmp")
-        #println("DAN old pressure: $pressure")
-        oad(debug, "    NEW read pressure length: $(length(pressure)); first $(first(pressure,6))")
-        oad(debug, "    read pressure length: $(length(pressureOLD)); first $(first(pressureOLD,6))")
-        oad(debug, "    DAN equal? $(pressure == pressureOLD)")
+        oad(debug, "    read $(length(pressure)) pressure values; first are $(first(pressure,3))")
 
         salinity = get_nc_value(d, "PSAL")
-        if haskey(d, "PSAL")
-            salinityOLD = get_nc_value(d["PSAL"][:, column])
-        else
-            error("This argo file lacks salinity ('PSAL') data")
-        end
-        oad(debug, "    NEW read salinity length: $(length(salinity)); first $(first(salinity,6))")
-        oad(debug, "    read salinity length: $(length(salinityOLD)); first $(first(salinityOLD,6))")
-        oad(debug, "    DAN equal? $(salinity == salinityOLD)")
+        oad(debug, "    read $(length(salinity)) salinity values; first are $(first(salinity,3))")
 
-        if haskey(d, "TEMP")
-            temperature = get_nc_value(d["TEMP"][:, column])
-        else
-            error("This argo file lacks temperature ('TEMP') data")
-        end
-        oad(debug, "    read temperature length: $(length(temperature))")
+        temperature = get_nc_value(d, "TEMP")
+        oad(debug, "    read $(length(temperature)) temperature values; first are $(first(temperature,3))")
+
         if haskey(d, "LONGITUDE")
             longitude = get_nc_value(d["LONGITUDE"][1])
         else
             error("This argo file lacks longitude ('LONGITUDE') data")
         end
         oad(debug, "    read longitude: $longitude")
+
+        longitudeNEW = get_nc_value(d, "LONGITUDE")
+        println("DAN lon $longitude vs $longitudeNEW")
+
         if haskey(d, "LATITUDE")
             latitude = get_nc_value(d["LATITUDE"][1])
         else
