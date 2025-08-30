@@ -627,7 +627,7 @@ function get_nc_value(item)
 end
 
 function get_nc_value(d, name)
-    if !name in keys(d)
+    if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
     item = d[name]
