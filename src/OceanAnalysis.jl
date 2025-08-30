@@ -651,8 +651,8 @@ function get_nc_value(d, name)
     println(item)
     println("DAN 5")
     println("DAN typeof $(typeof(item)) for name=\"$name\"")
-    if typeof(item) != "Dates.DateTime"
-        println("Not a Dates.DateTime")
+    # this does not work if typeof(item) != "Dates.DateTime"
+    if name != "JULD"
         if length(item) > 1
             rval = convert(Vector{Float64}, item)
         else
