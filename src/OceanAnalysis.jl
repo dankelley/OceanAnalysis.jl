@@ -241,7 +241,7 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
     to 30 (i.e. 30N, in the North Atlantic).
 - `time::Date.DateTime` an optional indication of the measurement start time.
 - `debug::Int64` an optional value that, if it exceeds 0, indicates that
-debugging output should be printed during processing.
+    debugging output should be printed during processing.
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
