@@ -666,6 +666,10 @@ function get_nc_value(d, name)
     println("DAN 3 got $(sum(bad)) bad value(s) out of total $(length(bad)) value(s)")
     if any(bad)
         println("DAN 3.1")
+        if all(ismissing.(item))
+            println("ALL DATA ARE MISSING")
+            return item
+        end
         item[ismissing.(item)] .= NaN
         println("DAN 3.2")
     end
