@@ -674,17 +674,13 @@ end
 Read a CTD file named `filename` that is in SeaBird CNV format.
 
 Returns a [`Ctd`](@ref) object that holds `metadata` (a Dict) and `data` (a
-DataFrame).
-
-* `metadata` holds `header` (a vector of strings, one per line from the start
-down to a line containing `#END`), plus some particular items scanned from that
-header.
-
-* `data` holds the columnar data read from the file, along with renamed values
-in standard nomenclature. At present, the only renamed items are salinity,
-temperature, and pressure. Note that if the data file indicates temperature is
-on the T68 scale, then [`read_ctd_cnv`] converts to T90 before saving as
-`temperature`. 
+DataFrame). `metadata` item holds `header` (a vector of strings, one per line
+from the start down to a line containing `#END`), plus some particular items
+scanned from that header. `data` holds the columnar data read from the file,
+along with renamed values in standard nomenclature. At present, the only
+renamed items are salinity, temperature, and pressure. Note that if the data
+file indicates temperature is on the T68 scale, then this is converted
+to the standard modern scale, T90, before saving as `temperature`. 
 
 # Examples
 ```julia-repl
