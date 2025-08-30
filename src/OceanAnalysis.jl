@@ -224,7 +224,7 @@ end
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 
-This returns a `Ctd` object with a `data` element that is a data frame holding
+Returns a [`Ctd`](@ref) object with a `data` element that is a data frame holding
 the provided water properties, along with computed Absolute Salinity (`SA`)
 Conservative Temperature (`CT`), potential density anomaly relative to the
 surface pressure (`sigma0`) and spiciness with respect to surface pressure
