@@ -39,7 +39,7 @@ abstract type Oce end
 """
     An object to hold CTD data
 
-This is a struct that holds a Dict named `metadata` and a DataFrame named `data.
+This is a struct that holds a Dict named `metadata` and a DataFrame named `data`.
 """
 struct Ctd <: Oce
     metadata::Dict{String,Any}
