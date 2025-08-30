@@ -663,10 +663,11 @@ function get_nc_value(d, name)
     end
     println("DAN 2")
     bad = ismissing.(item)
-    println("DAN 3")
+    println("DAN 3 got $(sum(bad)) bad values")
     if any(bad)
-        #println("DAN 3.1 have $(sum(bad)) bad values")
+        println("DAN 3.1")
         item[ismissing.(item)] .= NaN
+        println("DAN 3.2")
     end
     println("DAN 4")
     TEST = sum(isfinite.(item))
