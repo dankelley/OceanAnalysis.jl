@@ -556,12 +556,14 @@ plot_TS(d)
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     NCDataset(filename, "r") do d
+        tmp = get_nc_value(d, "PRES")
+        oad(debug, "    NEW read pressure length: $(length(tmp)); first $(first(tmp,6))")
         if haskey(d, "TEMP")
             pressure = get_nc_value(d["PRES"][:, column])
         else
             error("This argo file lacks pressure ('PRES') data")
         end
-        oad(debug, "    read pressure length: $(length(pressure))")
+        oad(debug, "    read pressure length: $(length(tmp)); first $(first(tmp,6))")
         if haskey(d, "PSAL")
             salinity = get_nc_value(d["PSAL"][:, column])
         else
