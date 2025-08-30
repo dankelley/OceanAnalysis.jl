@@ -238,7 +238,8 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
 - `pressure` a vector of sea pressures, in dbar.
 - `longitude` a single number for longitude, in degrees East.
 - `latitude` a single number for latitude, in degrees North.
-- `time` a single Date.DateTime value.
+- `time` an optional Date.DateTime value indicating the sampling time.
+- `debug` an optional Int64 value indicating whether to print debugging output during processing.
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
