@@ -277,7 +277,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     rval = Ctd(metadata, data)
     oad(debug, "END as_ctd()")
     rval
-end # as_ctd(salinity, ...)
+end # as_ctd()
 
 """
     plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
@@ -675,14 +675,17 @@ end
 """
     ctd = read_ctd_cnv(filename)
 
-Read a CTD file named `filename` that is in SeaBird CNV format. This returns
-`header` (a vector of strings, one per line from the start down to a line
-containing `#END`), `metadata` (a Dict with some items scanned from the header)
-and `data` (a `dataFrame` holding the data). Note that the column names in
-`data` are taken from the CNV file, so the user will need to have some
-familiarity with the SeaBird conventions; for example, notice how a temperature
-is converted from the T68 scale to the T90 scale, which is required by other
-oceanographic software, especially the `gsw` package.
+Read a CTD file named `filename` that is in SeaBird CNV format.
+
+Returns items `metadata` (a Dict) and `data` (a DataFrame).
+
+The `metadata` item of the return value holds `header` (a vector of strings,
+one per line from the start down to a line containing `#END`), plus some
+particular items scanned from that header. The `data` item holds the columnar
+data read from the file, along with renamed values in standard nomenclature. At
+present, the only renamed items are salinity, temperature, and pressure.
+Note that if the data file indicates temperature is on the T68 scale,
+then [`read_ctd_cnv`] converts to T90 before saving as `temperature`. 
 
 # Examples
 ```julia-repl
@@ -818,6 +821,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     oad(debug, "    combining .metadata and .data into a Ctd object")
     rval = Ctd(metadata, data)
+    # FIXME: should use as_ctd() in this function, instead of duplicating ideas here
     oad(debug, "END read_ctd_cnv()")
     rval
 end
