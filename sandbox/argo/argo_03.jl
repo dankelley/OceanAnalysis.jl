@@ -1,5 +1,5 @@
 # add .metadata items: filename, platform, and cycle
-using OceanAnalysis
+using OceanAnalysis, Plots
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f1 = joinpath(pkgdir, "data", "D4902911_095.nc")
 f2 = "/Users/kelley/data/argo/R1902325_038D.nc" # NOTE the "D" in the cycle
@@ -18,5 +18,7 @@ for f in (f1, f2)
         d = read_argo(f)
         println("  metadata: $(d.metadata)")
         println("\n")
+        plot_TS(d)
+        savefig(f * ".png")
     end
 end

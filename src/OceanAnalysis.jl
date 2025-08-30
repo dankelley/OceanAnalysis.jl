@@ -559,11 +559,14 @@ function read_argo(filename, column=1; debug::Int64=0)
     NCDataset(filename, "r") do d
         tmp = get_nc_value(d, "PRES")
         oad(debug, "    NEW read pressure length: $(length(tmp)); first $(first(tmp,6))")
-        if haskey(d, "TEMP")
+        if haskey(d, "PRES")
             pressure = get_nc_value(d["PRES"][:, column])
         else
             error("This argo file lacks pressure ('PRES') data")
         end
+        println("DAN new pressure: $tmp")
+        println("DAN old pressure: $pressure")
+        println("DAN equal? $(tmp == pressure)")
         oad(debug, "    read pressure length: $(length(tmp)); first $(first(tmp,6))")
         if haskey(d, "PSAL")
             salinity = get_nc_value(d["PSAL"][:, column])
@@ -628,11 +631,10 @@ function get_nc_value(item)
 end
 
 function get_nc_value(d, name)
-    println("DAN 0")
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
-    println("DAN 1")
+    #println("DAN 1")
     local item = d[name]
     ndim = ndims(item)
     if ndim == 1
@@ -642,25 +644,25 @@ function get_nc_value(d, name)
     else
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
-    println("DANNY size $(size(item))")
-    println("DANNY ndimx $(ndims(item))")
-    println("DANNY first 3: $(first(item, 3))")
-    println("DAN 2")
+    #println("DANNY size $(size(item))")
+    #println("DANNY ndimx $(ndims(item))")
+    #println("DANNY first 3: $(first(item, 3))")
+    #println("DAN 2")
     bad = ismissing.(item)
-    println("DAN 3")
+    #println("DAN 3")
     if any(bad)
-        println("DAN 3.1 have $(sum(bad)) bad values")
+        #println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
-    println("DAN 4")
-    println(item)
-    println("DAN 5")
+    #println("DAN 4")
+    #println(item)
+    #println("DAN 5")
     if length(item) > 1
         rval = convert(Vector{Float64}, item)
     else
         rval = convert(Float64, item)
     end
-    println("DAN 5 (all done)")
+    #println("DAN 5 (all done)")
     return rval
 end
 
