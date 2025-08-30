@@ -686,7 +686,7 @@ function get_nc_value(d, name)
         rval = convert(Float64, item)
         println("DAN 3b")
     end
-    #println("DAN 5 (all done)")
+    println("DAN 4 returning $rval)")
     return rval
 end
 
