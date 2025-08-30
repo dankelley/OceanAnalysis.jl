@@ -663,7 +663,7 @@ function get_nc_value(d, name)
     end
     println("DAN 2")
     bad = ismissing.(item)
-    println("DAN 3 got $(sum(bad)) bad values")
+    println("DAN 3 got $(sum(bad)) bad value(s) out of total $(length(bad)) value(s)")
     if any(bad)
         println("DAN 3.1")
         item[ismissing.(item)] .= NaN
