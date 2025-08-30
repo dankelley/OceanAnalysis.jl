@@ -220,8 +220,7 @@ end
 
 
 """
-    as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-        longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
+    as_ctd(salinity, temperature, pressure, longitude=-30.0, latitude=30.0; time, debug::Int64=0)
 
     Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 
@@ -236,8 +235,10 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
 - `salinity` a vector of salinities, in Practical Salinity units.
 - `temperature` a vector of in-situ temperatures, in degrees Celsius.
 - `pressure` a vector of sea pressures, in dbar.
-- `longitude` a single number for longitude, in degrees East.
-- `latitude` a single number for latitude, in degrees North.
+- `longitude` a single number for longitude, in degrees East. If not provided, this defaults
+    to -30 (i.e. -30E, or 30W, in the North Atlantic).
+- `latitude` a single number for latitude, in degrees North. If not provided, this defaults
+    to 30 (i.e. 30N, in the North Atlantic).
 - `time` an optional Date.DateTime value indicating the sampling time.
 - `debug` an optional Int64 value indicating whether to print debugging output during processing.
 """
