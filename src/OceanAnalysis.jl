@@ -566,28 +566,21 @@ function read_argo(filename, column=1; debug::Int64=0)
         temperature = get_nc_value(d, "TEMP")
         oad(debug, "    read $(length(temperature)) temperature values; first are $(first(temperature,3))")
 
-        if haskey(d, "LONGITUDE")
-            longitude = get_nc_value(d["LONGITUDE"][1])
-        else
-            error("This argo file lacks longitude ('LONGITUDE') data")
-        end
+        longitude = get_nc_value(d, "LONGITUDE")
         oad(debug, "    read longitude: $longitude")
 
-        longitudeNEW = get_nc_value(d, "LONGITUDE")
-        println("DAN lon $longitude vs $longitudeNEW")
-
-        if haskey(d, "LATITUDE")
-            latitude = get_nc_value(d["LATITUDE"][1])
-        else
-            error("This argo file lacks latitude ('LATITUDE') data")
-        end
+        latitude = get_nc_value(d, "LATITUDE")
         oad(debug, "    read latitude: $latitude")
+
         if haskey(d, "DATE_CREATION")
             time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
             error("This argo file lacks time ('DATE_CREATION') data")
         end
         oad(debug, "    read time: $time")
+        timeNEW = get_nc_value(d, "DATE_CREATION")
+        oad(debug, "    read timeNEW: $timeNEW")
+
         oad(debug, "    calling as_ctd() to construct base ctd object")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
             time=time, debug=debug > 0 ? debug + 1 : 0)
