@@ -572,14 +572,20 @@ function read_argo(filename, column=1; debug::Int64=0)
         latitude = get_nc_value(d, "LATITUDE")
         oad(debug, "    read latitude: $latitude")
 
+        # double JULD(N_PROF) ;
+        # JULD:units = "days since 1950-01-01 00:00:00 UTC" ;
+        juld = get_nc_values(d, "JULD")
+        println("JULD: $juld")
+
+
+        # FIXME: next refers to the file creation time, not the sampling time. There
+        # is also a field for modification date. Do we want either?
         if haskey(d, "DATE_CREATION")
             time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
             error("This argo file lacks time ('DATE_CREATION') data")
         end
         oad(debug, "    read time: $time")
-        timeNEW = get_nc_value(d, "DATE_CREATION")
-        oad(debug, "    read timeNEW: $timeNEW")
 
         oad(debug, "    calling as_ctd() to construct base ctd object")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
