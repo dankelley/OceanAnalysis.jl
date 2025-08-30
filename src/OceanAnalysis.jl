@@ -623,9 +623,12 @@ function get_nc_value(d, name)
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
-    #println("DAN 1")
+    println("DAN 1")
+    println("get_nc_value(d, \"$name\"")
     local item = d[name]
+    println("  item=$item")
     ndim = ndims(item)
+    println("  ndim=$ndim")
     if ndim == 1
         item = item[1]
     elseif ndim == 2
@@ -636,22 +639,22 @@ function get_nc_value(d, name)
     #println("DANNY size $(size(item))")
     #println("DANNY ndimx $(ndims(item))")
     #println("DANNY first 3: $(first(item, 3))")
-    #println("DAN 2")
+    println("DAN 2")
     bad = ismissing.(item)
-    #println("DAN 3")
+    println("DAN 3")
     if any(bad)
-        #println("DAN 3.1 have $(sum(bad)) bad values")
+        println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
-    #println("DAN 4")
-    #println(item)
-    #println("DAN 5")
+    println("DAN 4")
+    println(item)
+    println("DAN 5")
     if length(item) > 1
         rval = convert(Vector{Float64}, item)
     else
         rval = convert(Float64, item)
     end
-    #println("DAN 5 (all done)")
+    println("DAN 5 (all done)")
     return rval
 end
 
