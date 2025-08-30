@@ -18,7 +18,5 @@ for f in (f1, f2)
         d = read_argo(f)
         println("  metadata: $(d.metadata)")
         println("\n")
-        plot_TS(d)
-        savefig(f * ".png")
     end
 end

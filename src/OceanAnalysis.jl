@@ -557,23 +557,28 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     rval = nothing
     NCDataset(filename, "r") do d
-        tmp = get_nc_value(d, "PRES")
-        oad(debug, "    NEW read pressure length: $(length(tmp)); first $(first(tmp,6))")
+        pressure = get_nc_value(d, "PRES")
         if haskey(d, "PRES")
-            pressure = get_nc_value(d["PRES"][:, column])
+            pressureOLD = get_nc_value(d["PRES"][:, column])
         else
             error("This argo file lacks pressure ('PRES') data")
         end
-        println("DAN new pressure: $tmp")
-        println("DAN old pressure: $pressure")
-        println("DAN equal? $(tmp == pressure)")
-        oad(debug, "    read pressure length: $(length(tmp)); first $(first(tmp,6))")
+        #println("DAN new pressure: $tmp")
+        #println("DAN old pressure: $pressure")
+        oad(debug, "    NEW read pressure length: $(length(pressure)); first $(first(pressure,6))")
+        oad(debug, "    read pressure length: $(length(pressureOLD)); first $(first(pressureOLD,6))")
+        oad(debug, "    DAN equal? $(pressure == pressureOLD)")
+
+        salinity = get_nc_value(d, "PSAL")
         if haskey(d, "PSAL")
-            salinity = get_nc_value(d["PSAL"][:, column])
+            salinityOLD = get_nc_value(d["PSAL"][:, column])
         else
             error("This argo file lacks salinity ('PSAL') data")
         end
-        oad(debug, "    read salinity length: $(length(salinity))")
+        oad(debug, "    NEW read salinity length: $(length(salinity)); first $(first(salinity,6))")
+        oad(debug, "    read salinity length: $(length(salinityOLD)); first $(first(salinityOLD,6))")
+        oad(debug, "    DAN equal? $(salinity == salinityOLD)")
+
         if haskey(d, "TEMP")
             temperature = get_nc_value(d["TEMP"][:, column])
         else
