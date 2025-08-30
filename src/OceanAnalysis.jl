@@ -246,7 +246,7 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
     debugging output should be printed during processing.
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
+    longitude::Float64=-30.0, latitude::Float64=30.0; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     oad(debug, "    given salinity (length: $(length(salinity)), starts: $(first(salinity,3))")
