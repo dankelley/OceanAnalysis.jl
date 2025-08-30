@@ -574,23 +574,20 @@ function read_argo(filename, column=1; debug::Int64=0)
 
         # double JULD(N_PROF) ;
         # JULD:units = "days since 1950-01-01 00:00:00 UTC" ;
-        juld = get_nc_value(d, "JULD")
-        println("JULD: $juld")
-
-
-        # FIXME: next refers to the file creation time, not the sampling time. There
-        # is also a field for modification date. Do we want either?
+        # The NCDatasets package converts this to a Date.DateTime
+        time = get_nc_value(d, "JULD")
+        # FIXME: why save next in metadata?
         if haskey(d, "DATE_CREATION")
-            time = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+            date_creation = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
             error("This argo file lacks time ('DATE_CREATION') data")
         end
-        oad(debug, "    read time: $time")
-
+        oad(debug, "    read date_creation: $date_creation")
         oad(debug, "    calling as_ctd() to construct base ctd object")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
             time=time, debug=debug > 0 ? debug + 1 : 0)
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
+        rval.metadata["date_creation"] = date_creation
         rval.metadata["filename"] = filename
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
         rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
