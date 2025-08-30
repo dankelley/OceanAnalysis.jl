@@ -671,6 +671,7 @@ function get_nc_value(d, name)
         #println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
+    println("TEST $(any(!isna.(item)))")
     #println("DAN 4")
     #println(item)
     #println("DAN 5")
@@ -686,7 +687,6 @@ function get_nc_value(d, name)
         rval = convert(Float64, item)
         println("DAN 3b")
     end
-    println("DAN 4 returning $rval)")
     return rval
 end
 
