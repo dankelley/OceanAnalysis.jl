@@ -6,7 +6,7 @@ for f in (f1, f2)
     if isfile(f)
         println("file: $f")
         # The above was inserted into OceanAnalysis, as shown below
-        d = read_argo(f)
+        d = read_argo(f, debug=1)
         println("  metadata: $(d.metadata)")
         png = replace(f, r".*/(.*).nc$" => s"\1.png")
         plot_TS(d)
