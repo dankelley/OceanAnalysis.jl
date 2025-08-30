@@ -575,7 +575,7 @@ function read_argo(filename, column=1; debug::Int64=0)
         # double JULD(N_PROF) ;
         # JULD:units = "days since 1950-01-01 00:00:00 UTC" ;
         # The NCDatasets package converts this to a Date.DateTime
-        time = get_nc_value(d, "JULD")
+        time = d["JULD"] # get_nc_value() is for numeric items
         # FIXME: why save next in metadata?
         if haskey(d, "DATE_CREATION")
             date_creation = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
