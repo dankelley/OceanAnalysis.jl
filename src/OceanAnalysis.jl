@@ -671,7 +671,8 @@ function get_nc_value(d, name)
         #println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
-    println("TEST $(any(!isna.(item)))")
+    TEST = sum(isfinite.(item))
+    println("$name TEST $TEST)
     #println("DAN 4")
     #println(item)
     #println("DAN 5")
