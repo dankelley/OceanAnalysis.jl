@@ -634,6 +634,14 @@ function get_nc_value(d, name)
     end
     println("DAN 1")
     local item = d[name]
+    ndim = ndims(item)
+    if ndim == 1
+        item = item[1]
+    elseif ndim == 2
+        item = item[:, 1]
+    else
+        error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
+    end
     println("DANNY size $(size(item))")
     println("DANNY ndimx $(ndims(item))")
     println("DANNY first 3: $(first(item, 3))")
