@@ -37,7 +37,9 @@ export z_from_pressure
 abstract type Oce end
 
 """
-    The Ctd object, a struct holding a Dict named `metadata` and a DataFrame named `data`.
+    An object to hold CTD data
+
+This is a struct that holds a Dict named `metadata` and a DataFrame named `data.
 """
 struct Ctd <: Oce
     metadata::Dict{String,Any}
@@ -220,7 +222,7 @@ end
 
 
 """
-    as_ctd(salinity, temperature, pressure, longitude=-30.0, latitude=30.0; time, debug::Int64=0)
+    as_ctd(salinity, temperature, pressure, longitude=-30.0, latitude=30.0; time, debug=0)
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 
