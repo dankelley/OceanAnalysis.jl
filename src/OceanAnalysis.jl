@@ -640,12 +640,14 @@ function get_nc_value(d, name)
     if any(bad)
         item[ismissing.(item)] .= NaN
     end
+    println("DAN 4")
     if length(item) > 1
         rval = convert(Vector{Float64}, item)
     else
         rval = convert(Float64, item)
     end
-    return rval |> fix_gsw_bad_code!
+    println("DAN 5 (all done)")
+    return rval
 end
 
 
