@@ -239,7 +239,6 @@ This function is used by [`read_ctd_cnv`](@ref) and [`read_argo`](@ref).
 - `latitude` a single number for latitude, in degrees North.
 - `time` a single Date.DateTime value.
 """
-# Convenience function, which carries out TEOS-10 computations
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
@@ -699,6 +698,9 @@ function read_ctd_cnv(filename::String; debug::Int64=0)
     end
 end
 
+"""
+    read_ctd_cnv(stream; debug)
+"""
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
