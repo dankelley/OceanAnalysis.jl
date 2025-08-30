@@ -223,7 +223,7 @@ end
     as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
         longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
 
-Construct a `Ctd` structure, given S, T, p, and a location.
+    Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 
 This returns a `Ctd` object with a `data` element that is a data frame holding
 the provided water properties, along with computed Absolute Salinity (`SA`)
