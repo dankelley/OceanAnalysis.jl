@@ -237,7 +237,7 @@ surface pressure (`sigma0`) and spiciness with respect to surface pressure
 - `salinity::Vector{Float64}` measured salinity values, in Practical Salinity units.
 - `temperature::Vector{Float64}` measured temperature values, in degrees Celsius.
 - `pressure::Vector{Float64}` measured sea pressure, in dbar.
-- `longitude::Vector` observation longitude, in degrees East. If not provided, this defaults
+- `longitude::Float64` observation longitude, in degrees East. If not provided, this defaults
     to -30 (i.e. -30E, or 30W, in the North Atlantic).
 - `latitude::Float64` observation latitude, in degrees North. If not provided, this defaults
     to 30 (i.e. 30N, in the North Atlantic).
