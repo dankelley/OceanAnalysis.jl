@@ -238,12 +238,6 @@ This function is used by [`read_ctd_cnv`](@ref) and [`read_argo`](@ref).
 - `longitude` a single number for longitude, in degrees East.
 - `latitude` a single number for latitude, in degrees North.
 - `time` a single Date.DateTime value.
-
-# Examples
-
-```
-
-
 """
 # Convenience function, which carries out TEOS-10 computations
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
