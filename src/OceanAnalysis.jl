@@ -633,7 +633,7 @@ function get_nc_value(d, name)
         error("This NetCDF file has no variable named \"$name\"")
     end
     println("DAN 1")
-    item = d[name]
+    local item = d[name]
     println("DAN 2")
     bad = ismissing.(item)
     println("DAN 3")
