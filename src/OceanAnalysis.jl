@@ -568,7 +568,7 @@ function read_argo(filename, column=1; debug::Int64=0)
         oad(debug, "    read longitude: $longitude")
         latitude = get_nc_value(d, "LATITUDE")
         oad(debug, "    read latitude: $latitude")
-        time = d["JULD"] # NCDatasets converts this to a Date.DateTime for us!
+        time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
         oad(debug, "    calling as_ctd() to construct base ctd object")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
