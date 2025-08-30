@@ -638,9 +638,12 @@ function get_nc_value(d, name)
     bad = ismissing.(item)
     println("DAN 3")
     if any(bad)
+        println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
     println("DAN 4")
+    println(item)
+    println("DAN 5")
     if length(item) > 1
         rval = convert(Vector{Float64}, item)
     else
