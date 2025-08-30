@@ -217,14 +217,32 @@ end
 
 
 """
-    Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-        longitude::Float64=-30, latitude::Float64=30)
+    as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
+        longitude::Float64=-30.0, latitude::Float64=30.0; time, debug::Int64=0)
 
-Construct a `Ctd` structure, given vectors Practical Salinity, in-situ
-Temperature, and sea pressure, along with single numbers indicating longitude
-and latitude. Note that the last two are needed for the computation of Absolute
-Salinity, Conservative Temperature, sigma0 and spicines0, all of which are
-which are stored in the returned value alongside the three supplied vectors.
+Construct a `Ctd` structure, given S, T, p, and a location.
+
+This returns a `Ctd` object with a `data` element that is a data frame holding
+the provided water properties, along with computed Absolute Salinity (`SA`)
+Conservative Temperature (`CT`), potential density anomaly relative to the
+surface pressure (`sigma0`) and spiciness with respect to surface pressure
+(`spiciness0`).  The object also holds a `metadata` element that holds
+`longitude`, `latitude` and `time`.
+
+This function is used by [`read_ctd_cnv`](@ref) and [`read_argo`](@ref).
+
+# Arguments
+- `salinity` a vector of salinities, in Practical Salinity units.
+- `temperature` a vector of in-situ temperatures, in degrees Celsius.
+- `pressure` a vector of sea pressures, in dbar.
+- `longitude` a single number for longitude, in degrees East.
+- `latitude` a single number for latitude, in degrees North.
+- `time` a single Date.DateTime value.
+
+# Examples
+
+```
+
 
 """
 # Convenience function, which carries out TEOS-10 computations
