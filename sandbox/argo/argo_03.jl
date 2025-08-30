@@ -1,21 +1,16 @@
-using OceanAnalysis, NCDatasets
+using OceanAnalysis, NCDatasets, Plots
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f1 = joinpath(pkgdir, "data", "D4902911_095.nc")
 f2 = "/Users/kelley/data/argo/R1902325_038D.nc"
-#for f in (f1, f2)
-f = f1
-if isfile(f)
-    println("file: $f")
-    #d = NCDataset(f, "r")
-    #platform = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
-    #println("  low-level inference: platform '$platform'")
-
-    #cycle = string(d["CYCLE_NUMBER"][1])
-    #println("  low-level inference: cycle '$cycle'")
-
-    # The above was inserted into OceanAnalysis, as shown below
-    d = read_argo(f, debug=1)
-    println("  metadata: $(d.metadata)")
-    println("\n")
+for f in (f1, f2)
+    if isfile(f)
+        println("file: $f")
+        # The above was inserted into OceanAnalysis, as shown below
+        d = read_argo(f)
+        println("  metadata: $(d.metadata)")
+        png = replace(f, r".*/(.*).nc$" => s"\1.png")
+        plot_TS(d)
+        savefig(png)
+        println("  plotted to $png")
+    end
 end
-#end

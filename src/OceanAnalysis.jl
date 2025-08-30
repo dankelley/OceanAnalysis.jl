@@ -559,74 +559,65 @@ function read_argo(filename, column=1; debug::Int64=0)
     NCDataset(filename, "r") do d
         pressure = get_nc_value(d, "PRES")
         oad(debug, "    read $(length(pressure)) pressure values; first are $(first(pressure,3))")
-
         salinity = get_nc_value(d, "PSAL")
         oad(debug, "    read $(length(salinity)) salinity values; first are $(first(salinity,3))")
-
         temperature = get_nc_value(d, "TEMP")
         oad(debug, "    read $(length(temperature)) temperature values; first are $(first(temperature,3))")
-
         longitude = get_nc_value(d, "LONGITUDE")
         oad(debug, "    read longitude: $longitude")
-
         latitude = get_nc_value(d, "LATITUDE")
         oad(debug, "    read latitude: $latitude")
-
-        # double JULD(N_PROF) ;
-        # JULD:units = "days since 1950-01-01 00:00:00 UTC" ;
-        # The NCDatasets package converts this to a Date.DateTime
-        time = d["JULD"] # get_nc_value() is for numeric items
-        # FIXME: why save next in metadata?
-        if haskey(d, "DATE_CREATION")
-            date_creation = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
-        else
-            error("This argo file lacks time ('DATE_CREATION') data")
-        end
-        oad(debug, "    read date_creation: $date_creation")
+        time = d["JULD"] # NCDatasets converts this to a Date.DateTime for us!
+        oad(debug, "    read time: $time")
         oad(debug, "    calling as_ctd() to construct base ctd object")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
             time=time, debug=debug > 0 ? debug + 1 : 0)
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
-        rval.metadata["date_creation"] = date_creation
+        # Do some things directly, because get_nc_value() is designed for numeric items
+        if haskey(d, "DATE_CREATION")
+            rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+            oad(debug, "    read date_creation: $date_creation")
+        end
         rval.metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
+        # I think one cycle can hold may profiles, so we only examine the first CYCLE_NUMBER value
         rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
     end
     oad(debug, "END read_argo()")
     return rval
 end # read_argo()
 
-"""
-    Transform an item from a NetCDF file into a more useable object
-
-    This converts the item into either a `Float64` object or `Vector{Float64}` object,
-    depending on its length.  Also, values equal to the NetCDF "bad" flag for easier 
-    Values exceeding 1e14 that `ismissing()` finds to be flags
-"""
-function get_nc_value(item)
-    bad = ismissing.(item)
-    if any(bad)
-        item[ismissing.(item)] .= NaN
-    end
-    if length(item) > 1
-        rval = convert(Vector{Float64}, item)
-    else
-        rval = convert(Float64, item)
-    end
-    return rval |> fix_gsw_bad_code!
-end
+# """
+#     Transform an item from a NetCDF file into a more useable object
+# 
+#     This converts the item into either a `Float64` object or `Vector{Float64}` object,
+#     depending on its length.  Also, values equal to the NetCDF "bad" flag for easier 
+#     Values exceeding 1e14 that `ismissing()` finds to be flags
+# """
+# function get_nc_value(item)
+#     bad = ismissing.(item)
+#     if any(bad)
+#         item[ismissing.(item)] .= NaN
+#     end
+#     if length(item) > 1
+#         rval = convert(Vector{Float64}, item)
+#     else
+#         rval = convert(Float64, item)
+#     end
+#     return rval |> fix_gsw_bad_code!
+# end
 
 function get_nc_value(d, name)
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
-    println("DAN 1")
-    println("get_nc_value(d, \"$name\"")
+    #println("DAN 1")
+    #println("get_nc_value(d, \"$name\"")
     local item = d[name]
-    println("  item=$item")
+    #println("  item=$item")
     ndim = ndims(item)
-    println("  ndim=$ndim")
+    #println("  ndim=$ndim")
     if ndim == 1
         item = item[1]
     elseif ndim == 2
@@ -634,21 +625,21 @@ function get_nc_value(d, name)
     else
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
-    println("  item=$item after grabbing first")
+    #println("  item=$item after grabbing first")
     #println("DANNY size $(size(item))")
     #println("DANNY ndimx $(ndims(item))")
     #println("DANNY first 3: $(first(item, 3))")
-    println("DAN 2")
+    #println("DAN 2")
     bad = ismissing.(item)
-    println("DAN 3")
+    #println("DAN 3")
     if any(bad)
-        println("DAN 3.1 have $(sum(bad)) bad values")
+        #println("DAN 3.1 have $(sum(bad)) bad values")
         item[ismissing.(item)] .= NaN
     end
-    println("DAN 4")
-    println(item)
-    println("DAN 5")
-    println("DAN typeof $(typeof(item)) for name=\"$name\"")
+    #println("DAN 4")
+    #println(item)
+    #println("DAN 5")
+    #println("DAN typeof $(typeof(item)) for name=\"$name\"")
     # this does not work if typeof(item) != "Dates.DateTime"
     if name != "JULD"
         if length(item) > 1
@@ -657,7 +648,7 @@ function get_nc_value(d, name)
             rval = convert(Float64, item)
         end
     end
-    println("DAN 5 (all done)")
+    #println("DAN 5 (all done)")
     return rval
 end
 
