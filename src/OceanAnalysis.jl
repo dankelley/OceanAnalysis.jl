@@ -555,6 +555,7 @@ plot_TS(d)
 """
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
+    rval = nothing
     NCDataset(filename, "r") do d
         tmp = get_nc_value(d, "PRES")
         oad(debug, "    NEW read pressure length: $(length(tmp)); first $(first(tmp,6))")
@@ -601,9 +602,9 @@ function read_argo(filename, column=1; debug::Int64=0)
         rval.metadata["filename"] = filename
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
         rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
-        oad(debug, "END read_argo()")
-        return rval
     end
+    oad(debug, "END read_argo()")
+    return rval
 end # read_argo()
 
 """
@@ -627,11 +628,15 @@ function get_nc_value(item)
 end
 
 function get_nc_value(d, name)
+    println("DAN 0")
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
+    println("DAN 1")
     item = d[name]
+    println("DAN 2")
     bad = ismissing.(item)
+    println("DAN 3")
     if any(bad)
         item[ismissing.(item)] .= NaN
     end
