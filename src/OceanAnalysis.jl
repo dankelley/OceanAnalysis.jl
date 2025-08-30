@@ -650,6 +650,7 @@ function get_nc_value(d, name)
     println("DAN 4")
     println(item)
     println("DAN 5")
+    println("DAN typeof $(typeof(item)) for name=\"$name\"")
     if typeof(item) != "Dates.DateTime"
         println("Not a Dates.DateTime")
         if length(item) > 1
