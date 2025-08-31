@@ -732,17 +732,21 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
-        end
-        if occursin(r"^# start_time", line)
+        elseif occursin(r"^# start_time", line)
+            # Do this step by step, to make it easier to find problems if we
+            # encounter files in formats that are not currently handled.
             time_string = split(line, " = ")[2]
-            oad(debug, "time_string '", time_string, "'")
+            #oad(debug, "time_string '", time_string, "'")
             time_string = replace(time_string, r" \[.*$" => "")
-            oad(debug, "time_string '", time_string, "'")
+            #oad(debug, "time_string '", time_string, "'")
             time_string = strip(time_string)
-            oad(debug, "time_string '", time_string, "'")
+            #oad(debug, "time_string '", time_string, "'")
             metadata["time"] = DateTime(time_string, time_format)
-        end
-        if occursin(r"^\*\*.*:", line)
+        elseif occursin(r"^\* .* Longitude =", line)
+            println(line)
+            lonstring = split(line, " = ")[2]
+            println(lonstring)
+        elseif occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
