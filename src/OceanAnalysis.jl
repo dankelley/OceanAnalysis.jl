@@ -734,7 +734,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     data_start = 0
     for i in eachindex(lines)
         line = lines[i]
-        oad(debug, "examining line: '", line, "'")
+        #oad(debug, "examining line: '", line, "'")
         if occursin(r"^# name ", line)
             if !names_found
                 names_found = true
