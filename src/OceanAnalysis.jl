@@ -715,8 +715,7 @@ end
 """
     read_ctd_cnv(stream; debug)
 """
-function read_ctd_cnv(stream::IOStream, filename::String; debug::Int64=0)
-    oad(debug, "read_ctd_cnv(<IOStream>, ...) START")
+function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     oad(debug, "read_ctd_cnv(\"", filename, "\", ...) START")
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
@@ -896,6 +895,7 @@ function read_ctd_cnv(stream::IOStream, filename::String; debug::Int64=0)
     end
     # Add nonstandard metadata that are in the file
     rval.metadata["header"] = header
+    rval.metadata["filename"] = filename
     oad(debug, "END read_ctd_cnv()")
     rval
 end
