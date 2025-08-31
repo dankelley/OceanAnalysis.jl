@@ -22,7 +22,7 @@ for (i, file) in enumerate(files)
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try
         d = read_ctd_cnv(file)
-        print(": ", d.metadata["time"], " @ ", round(d.metadata["latitude"], digits=3), "N, ", round(d.metadata["longitude"], digits=3), "E\n")
+        print(": ", d.metadata["time"], " @ ", round(d.metadata["latitude"], digits=3), " N, ", round(d.metadata["longitude"], digits=3), " E\n")
     catch e
         global bad = bad + 1
         print(" FAILURE TO READ ", e, "\n")

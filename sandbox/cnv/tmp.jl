@@ -1,7 +1,12 @@
-using OceanAnalysis, Dates
-#file = "/Users/kelley/git/OceanAnalysis.jl/data/ctd.cnv"
-file = "/Users/kelley/data/arctic/beaufort/2012/d201211_0056.cnv"
-file = "/Users/kelley/data/arctic/beaufort/2004/d200416_049.cnv"
-println(file)
-d = read_ctd_cnv(file)
-println(": ", d.metadata["time"], " @ ", d.metadata["latitude"], "N, ", d.metadata["longitude"], "E\n")
+using OceanAnalysis
+files = ["/Users/kelley/data/arctic/beaufort/2005/d200504_001.cnv";
+    "/Users/kelley/data/arctic/beaufort/2005/d200504_005.cnv";
+    "/Users/kelley/Dropbox/oce-working-notes/cnv/AS_CTD_20130821_c043.cnv"]
+for file in files
+    d = read_ctd_cnv(file, debug=0)
+    println(d.metadata["filename"], " @ ", d.metadata["latitude"], " N and ", d.metadata["longitude"], " E")
+    println("  first(d.data, 2)")
+    println(first(d.data, 2))
+    print(keys(d.metadata))
+    print(first(d.data, 2))
+end
