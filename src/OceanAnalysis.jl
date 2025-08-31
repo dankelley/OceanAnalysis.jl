@@ -799,6 +799,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             line = replace(line, r"[EWew]" => "") |> strip
             #println("3. after remove hemisphere = ", line)
             s = split(line, ": ")[2] |> strip
+            s = replace(s, r"\*" => "") # some files have a * (for degree sign, I suppose)
             #println("4. s=", s)
             ss = split(s, r"[ ]+")
             #println("5. ss= ", ss)
