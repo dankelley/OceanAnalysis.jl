@@ -742,6 +742,17 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             time_string = strip(time_string)
             #oad(debug, "time_string '", time_string, "'")
             metadata["time"] = DateTime(time_string, time_format)
+        elseif occursin(r"^\* .* Latitude =", line)
+            println(line)
+            s = split(line, " = ")[2]
+            println(s)
+            sign = occursin(r"[sS]", s) ? -1 : 1
+            println(sign)
+            replace(s, r"[eEwW]" => "")
+            println(s)
+            ss = split(s, r"[ ]+")
+            lat = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            metadata["latitude"] = lat
         elseif occursin(r"^\* .* Longitude =", line)
             println(line)
             # * NMEA Longitude = 132 40.03 W
@@ -749,7 +760,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             println(s)
             sign = occursin(r"[Ww]", s) ? -1 : 1
             println(sign)
-            replace(s, r"[wW]" => "")
+            replace(s, r"[eEwW]" => "")
             println(s)
             ss = split(s, r"[ ]+")
             lon = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
