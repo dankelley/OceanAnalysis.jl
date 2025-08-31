@@ -733,9 +733,8 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             push!(data_names, name)
         end
         if occursin(r"^# start_time", line)
-            tokens = split(line)
-            time = tokens[4:end]
-            println(time)
+            s = split(line, " = ")[2]
+            println(s)
             println("  is ABOVE a time?")
         end
         if occursin(r"^\*\*.*:", line)

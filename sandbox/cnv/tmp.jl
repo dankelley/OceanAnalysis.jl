@@ -20,6 +20,8 @@ for (i, file) in enumerate(files)
     print(file)
     file = files[i]
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
+    println("file", file)
+    println("file_short_name", file_short_name)
     try
         d = read_ctd_cnv(file)
         println(d.metadata)
