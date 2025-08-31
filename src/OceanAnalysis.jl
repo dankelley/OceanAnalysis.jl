@@ -759,9 +759,9 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             println("1. line=", line)
             sign = occursin(r"[sS]", line) ? -1 : 1
             println("2. sign=", sign)
-            replace(line, r"[NSns]" => "")
+            line = replace(line, r"[NSns]" => "")
             println("3. after remove hemisphere = ", line)
-            s = split(line, ":")[2]
+            s = split(line, ": ")[2]
             println("4. s=", s)
             ss = split(s, r"[ ]+")
             println("5. ss= ", ss)
