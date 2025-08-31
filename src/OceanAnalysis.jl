@@ -264,7 +264,7 @@ Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.
 ```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Float64=-30.0, latitude::Float64=30.0; time=nothing, debug::Int64=0)
+    longitude::Float64=NaN, latitude::Float64=NaN; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 3))
@@ -272,7 +272,15 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 3))
     oad(debug, "    given longitude:  ", longitude)
     oad(debug, "    given latitude:   ", latitude)
-    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
+    if isnan(longitude) || isnan(latitude)
+        lon = -30.0
+        lat = 30.0
+        @warn("as_ctd() found NaN values for longitude and/or latitude, so computing SA, CT, sigma0 and spiciness0 from default mid-Atlantic values 30N and -30E.")
+    else
+        lon = longitude
+        lat = latitude
+    end
+    local SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
     oad(debug, "    created SA length ", length(SA), ", which starts: ", first(SA, 3))
     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
     oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 3))
@@ -727,8 +735,8 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     header = ""
     data_start = 0
     time = nothing
-    latitude = 30.0 # default
-    longitude = -30.0 # default
+    latitude = NaN
+    longitude = NaN
     names_start = 0
     names_found = false
     data_start = 0
