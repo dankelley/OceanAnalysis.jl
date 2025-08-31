@@ -757,12 +757,12 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             oad(debug, "    inferred time=", time)
         elseif occursin(r"^\*.* [Ll]atitude:", line) # e.g. "** Latitude: 74 15.88 N"
             println("1. line=", line)
-            s = split(line, ":")[2]
-            println("2. s=", s)
             sign = occursin(r"[sS]", s) ? -1 : 1
-            println("3. sign=", sign)
-            replace(s, r"[NSns]" => "")
-            println("4. s after remove hemisphere = ", s)
+            println("2. sign=", sign)
+            s = replace(s, r"[NSns]" => "")
+            println("3. s after remove hemisphere = ", s)
+            s = split(line, ":")[2]
+            println("4. s=", s)
             ss = split(s, r"[ ]+")
             println("5. ss= ", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
