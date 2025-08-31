@@ -866,7 +866,16 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     oad(debug, "    combining .metadata and .data into a Ctd object")
     rval = Ctd(metadata, data)
-    # FIXME: should use as_ctd() in this function, instead of duplicating ideas here
+    # Add any nonstandard columns that are in the file
+    rval = as_ctd(data.salinity, data.temperature, data.pressure, metadata["latitude"],
+        metadata["longitude"], metadata["time"])
+    for name in names(data)
+        if name != "salinity" && name != "temperature" && name != "pressure"
+            rval.data[name] = data.name
+        end
+    end
+    # Add nonstandard metadata that are in the file
+    rval.metadata["header"] = header
     oad(debug, "END read_ctd_cnv()")
     rval
 end
