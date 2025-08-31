@@ -737,7 +737,9 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         if occursin(r"^# start_time", line)
             time_string = split(line, " = ")[2]
             oad(debug, "time_string '", time_string, "'")
-            time_string = replace(time_string, r"\[.*$" => "")
+            time_string = replace(time_string, r" \[.*$" => "")
+            oad(debug, "time_string '", time_string, "'")
+            time_string = strip(time_string)
             oad(debug, "time_string '", time_string, "'")
             metadata["time"] = DateTime(time_string, time_format)
         end
