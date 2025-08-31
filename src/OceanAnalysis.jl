@@ -267,13 +267,13 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     longitude::Float64=-30.0, latitude::Float64=30.0; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
-    oad(debug, "    given salinity (length: $(length(salinity)), starts: $(first(salinity,3))")
+    oad(debug, "    given salinity    (length: ", length(salinity), " starts: ", first(salinity, 3))
     oad(debug, "    given temperature (length: $(length(temperature)), starts: $(first(temperature,3))")
-    oad(debug, "    given pressure (length: $(length(pressure)), starts: $(first(pressure,3))")
-    oad(debug, "    given longitude: $longitude")
-    oad(debug, "    given latitude: $latitude")
+    oad(debug, "    given pressure    (length: $(length(pressure)), starts: $(first(pressure,3))")
+    oad(debug, "    given longitude:  ", longitude)
+    oad(debug, "    given latitude:   ", latitude)
     local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
-    oad(debug, "    created SA (length: $(length(SA)), starts: $(first(SA, 3))")
+    oad(debug, "    created SA (length: ", length(SA), " which starts:", first(SA, 3))
     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
     oad(debug, "    created CT (length: $(length(CT)), starts: $(first(CT, 3))")
     sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
