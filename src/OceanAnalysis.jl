@@ -744,8 +744,16 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             metadata["time"] = DateTime(time_string, time_format)
         elseif occursin(r"^\* .* Longitude =", line)
             println(line)
-            lonstring = split(line, " = ")[2]
-            println(lonstring)
+            # * NMEA Longitude = 132 40.03 W
+            s = split(line, " = ")[2]
+            println(s)
+            sign = occursin(r"[Ww]", s) ? -1 : 1
+            println(sign)
+            replace(s, r"[wW]" => "")
+            println(s)
+            ss = split(s, r"[ ]+")
+            lon = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            metadata["longitude"] = lon
         elseif occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")
             tokens = split(line, ":")
