@@ -775,8 +775,8 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             println("s after split: '", s, "'")
             sign = occursin(r"[sS]", s) ? -1 : 1
             println("sign=", sign)
-            s = replace(s, r"[NSns]" => "")
-            println("Before split for deg and dec-min, s=", s)
+            s = replace(s, r"[NSns]" => "") |> strip
+            println("Before split for deg and dec-min, s='", s, "'")
             ss = split(s, r"[ ]+")
             println("after split, ss=", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
