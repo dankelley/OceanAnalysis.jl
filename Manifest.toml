@@ -2,7 +2,7 @@
 
 julia_version = "1.12.0-rc1"
 manifest_format = "2.0"
-project_hash = "4bfb57992a83144cf03cc04a38b29d066a0b247f"
+project_hash = "9958bac6a801feaba476a47fc09a4c40d728d204"
 
 [[deps.AliasTables]]
 deps = ["PtrArrays", "Random"]
@@ -685,7 +685,7 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.3.0"
 
 [[deps.OceanAnalysis]]
-deps = ["CSV", "DataFrames", "Dierckx", "GibbsSeaWater", "NCDatasets", "Plots", "Statistics", "Test"]
+deps = ["CSV", "DataFrames", "Dates", "Dierckx", "GibbsSeaWater", "Measures", "NCDatasets", "Plots", "Statistics", "Test"]
 path = "."
 uuid = "935d77d6-d85b-49cc-a465-c336e8287d34"
 version = "0.1.0"

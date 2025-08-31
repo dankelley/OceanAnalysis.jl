@@ -1,4 +1,4 @@
-using OceanAnalysis, Test
+using OceanAnalysis, Test, Dates
 
 # My macOS 64-bit M4 machine likes tests to 14 digits but has problems
 # with 15 digits.  I set some test values from R/oce, printing with 15 digits,
@@ -16,6 +16,10 @@ using OceanAnalysis, Test
     @test coordinate_from_string("s1 30") == -1.5
     @test coordinate_from_string("27* 14.072 N") ≈ (27.0 + 14.072 / 60) atol = 1e-5
     @test coordinate_from_string("111* 31.440 W") ≈ -(111 + 31.440 / 60) atol = 1e-5
+end
+
+@testset "conductivity and salinity" begin
+    @test salinity_from_conductivity(34.5487, 28.7856, 10.0) ≈ 20.009869599086951 atol = 1e-10
 end
 
 @testset "pressure, depth and z" begin
@@ -42,6 +46,17 @@ end
     @test ctd.metadata["latitude"] ≈ 44.684266666666666 atol = 1e-13
     @test 42 == length(ctd.metadata["header"])
 end
+
+@testset "read_argo()" begin
+    filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc")
+    argo = read_argo(filename)
+    @test argo.metadata["longitude"] ≈ -66.38298 atol = 1e-13
+    @test argo.metadata["latitude"] ≈ 40.45216 atol = 1e-13
+    @test argo.metadata["time"] == Dates.DateTime("2021-01-28T18:01:24")
+    @test 1014 == length(argo.data.pressure)
+    @test collect(first(argo.data)) ≈ [34.913; 19.513; 0.48; 35.0786; 19.5079; 24.8272; 3.31464] atol = 0.0001
+end
+
 
 @testset "pretty() tests for consistency with R" begin
     e = 0.0:2.0:16

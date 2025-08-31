@@ -1,6 +1,15 @@
+"""
+The OceanAnalysis module is intended to help with the analysis of oceanographic
+data. It is in a preliminary form, providing help with only two file
+types: Argo NetCDF files and CTD files in the Seabird CNV format.  In neither
+case does it read all the data.  If you need more powerful tools for
+reading and analysing oceanographic data, consider using the `oce` package
+in the R language, which over a decade old and supports many data types.
+"""
 module OceanAnalysis
 
 using NCDatasets
+using Dates
 using DataFrames
 using GibbsSeaWater
 using Plots
@@ -16,25 +25,43 @@ export Ctd
 # Functions
 export as_ctd
 export coordinate_from_string
+export depth_from_pressure
+export fix_gsw_bad_code
+export fix_gsw_bad_code!
 export get_element
 export N2
 export plot_profile
 export plot_TS
+export pressure_from_depth
+export pressure_from_z
 export pretty
 export read_argo
 export read_ctd_cnv
+export salinity_from_conductivity
 export T90_from_T48
 export T90_from_T68
-export depth_from_pressure
 export z_from_pressure
-export pressure_from_depth
-export pressure_from_z
 
 abstract type Oce end
 
+"""
+    An object to hold CTD data
+
+This is a struct that holds a Dict named `metadata` and a DataFrame named `data`.
+"""
 struct Ctd <: Oce
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
+end
+
+"""
+    Split Argo "id_cycle" into components id and cycle
+"""
+function argo_id_cycle(idcycle::String="D123_321")
+    splitat = firstindex("_", idcycle)[1]
+    id = idcycle[1:splitat-1]
+    cycle = idcycle[splitat+1:end]
+    id, cycle
 end
 
 function oad(debug::Int64=0, args...)
@@ -46,6 +73,47 @@ function oad(debug::Int64=0, args...)
         print("\n")
     end
 end
+
+"""
+    Change any values of x that equal the GSW 'missing' code (9e15) to NaN
+
+    A copy is returned, with x unaltered.  See [`fix_gsw_bad_code!`](@ref) for an
+    in-place version.
+
+"""
+function fix_gsw_bad_code(x)
+    rval = copy(x)
+    bad = rval .> 1e15
+    if any(bad)
+        rval[bad] .= NaN
+    end
+    rval
+end
+
+"""
+    In-place change any values of x that equal the GSW 'missing' code (9e15) to NaN
+
+    This alters x.  See [`fix_gsw_bad_code`](@ref) for a version that does
+    not alter x.
+
+"""
+function fix_gsw_bad_code!(x)
+    bad = x .> 1e15
+    if any(bad)
+        x[bad] .= NaN
+    end
+    x
+end
+
+
+"""
+    Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and pressure (dbar).
+"""
+#gsw::gsw_SP_from_C(C0 * conductivity, temperature, pressure)
+function salinity_from_conductivity(conductivity::Float64, temperature::Float64, pressure::Float64)
+    gsw_sp_from_c(conductivity, temperature, pressure)
+end
+
 
 """
     Compute sea pressure (dbar) from depth (m) and latitude (deg).
@@ -94,8 +162,13 @@ pretty([22.299, 25.091])
 
 1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
 """
-function pretty(x, n=5; debug::Bool=false)
-    min, max = extrema(x)
+function pretty(x, n=5; debug::Int64=0)
+    min, max = extrema(filter(!isnan, x))
+    oad(debug, "pretty() got min=$min and max=$max")
+    if max == min
+        @warn("pretty() got max=min=$min, so returning empty vector")
+        return []
+    end
     dx = (max - min) / n
     fac = 10^floor(log10(dx))
     dx0 = dx / fac # dx0 should be between 1 and 10
@@ -115,9 +188,7 @@ function pretty(x, n=5; debug::Bool=false)
     # round() cleans up trailing-digits error
     minnew = round(dxnew * floor(min / dxnew), sigdigits=5)
     maxnew = minnew + dxnew * ceil((max - minnew) / dxnew)
-    if debug
-        println("fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
-    end
+    oad(debug, "fac:$fac, dx:$dx, dxnew:$dxnew, min:$min, minnew:$minnew, max:$max, maxnew:$maxnew")
     rval = collect(range(minnew, maxnew, step=dxnew))
     return rval
 end
@@ -159,46 +230,71 @@ end
 
 
 """
-    Ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-        longitude::Float64=-30, latitude::Float64=30)
+    as_ctd(salinity, temperature, pressure, longitude=-30.0, latitude=30.0; time, debug=0)
 
-Construct a `Ctd` structure, given vectors Practical Salinity, in-situ
-Temperature, and sea pressure, along with single numbers indicating longitude
-and latitude. Note that the last two are needed for the computation of Absolute
-Salinity, Conservative Temperature, sigma0 and spicines0, all of which are
-which are stored in the returned value alongside the three supplied vectors.
+Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 
+Returns a [`Ctd`](@ref) object with a `data` element that is a data frame holding
+the provided water properties, along with computed Absolute Salinity (`SA`)
+Conservative Temperature (`CT`), potential density anomaly relative to the
+surface pressure (`sigma0`) and spiciness with respect to surface pressure
+(`spiciness0`).  The object also holds a `metadata` element that holds
+`longitude`, `latitude` and `time`.
+
+# Arguments
+- `salinity::Vector{Float64}` measured salinity values, in Practical Salinity units.
+- `temperature::Vector{Float64}` measured temperature values, in degrees Celsius.
+- `pressure::Vector{Float64}` measured sea pressure, in dbar.
+- `longitude::Float64` observation longitude, in degrees East. If not provided, this defaults
+    to -30 (i.e. -30E, or 30W, in the North Atlantic).
+- `latitude::Float64` observation latitude, in degrees North. If not provided, this defaults
+    to 30 (i.e. 30N, in the North Atlantic).
+- `time::Date.DateTime` an optional indication of the measurement start time.
+- `debug::Int64` an optional value that, if it exceeds 0, indicates that
+    debugging output should be printed during processing.
+
+# Examples
+```jldoctest
+julia> as_ctd([32.],[15.],[0.],-63.,40.)
+Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
+ Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
+     │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
+─────┼────────────────────────────────────────────────────────────────────────
+   1 │     32.0         15.0       0.0  32.1516  15.0642  23.6653   0.0686905)
+```
 """
-# Convenience function, which carries out TEOS-10 computations
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Float64=-30.0, latitude::Float64=30.0;
-    debug::Int64=0)
+    longitude::Float64=-30.0, latitude::Float64=30.0; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
-    oad(debug, "    salinity length: $(length(salinity))")
-    oad(debug, "    temperature length: $(length(temperature))")
-    oad(debug, "    pressure length: $(length(pressure))")
-    oad(debug, "    longitude length: $(length(longitude))")
-    oad(debug, "    latitude length: $(length(latitude))")
-    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
-    oad(debug, "    SA length: $(length(SA))")
-    local CT = gsw_ct_from_t.(SA, temperature, pressure)
-    oad(debug, "    CT length: $(length(CT))")
-    spiciness0 = gsw_spiciness0.(SA, CT)
-    oad(debug, "    spiciness0 length: $(length(spiciness0))")
-    sigma0 = gsw_sigma0.(SA, CT)
-    oad(debug, "    sigma0 length: $(length(sigma0))")
-    oad(debug, "    assembling metadata")
+    #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
+    oad(debug, "    given salinity (length: $(length(salinity)), starts: $(first(salinity,3))")
+    oad(debug, "    given temperature (length: $(length(temperature)), starts: $(first(temperature,3))")
+    oad(debug, "    given pressure (length: $(length(pressure)), starts: $(first(pressure,3))")
+    oad(debug, "    given longitude: $longitude")
+    oad(debug, "    given latitude: $latitude")
+    local SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
+    oad(debug, "    created SA (length: $(length(SA)), starts: $(first(SA, 3))")
+    local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
+    oad(debug, "    created CT (length: $(length(CT)), starts: $(first(CT, 3))")
+    sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
+    oad(debug, "    created sigma0 (length: $(length(sigma0)), starts: $(first(sigma0, 3))")
+    spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
+    oad(debug, "    created spiciness0 (length: $(length(spiciness0)), starts: $(first(spiciness0, 3))")
+    oad(debug, "    assembling .data (a DataFrame) from the above")
+    data = DataFrame(salinity=salinity, temperature=temperature,
+        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
+    oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
-    oad(debug, "    assembling data")
-    data = DataFrame(salinity=salinity, temperature=temperature,
-        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
-    oad(debug, "    creating Ctd object")
+    if !ismissing(time)
+        metadata["time"] = time
+    end
+    oad(debug, "    assembling .data and .metadata into a Ctd object")
     rval = Ctd(metadata, data)
-    oad(debug, "    END as_ctd()")
+    oad(debug, "END as_ctd()")
     rval
-end # as_ctd(salinity, ...)
+end # as_ctd()
 
 """
     plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
@@ -267,9 +363,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    SA = ctd.data.SA #gsw_sa_from_sp.(S, p, ctd.longitude, ctd.latitude)
-    CT = ctd.data.CT #gsw_ct_from_t.(SA, T, p)
-    sigma0 = ctd.data.sigma0 #gsw_sigma0.(SA, CT)
+    SA = ctd.data.SA |> fix_gsw_bad_code!
+    CT = ctd.data.CT |> fix_gsw_bad_code!
+    sigma0 = ctd.data.sigma0
     oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
@@ -316,7 +412,8 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         oad(debug, "    drawing $which")
-        rval = plot(gsw_spiciness0.(SA, CT), y, ylabel=ylabel,
+        rval = plot(gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!,
+            y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -339,7 +436,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     else
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
-    oad(debug, "    END plot_profile()")
+    oad(debug, "END plot_profile()")
     rval
 end
 
@@ -395,8 +492,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     local p = ctd.data.pressure
     local lon = ctd.metadata["longitude"]
     local lat = ctd.metadata["latitude"]
-    SA = gsw_sa_from_sp.(S, p, lon, lat)
-    CT = gsw_ct_from_t.(SA, T, p)
+    SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
+    CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     # We start with the measurements ... 
     oad(debug, "    drawing data")
     rval = plot(SA, CT, legend=legend,
@@ -412,11 +509,11 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    processing sigma0 contours")
-    sigma0c = gsw_sigma0.(SAc', CTc)
+    sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
     local levels = sigma0_levels
     if length(sigma0_levels) == 0
         oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
-        levels = pretty(sigma0c)
+        levels = pretty(sigma0c) # returns [] if min=max
     elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
         oad(debug, "        case 2: sigma0_levels is a single integer")
         if sigma0_levels > 0
@@ -436,7 +533,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     end
     # ... then (optionally) add spiciness contours ...
     oad(debug, "    processing spiciness0 contours")
-    spiciness0c = gsw_spiciness0.(SAc', CTc)
+    spiciness0c = gsw_spiciness0.(SAc', CTc) |> fix_gsw_bad_code!
     local levels = spiciness0_levels
     if length(spiciness0_levels) == 0
         oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
@@ -468,7 +565,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
     end
-    oad(debug, "    END plot_TS()")
+    oad(debug, "END plot_TS()")
     rval
 end # plot_TS()
 
@@ -478,6 +575,8 @@ end # plot_TS()
 Read an Argo file and return a Ctd object.  As of 2025-08-23, this code is
 still in rapid development; please report problems as issues on
 <www.github.com/dankelley/OceanAnalysis.jl/issues>.
+
+An error is issued if the file lacks pressure, salinity, or temperature data.
 
 # Examples
 ```julia-repl
@@ -492,35 +591,108 @@ plot_TS(d)
 """
 function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
-    d = NCDataset(filename, "r")
-    pressure = convert(Vector{Float64}, d["PRES"][:, column])
-    oad(debug, "    pressure length: $(length(pressure))")
-    salinity = convert(Vector{Float64}, d["PSAL"][:, column])
-    oad(debug, "    salinity length: $(length(salinity))")
-    temperature = convert(Vector{Float64}, d["TEMP"][:, column])
-    oad(debug, "    temperature length: $(length(temperature))")
-    longitude = convert(Float64, d["LONGITUDE"][1])
-    oad(debug, "    longitude: $longitude")
-    latitude = convert(Float64, d["LATITUDE"][1])
-    oad(debug, "    latitude: $latitude")
-    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-        debug=debug > 0 ? debug + 1 : 0)
-    oad(debug, "    END read_argo()")
-    rval
+    local rval = nothing
+    NCDataset(filename, "r") do d
+        pressure = get_nc_value(d, "PRES")
+        oad(debug, "    read $(length(pressure)) pressure values; first are $(first(pressure,3))")
+        salinity = get_nc_value(d, "PSAL")
+        oad(debug, "    read $(length(salinity)) salinity values; first are $(first(salinity,3))")
+        temperature = get_nc_value(d, "TEMP")
+        oad(debug, "    read $(length(temperature)) temperature values; first are $(first(temperature,3))")
+        longitude = get_nc_value(d, "LONGITUDE")
+        if ismissing(longitude)
+            error("No non-missing longitude data in Argo file")
+        end
+        oad(debug, "    read longitude: $longitude")
+        latitude = get_nc_value(d, "LATITUDE")
+        if ismissing(latitude)
+            error("No non-missing latitude data in Argo file")
+        end
+        oad(debug, "    read latitude: $latitude")
+        time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
+        oad(debug, "    read time: $time")
+        oad(debug, "    calling as_ctd() to construct base ctd object")
+        rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
+            time=time, debug=debug > 0 ? debug + 1 : 0)
+        oad(debug, "    extending ctd object .metadata by adding argo-specific items")
+        # Do some things directly, because get_nc_value() is designed for numeric items
+        if haskey(d, "DATE_CREATION")
+            rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+        end
+        rval.metadata["filename"] = filename
+        # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
+        rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
+        # I think one cycle can hold may profiles, so we only examine the first CYCLE_NUMBER value
+        rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
+    end
+    oad(debug, "END read_argo()")
+    return rval
 end # read_argo()
+
+# """
+#     Transform an item from a NetCDF file into a more useable object
+# 
+#     This converts the item into either a `Float64` object or `Vector{Float64}` object,
+#     depending on its length.  Also, values equal to the NetCDF "bad" flag for easier 
+#     Values exceeding 1e14 that `ismissing()` finds to be flags
+# """
+# function get_nc_value(item)
+#     bad = ismissing.(item)
+#     if any(bad)
+#         item[ismissing.(item)] .= NaN
+#     end
+#     if length(item) > 1
+#         rval = convert(Vector{Float64}, item)
+#     else
+#         rval = convert(Float64, item)
+#     end
+#     return rval |> fix_gsw_bad_code!
+# end
+
+function get_nc_value(d, name)
+    if !(name in keys(d))
+        error("This NetCDF file has no variable named \"$name\"")
+    end
+    #println("DAN in get_nc_value() with name='$name'")
+    local item = d[name]
+    ndim = ndims(item)
+    if ndim == 1
+        item = item[1]
+    elseif ndim == 2
+        item = item[:, 1]
+    else
+        error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
+    end
+    bad = ismissing.(item)
+    if any(bad)
+        if all(ismissing.(item))
+            return item
+        end
+        item[ismissing.(item)] .= NaN
+    end
+    if length(item) > 1
+        rval = convert(Vector{Float64}, item)
+    else
+        rval = convert(Float64, item)
+    end
+    return rval
+end
+
 
 
 """
     ctd = read_ctd_cnv(filename)
 
-Read a CTD file named `filename` that is in SeaBird CNV format. This returns
-`header` (a vector of strings, one per line from the start down to a line
-containing `#END`), `metadata` (a Dict with some items scanned from the header)
-and `data` (a `dataFrame` holding the data). Note that the column names in
-`data` are taken from the CNV file, so the user will need to have some
-familiarity with the SeaBird conventions; for example, notice how a temperature
-is converted from the T68 scale to the T90 scale, which is required by other
-oceanographic software, especially the `gsw` package.
+Read a CTD file named `filename` that is in SeaBird CNV format.
+
+Returns a [`Ctd`](@ref) object that holds `metadata` (a Dict) and `data` (a
+DataFrame). `metadata` item holds `header` (a vector of strings, one per line
+from the start down to a line containing `#END`), plus some particular items
+scanned from that header. `data` holds the columnar data read from the file,
+along with renamed values in standard nomenclature. At present, the only
+renamed items are salinity, temperature, and pressure. Note that if the data
+file indicates temperature is on the T68 scale, then this is converted
+to the standard modern scale, T90, before saving as `temperature`. 
 
 # Examples
 ```julia-repl
@@ -540,6 +712,9 @@ function read_ctd_cnv(filename::String; debug::Int64=0)
     end
 end
 
+"""
+    read_ctd_cnv(stream; debug)
+"""
 function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
@@ -547,16 +722,50 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     header = ""
     data_start = 0
     data_names = Vector{String}()
+    oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
+    time_format = DateFormat("u d yyy HH:MM:SS")
     for i in eachindex(lines)
         line = lines[i]
-        #println("lines[$i]='$(lines[i])' -> '$line'")
+        #println(line)
         if occursin(r"^# name ", line)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
-        end
-        if occursin(r"^\*\*.*:", line)
+        elseif occursin(r"^# start_time", line)
+            # Do this step by step, to make it easier to find problems if we
+            # encounter files in formats that are not currently handled.
+            time_string = split(line, " = ")[2]
+            #oad(debug, "time_string '", time_string, "'")
+            time_string = replace(time_string, r" \[.*$" => "")
+            #oad(debug, "time_string '", time_string, "'")
+            time_string = strip(time_string)
+            #oad(debug, "time_string '", time_string, "'")
+            metadata["time"] = DateTime(time_string, time_format)
+        elseif occursin(r"^\* .* Latitude =", line)
+            #println(line)
+            s = split(line, " = ")[2]
+            #println(s)
+            sign = occursin(r"[sS]", s) ? -1 : 1
+            #println(sign)
+            replace(s, r"[eEwW]" => "")
+            #println(s)
+            ss = split(s, r"[ ]+")
+            lat = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            metadata["latitude"] = lat
+        elseif occursin(r"^\* .* Longitude =", line)
+            #println(line)
+            # * NMEA Longitude = 132 40.03 W
+            s = split(line, " = ")[2]
+            #println(s)
+            sign = occursin(r"[Ww]", s) ? -1 : 1
+            #println(sign)
+            replace(s, r"[eEwW]" => "")
+            #println(s)
+            ss = split(s, r"[ ]+")
+            lon = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            metadata["longitude"] = lon
+        elseif occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
@@ -604,20 +813,28 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data[irow, :] = d
         irow = irow + 1
     end
+    metadata["header"] = header
+    oad(debug, "    assembling .data (a DataFrame)")
     data = DataFrame(data, data_names, makeunique=true)
+    data_names = names(data)
     # Add standard columns
-    oad(debug, "    adding columns with standard names (e.g. 'pressure' for 'pr')")
-    if "pr" in names(data)
+    if "pr" in data_names
         data.pressure = data.pr
-    elseif "prDM" in names(data)
+    elseif "prdM" in data_names
+        data.pressure = data.prdM
+    elseif "prDM" in data_names
         data.pressure = data.prDM
+    elseif "prSM" in data_names
+        data.pressure = data.prSM
+    elseif "depSM" in data_names
+        data.pressure = pressure_from_depth.(data.depSM)
     else
-        error("No 'pr' or 'prDM' column in CNV file; available names are ", names(data))
+        error("No 'pr', 'prdM', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
-    if "sal00" in names(data)
-        data.salinity = data.sal00
-    else
-        error("No 'sal00' column in CNV file; available names are ", names(data))
+    if "c0mS/cm" in data_names # FIXME: allow S/m etc; convert here to store mS/cm for gsw
+        data.conductivity = data[:, "c0mS/cm"]
+    elseif "c1mS/cm" in data_names
+        data.conductivity = data[:, "c1mS/cm"]
     end
     if "t068" in data_names
         data.temperature = T90_from_T68.(data.t068)
@@ -627,18 +844,30 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         data.temperature = data.t090C
     elseif "t190C" in data_names
         data.temperature = data.t190C
+    elseif "tv290C" in data_names
+        data.temperature = data.tv290C
+    elseif "tv268C" in data_names
+        data.temperature = data.tv268C
     else
-        error("No 't068', 't090', 't090C' or 't190C' column in CNV file; available names are ", names(data))
+        error("No 't068', 't090', 't090C', 't190C', 't290C', 'tv268C' in CNV file; found ", names(data))
     end
-    oad(debug, "    adding columns for SA, CT, sigma0 and spiciness0")
+    if "sal00" in data_names
+        data.salinity = data.sal00
+    else
+        if "conductivity" in names(data)
+            data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
+        else
+            error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
+        end
+    end
     data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     data.sigma0 = gsw_sigma0.(data.SA, data.CT)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    metadata["header"] = header
-    oad(debug, "    combining metadata and data into a Ctd object")
+    oad(debug, "    combining .metadata and .data into a Ctd object")
     rval = Ctd(metadata, data)
-    oad(debug, "    END read_ctd_cnv()")
+    # FIXME: should use as_ctd() in this function, instead of duplicating ideas here
+    oad(debug, "END read_ctd_cnv()")
     rval
 end
 
@@ -679,18 +908,20 @@ function get_element(o::Ctd, name::String; debug::Int64=0)
         return copy(N2(o))
     end
     # Handle TEOS10 variables
-    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude)
+    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude) |> fix_gsw_bad_code!
     if name == "SA"
         return copy(SA)
     end
-    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure)
+    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure) |> fix_gsw_bad_code!
     if name == "CT"
         return copy(CT)
     end
     if name == "sigma0"
-        return copy(gsw_sigma0.(SA, CT))
+        return copy(gsw_sigma0.(SA, CT)) |> fix_gsw_bad_code!
+
     elseif name == "spiciness0"
-        return copy(gsw_spiciness0.(SA, CT))
+        return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
+
     end
     # The item is not handled, so return an empty result
     return Nothing
@@ -740,7 +971,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     deriv = derivative(spline, pressure)
     N2 = (g / rho0) * deriv
     oad(debug, "    N2 length: $(length(N2))")
-    oad(debug, "    END N2()")
+    oad(debug, "END N2()")
     return N2
 end
 

@@ -1,0 +1,26 @@
+# Some 'BR' floats that lack PSAL (detected by OceanAnalysis julia code)
+# The first file used here is the one I found, randomly.  The other is
+# another file starting with BR (not same float ID) that also lacks
+# salinity.
+using OceanAnalysis
+using NCDatasets
+files = ("BR4902576_017.nc", "BR4902577_016.nc")
+for file in files
+    if isfile(file)
+        println("File: ", file, "\n")
+        try
+            d = read_argo(file, debug=1)
+            println("data starts: $(first(d.data, 3))")
+        catch e
+            println("    $e")
+        end
+        # data = NCDataset(file, "r") do ds
+        #     if haskey(ds, "PSAL")
+        #         println(" -- have salinity")
+        #     end
+        #     if haskey(ds, "TEMP")
+        #         println(" -- have temperature")
+        #     end
+        # end
+    end
+end
