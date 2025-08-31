@@ -708,15 +708,16 @@ plot(p1, p2, p3, layout=(1, 3))
 """
 function read_ctd_cnv(filename::String; debug::Int64=0)
     open(filename) do file
-        read_ctd_cnv(file, debug=debug)
+        read_ctd_cnv(file, filename, debug=debug)
     end
 end
 
 """
     read_ctd_cnv(stream; debug)
 """
-function read_ctd_cnv(stream::IOStream; debug::Int64=0)
-    oad(debug, "read_ctd_cnv(stream, ...) START")
+function read_ctd_cnv(stream::IOStream, filename, debug::Int64=0)
+    oad(debug, "read_ctd_cnv(<IOStream>, ...) START")
+    oad(debug, "read_ctd_cnv(\"", filename, "\", ...) START")
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
     data_names = Vector{String}()
