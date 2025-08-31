@@ -803,7 +803,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         # end
         if occursin(r"\*END\*", line)
             data_start = i + 1
-            oad(debug, "    the data columns start at line ", i)
+            oad(debug, "    the data columns start at line ", data_start)
             header = lines[1:i]
             break
         end
