@@ -769,14 +769,16 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
         elseif occursin(r"^\*.* [Ll]atitude[ ]*=", line) # e.g. "* NMEA Latitude = 70 33.09 N"
+            println("lat= case")
             println(line)
             s = split(line, "=")[2]
-            println(s)
+            println("s after split: '", s, "'")
             sign = occursin(r"[sS]", s) ? -1 : 1
-            println(sign)
-            replace(s, r"[NSns]" => "")
-            println(s)
+            println("sign=", sign)
+            s = replace(s, r"[NSns]" => "")
+            println("Before split for deg and dec-min, s=", s)
             ss = split(s, r"[ ]+")
+            println("after split, ss=", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
