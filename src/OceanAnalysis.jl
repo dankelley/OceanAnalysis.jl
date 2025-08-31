@@ -879,12 +879,10 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     rval = as_ctd(data.salinity, data.temperature, data.pressure,
         latitude, longitude, time=time, debug=debug > 0 ? debug + 1 : 0)
     for name in names(data)
-        println("    perhaps transferring $name from local 'data' to .data in rval")
         if name != "salinity" && name != "temperature" && name != "pressure"
-            rval.data[!, name] = data[!, name]
-            println("    tranferred?")
+            oad(debug, "    transferring nonstandard item '$name' to .data in rval")
+            rval.data[:, name] = data[:, name]
         end
-        println("    OK?")
     end
     # Add nonstandard metadata that are in the file
     rval.metadata["header"] = header
