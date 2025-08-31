@@ -868,7 +868,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     rval = Ctd(metadata, data)
     # Add any nonstandard columns that are in the file
     rval = as_ctd(data.salinity, data.temperature, data.pressure, metadata["latitude"],
-        metadata["longitude"], time=metadata["time"], debug=debug)
+        metadata["longitude"]; time=metadata["time"], debug=debug)
     for name in names(data)
         if name != "salinity" && name != "temperature" && name != "pressure"
             rval.data[name] = data.name
