@@ -886,7 +886,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     #    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
     #                  time=time, debug=debug > 0 ? debug + 1 : 0)
     rval = as_ctd(data.salinity, data.temperature, data.pressure,
-        latitude, longitude, time=time, debug=debug > 0 ? debug + 1 : 0)
+        longitude, latitude, time=time, debug=debug > 0 ? debug + 1 : 0)
     for name in names(data)
         if name != "salinity" && name != "temperature" && name != "pressure"
             oad(debug, "    transferring nonstandard item '$name' to .data in rval")
