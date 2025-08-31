@@ -738,7 +738,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         if occursin(r"^# name ", line)
             if !names_found
                 names_found = true
-                oad(debug, "    the names of data columns start at line ", i)
+                oad(debug, "    NOTE: the names of data columns start at line ", i)
             end
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
@@ -803,7 +803,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         # end
         if occursin(r"\*END\*", line)
             data_start = i + 1
-            oad(debug, "    the data columns start at line ", data_start)
+            oad(debug, "    NOTE: the data columns start at line ", data_start)
             header = lines[1:i]
             break
         end
