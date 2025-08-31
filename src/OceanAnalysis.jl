@@ -755,29 +755,27 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             # Do this step by step, to make it easier to find problems if we
             # encounter files in formats that are not currently handled.
             time_string = split(line, " = ")[2]
-            #oad(debug, "time_string '", time_string, "'")
+            oad(debug, "time_string '", time_string, "'")
             time_string = replace(time_string, r" \[.*$" => "")
             #oad(debug, "time_string '", time_string, "'")
             time_string = strip(time_string)
             #oad(debug, "time_string '", time_string, "'")
-            #metadata["time"] = DateTime(time_string, time_format)
             time = DateTime(time_string, time_format)
             oad(debug, "    inferred time=", time)
         elseif occursin(r"^\*.* [Ll]atitude:", line) # e.g. "** Latitude: 74 15.88 N"
-            println("try to decode latitude in ** : format")
-            println("1. line=", line)
+            #println("try to decode latitude in ** : format")
+            #println("1. line=", line)
             sign = occursin(r"[Ss]", line) ? -1 : 1
-            println("2. sign=", sign)
+            #println("2. sign=", sign)
             line = replace(line, r"[NSns]" => "") |> strip
-            println("3. after remove hemisphere line='", line, "'")
+            #println("3. after remove hemisphere line='", line, "'")
             s = split(line, ": ")[2] |> strip
             s = replace(s, r"\*" => "") # some files have a * (for degree sign, I suppose)
-            println("4. s=", s)
+            #println("4. s=", s)
             ss = split(s, r"[ ]+")
-            println("5. ss= ", ss)
+            #println("5. ss= ", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
-            #metadata["latitude"] = lat
         elseif occursin(r"^\*.* [Ll]atitude[ ]*=", line) # e.g. "* NMEA Latitude = 70 33.09 N"
             #println("lat= case")
             #println(line)
@@ -791,7 +789,6 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             #println("after split, ss=", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
-            #metadata["latitude"] = lat
         elseif occursin(r"^\*.* [Ll]ongitude:", line)
             #println("1. line=", line)
             sign = occursin(r"[Ww]", line) ? -1 : 1
@@ -815,32 +812,13 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             #println(s)
             ss = split(s, r"[ ]+")
             longitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
-            #metadata["longitude"] = lon
         elseif occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
             value = replace(tokens[2], r"^ *" => "")
-            if occursin(r"^longitude", item) || occursin(r"^latitude", item)
-                # FIXME I think we should get this up above
-                value = coordinate_from_string(String(value))
-                #println("got value='$value' for item='$item' (known to be longitude or latitude)")
-                # FIXME do wee want to store all this stuff?
-                metadata[item] = value
-            else
-                #println("got value='$value' for item='$item' (known not to be longitude or latitude)")
-                metadata[item] = value
-            end
-        end
-        # set location to a spot in the Atlantic Ocean, if not in the file.  (Otherwise, we
-        # cannot compute CT, SA etc.
-        # if !("latitude" in keys(metadata))
-        #     metadata["latitude"] = 30
-        # end
-        # if !("longitude" in keys(metadata))
-        #     metadata["longitude"] = -30
-        # end
-        if occursin(r"\*END\*", line)
+            metadata[item] = value
+        elseif occursin(r"\*END\*", line)
             data_start = i + 1
             oad(debug, "    NOTE: the data columns start at line ", data_start)
             header = lines[1:i]
