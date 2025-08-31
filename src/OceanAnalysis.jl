@@ -734,7 +734,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     data_start = 0
     for i in eachindex(lines)
         line = lines[i]
-        println("TOP: ", line)
+        oad(debug, "examining line: '", line, "'")
         if occursin(r"^# name ", line)
             if !names_found
                 names_found = true
@@ -754,21 +754,44 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             #oad(debug, "time_string '", time_string, "'")
             #metadata["time"] = DateTime(time_string, time_format)
             time = DateTime(time_string, time_format)
-        elseif occursin(r"^\*[\*]* .* [Ll]atitude =", line)
+            oad(debug, "    inferred time=", time)
+        elseif occursin(r"^\*.* [Ll]atitude:", line) # e.g. "** Latitude: 74 15.88 N"
             println(line)
-            s = split(line, " = ")[2]
+            s = split(line, ":")[2]
             println(s)
             sign = occursin(r"[sS]", s) ? -1 : 1
             println(sign)
-            replace(s, r"[eEwW]" => "")
+            replace(s, r"[NSns]" => "")
             println(s)
             ss = split(s, r"[ ]+")
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
-        elseif occursin(r"^\*.* [Ll]ongitude =", line)
+        elseif occursin(r"^\*.* [Ll]atitude[ ]*=", line) # e.g. "* NMEA Latitude = 70 33.09 N"
+            println(line)
+            s = split(line, "=")[2]
+            println(s)
+            sign = occursin(r"[sS]", s) ? -1 : 1
+            println(sign)
+            replace(s, r"[NSns]" => "")
+            println(s)
+            ss = split(s, r"[ ]+")
+            latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            oad(debug, "    inferred latitude=", latitude)
+            #metadata["latitude"] = lat
+        elseif occursin(r"^\*.* [Ll]ongitude:", line)
             #println(line)
-            # * NMEA Longitude = 132 40.03 W
+            s = split(line, ":")[2]
+            #println(s)
+            sign = occursin(r"[Ww]", s) ? -1 : 1
+            #println(sign)
+            replace(s, r"[EWew]" => "")
+            #println(s)
+            ss = split(s, r"[ ]+")
+            longitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            #metadata["longitude"] = lon
+        elseif occursin(r"^\*.* [Ll]ongitude[ ]*=", line) # e.g. "* NMEA Longitude = 132 40.03 W"
+            #println(line)
             s = split(line, " = ")[2]
             #println(s)
             sign = occursin(r"[Ww]", s) ? -1 : 1
