@@ -756,42 +756,42 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             time = DateTime(time_string, time_format)
             oad(debug, "    inferred time=", time)
         elseif occursin(r"^\*.* [Ll]atitude:", line) # e.g. "** Latitude: 74 15.88 N"
-            println("1. line=", line)
+            #println("1. line=", line)
             sign = occursin(r"[Ss]", line) ? -1 : 1
-            println("2. sign=", sign)
+            #println("2. sign=", sign)
             line = replace(line, r"[NSns]" => "")
-            println("3. after remove hemisphere = ", line)
+            #println("3. after remove hemisphere = ", line)
             s = split(line, ": ")[2]
-            println("4. s=", s)
+            #println("4. s=", s)
             ss = split(s, r"[ ]+")
-            println("5. ss= ", ss)
+            #println("5. ss= ", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
         elseif occursin(r"^\*.* [Ll]atitude[ ]*=", line) # e.g. "* NMEA Latitude = 70 33.09 N"
-            println("lat= case")
-            println(line)
+            #println("lat= case")
+            #println(line)
             s = split(line, "=")[2]
-            println("s after split: '", s, "'")
+            #println("s after split: '", s, "'")
             sign = occursin(r"[sS]", s) ? -1 : 1
-            println("sign=", sign)
+            #println("sign=", sign)
             s = replace(s, r"[NSns]" => "") |> strip
-            println("Before split for deg and dec-min, s='", s, "'")
+            #println("Before split for deg and dec-min, s='", s, "'")
             ss = split(s, r"[ ]+")
-            println("after split, ss=", ss)
+            #println("after split, ss=", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
         elseif occursin(r"^\*.* [Ll]ongitude:", line)
-            println("1. line=", line)
+            #println("1. line=", line)
             sign = occursin(r"[Ww]", line) ? -1 : 1
-            println("2. sign=", sign)
+            #println("2. sign=", sign)
             line = replace(line, r"[EWew]" => "")
-            println("3. after remove hemisphere = ", line)
+            #println("3. after remove hemisphere = ", line)
             s = split(line, ": ")[2]
-            println("4. s=", s)
+            #println("4. s=", s)
             ss = split(s, r"[ ]+")
-            println("5. ss= ", ss)
+            #println("5. ss= ", ss)
             longitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred longitude=", longitude)
         elseif occursin(r"^\*.* [Ll]ongitude[ ]*=", line) # e.g. "* NMEA Longitude = 132 40.03 W"
