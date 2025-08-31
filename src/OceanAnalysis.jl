@@ -820,6 +820,8 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     # Add standard columns
     if "pr" in data_names
         data.pressure = data.pr
+    elseif "prdM" in data_names
+        data.pressure = data.prdM
     elseif "prDM" in data_names
         data.pressure = data.prDM
     elseif "prSM" in data_names
@@ -827,7 +829,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     elseif "depSM" in data_names
         data.pressure = pressure_from_depth.(data.depSM)
     else
-        error("No 'pr', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
+        error("No 'pr', 'prdM', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
     end
     if "c0mS/cm" in data_names # FIXME: allow S/m etc; convert here to store mS/cm for gsw
         data.conductivity = data[:, "c0mS/cm"]
