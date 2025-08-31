@@ -881,7 +881,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     for name in names(data)
         println("    perhaps transferring $name from local 'data' to .data in rval")
         if name != "salinity" && name != "temperature" && name != "pressure"
-            rval.data[name] = data["name"]
+            rval.data[name] = data[!, "name"]
             println("    tranferred?")
         end
         println("    OK?")
