@@ -719,19 +719,27 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "read_ctd_cnv(stream, ...) START")
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
-    header = ""
-    data_start = 0
     data_names = Vector{String}()
     oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
     time_format = DateFormat("u d yyy HH:MM:SS")
+    # set defaults
+    header = ""
+    data_start = 0
     time = nothing
     latitude = 30.0 # default
     longitude = -30.0 # default
+    names_start = 0
+    names_found = false
+    data_start = 0
     for i in eachindex(lines)
         line = lines[i]
         #println(line)
         if occursin(r"^# name ", line)
+            if !names_found
+                names_found = true
+                oad(debug, "    the names of data columns start at line ", i)
+            end
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
@@ -795,6 +803,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         # end
         if occursin(r"\*END\*", line)
             data_start = i + 1
+            oad(debug, "    the data columns start at line ", i)
             header = lines[1:i]
             break
         end
