@@ -734,7 +734,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     data_start = 0
     for i in eachindex(lines)
         line = lines[i]
-        #println(line)
+        println("TOP: ", line)
         if occursin(r"^# name ", line)
             if !names_found
                 names_found = true
@@ -754,16 +754,17 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             #oad(debug, "time_string '", time_string, "'")
             #metadata["time"] = DateTime(time_string, time_format)
             time = DateTime(time_string, time_format)
-        elseif occursin(r"^\*.* [Ll]atitude =", line)
-            #println(line)
+        elseif occursin(r"^\*[\*]* .* [Ll]atitude =", line)
+            println(line)
             s = split(line, " = ")[2]
-            #println(s)
+            println(s)
             sign = occursin(r"[sS]", s) ? -1 : 1
-            #println(sign)
+            println(sign)
             replace(s, r"[eEwW]" => "")
-            #println(s)
+            println(s)
             ss = split(s, r"[ ]+")
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
         elseif occursin(r"^\*.* [Ll]ongitude =", line)
             #println(line)
