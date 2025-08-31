@@ -728,13 +728,16 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     for i in eachindex(lines)
         line = lines[i]
         #println("lines[$i]='$(lines[i])' -> '$line'")
+        println(line)
         if occursin(r"^# name ", line)
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
             push!(data_names, name)
         end
         if occursin(r"^# start_time", line)
-            metadata["time"] = DateTime(split(line, " = ")[2], time_format)
+            time_string = split(line, " = ")[2]
+            oad(debug, "time_string '", time_string, "'")
+            metadata["time"] = DateTime(time_string, time_format)
         end
         if occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")

@@ -22,13 +22,7 @@ for (i, file) in enumerate(files)
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try
         d = read_ctd_cnv(file)
-        println(d.metadata)
-        stop("DAN")
-        print(" OK\n")
-        #plot_TS(d, title=file, titlefont=font(9))
-        #png = "cnv01_$(file_short_name).png"
-        #println(png)
-        #savefig(png)
+        print(": ", d.metadata["time"], " @ ", d.metadata["latitude"], "N, ", d.metadata["longitude"], "E\n")
     catch e
         global bad = bad + 1
         print(" FAILURE TO READ ", e, "\n")
