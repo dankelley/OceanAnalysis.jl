@@ -756,14 +756,15 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             time = DateTime(time_string, time_format)
             oad(debug, "    inferred time=", time)
         elseif occursin(r"^\*.* [Ll]atitude:", line) # e.g. "** Latitude: 74 15.88 N"
-            println(line)
+            println("1. line=", line)
             s = split(line, ":")[2]
-            println(s)
+            println("2. s=", s)
             sign = occursin(r"[sS]", s) ? -1 : 1
-            println(sign)
+            println("3. sign=", sign)
             replace(s, r"[NSns]" => "")
-            println(s)
+            println("4. s after remove hemisphere = ", s)
             ss = split(s, r"[ ]+")
+            println("5. ss= ", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             oad(debug, "    inferred latitude=", latitude)
             #metadata["latitude"] = lat
