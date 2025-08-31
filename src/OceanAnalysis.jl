@@ -725,6 +725,9 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
     time_format = DateFormat("u d yyy HH:MM:SS")
+    time = nothing
+    latitude = 30.0 # default
+    longitude = -30.0 # default
     for i in eachindex(lines)
         line = lines[i]
         #println(line)
@@ -741,7 +744,8 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             #oad(debug, "time_string '", time_string, "'")
             time_string = strip(time_string)
             #oad(debug, "time_string '", time_string, "'")
-            metadata["time"] = DateTime(time_string, time_format)
+            #metadata["time"] = DateTime(time_string, time_format)
+            time = DateTime(time_string, time_format)
         elseif occursin(r"^\* .* Latitude =", line)
             #println(line)
             s = split(line, " = ")[2]
@@ -751,8 +755,8 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             replace(s, r"[eEwW]" => "")
             #println(s)
             ss = split(s, r"[ ]+")
-            lat = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
-            metadata["latitude"] = lat
+            latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            #metadata["latitude"] = lat
         elseif occursin(r"^\* .* Longitude =", line)
             #println(line)
             # * NMEA Longitude = 132 40.03 W
@@ -763,16 +767,18 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             replace(s, r"[eEwW]" => "")
             #println(s)
             ss = split(s, r"[ ]+")
-            lon = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
-            metadata["longitude"] = lon
+            longitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
+            #metadata["longitude"] = lon
         elseif occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")
             tokens = split(line, ":")
             item = lowercase(replace(tokens[1], "** " => ""))
             value = replace(tokens[2], r"^ *" => "")
             if occursin(r"^longitude", item) || occursin(r"^latitude", item)
+                # FIXME I think we should get this up above
                 value = coordinate_from_string(String(value))
                 #println("got value='$value' for item='$item' (known to be longitude or latitude)")
+                # FIXME do wee want to store all this stuff?
                 metadata[item] = value
             else
                 #println("got value='$value' for item='$item' (known not to be longitude or latitude)")
@@ -781,12 +787,12 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
         end
         # set location to a spot in the Atlantic Ocean, if not in the file.  (Otherwise, we
         # cannot compute CT, SA etc.
-        if !("latitude" in keys(metadata))
-            metadata["latitude"] = 30
-        end
-        if !("longitude" in keys(metadata))
-            metadata["longitude"] = -30
-        end
+        # if !("latitude" in keys(metadata))
+        #     metadata["latitude"] = 30
+        # end
+        # if !("longitude" in keys(metadata))
+        #     metadata["longitude"] = -30
+        # end
         if occursin(r"\*END\*", line)
             data_start = i + 1
             header = lines[1:i]
@@ -860,15 +866,18 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
         end
     end
-    data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
-    data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
-    data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-    data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
+    #data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
+    #data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
+    #data.sigma0 = gsw_sigma0.(data.SA, data.CT)
+    #data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     oad(debug, "    combining .metadata and .data into a Ctd object")
     rval = Ctd(metadata, data)
-    # Add any nonstandard columns that are in the file
-    rval = as_ctd(data.salinity, data.temperature, data.pressure, metadata["latitude"],
-        metadata["longitude"]; time=metadata["time"], debug=debug)
+    # Add any nonstandard columns that are in the file. Below is how this
+    # is done (successfully) by read_argo().
+    #    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
+    #                  time=time, debug=debug > 0 ? debug + 1 : 0)
+    rval = as_ctd(data.salinity, data.temperature, data.pressure,
+        latitude, longitude, time=metadata["time"], debug=debug > 0 ? debug + 1 : 0)
     for name in names(data)
         if name != "salinity" && name != "temperature" && name != "pressure"
             rval.data[name] = data.name
