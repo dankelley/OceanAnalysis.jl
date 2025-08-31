@@ -267,7 +267,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     longitude::Float64=-30.0, latitude::Float64=30.0; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
-    oad(debug, "    given salinity: ", first(salinity, 2), " and ", length(salinity) - 3, " more values")
+    oad(debug, "    given salinity: ", salinity[1], ", ", salinity[2], " and ", length(salinity) - 2, " more values")
     oad(debug, "    given temperature: (length: ", length(temperature), ", which starts: ", first(temperature, 3))
     oad(debug, "    given pressure    (length: ", length(pressure), ", which starts: ", first(pressure, 3))
     oad(debug, "    given longitude:  ", longitude)
