@@ -724,6 +724,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
     data_names = Vector{String}()
     oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
+    time_format = DateFormat("u d yyy HH:MM:SS")
     for i in eachindex(lines)
         line = lines[i]
         #println("lines[$i]='$(lines[i])' -> '$line'")
@@ -733,9 +734,7 @@ function read_ctd_cnv(stream::IOStream; debug::Int64=0)
             push!(data_names, name)
         end
         if occursin(r"^# start_time", line)
-            s = split(line, " = ")[2]
-            println(s)
-            println("  is ABOVE a time?")
+            metadata["time"] = Datetime(split(line, " = ")[2], time_format)
         end
         if occursin(r"^\*\*.*:", line)
             #println("line with colon: '$line'")
