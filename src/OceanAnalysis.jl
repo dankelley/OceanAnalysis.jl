@@ -754,7 +754,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             #oad(debug, "time_string '", time_string, "'")
             #metadata["time"] = DateTime(time_string, time_format)
             time = DateTime(time_string, time_format)
-        elseif occursin(r"^\* .* Latitude =", line)
+        elseif occursin(r"^\*.* [Ll]atitude =", line)
             #println(line)
             s = split(line, " = ")[2]
             #println(s)
@@ -765,7 +765,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             ss = split(s, r"[ ]+")
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
             #metadata["latitude"] = lat
-        elseif occursin(r"^\* .* Longitude =", line)
+        elseif occursin(r"^\*.* [Ll]ongitude =", line)
             #println(line)
             # * NMEA Longitude = 132 40.03 W
             s = split(line, " = ")[2]
