@@ -702,7 +702,7 @@ function get_nc_value(d, name, require_valid=true)
     end
     bad = ismissing.(item)
     if require_valid && all(bad)
-        error("this file has ", name, " data, but all the values are bad")
+        error("the ", name, " field contains no non-missing values")
     end
     if any(bad)
         if all(ismissing.(item))

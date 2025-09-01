@@ -14,7 +14,8 @@ for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
         d = read_argo(file, debug=debug)
-        println(i, ". ", short, " at ", d.metadata["time"], " [",
+        println(i, ". ", short, " mode ", d.metadata["data_mode"], " -- ",
+            d.metadata["time"], " [",
             round(d.metadata["latitude"], digits=3), " N ",
             round(d.metadata["longitude"], digits=3), " E]; ",
             length(d.data.pressure), " levels")
