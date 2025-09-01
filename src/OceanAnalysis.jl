@@ -601,25 +601,47 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d
-        pressure = get_nc_value(d, "PRES")
-        oad(debug, "    read $(length(pressure)) pressure values; first are $(first(pressure,3))")
+        # We demand some valid salinity, temperature and pressure data.
+
         salinity = get_nc_value(d, "PSAL")
-        oad(debug, "    read $(length(salinity)) salinity values; first are $(first(salinity,3))")
+        if !any(isfinite(salinity))
+            error("No valid salinity data")
+        end
+        oad(debug, "    read $(length(salinity)) salinity values, starting with $(first(salinity,3))")
+        column_length = length(salinity)
+
         temperature = get_nc_value(d, "TEMP")
-        oad(debug, "    read $(length(temperature)) temperature values; first are $(first(temperature,3))")
+        if !any(isfinite(temperature))
+            error("No valid temperature data")
+        end
+        if length(temperature) != column_length
+            error("salinity and temperature columns have different lengths")
+        end
+        oad(debug, "    read $(length(temperature)) temperature values, starting with $(first(temperature,3))")
+
+        pressure = get_nc_value(d, "PRES")
+        if !any(isfinite(pressure))
+            error("No valid pressure data")
+        end
+        if length(pressure) != column_length
+            error("salinity and pressure columns have different lengths")
+        end
+        oad(debug, "    read $(length(pressure)) pressure values starting with $(first(pressure,3))")
+
         longitude = get_nc_value(d, "LONGITUDE")
         if ismissing(longitude)
             error("No non-missing longitude data in Argo file")
         end
         oad(debug, "    read longitude: $longitude")
+
         latitude = get_nc_value(d, "LATITUDE")
         if ismissing(latitude)
             error("No non-missing latitude data in Argo file")
         end
         oad(debug, "    read latitude: $latitude")
+
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
-        oad(debug, "    calling as_ctd() to construct base ctd object")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
             time=time, debug=debug > 0 ? debug + 1 : 0)
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
