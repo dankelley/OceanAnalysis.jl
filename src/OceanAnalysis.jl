@@ -602,13 +602,11 @@ during processing. This can be handy if problems arise.
 
 # Return value
 
-`read_argo()` returns a Ctd object that has two components, a Dict named
-`.metadata` and DataFrame named `.data`.
-
-* `.metadata` has entries named `"cycle"`, `"data_mode"`, `"date_creation"`,
-`"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and `"time"`.
-
-* `.data` has columns named `"CT"`, `"SA"`, `"pressure"`, `"salinity"`,
+The `read_argo()` function returns a [`Ctd`](@ref) object that has two
+components, a Dict named `.metadata` and DataFrame named `.data`. The
+`.metadata` entries are named `"cycle"`, `"data_mode"`, `"date_creation"`,
+`"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and `"time"`. The
+`.data` columns are named `"CT"`, `"SA"`, `"pressure"`, `"salinity"`,
 `"sigma0"`, `"spiciness0"`, and `"temperature"`.
 
 # Examples
