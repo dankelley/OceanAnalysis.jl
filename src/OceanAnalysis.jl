@@ -654,7 +654,12 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         if haskey(d, "DATE_CREATION")
             rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         end
-        data_mode = d["DATA_MODE"][1]
+        # Some files don't have a DATA_MODE entry, so we set it to blank in that case
+        try
+            data_mode = d["DATA_MODE"][1]
+        catch
+            data_mode = ""
+        end
         rval.metadata["data_mode"] = data_mode
         rval.metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
