@@ -601,10 +601,10 @@ Set `debug` to a positive integer to cause `read_argo()` to print messages
 during processing. This can be handy if problems arise.
 
 # Return value
-The `.metadata` part of the return value is a Dict with names "data_mode",
-"latitude", "cycle", "time", "longitude", "platform", "filename", and
-"date_creation". The `.data` part is a DataFrame with names "salinity",
-"temperature", "pressure", "SA", "CT", "sigma0", and "spiciness0".
+The `.metadata` part of the return value is a Dict with names `"data_mode"`,
+`"latitude`", `"cycle"`, `"time"`, `"longitude"`, `"platform"`, `"filename"`,
+and `"date_creation"`. The `.data` part is a DataFrame with names `"salinity"`,
+`"temperature"`, `"pressure"`, `"SA"`, `"CT"`, `"sigma0"`, and `"spiciness0"`.
 
 # Examples
 ```julia-repl
