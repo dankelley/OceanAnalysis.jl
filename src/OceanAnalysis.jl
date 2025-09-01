@@ -166,7 +166,7 @@ function pretty(x, n=5; debug::Int64=0)
     min, max = extrema(filter(!isnan, x))
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        @warn("pretty() got max=min=$min, so returning empty vector")
+        println("pretty() got max=min=$min, so returning empty vector")
         return []
     end
     dx = (max - min) / n
@@ -275,7 +275,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
         lon = -30.0
         lat = 30.0
-        @warn("as_ctd() given NaN longitude/latitude values, so SA, CT, etc. computed at -30E, 30N.")
+        println("as_ctd() given NaN longitude/latitude values, so SA, CT, etc. computed at -30E, 30N.")
     else
         lon = longitude
         lat = latitude
@@ -634,12 +634,12 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
             first(pressure, 2))
         longitude = get_nc_value(d, "LONGITUDE", require_valid)
         if ismissing(longitude)
-            @warn("read_argo() found missing longitude")
+            println("read_argo() found missing longitude")
         end
         oad(debug, "    read longitude: $longitude")
         latitude = get_nc_value(d, "LATITUDE", require_valid)
         if ismissing(latitude)
-            @warn("read_argo() found missing latitude")
+            println("read_argo() found missing latitude")
         end
         oad(debug, "    read latitude: $latitude")
         # Non-numeric items cannot be retrieved with get_nc_value(), so we get
