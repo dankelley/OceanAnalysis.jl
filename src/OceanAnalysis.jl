@@ -631,9 +631,15 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         oad(debug, "    read ", length(pressure), " pressure values, starting with ",
             first(pressure, 3))
         # Location is also required for any practical work.
-        longitude = get_nc_value(d, "LONGITUDE", require_valid)
+        longitude = get_nc_value(d, "LONGITUDE", false)
+        if ismissing(longitude)
+            @warn("read_argo() found missing longitude")
+        end
         oad(debug, "    read longitude: $longitude")
-        latitude = get_nc_value(d, "LATITUDE", require_valid)
+        latitude = get_nc_value(d, "LATITUDE", false)
+        if ismissing(latitude)
+            @warn("read_argo() found missing latitude")
+        end
         oad(debug, "    read latitude: $latitude")
         # Non-numeric items cannot be retrieved with get_nc_value(), so we get
         # them directly.
@@ -646,6 +652,8 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         if haskey(d, "DATE_CREATION")
             rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         end
+        data_mode = d["DATA_MODE"][1]
+        rval.metadata["data_mode"] = data_mode
         rval.metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
