@@ -633,13 +633,12 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         end
         oad(debug, "    read ", length(pressure), " pressure values, starting with ",
             first(pressure, 2))
-        # Location is also required for any practical work.
-        longitude = get_nc_value(d, "LONGITUDE", false)
+        longitude = get_nc_value(d, "LONGITUDE", require_valid)
         if ismissing(longitude)
             @warn("read_argo() found missing longitude")
         end
         oad(debug, "    read longitude: $longitude")
-        latitude = get_nc_value(d, "LATITUDE", false)
+        latitude = get_nc_value(d, "LATITUDE", require_valid)
         if ismissing(latitude)
             @warn("read_argo() found missing latitude")
         end
