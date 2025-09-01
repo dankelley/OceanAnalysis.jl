@@ -275,7 +275,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
         lon = -30.0
         lat = 30.0
-        @warn("as_ctd() provided with missing/NaN values for longitude and/or latitude, so SA, CT, etc. are computed at -30E, 30N.")
+        @warn("as_ctd() given NaN longitude/latitude values, so SA, CT, etc. computed at -30E, 30N.")
     else
         lon = longitude
         lat = latitude
@@ -956,6 +956,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             longitude, latitude, time=time, debug=debug > 0 ? debug + 1 : 0)
     end
     oad(debug, "    adding non-standard variables to the '.data' component of return value")
+    println(first(data, 2)) # FIXME
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
         if !name in standard_items
