@@ -890,6 +890,8 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     oad(debug, "    assembling .data (a DataFrame)")
     data = DataFrame(data, data_names, makeunique=true)
     data_names = names(data)
+    println("data_names=", data_names)
+    println(first(data, 2))
     # Add standard columns
     if "pr" in data_names
         data.pressure = data.pr
