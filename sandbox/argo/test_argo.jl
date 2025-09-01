@@ -13,6 +13,7 @@ bad = 0
 files = [files[100]]
 for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
+    print(file)
     try
         d = read_argo(file, debug=debug)
         println(i, ". ", short, " mode ", d.metadata["data_mode"], " -- ",

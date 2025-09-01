@@ -659,11 +659,12 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         # Some files don't have a DATA_MODE entry, so we set it to blank in that case
         print(sort(keys(d)))
         if haskey(d, "DATA_MODE")
-            print("ok? ", d["DATA_MODE"])
+            print("ok? ", d["DATA_MODE"][1])
             data_mode = d["DATA_MODE"][1]
         else
             data_mode = ""
         end
+        rval.metadata["data_mode"] = data_mode
         rval.metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
