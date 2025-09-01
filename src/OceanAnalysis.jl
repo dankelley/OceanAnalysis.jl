@@ -264,8 +264,7 @@ Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.
 ```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Union{Missing,Float64}=missing,
-    latitude::Union{Missing,Float64}=missing; time=nothing, debug::Int64=0)
+    longitude::Float64=NaN, latitude::Float64=NaN; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
@@ -934,25 +933,28 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
         end
     end
-    if isnan(latitude) || isnan(longitude)
-        println("DAN DAN DAN")
-    end
     #data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     #data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     #data.sigma0 = gsw_sigma0.(data.SA, data.CT)
     #data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     oad(debug, "    combining .metadata and .data into a Ctd object")
-    println("metadata lat=", metadata["latitude"])
-    println("metadata lon=", metadata["longitude"])
+    #println("metadata lat=", metadata["latitude"])
+    #println("metadata lon=", metadata["longitude"])
     #rval = Ctd(metadata, data)
     # Add any nonstandard columns that are in the file. Below is how this
     # is done (successfully) by read_argo().
     #    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
     #                  time=time, debug=debug > 0 ? debug + 1 : 0)
-    rval = as_ctd(data.salinity, data.temperature, data.pressure,
-        longitude, latitude, time=time, debug=debug > 0 ? debug + 1 : 0)
+    if isnan(latitude) || isnan(longitude)
+        rval = as_ctd(data.salinity, data.temperature, data.pressure,
+            NaN, NaN, time=time, debug=debug > 0 ? debug + 1 : 0)
+    else
+        rval = as_ctd(data.salinity, data.temperature, data.pressure,
+            longitude, latitude, time=time, debug=debug > 0 ? debug + 1 : 0)
+    end
+    standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
-        if name != "salinity" && name != "temperature" && name != "pressure"
+        if !name in standard_items
             oad(debug, "    transferring nonstandard item '$name' to .data in rval")
             rval.data[:, name] = data[:, name]
         end
