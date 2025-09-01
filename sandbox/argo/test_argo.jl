@@ -3,14 +3,13 @@
 # NOTES (all files are in /users/kelley/argo):
 # D6902967_133.nc -- no LONGITUDE
 # BR6902958_xxx.nc -- no PSAL
-using OceanAnalysis, Glob, Random
-#Random.seed!(1234)
+using OceanAnalysis, Glob
 dir = "/Users/kelley/data/argo"
 files = glob("*.nc", dir)
-#files = [dir * "/D6902967_127.nc"]
+files = [files[100]] # to test a single random file
+
 debug = 0
 bad = 0
-files = [files[100]] # to test a single random file
 for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
@@ -21,8 +20,10 @@ for (i, file) in enumerate(files)
             round(d.metadata["longitude"], digits=3), ", levels:",
             length(d.data.pressure), "]")
         if length(files) == 1
-            println("metadata names: ", keys(d.metadata))
-            println("data names: ", names(d.data))
+            tmp = keys(d.metadata)
+            println("metadata names: ", sort(collect(tmp)))
+            tmp = names(d.data)
+            println("data names: ", sort(collect(tmp)))
         end
     catch e
         println(i, ". ", short, " -- ", e)
