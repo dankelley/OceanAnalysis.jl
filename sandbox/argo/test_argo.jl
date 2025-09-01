@@ -10,15 +10,17 @@ files = glob("*.nc", dir)
 #files = [dir * "/R4902911_202.nc"]
 
 bad = 0
-for i = eachindex(files)
-    file = files[i]
+for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
         d = read_argo(file)
-        println("$short $(d.metadata["time"]) @ $(round(d.metadata["latitude"], digits=3))N $(round(d.metadata["longitude"], digits=3))E $(length(d.data.pressure)) levels")
+        println(i, ". ", short, " -- ", d.metadata["time"], " @",
+            round(d.metadata["latitude"], digits=3), " N ",
+            round(d.metadata["longitude"], digits=3), " E ",
+            length(d.data.pressure), " levels")
     catch e
-        println("$short -- $e")
+        println(i, ". ", short, " -- ", e)
         global bad = bad + 1
     end
 end
-println("Read ", length(files), ", ", bad, " of which are faulty")
+println("Read ", length(files), " files, ", bad, " of which are faulty")
