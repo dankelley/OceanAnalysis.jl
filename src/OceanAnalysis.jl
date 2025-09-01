@@ -273,10 +273,10 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 3))
     oad(debug, "    given longitude:  ", longitude)
     oad(debug, "    given latitude:   ", latitude)
-    if isnan(longitude) || isnan(latitude) || ismissing(longitude) || ismissing(latitude)
+    if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
         lon = -30.0
         lat = 30.0
-        @warn("as_ctd() found NaN values for longitude and/or latitude, so computing SA, CT, sigma0 and spiciness0 from default mid-Atlantic values 30N and -30E.")
+        @warn("as_ctd() provided with missing/NaN values for longitude and/or latitude, so SA, CT, etc. are computed at -30E, 30N.")
     else
         lon = longitude
         lat = latitude
@@ -294,6 +294,8 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
     oad(debug, "    assembling .metadata (a Dict)")
     metadata = Dict{String,Any}()
+    # Note that we are inserting the longitude and latitude from the function call,
+    # not the -30,30 values that we invented in order to estimate SA, CT, sigma0 and spicines0
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
     if !ismissing(time)
