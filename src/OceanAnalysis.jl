@@ -657,7 +657,7 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
             rval.metadata["date_creation"] = missing
         end
         # Some files don't have a DATA_MODE entry, so we set it to blank in that case
-        print(keys(d))
+        print(sort(keys(d)))
         if haskey(d, "DATA_MODE")
             data_mode = d["DATA_MODE"][1]
         else
