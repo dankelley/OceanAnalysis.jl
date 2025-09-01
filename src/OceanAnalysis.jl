@@ -686,7 +686,7 @@ function get_nc_value(d, name, require_some_nonmissing=true)
     end
     bad = ismissing.(item)
     if require_some_nonmissing && all(bad)
-        error("the ", name, " data are ALL missing, so cannot proceed")
+        error("all the ", name, " data are missing")
     end
     if any(bad)
         if all(ismissing.(item))
