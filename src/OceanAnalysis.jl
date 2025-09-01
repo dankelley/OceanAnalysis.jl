@@ -619,16 +619,10 @@ function read_argo(filename, column=1; debug::Int64=0)
         end
         oad(debug, "    read $(length(pressure)) pressure values starting with $(first(pressure,3))")
 
-        longitude = get_nc_value(d, "LONGITUDE", false)
-        if ismissing(longitude)
-            error("No non-missing longitude data in Argo file")
-        end
+        longitude = get_nc_value(d, "LONGITUDE")
         oad(debug, "    read longitude: $longitude")
 
-        latitude = get_nc_value(d, "LATITUDE", false)
-        if ismissing(latitude)
-            error("No non-missing latitude data in Argo file")
-        end
+        latitude = get_nc_value(d, "LATITUDE")
         oad(debug, "    read latitude: $latitude")
 
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
