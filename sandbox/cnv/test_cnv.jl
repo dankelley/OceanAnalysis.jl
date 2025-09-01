@@ -27,7 +27,6 @@ files = ["Users/kelley/Dropbox/oce-working-notes/cnv/vert_01.cnv"]
 # %%
 bad = 0
 for (i, file) in enumerate(files)
-    print(file)
     file = files[i]
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try

@@ -797,7 +797,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             # Do this step by step, to make it easier to find problems if we
             # encounter files in formats that are not currently handled.
             time_string = split(line, " = ")[2]
-            oad(debug, "time_string '", time_string, "'")
+            oad(debug, "    time_string '", time_string, "'")
             time_string = replace(time_string, r" \[.*$" => "")
             #oad(debug, "time_string '", time_string, "'")
             time_string = strip(time_string)
@@ -933,6 +933,9 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
         else
             error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
         end
+    end
+    if isnan(latitude) || isnan(longitude)
+        println("DAN DAN DAN")
     end
     #data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
     #data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
