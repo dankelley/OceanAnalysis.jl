@@ -780,6 +780,8 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     names_start = 0
     names_found = false
     data_start = 0
+    latitude = NaN # to catch case where file lacks this info
+    longitude = NaN # to catch case where file lacks this info
     for i in eachindex(lines)
         line = lines[i]
         #oad(debug, "examining line: '", line, "'")
@@ -937,6 +939,8 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     #data.sigma0 = gsw_sigma0.(data.SA, data.CT)
     #data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
     oad(debug, "    combining .metadata and .data into a Ctd object")
+    println("metadata lat=", metadata["latitude"])
+    println("metadata lon=", metadata["longitude"])
     rval = Ctd(metadata, data)
     # Add any nonstandard columns that are in the file. Below is how this
     # is done (successfully) by read_argo().
