@@ -10,6 +10,7 @@ files = glob("*.nc", dir)
 #files = [dir * "/D6902967_127.nc"]
 debug = 0
 bad = 0
+files = [files[100]]
 for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
