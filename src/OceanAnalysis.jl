@@ -653,14 +653,15 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
             rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+        else
+            rval.metadata["date_creation"] = missing
         end
         # Some files don't have a DATA_MODE entry, so we set it to blank in that case
-        try
+        if haskey(d, "DATA_MODE")
             data_mode = d["DATA_MODE"][1]
-        catch
+        else
             data_mode = ""
         end
-        rval.metadata["data_mode"] = data_mode
         rval.metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
