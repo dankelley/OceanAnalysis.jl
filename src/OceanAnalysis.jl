@@ -962,7 +962,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     println(first(rval.data, 2)) # FIXME
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
-        if !name in standard_items
+        if !(name in standard_items)
             oad(debug, "        adding '", name, "'")
             rval.data[:, name] = data[:, name]
         end
