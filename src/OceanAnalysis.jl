@@ -602,14 +602,14 @@ during processing. This can be handy if problems arise.
 
 # Return value
 
-`read_argo()` returns a Ctd object that has two components, `metadata` and `data`.
+`read_argo()` returns a Ctd object that has two components, a Dict named
+`.metadata` and DataFrame named `.data`.
 
-* `.metadata` is a Dict with entries named `"cycle"`, `"data_mode"`,
-`"date_creation"`, `"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and
-`"time"`.
+* `.metadata` has entries named `"cycle"`, `"data_mode"`, `"date_creation"`,
+`"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and `"time"`.
 
-* `.data` is a DataFrame with columns named `"CT"`, `"SA"`, `"pressure"`,
-`"salinity"`, `"sigma0"`, `"spiciness0"`, and `"temperature"`.
+* `.data` has columns named `"CT"`, `"SA"`, `"pressure"`, `"salinity"`,
+`"sigma0"`, `"spiciness0"`, and `"temperature"`.
 
 # Examples
 ```julia-repl
