@@ -666,7 +666,7 @@ end # read_argo()
 
 function get_nc_value(d, name, require_some_nonmissing=true)
     if !(name in keys(d))
-        error("This NetCDF file has no variable named \"$name\"")
+        error("no ", name, " data found")
     end
     #println("DAN in get_nc_value() with name='$name'")
     local item = d[name]
