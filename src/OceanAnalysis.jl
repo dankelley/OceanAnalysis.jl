@@ -604,14 +604,14 @@ function read_argo(filename, column=1; debug::Int64=0)
         # We demand some valid salinity, temperature and pressure data.
 
         salinity = get_nc_value(d, "PSAL")
-        if !any(isfinite(salinity))
+        if !any(ismissing(salinity))
             error("No valid salinity data")
         end
         oad(debug, "    read $(length(salinity)) salinity values, starting with $(first(salinity,3))")
         column_length = length(salinity)
 
         temperature = get_nc_value(d, "TEMP")
-        if !any(isfinite(temperature))
+        if !any(ismissing(temperature))
             error("No valid temperature data")
         end
         if length(temperature) != column_length
@@ -620,7 +620,7 @@ function read_argo(filename, column=1; debug::Int64=0)
         oad(debug, "    read $(length(temperature)) temperature values, starting with $(first(temperature,3))")
 
         pressure = get_nc_value(d, "PRES")
-        if !any(isfinite(pressure))
+        if !any(ismissing(pressure))
             error("No valid pressure data")
         end
         if length(pressure) != column_length
