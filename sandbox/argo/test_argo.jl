@@ -10,7 +10,7 @@ files = glob("*.nc", dir)
 #files = [dir * "/D6902967_127.nc"]
 debug = 0
 bad = 0
-# files = [files[100]] # to test a single random file
+files = [files[100]] # to test a single random file
 for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
@@ -20,6 +20,10 @@ for (i, file) in enumerate(files)
             round(d.metadata["latitude"], digits=3), ", longitude:",
             round(d.metadata["longitude"], digits=3), ", levels:",
             length(d.data.pressure), "]")
+        if length(files) == 1
+            println("metadata names: ", keys(d.metadata))
+            println("data names: ", names(d.data))
+        end
     catch e
         println(i, ". ", short, " -- ", e)
         global bad = bad + 1
