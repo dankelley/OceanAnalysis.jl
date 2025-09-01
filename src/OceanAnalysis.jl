@@ -956,10 +956,10 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
             longitude, latitude, time=time, debug=debug > 0 ? debug + 1 : 0)
     end
     oad(debug, "    adding non-standard variables to the '.data' component of return value")
-    println("data...")
-    println(first(data, 2)) # FIXME
-    println("rval.data...")
-    println(first(rval.data, 2)) # FIXME
+    #println("data...")
+    #println(first(data, 2)) # FIXME
+    #println("rval.data...")
+    #println(first(rval.data, 2)) # FIXME
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
         if !(name in standard_items)
