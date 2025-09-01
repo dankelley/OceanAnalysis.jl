@@ -601,40 +601,31 @@ function read_argo(filename, column=1; debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d
+        oad(debug, "    about to read salinity, temperature and pressure data.")
         # We demand some valid salinity, temperature and pressure data.
-
         salinity = get_nc_value(d, "PSAL")
-        if !any(ismissing(salinity))
-            error("No valid salinity data")
-        end
         oad(debug, "    read $(length(salinity)) salinity values, starting with $(first(salinity,3))")
         column_length = length(salinity)
 
         temperature = get_nc_value(d, "TEMP")
-        if !any(ismissing(temperature))
-            error("No valid temperature data")
-        end
         if length(temperature) != column_length
             error("salinity and temperature columns have different lengths")
         end
         oad(debug, "    read $(length(temperature)) temperature values, starting with $(first(temperature,3))")
 
         pressure = get_nc_value(d, "PRES")
-        if !any(ismissing(pressure))
-            error("No valid pressure data")
-        end
         if length(pressure) != column_length
             error("salinity and pressure columns have different lengths")
         end
         oad(debug, "    read $(length(pressure)) pressure values starting with $(first(pressure,3))")
 
-        longitude = get_nc_value(d, "LONGITUDE")
+        longitude = get_nc_value(d, "LONGITUDE", false)
         if ismissing(longitude)
             error("No non-missing longitude data in Argo file")
         end
         oad(debug, "    read longitude: $longitude")
 
-        latitude = get_nc_value(d, "LATITUDE")
+        latitude = get_nc_value(d, "LATITUDE", false)
         if ismissing(latitude)
             error("No non-missing latitude data in Argo file")
         end
@@ -679,7 +670,7 @@ end # read_argo()
 #     return rval |> fix_gsw_bad_code!
 # end
 
-function get_nc_value(d, name)
+function get_nc_value(d, name, require_some_nonmissing=true)
     if !(name in keys(d))
         error("This NetCDF file has no variable named \"$name\"")
     end
@@ -694,6 +685,9 @@ function get_nc_value(d, name)
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
     bad = ismissing.(item)
+    if require_some_nonmissing && all(bad)
+        error("the ", name, " data are ALL missing, so cannot proceed")
+    end
     if any(bad)
         if all(ismissing.(item))
             return item
