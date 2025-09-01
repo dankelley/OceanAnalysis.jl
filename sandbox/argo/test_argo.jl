@@ -10,17 +10,16 @@ files = glob("*.nc", dir)
 #files = [dir * "/D6902967_127.nc"]
 debug = 0
 bad = 0
-files = [files[100]]
+# files = [files[100]] # to test a single random file
 for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
-    print(file)
     try
         d = read_argo(file, debug=debug)
-        println(i, ". ", short, " mode ", d.metadata["data_mode"], " -- ",
-            d.metadata["time"], " [",
-            round(d.metadata["latitude"], digits=3), " N ",
-            round(d.metadata["longitude"], digits=3), " E]; ",
-            length(d.data.pressure), " levels")
+        println(i, ". ", short, " [mode:", d.metadata["data_mode"], ", time:",
+            d.metadata["time"], ", latitude:",
+            round(d.metadata["latitude"], digits=3), ", longitude:",
+            round(d.metadata["longitude"], digits=3), ", levels:",
+            length(d.data.pressure), "]")
     catch e
         println(i, ". ", short, " -- ", e)
         global bad = bad + 1
