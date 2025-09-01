@@ -578,13 +578,23 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
 end # plot_TS()
 
 """
-    read_argo(filename, column=1)
+    read_argo(filename, column=1; require_valid=true, debug=0)
 
-Read an Argo file and return a Ctd object.  As of 2025-08-23, this code is
-still in rapid development; please report problems as issues on
-<www.github.com/dankelley/OceanAnalysis.jl/issues>.
+Read an Argo file and return a Ctd object that holds salinity, temperature,
+pressure (and derived columns) but no other columns from the file.  As of
+2025-08-23, this code is still in rapid development; please report problems as
+issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
 
-An error is issued if the file lacks pressure, salinity, or temperature data.
+If `require_valid` is true (the default) then an error is reported if the file
+lacks one of three required data columns, or either longitude or latitude.  An
+error is also reported if any of these items consists entirely of missing
+values. This is because such files are unlikely to be of much use. In some
+cases, setting `require_valid` to false may permit the file to be read, but
+this has not been tested, since the results in such cases are not likely to be
+of practical use.
+
+Set `debug` to a positive integer to cause `read_argo()` to print messages
+during processing. This can be handy if problems arise.
 
 # Examples
 ```julia-repl
@@ -597,34 +607,36 @@ d = read_argo(f)
 plot_TS(d)
 ```
 """
-function read_argo(filename, column=1; debug::Int64=0)
-    oad(debug, "read_argo(<filename>, column=$column, debug=$debug) START")
+function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
+    oad(debug, "read_argo(<filename>, column=$column, require_valid=$require_valid, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d
         oad(debug, "    about to read salinity, temperature and pressure data.")
-        # We demand some valid salinity, temperature and pressure data.
-        salinity = get_nc_value(d, "PSAL")
-        oad(debug, "    read $(length(salinity)) salinity values, starting with $(first(salinity,3))")
+        salinity = get_nc_value(d, "PSAL", require_valid)
+        oad(debug, "    read ", length(salinity), " salinity values, starting with ",
+            first(salinity, 3))
         column_length = length(salinity)
-
-        temperature = get_nc_value(d, "TEMP")
+        temperature = get_nc_value(d, "TEMP", require_valid)
         if length(temperature) != column_length
-            error("salinity and temperature columns have different lengths")
+            error("salinity and temperature have different lengths (",
+                column_length, " and ", length(temperature), ")")
         end
-        oad(debug, "    read $(length(temperature)) temperature values, starting with $(first(temperature,3))")
-
-        pressure = get_nc_value(d, "PRES")
+        oad(debug, "    read ", length(temperature), " temperature values, starting with ",
+            first(temperature, 3))
+        pressure = get_nc_value(d, "PRES", require_valid)
         if length(pressure) != column_length
-            error("salinity and pressure columns have different lengths")
+            error("salinity and pressure have different lengths (",
+                column_length, " and ", length(pressure), ")")
         end
-        oad(debug, "    read $(length(pressure)) pressure values starting with $(first(pressure,3))")
-
-        longitude = get_nc_value(d, "LONGITUDE")
+        oad(debug, "    read ", length(pressure), " pressure values, starting with ",
+            first(pressure, 3))
+        # Location is also required for any practical work.
+        longitude = get_nc_value(d, "LONGITUDE", require_valid)
         oad(debug, "    read longitude: $longitude")
-
-        latitude = get_nc_value(d, "LATITUDE")
+        latitude = get_nc_value(d, "LATITUDE", require_valid)
         oad(debug, "    read latitude: $latitude")
-
+        # Non-numeric items cannot be retrieved with get_nc_value(), so we get
+        # them directly.
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
@@ -664,7 +676,7 @@ end # read_argo()
 #     return rval |> fix_gsw_bad_code!
 # end
 
-function get_nc_value(d, name, require_some_nonmissing=true)
+function get_nc_value(d, name, require_valid=true)
     if !(name in keys(d))
         error("this file contains no ", name, " data")
     end
@@ -679,7 +691,7 @@ function get_nc_value(d, name, require_some_nonmissing=true)
         error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
     end
     bad = ismissing.(item)
-    if require_some_nonmissing && all(bad)
+    if require_valid && all(bad)
         error("this file has ", name, " data, but all the values are bad")
     end
     if any(bad)
