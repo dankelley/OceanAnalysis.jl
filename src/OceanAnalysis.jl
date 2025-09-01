@@ -268,9 +268,9 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     latitude::Union{Missing,Float64}=missing; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
-    oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 3))
-    oad(debug, "    given temperature of length ", length(temperature), ", which starts: ", first(temperature, 3))
-    oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 3))
+    oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
+    oad(debug, "    given temperature of length ", length(temperature), ", which starts: ", first(temperature, 2))
+    oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
     oad(debug, "    given longitude:  ", longitude)
     oad(debug, "    given latitude:   ", latitude)
     if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
@@ -282,13 +282,13 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         lat = latitude
     end
     local SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
-    oad(debug, "    created SA length ", length(SA), ", which starts: ", first(SA, 3))
+    oad(debug, "    created SA length ", length(SA), ", which starts: ", first(SA, 2))
     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
-    oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 3))
+    oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 2))
     sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(sigma0, 3))
+    oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(sigma0, 2))
     spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(spiciness0, 3))
+    oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(spiciness0, 2))
     oad(debug, "    assembling .data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
@@ -617,7 +617,7 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         oad(debug, "    about to read salinity, temperature and pressure data.")
         salinity = get_nc_value(d, "PSAL", require_valid)
         oad(debug, "    read ", length(salinity), " salinity values, starting with ",
-            first(salinity, 3))
+            first(salinity, 2))
         column_length = length(salinity)
         temperature = get_nc_value(d, "TEMP", require_valid)
         if length(temperature) != column_length
@@ -625,14 +625,14 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
                 column_length, " and ", length(temperature), ")")
         end
         oad(debug, "    read ", length(temperature), " temperature values, starting with ",
-            first(temperature, 3))
+            first(temperature, 2))
         pressure = get_nc_value(d, "PRES", require_valid)
         if length(pressure) != column_length
             error("salinity and pressure have different lengths (",
                 column_length, " and ", length(pressure), ")")
         end
         oad(debug, "    read ", length(pressure), " pressure values, starting with ",
-            first(pressure, 3))
+            first(pressure, 2))
         # Location is also required for any practical work.
         longitude = get_nc_value(d, "LONGITUDE", false)
         if ismissing(longitude)
