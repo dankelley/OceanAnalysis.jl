@@ -230,16 +230,18 @@ end
 
 
 """
-    as_ctd(salinity, temperature, pressure, longitude=-30.0, latitude=30.0; time, debug=0)
+    as_ctd(salinity, temperature, pressure, longitude=NaN, latitude=NaN; time, debug=-1)
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 
-Returns a [`Ctd`](@ref) object with a `data` element that is a data frame holding
-the provided water properties, along with computed Absolute Salinity (`SA`)
-Conservative Temperature (`CT`), potential density anomaly relative to the
-surface pressure (`sigma0`) and spiciness with respect to surface pressure
+Returns a [`Ctd`](@ref) object with a `data` element that is a data frame
+holding the provided water properties, along with computed Absolute Salinity
+(`SA`) Conservative Temperature (`CT`), potential density anomaly relative to
+the surface pressure (`sigma0`) and spiciness with respect to surface pressure
 (`spiciness0`).  The object also holds a `metadata` element that holds
-`longitude`, `latitude` and `time`.
+`longitude`, `latitude` and `time`.  If either `longitude` or `latitude` is
+NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
+30N).
 
 # Arguments
 - `salinity::Vector{Float64}` measured salinity values, in Practical Salinity units.
@@ -740,6 +742,14 @@ along with renamed values in standard nomenclature. At present, the only
 renamed items are salinity, temperature, and pressure. Note that if the data
 file indicates temperature is on the T68 scale, then this is converted
 to the standard modern scale, T90, before saving as `temperature`. 
+
+A message is printed if no data in the file are labelled with names that are
+recognized as salinity, temperature, or pressure, because these quantities are
+required for any meaningful CTD dataset.  Also, if longitude and latitude
+cannot can be inferred from the file, a message is printed to indicate that
+mid-Atlantic values (-30E and 30N) are assumed, so that Absolute Salinity,
+`SA`, and other TEOS-10 quantities can be approximated, as these
+are needed for other functions in the package.
 
 # Examples
 ```julia-repl

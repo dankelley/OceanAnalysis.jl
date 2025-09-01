@@ -14,7 +14,7 @@ files = [files; glob("*.cnv", "/Users/kelley/data/arctic/beaufort/2012/")]
 files = sort(files)
 
 # Override the above by uncommenting the next line, to test on a particular file.
-# files = ["/Users/kelley/Dropbox/oce-working-notes/cnv/vert_01.cnv"] # bad location
+# files = ["/Users/kelley/Dropbox/oce-working-notes/cnv/vert_01.cnv"]
 
 bad = 0
 for (i, file) in enumerate(files)
@@ -24,6 +24,12 @@ for (i, file) in enumerate(files)
         print(i, ". ", d.metadata["filename"], ": ", d.metadata["time"], " @ ",
             round(d.metadata["latitude"], digits=3), " N, ",
             round(d.metadata["longitude"], digits=3), " E\n")
+        if 1 == length(files)
+            println("metadata:")
+            println(d.metadata)
+            println("data:")
+            println(first(d.data, 6))
+        end
     catch e
         global bad = bad + 1
         print(" ERROR ", e, "\n")
