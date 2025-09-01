@@ -21,16 +21,15 @@ files = sort(files)
 # files = ["/Users/kelley/data/arctic/beaufort/2009/d200920_007.cnv"]
 # files = ["/Users/kelley/data/arctic/beaufort/2009/d200920_008.cnv"]
 
-files = ["Users/kelley/Dropbox/oce-working-notes/cnv/vert_01.cnv"]
+files = ["/Users/kelley/Dropbox/oce-working-notes/cnv/vert_01.cnv"]
 
 
 # %%
 bad = 0
 for (i, file) in enumerate(files)
-    file = files[i]
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try
-        print(file)
+        print(i, ". ", file)
         d = read_ctd_cnv(file, debug=1)
         print(": ", d.metadata["time"], " @ ", round(d.metadata["latitude"], digits=3), " N, ", round(d.metadata["longitude"], digits=3), " E\n")
     catch e

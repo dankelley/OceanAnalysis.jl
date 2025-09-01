@@ -288,10 +288,10 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(sigma0, 2))
     spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
     oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(spiciness0, 2))
-    oad(debug, "    assembling .data (a DataFrame) from the above")
+    oad(debug, "    assembling data (a DataFrame) from the above")
     data = DataFrame(salinity=salinity, temperature=temperature,
         pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
-    oad(debug, "    assembling .metadata (a Dict)")
+    oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
     # Note that we are inserting the longitude and latitude from the function call,
     # not the -30,30 values that we invented in order to estimate SA, CT, sigma0 and spicines0
@@ -300,7 +300,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     if !ismissing(time)
         metadata["time"] = time
     end
-    oad(debug, "    assembling .data and .metadata into a Ctd object")
+    oad(debug, "    passing metadata and data to Ctd() to construct a return value
     rval = Ctd(metadata, data)
     oad(debug, "END as_ctd()")
     rval
@@ -937,7 +937,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     #data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
     #data.sigma0 = gsw_sigma0.(data.SA, data.CT)
     #data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    oad(debug, "    combining .metadata and .data into a Ctd object")
+    #oad(debug, "    combining .metadata and .data into a Ctd object")
     #println("metadata lat=", metadata["latitude"])
     #println("metadata lon=", metadata["longitude"])
     #rval = Ctd(metadata, data)
@@ -945,6 +945,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     # is done (successfully) by read_argo().
     #    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
     #                  time=time, debug=debug > 0 ? debug + 1 : 0)
+    oad(debug, "    calling as_ctd() to create a Ctd object, as the skeleton of the return value")
     if isnan(latitude) || isnan(longitude)
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
             NaN, NaN, time=time, debug=debug > 0 ? debug + 1 : 0)
@@ -952,14 +953,16 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
             longitude, latitude, time=time, debug=debug > 0 ? debug + 1 : 0)
     end
+    oad(debug, "    adding non-standard variables to the '.data' component of return value")
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
         if !name in standard_items
-            oad(debug, "    transferring nonstandard item '$name' to .data in rval")
+            oad(debug, "        adding '", name, "'")
             rval.data[:, name] = data[:, name]
         end
     end
     # Add nonstandard metadata that are in the file
+    oad(debug, "        adding header and filename to the '.metadata' component of return value")
     rval.metadata["header"] = header
     rval.metadata["filename"] = filename
     oad(debug, "END read_ctd_cnv()")
