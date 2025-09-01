@@ -264,7 +264,8 @@ Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.
 ```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
-    longitude::Float64=NaN, latitude::Float64=NaN; time=nothing, debug::Int64=0)
+    longitude::Union{Missing,Float64}=missing,
+    latitude::Union{Missing,Float64}=missing; time=nothing, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 3))
@@ -272,7 +273,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 3))
     oad(debug, "    given longitude:  ", longitude)
     oad(debug, "    given latitude:   ", latitude)
-    if isnan(longitude) || isnan(latitude)
+    if isnan(longitude) || isnan(latitude) || ismissing(longitude) || ismissing(latitude)
         lon = -30.0
         lat = 30.0
         @warn("as_ctd() found NaN values for longitude and/or latitude, so computing SA, CT, sigma0 and spiciness0 from default mid-Atlantic values 30N and -30E.")

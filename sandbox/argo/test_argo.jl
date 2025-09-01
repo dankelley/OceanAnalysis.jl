@@ -7,13 +7,13 @@ using OceanAnalysis, Glob, Random
 #Random.seed!(1234)
 dir = "/Users/kelley/data/argo"
 files = glob("*.nc", dir)
-#files = [dir * "/R4902911_202.nc"]
-
+files = [dir * "/D6902967_127.nc"]
+debug = 1
 bad = 0
 for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
-        d = read_argo(file)
+        d = read_argo(file, debug=debug)
         println(i, ". ", short, " -- ", d.metadata["time"], " @",
             round(d.metadata["latitude"], digits=3), " N ",
             round(d.metadata["longitude"], digits=3), " E ",
