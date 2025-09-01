@@ -1,4 +1,4 @@
-# Takes 4s with 1 file, 5.8 s with . files
+# Time: 4s with 1 file, 6.5s with 975 files -- approximately 500 files per second
 
 # NOTES (all files are in /users/kelley/argo):
 # D6902967_133.nc -- no LONGITUDE

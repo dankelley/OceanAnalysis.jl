@@ -666,7 +666,7 @@ end # read_argo()
 
 function get_nc_value(d, name, require_some_nonmissing=true)
     if !(name in keys(d))
-        error("no ", name, " data found")
+        error("this file lacks any ", name, " data")
     end
     #println("DAN in get_nc_value() with name='$name'")
     local item = d[name]
@@ -680,7 +680,7 @@ function get_nc_value(d, name, require_some_nonmissing=true)
     end
     bad = ismissing.(item)
     if require_some_nonmissing && all(bad)
-        error("all the ", name, " data are missing")
+        error("this file has ", name, " data, but all the values are bad")
     end
     if any(bad)
         if all(ismissing.(item))
