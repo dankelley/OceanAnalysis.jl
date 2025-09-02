@@ -52,7 +52,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
         lat = latitude
     end
     local SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
-    oad(debug, "    created SA length ", length(SA), ", which starts: ", first(SA, 2))
+    oad(debug, "    created SA of length ", length(SA), ", which starts: ", first(SA, 2))
     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
     oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 2))
     sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!

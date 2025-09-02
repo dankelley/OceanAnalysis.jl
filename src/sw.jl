@@ -5,17 +5,19 @@
 Compute Conservative Temperature (CT).
 
 This is done with the function `gsw_ct_from_t` of the `GibbsSeaWater` package.
-In the second form, SA is computed first, and then temperature and pressure are
-extracted from the [`Ctd`](@ref) object.
+
+The first form takes single values and returns a single value.
+
+The second form extracts values from a [`Ctd`](@ref) object and then calls the
+first form as `CT.()` so that it returns a vector of CT values.
 
 """
-
 function CT(ctd::Ctd)
     CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
-    gsw_ct_from_t(SA, temperature, pressure)
+    gsw_ct_from_t(SA, temperature, pressure) |> fix_gsw_bad_code!
 end
 
 
@@ -26,12 +28,12 @@ end
 Compute Absolute Salinity (SA).
 
 This is done with the function `gsw_sa_from_sp` of the `GibbsSeaWater` package.
-In the first form, the hydrographic variables are given as Float64 values,
-while the location variables are single Float64 values.  In the second form,
-all values are extracted from the [`Ctd`](@ref) object.
 
+The first form takes single values and returns a single value.
+
+The second form extracts values from a [`Ctd`](@ref) object and then calls the
+first form as `SA.()` so that it returns a vector of SA values.
 """
-
 function SA(ctd::Ctd)
     salinity = ctd.data.salinity
     pressure = ctd.data.pressure
@@ -43,12 +45,8 @@ end
 
 function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
-    gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+    gsw_sa_from_sp(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
 end
-
-
-
-
 
 """
     N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)

@@ -1,6 +1,6 @@
 using OceanAnalysis
 d = read_ctd_cnv("data/ctd.cnv")
 SA_ = SA(d)
-println(first(SA_, 10))
 CT_ = CT(d)
-println(first(CT_, 10))
+println(maximum(abs.(SA_ .- d.data.SA)))
+println(maximum(abs.(CT_ .- d.data.CT)))
