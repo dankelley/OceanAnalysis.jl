@@ -1,4 +1,27 @@
 """
+    CT(SA, temperature, pressure)
+    CT(ctd)
+
+Compute Conservative Temperature (CT).
+
+This is done with the function `gsw_ct_from_t` of the `GibbsSeaWater` package.
+In the second form, SA is computed first, and then temperature and pressure are
+extracted from the [`Ctd`](@ref) object.
+
+"""
+
+function CT(ctd::Ctd)
+    SA = SA(ctd)
+    pressure = ctd.data.pressure
+    CT.(SA, temperature, pressure)
+end
+
+function CT(SA::Float64, temperature::Float64, pressure::Float64)
+    gsw_ct_from_t.(SA, temperature, pressure)
+end
+
+
+"""
     SA(salinity, pressure, longitude, latitude)
     SA(ctd)
 

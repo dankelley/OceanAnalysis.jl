@@ -25,6 +25,7 @@ export Ctd
 # Functions
 export as_ctd
 export coordinate_from_string
+export CT
 export depth_from_pressure
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
