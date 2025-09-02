@@ -6,6 +6,15 @@ using OceanAnalysis, Test, Dates
 # Basically, even 10 digits is fine in practical terms, as we are mostly
 # looking for gross coding errors.
 
+
+@testset "SA() handles NaN values well" begin
+    SP = [34.0, NaN, 34.2, 34.3, 34.4, 34.5]
+    p = [10.0, 11.0, NaN, 13.0, 14.0, 15.0]
+    lon = [-30.0, -30.0, -30.0, NaN, -30.0, -30.0]
+    lat = [30.0, 30.0, 30.0, 30.0, NaN, 30.0]
+    @test isnan.(SA.(SP, p, lon, lat)) == [0, 1, 1, 1, 1, 0]
+end
+
 @testset "coordinate_from_string()" begin
     @test coordinate_from_string("1.5") == 1.5
     @test coordinate_from_string("1.5n") == 1.5

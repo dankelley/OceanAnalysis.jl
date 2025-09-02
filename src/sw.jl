@@ -17,9 +17,9 @@ function CT(ctd::Ctd)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
-    println("CT(): SA $SA, temperature $temperature, presure $pressure")
+    #println("CT(): SA $SA, temperature $temperature, pressure $pressure")
     rval = gsw_ct_from_t(SA, temperature, pressure)
-    println("    rval $rval")
+    #println("    rval $rval")
     rval
 end
 
@@ -48,12 +48,12 @@ end
 
 function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
-    println("SA(): salinity $salinity, pressure $pressure, lon $longitude, lat $latitude")
+    #println("SA(): salinity $salinity, pressure $pressure, lon $longitude, lat $latitude")
     rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
     if rval > 1e15
         rval = NaN
     end
-    println("  rval $rval")
+    #println("  rval $rval")
     rval
 end
 
