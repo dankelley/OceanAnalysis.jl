@@ -15,6 +15,13 @@ using OceanAnalysis, Test, Dates
     @test isnan.(SA.(SP, p, lon, lat)) == [0, 1, 1, 1, 1, 0]
 end
 
+@testset "CT() handles NaN values well" begin
+    SA_ = [34.0, NaN, 34.2, 34.3, 34.4]
+    T = [10.0, 11.0, NaN, 13.0, 14.0]
+    p = [10.0, 11.0, 12.0, NaN, 14.0]
+    @test isnan.(CT.(SA_, T, p)) == [0, 1, 1, 1, 0]
+end
+
 @testset "coordinate_from_string()" begin
     @test coordinate_from_string("1.5") == 1.5
     @test coordinate_from_string("1.5n") == 1.5
