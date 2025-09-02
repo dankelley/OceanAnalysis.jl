@@ -11,13 +11,11 @@ extracted from the [`Ctd`](@ref) object.
 """
 
 function CT(ctd::Ctd)
-    SA_ = SA(ctd)
-    pressure = ctd.data.pressure
-    CT.(SA_, temperature, pressure)
+    CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
-    gsw_ct_from_t.(SA, temperature, pressure)
+    gsw_ct_from_t(SA, temperature, pressure)
 end
 
 
@@ -45,7 +43,7 @@ end
 
 function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
-    gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
+    gsw_sa_from_sp(salinity, pressure, longitude, latitude)
 end
 
 
