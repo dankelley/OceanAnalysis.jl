@@ -14,8 +14,9 @@ form, all values are extracted from the [`Ctd`](@ref) object.
 function SA(ctd::Ctd)
     salinity = ctd.data.salinity
     pressure = ctd.data.pressure
-    longitude = ctd.metadata["longitude"]
-    latitude = ctd.metadata["latitude"]
+    n = length(salinity)
+    longitude = repeat([ctd.metadata["longitude"]], n)
+    latitude = repeat([ctd.metadata["latitude"]], n)
     SA.(salinity, pressure, longitude, latitude)
 end
 
