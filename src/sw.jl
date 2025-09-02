@@ -14,7 +14,7 @@ function `gsw_sa_from_sp`.
     debugging output should be printed during processing.
 """
 
-function SA(ctd::Ctd; debug:Int64=0)
+function SA(ctd::Ctd; debug::Int64=0)
     println("in SA()")
 end
 
