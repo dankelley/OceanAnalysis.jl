@@ -17,7 +17,10 @@ function CT(ctd::Ctd)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
-    gsw_ct_from_t(SA, temperature, pressure)
+    println("CT(): SA $SA, temperature $temperature, presure $pressure")
+    rval = gsw_ct_from_t(SA, temperature, pressure)
+    println("    rval $rval")
+    rval
 end
 
 
@@ -45,7 +48,10 @@ end
 
 function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
-    gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+    println("SA(): salinity $salinity, pressure $pressure, lon $longitude, lat $latitude")
+    rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+    println("  rval $rval")
+    rval
 end
 
 """
