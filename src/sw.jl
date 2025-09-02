@@ -5,9 +5,9 @@
 Compute Absolute Salinity (SA).
 
 This is done with the function `gsw_sa_from_sp` of the `GibbsSeaWater` package.
-In the first form, the hydrographic variables are given as vectors of Float64
-values, while the location variables are single Float64 values.  In the second
-form, all values are extracted from the [`Ctd`](@ref) object.
+In the first form, the hydrographic variables are given as Float64 values,
+while the location variables are single Float64 values.  In the second form,
+all values are extracted from the [`Ctd`](@ref) object.
 
 """
 
@@ -20,7 +20,7 @@ function SA(ctd::Ctd)
     SA.(salinity, pressure, longitude, latitude)
 end
 
-function SA(salinity::Vector{Float64}, pressure::Vector{Float64},
+function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
     gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
 end
