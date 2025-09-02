@@ -1,19 +1,7 @@
 # %%
-function f(x, y)
-    [2x, 3y]
-end
-f(1, 1)
-
-# %%
-x = 1:4
-y = 10x
-
-# %%
-X, Y = f.(x, y)
-
-# %%
-F[:; 1]
-
-# %%
-F[:; 2]
-
+using OceanAnalysis
+SP = [34., NaN, 34.2, 34.3]
+p = [10.0, 11.0, NaN, 13.0]
+lon = repeat([-30.], 4)
+lat = repeat([30.], 4)
+SA.(SP, p, lon, lat)
