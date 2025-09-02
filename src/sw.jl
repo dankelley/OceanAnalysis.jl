@@ -11,9 +11,9 @@ extracted from the [`Ctd`](@ref) object.
 """
 
 function CT(ctd::Ctd)
-    SA = SA(ctd)
+    SA_ = SA(ctd)
     pressure = ctd.data.pressure
-    CT.(SA, temperature, pressure)
+    CT.(SA_, temperature, pressure)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
