@@ -50,6 +50,9 @@ function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
     println("SA(): salinity $salinity, pressure $pressure, lon $longitude, lat $latitude")
     rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+    if rval > 1e15
+        rval = NaN
+    end
     println("  rval $rval")
     rval
 end
