@@ -21,7 +21,7 @@ end
 
 function SA(salinity::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64, latitude::Float64)
-    gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+    gsw_sa_from_sp.(salinity, pressure, longitude, latitude)
 end
 
 
