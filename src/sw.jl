@@ -17,7 +17,7 @@ function CT(ctd::Ctd)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
-    gsw_ct_from_t(SA, temperature, pressure) |> fix_gsw_bad_code
+    gsw_ct_from_t(SA, temperature, pressure)
 end
 
 
@@ -45,7 +45,7 @@ end
 
 function SA(salinity::Float64, pressure::Float64,
     longitude::Float64, latitude::Float64)
-    gsw_sa_from_sp(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code
+    gsw_sa_from_sp(salinity, pressure, longitude, latitude)
 end
 
 """
