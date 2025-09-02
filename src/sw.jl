@@ -1,5 +1,25 @@
 """
-    N2(ctd::Ctd, s::Float64=0.15; debug)
+    SA(ctd::Ctd; debug=0)
+
+Compute Absolute Salinity (SA) for the elements of a [`Ctd`](@ref) object.
+
+This works by passing the values of `ctd.data.salinity`, `ctd.data.temperature`
+and `ctd.data.pressure`, in combination with the values of
+`ctd.metadata["longitude"]` and `ctd.metadata["latitude"]` to the GibbsSeaWater
+function `gsw_sa_from_sp`.
+
+# Arguments
+- `ctd::Ctd` a CTD object
+- `debug::Int64` an optional value that, if it exceeds 0, indicates that
+    debugging output should be printed during processing.
+"""
+
+function SA(ctd::Ctd; debug:Int64=0)
+    println("in SA()")
+end
+
+"""
+    N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
 
 Compute N², the square of the buoyancy frequency, for a Ctd object, e.g.
 created by either the [`Ctd`](@ref) or [`read_argo`](@ref) function.  The value

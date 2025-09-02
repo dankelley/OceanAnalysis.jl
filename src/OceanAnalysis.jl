@@ -38,6 +38,7 @@ export pretty
 export read_argo
 export read_ctd_cnv
 export salinity_from_conductivity
+export SA
 export T90_from_T48
 export T90_from_T68
 export z_from_pressure
