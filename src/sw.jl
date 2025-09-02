@@ -1,22 +1,32 @@
 """
-    SA(ctd::Ctd; debug=0)
+    SA(salinity, pressure, longitude, latitude)
+    SA(ctd)
 
-Compute Absolute Salinity (SA) for the elements of a [`Ctd`](@ref) object.
+Compute Absolute Salinity (SA).
 
-This works by passing the values of `ctd.data.salinity`, `ctd.data.temperature`
-and `ctd.data.pressure`, in combination with the values of
-`ctd.metadata["longitude"]` and `ctd.metadata["latitude"]` to the GibbsSeaWater
-function `gsw_sa_from_sp`.
+This is done with the function `gsw_sa_from_sp` of the `GibbsSeaWater` package.
+In the first form, the hydrographic variables are given as vectors of Float64
+values, while the location variables are single Float64 values.  In the second
+form, all values are extracted from the [`Ctd`](@ref) object.
 
-# Arguments
-- `ctd::Ctd` a CTD object
-- `debug::Int64` an optional value that, if it exceeds 0, indicates that
-    debugging output should be printed during processing.
 """
 
-function SA(ctd::Ctd; debug::Int64=0)
-    println("in SA()")
+function SA(ctd::Ctd)
+    salinity = ctd.data.salinity
+    pressure = ctd.data.pressure
+    longitude = ctd.metadata["longitude"]
+    latitude = ctd.metadata["latitude"]
+    SA.(salinity, pressure, longitude, latitude)
 end
+
+function SA(salinity::Vector{Float64}, pressure::Vector{Float64},
+    longitude::Float64, latitude::Float64)
+    gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+end
+
+
+
+
 
 """
     N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
