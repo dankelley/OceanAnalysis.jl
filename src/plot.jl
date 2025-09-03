@@ -94,7 +94,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         error("vertical must be either \"pressure\" or \"density\"")
     end
     if which == "temperature" || which == "CT"
-        oad(debug, "    drawing $which")
+        oad(debug, "    drawing '", which, "'")
         rval = plot(which == "CT" ? CT_ : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -105,7 +105,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "salinity" || which == "SA"
-        oad(debug, "    drawing $which")
+        oad(debug, "    drawing '", which, "'")
         rval = plot(which == "SA" ? SA_ : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -116,7 +116,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
-        oad(debug, "    drawing $which")
+        oad(debug, "    drawing '", which, "'")
         rval = plot(sigma0_, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -127,7 +127,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
-        oad(debug, "    drawing $which")
+        oad(debug, "    drawing '", which, "'")
         rval = plot(spiciness0_,
             y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -139,8 +139,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     elseif which == "N2"
-        oad(debug, "    drawing $which")
-        error("FIXME: recode N2() and plot_profile(..., \"N2\")")
+        oad(debug, "    drawing '", which, "'")
         x = N2(ctd)
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
