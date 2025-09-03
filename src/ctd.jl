@@ -27,11 +27,11 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 # Examples
 ```jldoctest
 julia> as_ctd([32.],[15.],[0.],-63.,40.)
-Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
- Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
-     │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
-─────┼────────────────────────────────────────────────────────────────────────
-   1 │     32.0         15.0       0.0  32.1516  15.0642  23.6653   0.0686905)
+Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
+ Row │ salinity  temperature  pressure
+     │ Float64   Float64      Float64
+─────┼─────────────────────────────────
+   1 │     32.0         15.0       0.0)
 ```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},

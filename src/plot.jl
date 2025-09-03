@@ -54,11 +54,19 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
+    print("plotnames before: $plot_names")
+    for item in ["SA", "CT", "sigma0", "spiciness0"]
+        if !(item in plot_names)
+            plot_names = [plot_names; item]
+        end
+    end
+    print("plotnames after: $plot_names")
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
     if !(which in plot_names)
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
     oad(debug, "    extracting data")
+    stop("DAN DAN DAN DAN")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
