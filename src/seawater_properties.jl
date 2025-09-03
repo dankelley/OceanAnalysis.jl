@@ -93,10 +93,12 @@ to examine Reference 2, which compares the R and Julia results.
 2. https://github.com/dankelley/OceanAnalysis.jl/issues/13
 
 """
-function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
+function N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
     oad(debug, "N2([Ctd object]) START")
-    pressure = o.data.pressure
-    sigma0 = o.data.sigma0
+    pressure = ctd.data.pressure
+    SA_ = SA(ctd)
+    CT_ = gsw_ct_from_t(SA_, ctd.data.temperature, ctd.data.pressure)
+    sigma0 = gsw_sigma0(SA_, CT_)
     i = sortperm(pressure)
     ok = diff(pressure[i]) .> 0.0
     ok = [ok[1]; ok]
@@ -108,7 +110,7 @@ function N2(o::Ctd, s::Float64=0.15; debug::Int64=0)
     g = 9.8
     deriv = derivative(spline, pressure)
     N2 = (g / rho0) * deriv
-    oad(debug, "    N2 length: $(length(N2))")
+    oad(debug, "    N2 length: ", length(N2))
     oad(debug, "END N2()")
     return N2
 end
