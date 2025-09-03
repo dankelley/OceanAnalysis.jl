@@ -8,14 +8,14 @@ variable named by `which` depends on pressure.  The variable is drawn on the x
 axis and pressure on the y axis. Following oceanographic convention, pressure
 increases downwards on the page and the "x" axis is drawn at the top. The
 permitted values of `which` are
-`"CT"` for Conservative Temperature,
+`"CT"` for the Gibbs Seawater formulation of Conservative Temperature,
 `"N2"` for N², the square of the buoyancy frequency,
-`"S"` for Practical Salinity,
-`"SA"` for Absolute Salinity,
-`"sigma0"` for the TEOS10 formulation of density anomaly referenced to the surface,
-`"spiciness0"` for seawater spiciness referenced to the surface,
+`"SA"` for the Gibbs Seawater formulation of Absolute Salinity,
+`"salinity"` for Practical Salinity,
+`"sigma0"` for the Gibbs Seawater formulation of density anomaly referenced to the surface,
+`"spiciness0"` for the Gibbs Seawater seawater spiciness referenced to the surface,
 and
-`"T"` for in-situ temperature.
+`"temperature"` for in-situ temperature.
 
 The default Julia font sizes on axes are overridden in this function, with
 8-point being used for both the numbers on axes (`tickfontize`) and the names
@@ -58,15 +58,14 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # we don't allow plotting a profile of pressure, since that's just a silly 1:1
     # line.
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
-    println("plotnames before: $plot_names")
-    derived_items = ["SA", "CT", "sigma0", "spiciness0"]
-    for item in derived_items
-        println("maybe add '", item, "'")
+    oad(debug, "    plotnames before adding derived variables: ", $plot_names)
+    derived_variables = ["SA", "CT", "sigma0", "spiciness0", "N2"]
+    for item in derived_variables
         if !(item in plot_names)
             plot_names = [plot_names; item]
         end
     end
-    println("plotnames after: $plot_names")
+    oad(debug, "    plotnames after adding derived variables: ", $plot_names)
     if !(which in plot_names)
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
@@ -77,7 +76,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    if which in derived_items
+    if which in derived_variables
         SA_ = SA(ctd)
         CT_ = CT(ctd)
         sigma0_ = gsw_sigma0.(SA_, CT_)
@@ -94,7 +93,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     else
         error("vertical must be either \"pressure\" or \"density\"")
     end
-    if which == "T" || which == "CT"
+    if which == "temperature" || which == "CT"
         oad(debug, "    drawing $which")
         rval = plot(which == "CT" ? CT_ : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -105,7 +104,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
                 which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
             end,
             yrot=90; kwargs...)
-    elseif which == "S" || which == "SA"
+    elseif which == "salinity" || which == "SA"
         oad(debug, "    drawing $which")
         rval = plot(which == "SA" ? SA_ : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
@@ -151,8 +150,15 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
                 "N² [s⁻²]" # "N2 [1/s^2]"
             end,
             yrot=90; kwargs...)
+    elseif which in plot_names
+        x = ctd.data[:, which]
+        oad(debug, "    drawing $which")
+        rval = plot(x, y, ylabel=ylabel,
+            yaxis=:flip, xmirror=true, framestyle=:box,
+            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            xlabel=which,
+            yrot=90; kwargs...)
     else
-        @warn("FIXME: code to let plot_profile() take *any* data item")
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
     oad(debug, "END plot_profile()")
