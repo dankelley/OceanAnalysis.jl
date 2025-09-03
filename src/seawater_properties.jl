@@ -97,8 +97,8 @@ function N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
     oad(debug, "N2([Ctd object]) START")
     pressure = ctd.data.pressure
     SA_ = SA(ctd)
-    CT_ = gsw_ct_from_t(SA_, ctd.data.temperature, ctd.data.pressure)
-    sigma0 = gsw_sigma0(SA_, CT_)
+    CT_ = gsw_ct_from_t.(SA_, ctd.data.temperature, ctd.data.pressure)
+    sigma0 = gsw_sigma0.(SA_, CT_)
     i = sortperm(pressure)
     ok = diff(pressure[i]) .> 0.0
     ok = [ok[1]; ok]
