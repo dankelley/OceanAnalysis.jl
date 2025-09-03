@@ -54,6 +54,10 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
+    # We can plot proviles of whatever is in the file, plus some others. Of course,
+    # we don't allow plotting a profile of pressure, since that's just a silly 1:1
+    # line.
+    plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
     print("plotnames before: $plot_names")
     for item in ["SA", "CT", "sigma0", "spiciness0"]
         if !(item in plot_names)
@@ -61,7 +65,6 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         end
     end
     print("plotnames after: $plot_names")
-    plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
     if !(which in plot_names)
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
