@@ -69,7 +69,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
     oad(debug, "    extracting data")
-    stop("DAN DAN DAN DAN")
+    error("DAN DAN DAN DAN")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
