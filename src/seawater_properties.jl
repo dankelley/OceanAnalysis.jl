@@ -11,16 +11,18 @@ The first form takes single values and returns a single value.
 The second form extracts values from a [`Ctd`](@ref) object and then calls the
 first form as `CT.()` so that it returns a vector of CT values.
 
+# Examples
+```jldoctest
+julia> CT(35.0, 10.0, 100.0)
+9.981322531922249
+```
 """
 function CT(ctd::Ctd)
     CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
-    #println("CT(): SA $SA, temperature $temperature, pressure $pressure")
-    rval = gsw_ct_from_t(SA, temperature, pressure)
-    #println("    rval $rval")
-    rval
+    gsw_ct_from_t(SA, temperature, pressure)
 end
 
 
@@ -36,6 +38,12 @@ The first form takes single values and returns a single value.
 
 The second form extracts values from a [`Ctd`](@ref) object and then calls the
 first form as `SA.()` so that it returns a vector of SA values.
+
+# Examples
+```jldoctest
+julia> SA(35.0, 100.0, -30.0, 30.0)
+35.165308620244
+```
 """
 function SA(ctd::Ctd)
     salinity = ctd.data.salinity
