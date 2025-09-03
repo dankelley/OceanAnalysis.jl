@@ -58,7 +58,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # we don't allow plotting a profile of pressure, since that's just a silly 1:1
     # line.
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
-    oad(debug, "    plotnames before adding derived variables: ", $plot_names)
+    oad(debug, "    plotnames before adding derived variables: ", plot_names)
     derived_variables = ["SA", "CT", "sigma0", "spiciness0", "N2"]
     for item in derived_variables
         if !(item in plot_names)
