@@ -34,8 +34,10 @@ The `read_argo()` function returns a [`Ctd`](@ref) object that has two
 components, a Dict named `.metadata` and DataFrame named `.data`. The
 `.metadata` entries are named `"cycle"`, `"data_mode"`, `"date_creation"`,
 `"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and `"time"`. The
-`.data` columns are named `"CT"`, `"SA"`, `"pressure"`, `"salinity"`,
-`"sigma0"`, `"spiciness0"`, and `"temperature"`.
+`.data` columns are named `"pressure"`, `"salinity"` and `"temperature"`,
+as copied from fields in the NetCDF file named `"PRES"`, `"PSAL"`
+and `"TEMP"`; no other NetCDF fields are copied in this version
+of `read_argo()`.
 
 # Examples
 ```julia-repl

@@ -97,11 +97,7 @@ to the standard modern scale, T90, before saving as `temperature`.
 
 A message is printed if no data in the file are labelled with names that are
 recognized as salinity, temperature, or pressure, because these quantities are
-required for any meaningful CTD dataset.  Also, if longitude and latitude
-cannot can be inferred from the file, a message is printed to indicate that
-mid-Atlantic values (-30E and 30N) are assumed, so that Absolute Salinity,
-`SA`, and other TEOS-10 quantities can be approximated, as these
-are needed for other functions in the package.
+required for any meaningful CTD dataset.
 
 # Examples
 ```julia-repl
