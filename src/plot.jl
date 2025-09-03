@@ -1,3 +1,4 @@
+using GibbsSeaWater
 """
     plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         abbreviate::Bool=false, legend::Bool=false,
