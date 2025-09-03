@@ -141,7 +141,8 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     elseif which == "N2"
         oad(debug, "    drawing $which")
         error("FIXME: recode N2() and plot_profile(..., \"N2\")")
-        rval = plot(get_element(ctd, "N2"), y, ylabel=ylabel,
+        x = N2(ctd)
+        rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
