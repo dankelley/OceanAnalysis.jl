@@ -59,7 +59,8 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # line.
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
     print("plotnames before: $plot_names")
-    for item in ["SA", "CT", "sigma0", "spiciness0"]
+    derived_items = ["SA", "CT", "sigma0", "spiciness0"]
+    for item in derived_items
         if !(item in plot_names)
             plot_names = [plot_names; item]
         end
@@ -69,16 +70,18 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
     oad(debug, "    extracting data")
-    error("DAN DAN DAN DAN")
     S = ctd.data.salinity
     T = ctd.data.temperature
     p = ctd.data.pressure
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    SA = ctd.data.SA |> fix_gsw_bad_code!
-    CT = ctd.data.CT |> fix_gsw_bad_code!
-    sigma0 = ctd.data.sigma0
+    if which in derived_items
+        SA_ = SA(ctd)
+        CT_ = CT(ctd)
+        sigma0_ = gsw_sigma0(SA_, CT_)
+        spiciness0_ = gsw_spiciness0(SA_, CT_)
+    end
     oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
@@ -92,7 +95,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     end
     if which == "T" || which == "CT"
         oad(debug, "    drawing $which")
-        rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
+        rval = plot(which == "CT" ? CT_ : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
@@ -103,7 +106,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "S" || which == "SA"
         oad(debug, "    drawing $which")
-        rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
+        rval = plot(which == "SA" ? SA_ : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
@@ -114,7 +117,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         oad(debug, "    drawing $which")
-        rval = plot(sigma0, y, ylabel=ylabel,
+        rval = plot(sigma0_, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -125,7 +128,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         oad(debug, "    drawing $which")
-        rval = plot(gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!,
+        rval = plot(spiciness0_,
             y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -137,6 +140,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "N2"
         oad(debug, "    drawing $which")
+        error("FIXME: recode N2() and plot_profile(..., \"N2\")")
         rval = plot(get_element(ctd, "N2"), y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -147,6 +151,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             end,
             yrot=90; kwargs...)
     else
+        @warn("FIXME: code to let plot_profile() take *any* data item")
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
     end
     oad(debug, "END plot_profile()")
