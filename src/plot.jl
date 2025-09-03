@@ -65,9 +65,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             plot_names = [plot_names; item]
         end
     end
-    oad(debug, "    plotnames after adding derived variables: ", $plot_names)
+    oad(debug, "    plotnames after adding derived variables: ", plot_names)
     if !(which in plot_names)
-        error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
+        error("plot_profile() cannot handle which='", which, "'; try one of: ", plot_names)
     end
     oad(debug, "    extracting data")
     S = ctd.data.salinity
