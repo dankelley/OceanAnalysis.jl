@@ -1,4 +1,3 @@
-using GibbsSeaWater
 """
     plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         abbreviate::Bool=false, legend::Bool=false,
@@ -81,8 +80,8 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     if which in derived_items
         SA_ = SA(ctd)
         CT_ = CT(ctd)
-        sigma0_ = gsw_sigma0(SA_, CT_)
-        spiciness0_ = gsw_spiciness0(SA_, CT_)
+        sigma0_ = gsw_sigma0.(SA_, CT_)
+        spiciness0_ = gsw_spiciness0.(SA_, CT_)
     end
     oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
