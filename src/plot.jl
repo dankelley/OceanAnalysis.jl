@@ -58,14 +58,15 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # we don't allow plotting a profile of pressure, since that's just a silly 1:1
     # line.
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
-    print("plotnames before: $plot_names")
+    println("plotnames before: $plot_names")
     derived_items = ["SA", "CT", "sigma0", "spiciness0"]
     for item in derived_items
+        println("maybe add '", item, "'")
         if !(item in plot_names)
             plot_names = [plot_names; item]
         end
     end
-    print("plotnames after: $plot_names")
+    println("plotnames after: $plot_names")
     if !(which in plot_names)
         error("plot_profile() cannot handle which='$which'; try one of: $plot_names")
     end
