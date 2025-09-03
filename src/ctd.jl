@@ -43,29 +43,33 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
     oad(debug, "    given longitude:  ", longitude)
     oad(debug, "    given latitude:   ", latitude)
-    if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
-        lon = -30.0
-        lat = 30.0
-        println("as_ctd() given NaN longitude/latitude values, so SA, CT, etc. computed at -30E, 30N.")
-    else
-        lon = longitude
-        lat = latitude
-    end
-    local SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
-    oad(debug, "    created SA of length ", length(SA), ", which starts: ", first(SA, 2))
-    local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
-    oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 2))
-    sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(sigma0, 2))
-    spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
-    oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(spiciness0, 2))
+    # DELETE  Removed 2025-09-03 because it's only for plot_*() and those functions can
+    # DELETE  easily compute SA and CT if desired.
+    # DELETE     if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
+    # DELETE         lon = -30.0
+    # DELETE         lat = 30.0
+    # DELETE         println("as_ctd() given NaN longitude/latitude values, so SA, CT, etc. computed at -30E, 30N.")
+    # DELETE     else
+    # DELETE         lon = longitude
+    # DELETE         lat = latitude
+    # DELETE     end
+    # DELETE     local SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
+    # DELETE     oad(debug, "    created SA of length ", length(SA), ", which starts: ", first(SA, 2))
+    # DELETE     local CT = gsw_ct_from_t.(SA, temperature, pressure) |> fix_gsw_bad_code!
+    # DELETE     oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 2))
+    # DELETE     sigma0 = gsw_sigma0.(SA, CT) |> fix_gsw_bad_code!
+    # DELETE     oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(sigma0, 2))
+    # DELETE     spiciness0 = gsw_spiciness0.(SA, CT) |> fix_gsw_bad_code!
+    # DELETE     oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(spiciness0, 2))
+    # DELETE end
     oad(debug, "    assembling data (a DataFrame) from the above")
-    data = DataFrame(salinity=salinity, temperature=temperature,
-        pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
+    # DELETE   data = DataFrame(salinity=salinity, temperature=temperature,
+    # DELETE       pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
+    data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
     oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
-    # Note that we are inserting the longitude and latitude from the function call,
-    # not the -30,30 values that we invented in order to estimate SA, CT, sigma0 and spicines0
+    # DELETE     Note that we are inserting the longitude and latitude from the function call,
+    # DELETE     not the -30,30 values that we invented in order to estimate SA, CT, sigma0 and spicines0
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
     if !ismissing(time)
@@ -134,7 +138,6 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     time = nothing
     latitude = NaN
     longitude = NaN
-    names_start = 0
     names_found = false
     data_start = 0
     latitude = NaN # to catch case where file lacks this info
