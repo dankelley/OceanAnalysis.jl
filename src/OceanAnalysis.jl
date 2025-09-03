@@ -44,6 +44,9 @@ export T90_from_T48
 export T90_from_T68
 export z_from_pressure
 
+"""
+    Base object in the OceanAnalysis package
+"""
 abstract type Oce end
 
 """
@@ -59,7 +62,7 @@ end
 include("argo.jl")
 include("ctd.jl")
 include("plot.jl")
-include("sw.jl")
+include("seawater_properties.jl")
 include("utilities.jl")
 
 end # module OceanAnalysis

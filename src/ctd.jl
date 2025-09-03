@@ -125,7 +125,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
     data_names = Vector{String}()
-    oad(debug, "    assembling .metadata (a Dict)")
+    oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
     time_format = DateFormat("u d yyy HH:MM:SS")
     # set defaults
@@ -245,7 +245,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; debug::Int64=0)
         irow = irow + 1
     end
     metadata["header"] = header
-    oad(debug, "    assembling .data (a DataFrame)")
+    oad(debug, "    assembling data (a DataFrame)")
     data = DataFrame(data, data_names, makeunique=true)
     data_names = names(data)
     oad(debug, "    data names: ", data_names)

@@ -21,9 +21,10 @@ for (i, file) in enumerate(files)
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try
         d = read_ctd_cnv(file)
-        print(i, ". ", d.metadata["filename"], ": ", d.metadata["time"], " @ ",
-            round(d.metadata["latitude"], digits=3), " N, ",
-            round(d.metadata["longitude"], digits=3), " E\n")
+        print(i, ". ", d.metadata["filename"], ": ",
+            Dates.format(d.metadata["time"], "yyyy-mm-dd HH:MM"), ", ",
+            trunc(d.metadata["latitude"], digits=2), " N, ",
+            trunc(d.metadata["longitude"], digits=2), " E\n")
         if 1 == length(files)
             println("metadata:")
             println(d.metadata)
