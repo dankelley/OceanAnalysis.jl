@@ -7,7 +7,7 @@ end
 
 function Base.setindex!(oce::Oce, value, name::String)
     println("SHOULD BE Setting data element '$name' in a Ctd object")
-    #oce.data[:, name] = value
+    oce.data[:, name] = value
     oce
 end
 
