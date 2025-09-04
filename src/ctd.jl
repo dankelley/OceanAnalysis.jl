@@ -1,14 +1,26 @@
 """
 """
-function Base.getindex(oce::Oce, name::String)
-    println("Getting data element '$name' from a Ctd object")
-    return oce.data[:, name]
+function Base.getindex(oce::OA, name::String)
+    println("Getting data element '$name' from an OA object")
+    if name in names(oce.data)
+        return oce.data[:, name]
+    elseif name in keys(oce.metadata)
+        return oce.metadata[name]
+    else
+        error("no '", name, "' present in this object")
+    end
 end
 
-function Base.setindex!(oce::Oce, value, name::String)
-    println("SHOULD BE Setting data element '$name' in a Ctd object")
-    oce.data[:, name] = value
-    oce
+function Base.setindex!(oce::OA, value, name::String)
+    println("Setting data element '$name' in a OA object")
+    if name in names(oce.data)
+        oce.data[:, name] = value
+    elseif name in keys(oce.metadata)
+        oce.metadata[name] = value
+    else
+        error("no '", name, "' present in this object")
+    end
+    return oce
 end
 
 """

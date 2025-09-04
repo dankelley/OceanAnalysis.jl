@@ -18,7 +18,7 @@ using Dierckx
 using Statistics
 
 # Structs
-export Oce
+export OA
 export Ctd
 #. export Argo
 
@@ -47,14 +47,14 @@ export z_from_pressure
 """
     Base object in the OceanAnalysis package
 """
-abstract type Oce end
+abstract type OA end
 
 """
     An object to hold CTD data
 
 This is a struct that holds a Dict named `metadata` and a DataFrame named `data`.
 """
-struct Ctd <: Oce
+struct Ctd <: OA
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
 end
