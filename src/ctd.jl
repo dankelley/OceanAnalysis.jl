@@ -1,7 +1,7 @@
 """
 """
 function Base.getindex(oce::OA, name::String)
-    println("Getting data element '$name' from an OA object")
+    #println("Getting data element '$name' from an OA object")
     if name in names(oce.data)
         return oce.data[:, name]
     elseif name in keys(oce.metadata)
@@ -12,7 +12,7 @@ function Base.getindex(oce::OA, name::String)
 end
 
 function Base.setindex!(oce::OA, value, name::String)
-    println("Setting data element '$name' in a OA object")
+    #println("Setting data element '$name' in a OA object")
     if name in names(oce.data)
         oce.data[:, name] = value
     elseif name in keys(oce.metadata)
