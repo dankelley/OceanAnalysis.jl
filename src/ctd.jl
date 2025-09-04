@@ -1,6 +1,6 @@
 """
 """
-function Base.getindex(oce::Ctd, name::Int)
+function Base.getindex(oce::Ctd, name::String)
     println("Getting data element '$name' from a Ctd object")
     return oce.data[:, name]
 end
