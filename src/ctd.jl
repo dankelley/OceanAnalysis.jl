@@ -1,4 +1,16 @@
 """
+"""
+function Base.getindex(oce::Oce, name::Int)
+    println("Getting data element '$name' from Oce object")
+    return oce.data[:, name]
+end
+
+function Base.setindex!(oce::Oce, name::String, value)
+    println("Setting data element '$name' in an Oce object")
+    oce.data[:, name] = value
+end
+
+"""
     as_ctd(salinity, temperature, pressure, longitude=NaN, latitude=NaN; time, debug=-1)
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
