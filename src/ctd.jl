@@ -5,6 +5,7 @@ function Base.getindex(oce::OA, name::String)
         return oce.data[:, name]
     elseif name in derived
         println("FIXME: compute derived quantity '", name, "'")
+        return SA(oce)
     elseif name in keys(oce.metadata)
         return oce.metadata[name]
     else
