@@ -1,7 +1,8 @@
+# %%
 using OceanAnalysis
 d = read_ctd_cnv("data/ctd.cnv")
 SA = d["SA"]
-println(first(SA, 2))
+println(first(d["salinity"] ./ SA, 5))
 
 #println("ORIG longitude: ", d["longitude"])
 #d["longitude"] = 99.99

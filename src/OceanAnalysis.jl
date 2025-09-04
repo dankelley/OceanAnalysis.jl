@@ -69,7 +69,10 @@ abstract type OA end
 """
     An object to hold CTD data
 
-This is a struct that holds a Dict named `metadata` and a DataFrame named `data`.
+Ctd is an object to store data from CTD instruments. As a class that derives
+from the base object of the package, it is a struct that holds a Dict named
+`metadata` and a DataFrame named `data`.  See [`OA`](@ref) for general notes on
+the data structure and its access.
 """
 struct Ctd <: OA
     metadata::Dict{String,Any}
