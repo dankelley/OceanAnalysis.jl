@@ -15,7 +15,7 @@ notation, with for example `ctd.data.salinity` refering to the salinity column
 of ctd data read by [`read_ctd_cnv`](@ref).  It is also possible to retrieve
 (or set) that value using `ctd["salinity"]`.  The advantage of this notation is
 that it can locate information whether it is in the `data` or the `metadata`
-component of the object. It is also possible to obtain *derived* information,
+component of the object. It is also possible to obtain derived information,
 e.g. `ctd["SA"]` calculates and then returns the Absolute Salinity, which is
 not typically stored in CTD files, but which can be computed from the stored
 information. Other derivable items are `"CT"` (Conservative Temperature),
