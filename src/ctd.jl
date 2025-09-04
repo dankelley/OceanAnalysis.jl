@@ -53,6 +53,7 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 
 # Examples
 ```jldoctest
+julia> using OceanAnalysis
 julia> as_ctd([32.],[15.],[0.],-63.,40.)
 Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
  Row │ salinity  temperature  pressure

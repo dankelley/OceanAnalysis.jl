@@ -1,8 +1,9 @@
 # %%
-using OceanAnalysis
+using OceanAnalysis, Plots
 d = read_ctd_cnv("data/ctd.cnv")
 SA = d["SA"]
 println(first(d["salinity"] ./ SA, 5))
+plot(d["SA"] ./ d["salinity"], -d["pressure"])
 
 #println("ORIG longitude: ", d["longitude"])
 #d["longitude"] = 99.99

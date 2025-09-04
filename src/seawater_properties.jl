@@ -13,6 +13,7 @@ first form as `CT.()` so that it returns a vector of CT values.
 
 # Examples
 ```jldoctest
+julia> using OceanAnalysis
 julia> CT(35.0, 10.0, 100.0)
 9.981322531922249
 ```
@@ -41,6 +42,7 @@ first form as `SA.()` so that it returns a vector of SA values.
 
 # Examples
 ```jldoctest
+julia> using OceanAnalysis
 julia> SA(35.0, 100.0, -30.0, 30.0)
 35.165308620244
 ```
