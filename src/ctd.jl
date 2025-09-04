@@ -1,11 +1,13 @@
 """
 """
-function Base.getindex(oce::Ctd, name::String)
+#function Base.getindex(oce::Ctd, name::String)
+function Base.getindex(oce::Oce, name::String)
     println("Getting data element '$name' from a Ctd object")
     return oce.data[:, name]
 end
 
-function Base.setindex!(oce::Ctd, name::String, value)
+#function Base.setindex!(oce::Ctd, name::String, value)
+function Base.setindex!(oce::Oce, name::String, value)
     println("Setting data element '$name' in a Ctd object")
     oce.data[:, name] .= value
 end
