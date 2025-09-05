@@ -40,6 +40,7 @@ export Ctd
 #. export Argo
 
 # Functions
+export argo_id_cycle
 export as_ctd
 export coordinate_from_string
 export CT

@@ -151,9 +151,8 @@ end
 """
     Change any values of x that equal the GSW 'missing' code (9e15) to NaN
 
-    A copy is returned, with x unaltered.  See [`fix_gsw_bad_code!`](@ref) for an
-    in-place version.
-
+A copy is returned, with x unaltered.  See [`fix_gsw_bad_code!`](@ref) for an
+in-place version.
 """
 function fix_gsw_bad_code(x)
     rval = copy(x)
@@ -167,9 +166,8 @@ end
 """
     In-place change any values of x that equal the GSW 'missing' code (9e15) to NaN
 
-    This alters x.  See [`fix_gsw_bad_code`](@ref) for a version that does
-    not alter x.
-
+This alters x.  See [`fix_gsw_bad_code`](@ref) for a version that does
+not alter x.
 """
 function fix_gsw_bad_code!(x)
     bad = x .> 1e15
