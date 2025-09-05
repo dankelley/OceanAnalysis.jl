@@ -50,20 +50,19 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 - `time::Date.DateTime` an optional indication of the measurement start time.
 - `debug::Int64` an optional value that, if it exceeds 0, indicates that
     debugging output should be printed during processing.
-
-# Examples
-```julia
-julia> using OceanAnalysis
-julia> as_ctd([32.],[15.],[0.],-63.,40.)
-Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
- Row │ salinity  temperature  pressure
-     │ Float64   Float64      Float64
-─────┼─────────────────────────────────
-   1 │     32.0         15.0       0.0)
-```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64},
     longitude::Float64=NaN, latitude::Float64=NaN; time=nothing, debug::Int64=0)
+    #<> # Examples
+    #<> ```julia
+    #<> julia> using OceanAnalysis
+    #<> julia> as_ctd([32.],[15.],[0.],-63.,40.)
+    #<> Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
+    #<>  Row │ salinity  temperature  pressure
+    #<>      │ Float64   Float64      Float64
+    #<> ─────┼─────────────────────────────────
+    #<>    1 │     32.0         15.0       0.0)
+    #<> ```
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
