@@ -128,7 +128,7 @@ recognized as salinity, temperature, or pressure, because these quantities are
 required for any meaningful CTD dataset.
 
 # Examples
-```julia-repl
+```julia
 using OceanAnalysis, Plots
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 filename = joinpath(pkgdir, "data", "ctd.cnv")

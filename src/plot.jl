@@ -26,7 +26,7 @@ not waste space with fonts that are larger than what journals require.)
 The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
 example, the default way to display the profile diagram is constructed with a
 blue line connecting points, but using e.g.
-```julia-repl
+```julia
 plot_profile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
 ```
 yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
@@ -195,7 +195,7 @@ Apart from that, the other parameters have the usual meanings for Julia plots.
 For example, `color` is set to black, to override the Julia default, etc.
 
 # Examples
-```julia-repl
+```julia
 # Display hydrographic properties stored in a built-in Argo file
 using OceanAnalysis, Plots
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))

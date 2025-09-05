@@ -9,7 +9,7 @@ in lower case) to indicate the hemisphere. Humans are quite good at writing
 confusing strings, so this function is not always helpful.
 
 # Examples
-```julia-repl
+```julia
 coordinate_from_string("1.5")   # 1.5
 coordinate_from_string("1 30")  # 1.5
 coordinate_from_string("1S 30") # -1.5
@@ -97,7 +97,7 @@ This is needed because contour() in Julia (Reference 1) does not use
 simple numbers for auto-computed levels.
 
 # Examples
-```julia-repl
+```julia
 # Example that could come up in a TS diagram, where the
 # first argument is a range of sigma0 values for the plot.
 pretty([22.299, 25.091])

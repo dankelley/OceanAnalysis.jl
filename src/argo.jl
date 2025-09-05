@@ -40,7 +40,7 @@ and `"TEMP"`; no other NetCDF fields are copied in this version
 of `read_argo()`.
 
 # Examples
-```julia-repl
+```julia
 using OceanAnalysis, Plots
 # Read an Argo file and plot a profile of Absolute Salinity
 # (black) and Practical Salinity (red).
