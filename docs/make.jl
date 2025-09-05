@@ -4,7 +4,7 @@ using OceanAnalysis
 makedocs(
     #repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
     sitename="OceanAnalysis.jl Documentation",
-    modules="OceanAnalysis",
+    modules=OceanAnalysis,
     #authors="Dan Kelley",
     pages=[
         "Home" => "index.md"
