@@ -1,22 +1,33 @@
+# Time: 4s with 1 file, 6.5s with 975 files -- approximately 500 files per second
+
 # NOTES (all files are in /users/kelley/argo):
 # D6902967_133.nc -- no LONGITUDE
-# BR6902958_161.nc -- no PSAL
-# BR4902576_017.nc -- no PSAL
-# BR4902578_012.nc -- no PSAL
-# BR4902576_016.nc -- no PSAL
-# BR4903273_048.nc -- no PSAL
-using OceanAnalysis, Glob, Random
-#Random.seed!(1234)
+# BR6902958_xxx.nc -- no PSAL
+using OceanAnalysis, Glob
 dir = "/Users/kelley/data/argo"
 files = glob("*.nc", dir)
+files = [files[100]] # to test a single random file
 
-for i = eachindex(files)
-    file = files[i]
+debug = 0
+bad = 0
+for (i, file) in enumerate(files)
     short = replace(file, r".*/" => "")
     try
-        local d = read_argo(file, debug=0)
-        println("$short $(d.metadata["time"]) @ $(round(d.metadata["latitude"], digits=3))N $(round(d.metadata["longitude"], digits=3))E $(length(d.data.pressure)) levels")
+        d = read_argo(file, debug=debug)
+        println(i, ". ", short, " [mode:", d.metadata["data_mode"], ", time:",
+            d.metadata["time"], ", latitude:",
+            round(d.metadata["latitude"], digits=3), ", longitude:",
+            round(d.metadata["longitude"], digits=3), ", levels:",
+            length(d.data.pressure), "]")
+        if length(files) == 1
+            tmp = keys(d.metadata)
+            println("metadata names: ", sort(collect(tmp)))
+            tmp = names(d.data)
+            println("data names: ", sort(collect(tmp)))
+        end
     catch e
-        println("$short -- $e")
+        println(i, ". ", short, " -- ", e)
+        global bad = bad + 1
     end
 end
+println("Read ", length(files), " files, ", bad, " of which are faulty")

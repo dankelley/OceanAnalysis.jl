@@ -129,6 +129,6 @@ following in a Julia console:
 ```julia
 ]
 activate .
-test
+test OceanAnalysis
 ```
 

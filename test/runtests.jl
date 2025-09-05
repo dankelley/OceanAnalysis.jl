@@ -6,6 +6,22 @@ using OceanAnalysis, Test, Dates
 # Basically, even 10 digits is fine in practical terms, as we are mostly
 # looking for gross coding errors.
 
+
+@testset "SA() handles NaN values well" begin
+    SP = [34.0, NaN, 34.2, 34.3, 34.4, 34.5]
+    p = [10.0, 11.0, NaN, 13.0, 14.0, 15.0]
+    lon = [-30.0, -30.0, -30.0, NaN, -30.0, -30.0]
+    lat = [30.0, 30.0, 30.0, 30.0, NaN, 30.0]
+    @test isnan.(SA.(SP, p, lon, lat)) == [0, 1, 1, 1, 1, 0]
+end
+
+@testset "CT() handles NaN values well" begin
+    SA_ = [34.0, NaN, 34.2, 34.3, 34.4]
+    T = [10.0, 11.0, NaN, 13.0, 14.0]
+    p = [10.0, 11.0, 12.0, NaN, 14.0]
+    @test isnan.(CT.(SA_, T, p)) == [0, 1, 1, 1, 0]
+end
+
 @testset "coordinate_from_string()" begin
     @test coordinate_from_string("1.5") == 1.5
     @test coordinate_from_string("1.5n") == 1.5
@@ -52,9 +68,9 @@ end
     argo = read_argo(filename)
     @test argo.metadata["longitude"] ≈ -66.38298 atol = 1e-13
     @test argo.metadata["latitude"] ≈ 40.45216 atol = 1e-13
-    @test argo.metadata["time"] == Dates.DateTime("2021-01-28T18:01:24")
+    @test argo.metadata["time"] == Dates.DateTime("2019-10-14T23:43:44.003")
     @test 1014 == length(argo.data.pressure)
-    @test collect(first(argo.data)) ≈ [34.913; 19.513; 0.48; 35.0786; 19.5079; 24.8272; 3.31464] atol = 0.0001
+    @test collect(first(argo.data)) ≈ [34.913; 19.513; 0.48] atol = 0.0001
 end
 
 

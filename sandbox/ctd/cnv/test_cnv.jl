@@ -1,4 +1,3 @@
-# %%
 using OceanAnalysis, Glob, Dates
 files = []
 files = [files; glob("*.cnv", "/Users/kelley/Dropbox/oce-working-notes/cnv")]
@@ -14,18 +13,27 @@ files = [files; glob("*.cnv", "/Users/kelley/data/arctic/beaufort/2011/")]
 files = [files; glob("*.cnv", "/Users/kelley/data/arctic/beaufort/2012/")]
 files = sort(files)
 
-# %%
+# Override the above by uncommenting the next line, to test on a particular file.
+# files = ["/Users/kelley/Dropbox/oce-working-notes/cnv/vert_01.cnv"]
+
 bad = 0
 for (i, file) in enumerate(files)
-    print(file)
-    file = files[i]
     file_short_name = replace.(file, r".*/" => "", ".cnv" => "")
     try
         d = read_ctd_cnv(file)
-        print(": ", d.metadata["time"], " @ ", round(d.metadata["latitude"], digits=3), " N, ", round(d.metadata["longitude"], digits=3), " E\n")
+        print(i, ". ", d.metadata["filename"], ": ",
+            Dates.format(d.metadata["time"], "yyyy-mm-dd HH:MM"), ", ",
+            trunc(d.metadata["latitude"], digits=2), " N, ",
+            trunc(d.metadata["longitude"], digits=2), " E\n")
+        if 1 == length(files)
+            println("metadata:")
+            println(d.metadata)
+            println("data:")
+            println(first(d.data, 6))
+        end
     catch e
         global bad = bad + 1
-        print(" FAILURE TO READ ", e, "\n")
+        print(" ERROR ", e, "\n")
     end
 end
 println("Got errors in $bad of the $(length(files)) files")

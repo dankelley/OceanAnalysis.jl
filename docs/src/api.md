@@ -1,0 +1,27 @@
+# API Reference
+
+```@docs
+OceanAnalysis.CT
+OceanAnalysis.Ctd
+OceanAnalysis.N2
+OceanAnalysis.OA
+OceanAnalysis.OceanAnalysis
+OceanAnalysis.SA
+OceanAnalysis.T90_from_T48
+OceanAnalysis.T90_from_T68
+OceanAnalysis.argo_id_cycle
+OceanAnalysis.as_ctd
+OceanAnalysis.coordinate_from_string
+OceanAnalysis.depth_from_pressure
+OceanAnalysis.fix_gsw_bad_code
+OceanAnalysis.fix_gsw_bad_code!
+OceanAnalysis.get_element
+OceanAnalysis.plot_TS
+OceanAnalysis.plot_profile
+OceanAnalysis.pressure_from_depth
+OceanAnalysis.pressure_from_z
+OceanAnalysis.pretty
+OceanAnalysis.read_argo
+OceanAnalysis.read_ctd_cnv
+OceanAnalysis.z_from_pressure
+```
