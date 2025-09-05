@@ -13,5 +13,9 @@ makedocs(
     ]
 )
 deploydocs(
-    repo="github.com/dankelley/OceanAnalysis.jl",
+    repo="github.com/dankelley/OceanAnalysis.jl.git",
+    target="build",
+    deps=nothing,
+    make=nothing,
+    push_preview=true
 )

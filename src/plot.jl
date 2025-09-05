@@ -33,7 +33,7 @@ yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on the many plotting controls available in Julia.
 
 # Examples
-```julia-repl
+```julia
 using OceanAnalysis, Plots
 # Read an Argo file
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
