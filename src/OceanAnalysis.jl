@@ -63,7 +63,7 @@ export T90_from_T68
 export z_from_pressure
 
 """
-    Base object in the [`OceanAnalysis`](@ref) package.
+    Base object in the OceanAnalysis package.
 """
 abstract type OA end
 

@@ -1,10 +1,9 @@
-push!(LOAD_PATH, "../src/")
-using Documenter
-using OceanAnalysis
+#push!(LOAD_PATH, "../src/")
+using Documenter, OceanAnalysis
 makedocs(
-    #repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
-    sitename="OceanAnalysis.jl Documentation",
-    modules=OceanAnalysis,
+    modules=[OceanAnalysis],
+    repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
+    sitename="OceanAnalysis.jl",
     #authors="Dan Kelley",
     pages=[
         "Home" => "index.md"
