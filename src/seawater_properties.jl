@@ -20,10 +20,8 @@ julia> CT(35.0, 10.0, 100.0)
 """
 function CT(ctd::Ctd)
     if "CT" in names(ctd.data)
-        println("CT from object")
         return copy(ctd.data.CT)
     else
-        println("CT from computation")
         return CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
     end
 end
