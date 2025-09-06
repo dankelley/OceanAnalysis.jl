@@ -51,6 +51,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     # DELETE       pressure=pressure, SA=SA, CT=CT, sigma0=sigma0, spiciness0=spiciness0)
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
     if add_teos
+        oad(debug, "    adding TEOS-10 variables")
         if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
             lon = -30.0
             lat = 30.0
@@ -60,13 +61,13 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
             lat = latitude
         end
         data.SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
-        oad(debug, "    created SA of length ", length(SA), ", which starts: ", first(SA, 2))
+        oad(debug, "    created SA of length ", length(SA), ", which starts: ", first(data.SA, 2))
         data.CT = gsw_ct_from_t.(data.SA, temperature, pressure) |> fix_gsw_bad_code!
-        oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(CT, 2))
+        oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(data.CT, 2))
         data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
-        oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(sigma0, 2))
+        oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(data.sigma0, 2))
         data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
-        oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(spiciness0, 2))
+        oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(data.spiciness0, 2))
     end
     oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
