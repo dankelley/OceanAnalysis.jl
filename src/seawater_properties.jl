@@ -19,7 +19,11 @@ julia> CT(35.0, 10.0, 100.0)
 ```
 """
 function CT(ctd::Ctd)
-    CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
+    if "CT" in names(ctd.data)
+        return copy(ctd.data.CT)
+    else
+        return CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
+    end
 end
 
 function CT(SA::Float64, temperature::Float64, pressure::Float64)
@@ -48,12 +52,16 @@ julia> SA(35.0, 100.0, -30.0, 30.0)
 ```
 """
 function SA(ctd::Ctd)
-    salinity = ctd.data.salinity
-    pressure = ctd.data.pressure
-    n = length(salinity)
-    longitude = repeat([ctd.metadata["longitude"]], n)
-    latitude = repeat([ctd.metadata["latitude"]], n)
-    SA.(salinity, pressure, longitude, latitude)
+    if "SA" in names(ctd.data)
+        return copy(ctd.data.SA)
+    else
+        salinity = ctd.data.salinity
+        pressure = ctd.data.pressure
+        n = length(salinity)
+        longitude = repeat([ctd.metadata["longitude"]], n)
+        latitude = repeat([ctd.metadata["latitude"]], n)
+        return SA.(salinity, pressure, longitude, latitude)
+    end
 end
 
 function SA(salinity::Float64, pressure::Float64,

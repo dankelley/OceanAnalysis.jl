@@ -16,10 +16,9 @@ A message is printed if no data in the file are labelled with names that are
 recognized as salinity, temperature, or pressure, because these quantities are
 required for any meaningful CTD dataset.
 
-If `add_teos` is true, then this is passed to [`as_ctd`](@ref), which
-will add some TEOS-10 computed values to the `data` item of the return
-value.
-
+The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
+whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
+to the `data` portion of the return value.
 # Examples
 ```julia
 using OceanAnalysis, Plots
@@ -32,7 +31,7 @@ p3 = plot_TS(ctd)
 plot(p1, p2, p3, layout=(1, 3))
 ```
 """
-function read_ctd_cnv(filename::String; add_teos=false, debug::Int64=0)
+function read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
     open(filename) do file
         read_ctd_cnv(file, filename; add_teos=add_teos, debug=debug)
     end
@@ -41,7 +40,7 @@ end
 """
     read_ctd_cnv(stream; debug)
 """
-function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=false, debug::Int64=0)
+function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debug::Int64=0)
     oad(debug, "read_ctd_cnv(\"", filename, "\", ...) START")
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
