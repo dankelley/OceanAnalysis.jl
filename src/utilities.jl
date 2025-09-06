@@ -1,3 +1,32 @@
+function Base.getindex(oce::OA, name::String)
+    #println("Getting data element '$name' from an OA object")
+    derived = ["SA", "CT", "sigma0", "spiciness0"]
+    if name in names(oce.data)
+        return oce.data[:, name]
+    elseif name in derived
+        println("FIXME: compute derived quantity '", name, "'")
+        return SA(oce)
+    elseif name in keys(oce.metadata)
+        return oce.metadata[name]
+    else
+        error("no '", name, "' present in or computable for this object")
+    end
+end
+
+function Base.setindex!(oce::OA, value, name::String)
+    #println("Setting data element '$name' in a OA object")
+    if name in names(oce.data)
+        oce.data[:, name] = value
+    elseif name in keys(oce.metadata)
+        oce.metadata[name] = value
+    else
+        error("no '", name, "' present in this object")
+    end
+    return oce
+end
+
+
+
 """
     degree = coordinate_from_string(s::String)
 
