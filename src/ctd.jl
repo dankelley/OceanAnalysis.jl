@@ -53,21 +53,31 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     if add_teos
         oad(debug, "    adding TEOS-10 variables")
         if ismissing(longitude) || ismissing(latitude) || isnan(longitude) || isnan(latitude)
+            oad(debug, "    no non-missing longitude or latitude given so using a mid-Atlantic value")
             lon = -30.0
             lat = 30.0
             println("as_ctd() given NaN longitude/latitude values, so SA, CT, etc. computed at -30E, 30N.")
         else
+            oad(debug, "    longitude and latitude given")
             lon = longitude
             lat = latitude
         end
+        println("DAN 1")
         data.SA = gsw_sa_from_sp.(salinity, pressure, lon, lat) |> fix_gsw_bad_code!
-        oad(debug, "    created SA of length ", length(SA), ", which starts: ", first(data.SA, 2))
+        println("DAN 2")
+        oad(debug, "    created SA, starting with ", first(data.SA, 2))
+        println("DAN 3")
         data.CT = gsw_ct_from_t.(data.SA, temperature, pressure) |> fix_gsw_bad_code!
-        oad(debug, "    created CT of length ", length(CT), ", which starts: ", first(data.CT, 2))
+        println("DAN 4")
+        oad(debug, "    created CT, stating with : ", first(data.CT, 2))
+        println("DAN 5")
         data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
-        oad(debug, "    created sigma0 of length ", length(sigma0), ", which starts: ", first(data.sigma0, 2))
+        println("DAN 6")
+        oad(debug, "    created sigma0, starting with ", first(data.sigma0, 2))
+        println("DAN 7")
         data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
-        oad(debug, "    created spiciness0 of length ", length(spiciness0), ", which starts: ", first(data.spiciness0, 2))
+        println("DAN 8")
+        oad(debug, "    created spiciness0, starting with ", first(data.spiciness0, 2))
     end
     oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
