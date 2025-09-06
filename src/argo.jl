@@ -10,12 +10,16 @@ end
 
 
 """
-    read_argo(filename, column=1; require_valid=true, debug=0)
+    read_argo(filename, column=1; add_teos=true, require_valid=true, debug=0)
 
 Read an Argo file and return a Ctd object that holds salinity, temperature,
 pressure (and derived columns) but no other columns from the file.  As of
 2025-08-23, this code is still in rapid development; please report problems as
 issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
+
+The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
+whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
+to the `data` portion of the return value.
 
 If `require_valid` is true (the default) then an error is reported if the file
 lacks one of three required data columns, or either longitude or latitude.  An
@@ -50,7 +54,7 @@ d = read_argo(f)
 plot_TS(d)
 ```
 """
-function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
+function read_argo(filename, column=1; add_teos=true, require_valid=true, debug::Int64=0)
     oad(debug, "read_argo(<filename>, column=$column, require_valid=$require_valid, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d
@@ -88,7 +92,7 @@ function read_argo(filename, column=1; require_valid=true, debug::Int64=0)
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-            time=time, debug=debug > 0 ? debug + 1 : 0)
+            time=time, add_teos=add_teos, debug=debug > 0 ? debug + 1 : 0)
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
