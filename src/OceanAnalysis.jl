@@ -26,6 +26,7 @@ module OceanAnalysis
 include("setup.jl")
 include("argo.jl")
 include("ctd.jl")
+include("ctd_cnv.jl")
 include("plot.jl")
 include("seawater_properties.jl")
 include("utilities.jl")
