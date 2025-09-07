@@ -2,18 +2,17 @@
     CT(SA, temperature, pressure)
     CT(ctd)
 
-Compute Conservative Temperature (CT).
+Compute Conservative Temperature (CT), using `gsw_ct_from_t()` in the `GibbsSeaWater`
+package.
 
-This is done with the function `gsw_ct_from_t` of the `GibbsSeaWater` package.
-
-The first form takes single values and returns a single value.
-
-The second form extracts values from a [`Ctd`](@ref) object and then calls the
-first form as `CT.()` so that it returns a vector of CT values.
+The first form takes single values and returns a single value. The second form
+extracts values from a [`Ctd`](@ref) object and then calls the first form as
+`CT.()` so that it returns a vector of CT values.
 
 # Examples
-```julia
+```jldoctest
 julia> using OceanAnalysis
+
 julia> CT(35.0, 10.0, 100.0)
 9.981322531922249
 ```
@@ -35,18 +34,17 @@ end
     SA(salinity, pressure, longitude, latitude)
     SA(ctd)
 
-Compute Absolute Salinity (SA).
+Compute Absolute Salinity (SA), using `gsw_sa_from_sp()` in the `GibbsSeaWater`
+package.
 
-This is done with the function `gsw_sa_from_sp` of the `GibbsSeaWater` package.
-
-The first form takes single values and returns a single value.
-
-The second form extracts values from a [`Ctd`](@ref) object and then calls the
-first form as `SA.()` so that it returns a vector of SA values.
+The first form takes single values and returns a single value. The second form
+extracts values from a [`Ctd`](@ref) object and then calls the first form as
+`SA.()` so that it returns a vector of SA values.
 
 # Examples
-```julia
+```jldoctest
 julia> using OceanAnalysis
+
 julia> SA(35.0, 100.0, -30.0, 30.0)
 35.165308620244
 ```
@@ -78,16 +76,15 @@ end
 """
     N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
 
-Compute N², the square of the buoyancy frequency, for a Ctd object, e.g.
-created by either the [`Ctd`](@ref) or [`read_argo`](@ref) function.  The value
-is inferred from a cubic spline fitted to sigma0 as a function of pressure.
+Compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object.
+The value is inferred from a smoothing cubic spline that models the dependence
+of sigma0 on pressure.
 
-Smoothing is the tricky part of the analysis.  In the present version, it is
-done with the `Dierckx::Spline1D()` function (Reference 1), which is called
-with equal weights, `w`, for all points, with `k=3` to set the polynomial order
-to cubic, and with `bc="nearest"` to control what happens near boundaries. The
-user has no control over these things, although this might change in a future
-version of `N2()`.
+In the present version, the spline is fitted with the `Dierckx::Spline1D()`
+function (Reference 1), which is provided with equal weights, `w`, for all
+points, with `k=3` to set the polynomial order to cubic, and with
+`bc="nearest"` to control what happens near boundaries. The user has no control
+over these things, although this might change in a future version of `N2()`.
 
 The user's control rests in `s`, a smoothing parameter that is passed to
 `Dierckx:Spline1D()`. If not specified by the user, this defaults to a value
@@ -102,6 +99,19 @@ to examine Reference 2, which compares the R and Julia results.
 1. https://github.com/JuliaMath/Dierckx.jl
 2. https://github.com/dankelley/OceanAnalysis.jl/issues/13
 
+# Examples
+
+```julia
+# Demonstrate N2()
+using OceanAnalysis, Plots
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+filename = joinpath(pkgdir, "data", "ctd.cnv")
+ctd = read_ctd_cnv(filename);
+# Basic plot (left), profile-plot in oceanographic convention (right)
+p1=plot(N2(ctd), z_from_pressure.(ctd.data.pressure))
+p2=plot_profile(ctd, "N2")
+plot(p1, p2)
+```
 """
 function N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
     oad(debug, "N2([Ctd object]) START")
@@ -138,6 +148,14 @@ end
 
 """
     Compute sea pressure (dbar) from depth (m) and latitude (deg).
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> pressure_from_depth(10.0)
+10.082069761243858
+```
 """
 function pressure_from_depth(depth::Float64, latitude::Float64=45.0)
     return gsw_p_from_z(-depth, latitude, 0.0, 0.0)
@@ -145,6 +163,14 @@ end
 
 """
     Compute sea pressure (dbar) from vertical coordinate (m) and latitude (deg).
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> pressure_from_z(-10.0)
+10.082069761243858
+```
 """
 function pressure_from_z(z::Float64, latitude::Float64=45.0)
     return gsw_p_from_z(z, latitude, 0.0, 0.0)
@@ -152,6 +178,16 @@ end
 
 """
     Compute seawater depth (m) from sea pressure (dbar)
+
+See also [`z_from_pressure`](@ref).
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> depth_from_pressure(100.0)
+99.16434938694897
+```
 """
 function depth_from_pressure(pressure::Float64, latitude::Float64=45.0)
     return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
@@ -159,6 +195,16 @@ end
 
 """
     Compute vertical coordinate (m) from sea pressure (dbar)
+
+See also [`depth_from_pressure`](@ref).
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> z_from_pressure(100.0)
+-99.16434938694897
+```
 """
 function z_from_pressure(pressure::Float64, latitude::Float64=45.0)
     return gsw_z_from_p(pressure, latitude, 0.0, 0.0)

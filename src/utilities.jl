@@ -38,12 +38,23 @@ in lower case) to indicate the hemisphere. Humans are quite good at writing
 confusing strings, so this function is not always helpful.
 
 # Examples
-```julia
-coordinate_from_string("1.5")   # 1.5
-coordinate_from_string("1 30")  # 1.5
-coordinate_from_string("1S 30") # -1.5
-coordinate_from_string("27* 14.072 N") # 27.234533333333335
-coordinate_from_string("111* 31.440 W") # -111.524
+```jldoctest
+julia> using OceanAnalysis
+
+julia> coordinate_from_string("1.5")
+1.5
+
+julia> coordinate_from_string("1 30")
+1.5
+
+julia> coordinate_from_string("1S 30")
+-1.5
+
+julia> coordinate_from_string("27* 14.072 N")
+27.234533333333335
+
+julia> coordinate_from_string("111* 31.440 W")
+-111.524
 ```
 """
 function coordinate_from_string(s::String)
@@ -69,6 +80,14 @@ end
 Convert a temperature from the T68 scale to the T90 scale.
 
 See also [`T90_from_T48`](@ref).
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> T90_from_T68(10.0)
+9.997600575861792
+```
 """
 T90_from_T68(T48::Float64) = T48 / 1.00024
 #T90fromT68(T48::Vector{Float64}) = T48 ./ 1.00024
@@ -79,6 +98,14 @@ T90_from_T68(T48::Float64) = T48 / 1.00024
 Convert a temperature from the T48 scale to the T90 scale.
 
 See also [`T90_from_T68`](@ref).
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> T90_from_T48(10.0)
+9.993641526033752
+```
 """
 T90_from_T48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
 #T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1.00024
@@ -122,14 +149,23 @@ end
 """
 Calculate sub-intervals with 125 scaling, as in R function of same name
 
-This is needed because contour() in Julia (Reference 1) does not use
-simple numbers for auto-computed levels.
+This is useful for plotting contours, because the built-in contour() function
+(Reference 1) does not use simple numbers for auto-computed levels.
 
 # Examples
-```julia
-# Example that could come up in a TS diagram, where the
-# first argument is a range of sigma0 values for the plot.
-pretty([22.299, 25.091])
+```jldoc
+julia> using OceanAnalysis
+
+julia> pretty([22.299, 25.091])
+8-element Vector{Float64}:
+ 22.0
+ 22.5
+ 23.0
+ 23.5
+ 24.0
+ 24.5
+ 25.0
+ 25.5
 ```
 
 # References
@@ -178,7 +214,7 @@ function oad(debug::Int64=0, args...)
 end
 
 """
-    Change any values of x that equal the GSW 'missing' code (9e15) to NaN
+    Change GSW 'missing' values (9.e15) to NaN
 
 A copy is returned, with x unaltered.  See [`fix_gsw_bad_code!`](@ref) for an
 in-place version.
@@ -193,7 +229,7 @@ function fix_gsw_bad_code(x)
 end
 
 """
-    In-place change any values of x that equal the GSW 'missing' code (9e15) to NaN
+    In-place change GSW 'missing' values (9.e15) to NaN
 
 This alters x.  See [`fix_gsw_bad_code`](@ref) for a version that does
 not alter x.

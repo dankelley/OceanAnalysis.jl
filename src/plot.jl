@@ -32,6 +32,8 @@ plot_profile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
 yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on the many plotting controls available in Julia.
 
+See also the [`plot_TS`](@ref) function.
+
 # Examples
 ```julia
 using OceanAnalysis, Plots
@@ -46,8 +48,6 @@ p2 = plot_profile(d, "SA")
 p3 = plot_profile(d, "sigma0")
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
-
-See also the [`plot_TS`](@ref) function.
 """
 function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
     legend::Bool=false, tickfontsize=8, labelfontsize=8,
