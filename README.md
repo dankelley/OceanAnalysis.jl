@@ -132,3 +132,21 @@ activate .
 test OceanAnalysis
 ```
 
+## Building and viewing documentation on development machine
+
+To build, type the following in a shell terminal. (Change the `/Users/kelley`
+as appropriate.)
+
+```sh
+cd /Users/kelley/git/OceanAnalysis.jl
+julia --project=. docs/make.jl
+```
+
+To view, do the following in a Julia console.  (Change the `/Users/kelley` as
+appropriate.)
+
+```julia
+cd("/Users/kelley/git/OceanAnalysis.jl/")
+using LiveServer
+serve(; dir="docs/build", launch_browser=true)
+```

@@ -36,7 +36,10 @@ export T90_from_T68
 export z_from_pressure
 
 """
-    Base object in the OceanAnalysis package.
+    Base type in the OceanAnalysis package.
+
+This is an abstract type. The other types in the package will derive from this.
+At the moment, the only such case is [`Ctd`](@ref).
 """
 abstract type OA end
 
