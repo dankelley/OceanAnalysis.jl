@@ -4,12 +4,11 @@ makedocs(
     modules=[OceanAnalysis],
     repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
     sitename="OceanAnalysis.jl",
-    #authors="Dan Kelley",
+    authors="Dan Kelley",
     pages=[
-        "Home" => "index.md"
-        #"Home" => "index.md",
-        #"Manual" => "manual.md",
-        #"API" => "api.md"
+        "Home" => "index.md",
+        "Manual" => "manual.md",
+        "API" => "api.md"
     ]
 )
 deploydocs(

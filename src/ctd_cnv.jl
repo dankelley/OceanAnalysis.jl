@@ -19,16 +19,36 @@ required for any meaningful CTD dataset.
 The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
 whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
 to the `data` portion of the return value.
+
 # Examples
-```julia
-using OceanAnalysis, Plots
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "ctd.cnv")
-ctd = read_ctd_cnv(filename)
-p1 = plot_profile(ctd, "SA")
-p2 = plot_profile(ctd, "CT")
-p3 = plot_TS(ctd)
-plot(p1, p2, p3, layout=(1, 3))
+```jldoctest
+julia> using OceanAnalysis
+
+julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+
+julia> d = read_ctd_cnv(f, add_teos=false);
+
+julia> d.metadata["time"]
+2003-10-15T11:38:38
+
+julia> d.metadata["latitude"]
+44.684266666666666
+
+julia> d.metadata["longitude"]
+-63.643883333333335
+
+julia> names(d.data)
+10-element Vector{String}:
+ "salinity"
+ "temperature"
+ "pressure"
+ "scan"
+ "timeS"
+ "pr"
+ "depS"
+ "t090"
+ "sal00"
+ "flag"
 ```
 """
 function read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
@@ -37,9 +57,7 @@ function read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
     end
 end
 
-"""
-    read_ctd_cnv(stream; debug)
-"""
+# Internal function used byRead a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debug::Int64=0)
     oad(debug, "read_ctd_cnv(\"", filename, "\", ...) START")
     lines = readlines(stream)

@@ -1,11 +1,22 @@
 """
     Split Argo "id_cycle" into components id and cycle
+
+# Examples
+```jldoctest
+julia> using OceanAnalysis
+
+julia> argo_id_cycle("4902911_095")
+2-element Vector{SubString{String}}:
+ "4902911"
+ "095"
+```
 """
-function argo_id_cycle(idcycle::String="D123_321")
-    splitat = firstindex("_", idcycle)[1]
-    id = idcycle[1:splitat-1]
-    cycle = idcycle[splitat+1:end]
-    id, cycle
+function argo_id_cycle(idcycle::String="")
+    if 0 == length(idcycle) || !occursin(r"_", idcycle)
+        error("'idcycle', a string containing an underline character, must be supplied")
+    else
+        split(idcycle, "_")
+    end
 end
 
 
@@ -44,14 +55,33 @@ and `"TEMP"`; no other NetCDF fields are copied in this version
 of `read_argo()`.
 
 # Examples
-```julia
-using OceanAnalysis, Plots
-# Read an Argo file and plot a profile of Absolute Salinity
-# (black) and Practical Salinity (red).
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = read_argo(f)
-plot_TS(d)
+```jldoctest
+julia> using OceanAnalysis, Plots
+
+julia> pkgdir = dirname(dirname(pathof(OceanAnalysis)));
+
+julia> f = joinpath(pkgdir, "data", "D4902911_095.nc");
+
+julia> d = read_argo(f, 1);
+
+julia> d.metadata["time"]
+2019-10-14T23:43:44.003
+
+julia> d.metadata["latitude"]
+40.45216
+
+julia> d.metadata["longitude"]
+-66.38298
+
+julia> names(d.data)
+7-element Vector{String}:
+ "salinity"
+ "temperature"
+ "pressure"
+ "SA"
+ "CT"
+ "sigma0"
+ "spiciness0"
 ```
 """
 function read_argo(filename, column=1; add_teos=true, require_valid=true, debug::Int64=0)

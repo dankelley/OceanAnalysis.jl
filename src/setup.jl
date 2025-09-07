@@ -43,10 +43,20 @@ abstract type OA end
 """
     An object to hold CTD data
 
-Ctd is an object to store data from CTD instruments. As a class that derives
-from the base object of the package, it is a struct that holds a Dict named
-`metadata` and a DataFrame named `data`.  See [`OA`](@ref) for general notes on
-the data structure and its access.
+Ctd is a type used to store data from CTD instruments and Argo floats. It takes
+the form of a Struct that derives from the base `OA` type, and holds two items:
+(1) a DataFrame named `data` that holds the actual data, including `pressure`,
+`salinity`, and `temperature`, perhaps along with other data and (2) a
+a Dict named `metadata` that stores information about the data, such as the
+`time` of observation and the `latitude` and `longitude` at which
+the observation was made.
+
+Objects of type `Ctd` are returned by [`as_ctd`](@ref), [`read_ctd_cnv`](@ref)
+and [`read_argo`](@ref) and can be passed to plotting functions [`plot_profile`](@ref)
+and [`plot_TS`](@ref), and by several functions relating to seawater properties,
+such as [`SA`](@ref) and other TEOS-10 related functions, as well as functions
+relating to the distributions of such properties, such as [`N2`](@ref).
+
 """
 struct Ctd <: OA
     metadata::Dict{String,Any}

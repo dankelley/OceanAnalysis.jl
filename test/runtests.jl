@@ -65,7 +65,7 @@ end
 
 @testset "read_argo()" begin
     filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc")
-    argo = read_argo(filename)
+    argo = read_argo(filename, add_teos=false)
     @test argo.metadata["longitude"] ≈ -66.38298 atol = 1e-13
     @test argo.metadata["latitude"] ≈ 40.45216 atol = 1e-13
     @test argo.metadata["time"] == Dates.DateTime("2019-10-14T23:43:44.003")
