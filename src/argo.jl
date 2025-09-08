@@ -199,3 +199,88 @@ function get_nc_value(d, name, require_valid=true)
     end
     return rval
 end
+
+"""
+    download_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
+
+Download an Argo index file, if an existing copy is less than `age` days old.
+
+Use [`read_argo_index`](@ref) to interpret the downloaded file.
+"""
+function download_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
+    oad(debug, "download_argo_index START")
+    file = "ar_index_global_prof.txt.gz"
+    local_file = expanduser(joinpath(destdir, file))
+    if isfile(local_file)
+        local_file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(local_file))) / Millisecond(1000) / 86400.0
+    else
+        local_file_age = 1e8 # so old that it will be forced to download
+    end
+    remote_file = joinpath(server, file)
+    oad(debug, "    remote_file: ", remote_file)
+    oad(debug, "    local_file: ", local_file)
+    oad(debug, "    age: ", age)
+    oad(debug, "    local_file_age: ", local_file_age)
+    if local_file_age > age
+        oad(debug, "    about to download and save in ", local_file)
+        Downloads.download(remote_file, local_file)
+    end
+    oad(debug, "END download_argo_index")
+end
+
+
+"""
+    read_argo_index(file::String, trim=true; header=9, debug=0)
+
+Read a file downloaded by [`download_argo_index`](@ref).
+
+This relies on there being exactly `header` lines of header, the last of which
+names the columns.  The default value of 9 works with index files downloaded
+from the ifremer.fr server, as of 2025-09-08.
+
+The `date` column is converted to a DateTime column named `time`.  If `trim` is
+true, then the `date` column is then removed, along with the the columns named
+`institution`, `date_update`, `ocean`, and `profiler_type`.
+"""
+function read_argo_index(file::String, trim=true; header=9, debug=0)
+    file = expanduser(file)
+    oad(debug, "read_argo_index START")
+    if !isfile(file)
+        error("No file: ", file)
+    end
+    oad(debug, "    file: ", file)
+    df = CSV.read(file, DataFrame, header=header)
+    norig = nrow(df)
+    dropmissing!(df)
+    nnew = nrow(df)
+    oad(debug, "    dropped ", norig - nnew, " rows (", round(100 * (norig - nnew) / norig, digits=3), "% of total) because of missing data")
+    df.file = replace.(df.file, r".*/" => "")
+    # create 'time', then remove 'date'
+    #println("DAN 1 ", first(df, 2))
+    ok_to_trim_date = true
+    try
+        df.time = DateTime.(string.(df.date), dateformat"yyyymmddHHMMSS")
+    catch e
+        println("ERROR computing df.time from df.date, so leaving the latter for user to deal with")
+        ok_to_trim_date = false
+    end
+    #println("DAN 2 ", first(df, 2))
+    if trim
+        if ok_to_trim_date
+            oad(debug, "    trimming 'date' column (use 'time' instead)")
+            select!(df, Not(:date))
+        end
+        # remove the some things that don't seem useful institution, which doesn't seem too useful
+        oad(debug, "    trimming 'institution' column")
+        select!(df, Not(:institution))
+        oad(debug, "    trimming 'date_update' column")
+        select!(df, Not(:date_update))
+        oad(debug, "    trimming 'ocean' column")
+        select!(df, Not(:ocean))
+        oad(debug, "    trimming 'profiler_type' column")
+        select!(df, Not(:profiler_type))
+    end
+    oad(debug, "END read_argo_index")
+    return df
+end
+

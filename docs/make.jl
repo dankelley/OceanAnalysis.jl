@@ -7,14 +7,16 @@ makedocs(
     authors="Dan Kelley",
     pages=[
         "Home" => "index.md",
-        "Manual" => "manual.md",
+        #"Manual" => "manual.md",
+        "Examples" => "examples.md",
         "API" => "api.md"
     ]
 )
 deploydocs(
     repo="github.com/dankelley/OceanAnalysis.jl.git",
-    target="build",
-    deps=nothing,
-    make=nothing,
-    push_preview=true
+    devbranch="main",
+    #target="build",
+    #deps=nothing,
+    #make=nothing,
+    #push_preview=true
 )
