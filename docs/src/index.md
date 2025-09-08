@@ -4,6 +4,9 @@ OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
 oceanographic data. It is at a very early stage of development by someone who
 is in the early steps of exploring Julia as a supplement to R.
 
+Click the three-horizontal-line icon at the top left and then click on 'API' to
+get an in-depth description of the functions and types in the package.
+
 ## Installation
 
 ### Official version
@@ -132,3 +135,21 @@ activate .
 test OceanAnalysis
 ```
 
+## Building and viewing documentation on development machine
+
+To build, type the following in a shell terminal. (Change the `/Users/kelley`
+part, as appropriate.)
+
+```sh
+cd /Users/kelley/git/OceanAnalysis.jl
+julia --project=. docs/make.jl
+```
+
+To view, do the following in a Julia console.  (Change the `/Users/kelley` part, as
+appropriate.)
+
+```julia
+cd("/Users/kelley/git/OceanAnalysis.jl/")
+using LiveServer
+serve(; dir="docs/build", launch_browser=true)
+```

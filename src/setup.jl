@@ -1,6 +1,7 @@
 using NCDatasets
 using Dates
 using DataFrames
+using Downloads
 using GibbsSeaWater
 using Plots
 using CSV
@@ -10,7 +11,6 @@ using Statistics
 # Structs
 export OA
 export Ctd
-#. export Argo
 
 # Functions
 export argo_id_cycle
@@ -18,6 +18,7 @@ export as_ctd
 export coordinate_from_string
 export CT
 export depth_from_pressure
+export download_argo_index
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
 export get_element
@@ -28,6 +29,7 @@ export pressure_from_depth
 export pressure_from_z
 export pretty
 export read_argo
+export read_argo_index
 export read_ctd_cnv
 export salinity_from_conductivity
 export SA

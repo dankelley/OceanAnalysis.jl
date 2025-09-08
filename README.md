@@ -121,6 +121,18 @@ There are no breaking changes; all change are additions or bug fixes.
 
 # Developer notes
 
+## Adding a package dependency
+
+For example, to add `Downloads` as a dependency to the present package,
+navigate to the present-package source directory, start a Julia session, and
+type the following.
+
+```julia
+]
+activate .
+add Downloads
+```
+
 ## Running tests
 
 There is a small test suite built into the package.  To run it, type the
@@ -135,14 +147,14 @@ test OceanAnalysis
 ## Building and viewing documentation on development machine
 
 To build, type the following in a shell terminal. (Change the `/Users/kelley`
-as appropriate.)
+part, as appropriate.)
 
 ```sh
 cd /Users/kelley/git/OceanAnalysis.jl
 julia --project=. docs/make.jl
 ```
 
-To view, do the following in a Julia console.  (Change the `/Users/kelley` as
+To view, do the following in a Julia console.  (Change the `/Users/kelley` part, as
 appropriate.)
 
 ```julia
