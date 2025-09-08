@@ -2,12 +2,29 @@
 
 ## CTD diagnostic plots
 
-FIXME: fill in something interesting here. Maybe mimic 'oce' default plot?
+The following shows how to read a built-in CTD file, and plot some hydrographic
+diagrams.
+
+```julia
+using OceanAnalysis, Plots, Measures
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    "data", "ctd.cnv")
+ctd = read_ctd_cnv(filename)
+p1 = plot_profile(ctd, "CT")
+p2 = plot_profile(ctd, "SA")
+p3 = plot_profile(ctd, "sigma0")
+p4 = plot_TS(ctd)
+plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 800), margin=0.25cm,
+    dpi=200)
+savefig("ctd_diagram.png")
+```
+![CTD diagram](ctd_diagram.png)
 
 ## Argo map
 
+The following shows how to map Argo profile locations since a month ago.
+
 ```julia
-# Map Argo profile locations since a month ago
 using Dates, CSV, DataFrames, Plots, OceanAnalysis
 # Download and read the profile index
 download_argo_index("~/data/argo/ss")
