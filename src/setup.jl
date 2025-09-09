@@ -19,6 +19,7 @@ export coordinate_from_string
 export CT
 export depth_from_pressure
 export download_argo_index
+export download_argo_file
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
 export get_element

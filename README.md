@@ -37,6 +37,23 @@ changes using this method.
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
 ```
 
+#### Brittle (for the core developer)
+
+In the commandline, navigate to the local source for the library.  Then start
+a Julia console and type the following.
+
+```julia
+]
+develop .
+```
+
+This sets Julia to look for changes in the files in that directory. Thereafter,
+issuing `using OceanAnalysis` in a Julia session will rebuild from that local
+source. Note that using the `Pkg.add(url=...)` method after using the `develop`
+method will reset things so that Julia rebuilds from the github page instead
+of the local files.
+
+
 ## Usage Examples
 
 ### CTD file

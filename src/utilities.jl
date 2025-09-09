@@ -147,10 +147,14 @@ function get_element(o::Ctd, name::String; debug::Int64=0)
 end
 
 """
-Calculate sub-intervals with 125 scaling, as in R function of same name
+    pretty(x, n::Int64=5; debug::Int64=0)
 
-This is useful for plotting contours, because the built-in contour() function
-(Reference 1) does not use simple numbers for auto-computed levels.
+Calculate sub-intervals with 125 scaling
+
+This function finds intervals that are multiples of 1, 2 or 5. The results are
+useful for contour intervals, because the built-in contour() function
+(Reference 1) simply divides the range into equal intervals, so that labelled
+contours can be quite ugly.
 
 # Examples
 ```jldoc
@@ -172,7 +176,7 @@ julia> pretty([22.299, 25.091])
 
 1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
 """
-function pretty(x, n=5; debug::Int64=0)
+function pretty(x, n::Int64=5; debug::Int64=0)
     min, max = extrema(filter(!isnan, x))
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min

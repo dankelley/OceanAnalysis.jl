@@ -203,7 +203,21 @@ end
 """
     download_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
 
-Download an Argo index file, if an existing copy is less than `age` days old.
+Download an Argo index file, unless an existing local copy is newly downloaded.
+
+The file is obtained from `server` and stored in `destdir`, but only if an
+existing version of the file in `destdir` is under `age` days old. The default
+is to cache index files for one day.
+
+The default `destdir` is the local directory, but it is common to set this
+value to some central location so the file can be used by Julia sessions
+running in multiple directories. (The author sets `destdir="~/data/argo"`, for
+example.)
+
+# Return value
+
+`read_argo_index` returns the full name of the downloaded (or cached)
+file.
 
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
@@ -212,21 +226,59 @@ function download_argo_index(destdir=".", age=1.0; server="https://data-argo.ifr
     file = "ar_index_global_prof.txt.gz"
     local_file = expanduser(joinpath(destdir, file))
     if isfile(local_file)
-        local_file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(local_file))) / Millisecond(1000) / 86400.0
+        local_file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(local_file))) / Dates.Millisecond(1000) / 86400.0
     else
         local_file_age = 1e8 # so old that it will be forced to download
     end
     remote_file = joinpath(server, file)
     oad(debug, "    remote_file: ", remote_file)
     oad(debug, "    local_file: ", local_file)
-    oad(debug, "    age: ", age)
-    oad(debug, "    local_file_age: ", local_file_age)
     if local_file_age > age
-        oad(debug, "    about to download and save in ", local_file)
+        oad(debug, "    downloading remote_file, since local_file is ",
+            round(local_file_age, digits=4), " days old, exceeding threshold of ", age, " days")
         Downloads.download(remote_file, local_file)
+    else
+        oad(debug, "    using cached local_file, since its age ", round(local_file_age, digits=4), " is under ", age, " days")
     end
     oad(debug, "END download_argo_index")
+    local_file
 end
+
+"""
+    download_argo_file(destdir::String=".", file::String="", age::Number=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
+
+Download an Argo profile file, if an existing copy is less than `age` days old.
+
+Use [`read_argo`](@ref) to read such a downloaded file.
+
+# Returns
+- `::String`: Full name of the local file after downloading, or as cached recently.
+
+# """
+function download_argo_file(destdir::String=".", file::String="", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+    oad(debug, "download_argo_file START")
+    file_trimmed = replace.(file, r".*/" => "")
+    oad(debug, "    file: ", file)
+    local_file = expanduser(joinpath(destdir, file_trimmed))
+    if isfile(local_file)
+        local_file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(local_file))) / Dates.Millisecond(1000) / 86400.0
+    else
+        local_file_age = 1e8 # so old that it will be forced to download
+    end
+    remote_file = joinpath(server, "dac", file)
+    oad(debug, "    remote_file: ", remote_file)
+    oad(debug, "    local_file: ", local_file)
+    if local_file_age > age
+        oad(debug, "    downloading remote_file, since local_file is ",
+            round(local_file_age, digits=4), " days old, exceeding threshold of ", age, " days")
+        Downloads.download(remote_file, local_file)
+    else
+        oad(debug, "    using cached local_file, since its age ", round(local_file_age, digits=4), " is under ", age, " days")
+    end
+    oad(debug, "END download_argo_file")
+    local_file
+end
+
 
 
 """
@@ -238,9 +290,9 @@ This relies on there being exactly `header` lines of header, the last of which
 names the columns.  The default value of 9 works with index files downloaded
 from the ifremer.fr server, as of 2025-09-08.
 
-The `date` column is converted to a DateTime column named `time`.  If `trim` is
-true, then the `date` column is then removed, along with the the columns named
-`institution`, `date_update`, `ocean`, and `profiler_type`.
+First, the `date` column is converted to a DateTime column named `time`.  If
+`trim` is true, then the original `date` column is removed, along with the the
+columns named `institution`, `date_update`, `ocean`, and `profiler_type`.
 """
 function read_argo_index(file::String, trim=true; header=9, debug=0)
     file = expanduser(file)
@@ -254,9 +306,8 @@ function read_argo_index(file::String, trim=true; header=9, debug=0)
     dropmissing!(df)
     nnew = nrow(df)
     oad(debug, "    dropped ", norig - nnew, " rows (", round(100 * (norig - nnew) / norig, digits=3), "% of total) because of missing data")
-    df.file = replace.(df.file, r".*/" => "")
+    #<REMOVED 2025-09-09> df.file = replace.(df.file, r".*/" => "")
     # create 'time', then remove 'date'
-    #println("DAN 1 ", first(df, 2))
     ok_to_trim_date = true
     try
         df.time = DateTime.(string.(df.date), dateformat"yyyymmddHHMMSS")
@@ -264,13 +315,12 @@ function read_argo_index(file::String, trim=true; header=9, debug=0)
         println("ERROR computing df.time from df.date, so leaving the latter for user to deal with")
         ok_to_trim_date = false
     end
-    #println("DAN 2 ", first(df, 2))
     if trim
         if ok_to_trim_date
             oad(debug, "    trimming 'date' column (use 'time' instead)")
             select!(df, Not(:date))
         end
-        # remove the some things that don't seem useful institution, which doesn't seem too useful
+        # Remove the some things that may not be needed in all applications.
         oad(debug, "    trimming 'institution' column")
         select!(df, Not(:institution))
         oad(debug, "    trimming 'date_update' column")
