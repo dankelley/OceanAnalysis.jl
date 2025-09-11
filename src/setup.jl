@@ -18,11 +18,12 @@ export as_ctd
 export coordinate_from_string
 export CT
 export depth_from_pressure
-export download_argo_index
-export download_argo_file
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
+export get_argo_index
+export get_argo_file
 export get_element
+export get_file
 export N2
 export plot_profile
 export plot_TS

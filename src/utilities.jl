@@ -1,3 +1,8 @@
+# Used internally
+function increment_debug(debug::Int64=0)
+    debug > 0 ? debug + 1 : 0
+end
+
 function Base.getindex(oce::OA, name::String)
     #println("Getting data element '$name' from an OA object")
     derived = ["SA", "CT", "sigma0", "spiciness0"]

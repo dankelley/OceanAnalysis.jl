@@ -1,5 +1,5 @@
 """
-    as_ctd(salinity, temperature, pressure, longitude=NaN, latitude=NaN; time, debug=-1)
+    as_ctd(salinity, temperature, pressure, longitude=NaN, latitude=NaN; time, debug=0)
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and a location.
 

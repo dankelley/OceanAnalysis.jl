@@ -53,7 +53,7 @@ julia> names(d.data)
 """
 function read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
     open(filename) do file
-        read_ctd_cnv(file, filename; add_teos=add_teos, debug=debug)
+        read_ctd_cnv(file, filename; add_teos=add_teos, debug=increment_debug(debug))
     end
 end
 
@@ -229,31 +229,15 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debu
             error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
         end
     end
-    #data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, metadata["longitude"], metadata["latitude"])
-    #data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
-    #data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-    #data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    #oad(debug, "    combining .metadata and .data into a Ctd object")
-    #println("metadata lat=", metadata["latitude"])
-    #println("metadata lon=", metadata["longitude"])
-    #rval = Ctd(metadata, data)
-    # Add any nonstandard columns that are in the file. Below is how this
-    # is done (successfully) by read_argo().
-    #    rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-    #                  time=time, debug=debug > 0 ? debug + 1 : 0)
     oad(debug, "    calling as_ctd() to create a Ctd object, as the skeleton of the return value")
     if isnan(latitude) || isnan(longitude)
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
-            NaN, NaN, time=time, add_teos=add_teos, debug=debug > 0 ? debug + 1 : 0)
+            NaN, NaN, time=time, add_teos=add_teos, debug=increment_debug(debug))
     else
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
-            longitude, latitude, time=time, add_teos=add_teos, debug=debug > 0 ? debug + 1 : 0)
+            longitude, latitude, time=time, add_teos=add_teos, debug=increment_debug(debug))
     end
     oad(debug, "    adding non-standard variables to the '.data' component of return value")
-    #println("data...")
-    #println(first(data, 2)) # FIXME
-    #println("rval.data...")
-    #println(first(rval.data, 2)) # FIXME
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
         if !(name in standard_items)

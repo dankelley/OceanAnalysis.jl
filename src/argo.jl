@@ -122,7 +122,7 @@ function read_argo(filename, column=1; add_teos=true, require_valid=true, debug:
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
         rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
-            time=time, add_teos=add_teos, debug=debug > 0 ? debug + 1 : 0)
+            time=time, add_teos=add_teos, debug=increment_debug(debug))
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
@@ -201,7 +201,7 @@ function get_nc_value(d, name, require_valid=true)
 end
 
 """
-    download_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
+    get_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
 
 Download an Argo index file, unless an existing local copy is newly downloaded.
 
@@ -221,31 +221,18 @@ file.
 
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
-function download_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
-    oad(debug, "download_argo_index START")
+function get_argo_index(destdir::String=".", age::Float64=1.0; server="https://data-argo.ifremer.fr", debug=0)
+    oad(debug, "get_argo_index START")
     file = "ar_index_global_prof.txt.gz"
     local_file = expanduser(joinpath(destdir, file))
-    if isfile(local_file)
-        local_file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(local_file))) / Dates.Millisecond(1000) / 86400.0
-    else
-        local_file_age = 1e8 # so old that it will be forced to download
-    end
     remote_file = joinpath(server, file)
-    oad(debug, "    remote_file: ", remote_file)
-    oad(debug, "    local_file: ", local_file)
-    if local_file_age > age
-        oad(debug, "    downloading remote_file, since local_file is ",
-            round(local_file_age, digits=4), " days old, exceeding threshold of ", age, " days")
-        Downloads.download(remote_file, local_file)
-    else
-        oad(debug, "    using cached local_file, since its age ", round(local_file_age, digits=4), " is under ", age, " days")
-    end
-    oad(debug, "END download_argo_index")
+    get_file(remote_file, local_file, age, debug=increment_debug(debug))
+    oad(debug, "END get_argo_index")
     local_file
 end
 
 """
-    download_argo_file(destdir::String=".", file::String="", age::Number=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
+    get_argo_file(destdir::String=".", file::String="", age::Number=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
 
 Download an Argo profile file, if an existing copy is less than `age` days old.
 
@@ -255,8 +242,8 @@ Use [`read_argo`](@ref) to read such a downloaded file.
 - `::String`: Full name of the local file after downloading, or as cached recently.
 
 # """
-function download_argo_file(destdir::String=".", file::String="", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
-    oad(debug, "download_argo_file START")
+function get_argo_file(destdir::String=".", file::String="", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+    oad(debug, "get_argo_file START")
     file_trimmed = replace.(file, r".*/" => "")
     oad(debug, "    file: ", file)
     local_file = expanduser(joinpath(destdir, file_trimmed))
@@ -269,13 +256,13 @@ function download_argo_file(destdir::String=".", file::String="", age::Float64=1
     oad(debug, "    remote_file: ", remote_file)
     oad(debug, "    local_file: ", local_file)
     if local_file_age > age
-        oad(debug, "    downloading remote_file, since local_file is ",
+        oad(debug, "    getting remote_file, since local_file is ",
             round(local_file_age, digits=4), " days old, exceeding threshold of ", age, " days")
         Downloads.download(remote_file, local_file)
     else
         oad(debug, "    using cached local_file, since its age ", round(local_file_age, digits=4), " is under ", age, " days")
     end
-    oad(debug, "END download_argo_file")
+    oad(debug, "END get_argo_file")
     local_file
 end
 
@@ -284,7 +271,7 @@ end
 """
     read_argo_index(file::String, trim=true; header=9, debug=0)
 
-Read a file downloaded by [`download_argo_index`](@ref).
+Read a file downloaded by [`get_argo_index`](@ref).
 
 This relies on there being exactly `header` lines of header, the last of which
 names the columns.  The default value of 9 works with index files downloaded
