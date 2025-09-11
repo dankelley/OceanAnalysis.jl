@@ -7,10 +7,12 @@ OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
 OceanAnalysis.Ctd
 OceanAnalysis.depth_from_pressure
-OceanAnalysis.download_argo_index
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!
+OceanAnalysis.get_argo_index
+OceanAnalysis.get_argo_file
 OceanAnalysis.get_element
+OceanAnalysis.get_file
 OceanAnalysis.N2
 OceanAnalysis.OA
 OceanAnalysis.OceanAnalysis
