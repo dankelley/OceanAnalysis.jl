@@ -1,6 +1,6 @@
 # %%
 using OceanAnalysis, CSV, DataFrames, Plots, PolygonOps, Dates
-include("regionNovaScotia.jl"); # defines scotian_shelf_polygon
+CSV.read("regionNovaScotia.csv", DataFrame, header=1); # defines scotian_shelf_polygon
 index_file = "~/data/argo/ss/ar_index_global_prof.txt.gz"
 
 # %%
