@@ -9,6 +9,7 @@ function get_file(url::String="", file::String="", age::Float64=1.0; debug::Int6
     if length(url) < 1 || length(file) < 1
         error("Must give 'url' and 'file'")
     end
+    file = expanduser(file)
     oad(debug, "    url: \"", url, "\"")
     oad(debug, "    file: \"", file, "\"")
     if isfile(file)

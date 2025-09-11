@@ -221,18 +221,18 @@ file.
 
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
-function get_argo_index(destdir::String=".", age::Float64=1.0; server="https://data-argo.ifremer.fr", debug=0)
+function get_argo_index(destdir::String=".", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo_index START")
     file = "ar_index_global_prof.txt.gz"
-    local_file = expanduser(joinpath(destdir, file))
+    local_file = joinpath(destdir, file)
     remote_file = joinpath(server, file)
-    get_file(remote_file, local_file, age, debug=increment_debug(debug))
+    rval = get_file(remote_file, local_file, age, debug=increment_debug(debug))
     oad(debug, "END get_argo_index")
-    local_file
+    rval
 end
 
 """
-    get_argo_file(destdir::String=".", file::String="", age::Number=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
+    get_argo_file(destdir::String=".", file::String="", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
 
 Download an Argo profile file, if an existing copy is less than `age` days old.
 
@@ -246,26 +246,12 @@ function get_argo_file(destdir::String=".", file::String="", age::Float64=1.0; s
     oad(debug, "get_argo_file START")
     file_trimmed = replace.(file, r".*/" => "")
     oad(debug, "    file: ", file)
-    local_file = expanduser(joinpath(destdir, file_trimmed))
-    if isfile(local_file)
-        local_file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(local_file))) / Dates.Millisecond(1000) / 86400.0
-    else
-        local_file_age = 1e8 # so old that it will be forced to download
-    end
+    local_file = joinpath(destdir, file_trimmed)
     remote_file = joinpath(server, "dac", file)
-    oad(debug, "    remote_file: ", remote_file)
-    oad(debug, "    local_file: ", local_file)
-    if local_file_age > age
-        oad(debug, "    getting remote_file, since local_file is ",
-            round(local_file_age, digits=4), " days old, exceeding threshold of ", age, " days")
-        Downloads.download(remote_file, local_file)
-    else
-        oad(debug, "    using cached local_file, since its age ", round(local_file_age, digits=4), " is under ", age, " days")
-    end
+    rval = get_file(remote_file, local_file, age, debug=increment_debug(debug))
     oad(debug, "END get_argo_file")
-    local_file
+    rval
 end
-
 
 
 """
