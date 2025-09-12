@@ -91,3 +91,8 @@ end
     p = pretty(1:20, 10)
     @test e == p
 end
+
+@testset "geod_distance() agrees with oce/R" begin
+    d = geod_distance(0.0, 45.0, 40.0, 46.0)
+    @test d ≈ 3095.1741526503 atol = 1e-11
+end
