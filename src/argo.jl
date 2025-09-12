@@ -221,7 +221,7 @@ file.
 
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
-function get_argo_index(destdir::String=".", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo_index(destdir::String=".", age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo_index START")
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
@@ -232,7 +232,7 @@ function get_argo_index(destdir::String=".", age::Float64=1.0; server::String="h
 end
 
 """
-    get_argo_file(destdir::String=".", file::String="", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
+    get_argo_file(file::String="", destdir::String="."; age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
 
 Download an Argo profile file, if an existing copy is less than `age` days old.
 
@@ -242,13 +242,17 @@ Use [`read_argo`](@ref) to read such a downloaded file.
 - `::String`: Full name of the local file after downloading, or as cached recently.
 
 # """
-function get_argo_file(destdir::String=".", file::String="", age::Float64=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo_file(file::String="", destdir::String="."; age::Real=1.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo_file START")
-    file_trimmed = replace.(file, r".*/" => "")
-    oad(debug, "    file: ", file)
-    local_file = joinpath(destdir, file_trimmed)
-    remote_file = joinpath(server, "dac", file)
-    rval = get_file(remote_file, local_file, age, debug=increment_debug(debug))
+    file_original = file
+    oad(debug, "    file: ", file, " (original)")
+    file = replace.(file, r".*/" => "")
+    oad(debug, "    file: ", file, " (after trimming)")
+    file = joinpath(destdir, file)
+    oad(debug, "    file: ", file, " (after prefixing with destdir)")
+    url = joinpath(server, "dac", file_original)
+    oad(debug, "    url: ", url)
+    rval = get_file(url, file, age, debug=increment_debug(debug))
     oad(debug, "END get_argo_file")
     rval
 end

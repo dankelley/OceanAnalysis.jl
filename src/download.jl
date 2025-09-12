@@ -4,7 +4,7 @@
 The contents of `url` are downloaded and stored as `file`, but only if either
 `file` does not exist locally or its age is less than `age` days.
 """
-function get_file(url::String="", file::String="", age::Float64=1.0; debug::Int64=0)
+function get_file(url::String="", file::String="", age::Real=1.0; debug::Int64=0)
     oad(debug, "get_file START")
     if length(url) < 1 || length(file) < 1
         error("Must give 'url' and 'file'")
