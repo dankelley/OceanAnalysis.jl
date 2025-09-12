@@ -32,18 +32,18 @@ ellipsoid. (The default values are highly recommended.)
 function geod_distance(lon1::Real, lat1::Real, lon2::Real, lat2::Real; a::Real=6378137.00, f::Real=1.0 / 298.257223563)
     # See git/oce/R/geod.R and git/oce/src/geod.cpp; the following code is a Julia
     # version of the C code in the latter file.
-    eps = 0.5e-13 # a tolerance parameter for the iterative solution
-    r = 1.0 - f
     if ((lat1) == (lat2)) && ((lon1) == (lon2))
         return 0.0
     end
-    # Put longitude between 0 and360, in case we are given e.g. -30 go mean 30W.
+    # Put longitude between 0 and360, in case we are given e.g. -30 to mean 30W.
     if lon1 < 0.0
         lon1 += 360.0
     end
     if lon2 < 0.0
         lon2 += 360.0
     end
+    eps = 0.5e-13 # a tolerance parameter for the iterative solution
+    r = 1.0 - f
     # Convert to radians
     lat1 = lat1 * pi / 180.0
     lon1 = lon1 * pi / 180.0
