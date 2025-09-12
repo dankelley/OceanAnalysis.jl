@@ -1,4 +1,4 @@
-# Time: 4s with 1 file, 6.5s with 975 files -- approximately 500 files per second
+# Time: 4s with 1 file, 7s with 975 files -- approximately 300 files per second
 
 # NOTES (all files are in /users/kelley/argo):
 # D6902967_133.nc -- no LONGITUDE
@@ -6,7 +6,7 @@
 using OceanAnalysis, Glob
 dir = "/Users/kelley/data/argo"
 files = glob("*.nc", dir)
-files = [files[100]] # to test a single random file
+#files = [files[100]] # to test a single random file
 
 debug = 0
 bad = 0

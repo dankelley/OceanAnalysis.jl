@@ -1,7 +1,9 @@
+# %% Read a built-in Argo file, and plot some hydrographic diagrams
 using OceanAnalysis, Plots, Measures
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
     "D4902911_095.nc")
 ctd = read_argo(filename)
+# %% Plot an overview of hydrographic properties
 p1 = plot_profile(ctd, "CT")
 p2 = plot_profile(ctd, "SA")
 p3 = plot_profile(ctd, "sigma0")

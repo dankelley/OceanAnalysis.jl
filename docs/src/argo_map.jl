@@ -1,25 +1,30 @@
-# Map Argo profile locations since a month ago
-using Dates, CSV, DataFrames, Plots, OceanAnalysis
-# Download and read the profile index
-index_file = get_argo_index("~/data/argo/")
-index = read_argo_index(index_file)
-# Isolate profiles made since a month ago
-t1 = floor(now(UTC), Dates.Day)
-t0 = t1 - Dates.Month(1)
-look = t0 .<= index.time .< t1
-index = index[look, :]
-# Plot profile locations in world domain
-t0f = Dates.format(t0, "yyyy-mm-d")
-t1f = Dates.format(t1, "yyyy-mm-d")
-title = "$(nrow(index)) Argo profiles from $t0f to $t1f"
-scatter(index.longitude, index.latitude,
-    markersize=1.0, color=:blue2, markerstrokecolor=:blue2,
-    xlimits=(-180, 180), ylimits=(-90, 90), aspect_ratio=:equal,
-    framestyle=:box, dpi=150, legend=false,
-    title=title, titlefontsize=9)
-# Add land for reference
+# %% Get the index
+using OceanAnalysis, CSV, Dates, DataFrames, Plots
+index_file = get_argo_index("~/data/argo")
+index = read_argo_index(index_file) # 3.2e6 profiles
+# %% Select profiles made within the past 365 days
+today = now(UTC)
+start = today - Dates.Year(1)
+index_recent = index[start.<index.time.<today, :] # 1.7e4 profiles
+# %% Isolate profiles made within 500 km of Sable Island
+SI_lon = -59.9149
+SI_lat = 43.9337
+distance = map(i -> geod_distance(SI_lon, SI_lat,
+        index_recent.longitude[i], index_recent.latitude[i]),
+    1:nrow(index_recent))
+index_near = index_recent[distance.<500, :]
+# %% Plot results on a ap
+scatter(index_recent.longitude, index_recent.latitude,
+    xlims=SI_lon .+ (-15, 15),
+    ylims=SI_lat .+ (-10, 10),
+    aspect_ratio=1.0 / cos(SI_lat * pi / 180.0),
+    markersize=1, markerstrokecolor=:blue, color=:blue,
+    framestyle=:box, dpi=200, legend=false)
+scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
+    markerstrokecolor=:red, color=:red)
+# %% add a coastline for reference
 cl_file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "coastline.csv.gz")
+    "data", "coastline_fine.csv.gz")
 cl = CSV.read(cl_file, DataFrame, header=1)
 plot!(cl.longitude, cl.latitude, seriestype=:shape, color=:bisque3)
 savefig("argo_map.png")
