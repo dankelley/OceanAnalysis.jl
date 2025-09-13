@@ -111,7 +111,7 @@ FIXME: this seems to work, but I need to explore more before writing documentati
 Is there any benefit over the user just using [`plot`](@ref) directly?
 """
 function plot_coastline(coastline::Coastline, clongitude::Real=0.0, clatitude::Real=0.0, span::Real=90.0,
-    seriestype=:shape, color=:tan, legend=false; kwargs...)# color=:tan, kwargs...)
+    seriestype=:shape, color=:bisque3, legend=false; kwargs...)# color=:tan, kwargs...)
     #println("plot_coastline() BEGIN")
     #println("kwargs...: ", kwargs...)
     #println("keys((; kwargs...)): ", keys((; kwargs...)))
@@ -127,8 +127,7 @@ function plot_coastline(coastline::Coastline, clongitude::Real=0.0, clatitude::R
         xlims=(clongitude - 2.0 * span * aspect_ratio, clongitude + 2.0 * span * aspect_ratio),
         ylims=(clatitude - span, clatitude + span),
         aspect_ratio=aspect_ratio,
-        legend=legend,
-        seriestype=seriestype, color=color, framestyle=:box; kwargs...)
+        legend=legend, seriestype=seriestype, color=color, framestyle=:box; kwargs...)
 end
 
 """
@@ -137,13 +136,12 @@ end
 FIXME: this seems to work, but I need to explore more before writing documentation.
 Is there any benefit over the user just using `plot!()` directly?
 """
-function plot_coastline!(coastline::Coastline, legend=false, seriestype=:shape, color=:tan; kwargs...)
+function plot_coastline!(coastline::Coastline, legend=false, seriestype=:shape, color=:bisque3; kwargs...)
     #println("plot_coastline!() BEGIN")
     #println("kwargs...: ", kwargs...)
     #println("keys((; kwargs...)): ", keys((; kwargs...)))
     plot!(coastline.data.longitude, coastline.data.latitude,
         xlims=xlims(), ylims=ylims(),
-        legend=legend,
-        seriestype=seriestype, color=color, framestyle=:box; kwargs...)
+        legend=legend, seriestype=seriestype, color=color, framestyle=:box; kwargs...)
 end
 
