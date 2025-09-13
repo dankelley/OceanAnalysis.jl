@@ -23,8 +23,6 @@ scatter(index_recent.longitude, index_recent.latitude,
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
 # %% add a coastline for reference
-cl_file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "coastline_fine.csv.gz")
-cl = CSV.read(cl_file, DataFrame, header=1)
-plot!(cl.longitude, cl.latitude, seriestype=:shape, color=:bisque3)
+cl = coastline(:global_fine)
+plot!(cl.data.longitude, cl.data.latitude, seriestype=:shape, color=:bisque3)
 savefig("argo_map.png")

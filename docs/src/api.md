@@ -3,6 +3,8 @@
 ```@docs
 OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
+OceanAnalysis.coastline
+OceanAnalysis.Coastline
 OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
 OceanAnalysis.Ctd

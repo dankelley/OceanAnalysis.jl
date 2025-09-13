@@ -11,11 +11,13 @@ using Statistics
 # Structs
 export OA
 export Ctd
+export Coastline
 
 # Functions
 export argo_id_cycle
 export as_ctd
 export coordinate_from_string
+export coastline
 export CT
 export depth_from_pressure
 export fix_gsw_bad_code
@@ -26,6 +28,8 @@ export get_argo_file
 export get_element
 export get_file
 export N2
+#<not-working-well>export plot_coastline
+#<not-working-well>export plot_coastline!
 export plot_profile
 export plot_TS
 export pressure_from_depth
@@ -49,7 +53,7 @@ At the moment, the only such case is [`Ctd`](@ref).
 abstract type OA end
 
 """
-    An object to hold CTD data
+    A type to hold CTD data
 
 Ctd is a type used to store data from CTD instruments and Argo floats. It takes
 the form of a Struct that derives from the base `OA` type, and holds two items:
@@ -70,3 +74,18 @@ struct Ctd <: OA
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
 end
+
+"""
+    A type to hold coastline data
+
+Coastline is a type to hold coastline data.  Its `metadata` element is a Dict that
+may hold the source filename or other information (or may be empty).  Its
+`data` element is a DataFrame holding columns named `longitude` and `latitude`,
+with NaN values separating continents and/or elements within them such
+as countries or subregions of countries.
+"""
+struct Coastline <: OA
+    metadata::Dict{String,Any}
+    data::DataFrames.DataFrame
+end
+

@@ -1,5 +1,33 @@
 # Examples
 
+## Coastlines
+
+The following shows how to plot a whole-earth view, for which the coarse-scale
+built-in coastline dataset is suitable, along with a Nova Scotia view, for
+which the fine-scale dataset is preferable.
+
+```julia
+# Plot earth with the coarse dataset and Nova Scotia with the fine dataset
+using OceanAnalysis, Plots
+clc = coastline(:global_coarse);
+clf = coastline(:global_fine);
+# World view
+p1 = plot(clc.data.longitude, clc.data.latitude,
+    xlim=(-180, 180), ylim=(-90, 90),
+    aspect_ratio=1.0,
+    seriestype=:shape, color=:bisque3, legend=false, framestyle=:box)
+# Nova Scotia view, with aspect_ratio set for the middle latitude
+p2 = plot(clf.data.longitude, clf.data.latitude,
+    xlim=(-68, -59), ylim=(42, 48),
+    aspect_ratio=1.0 / cos(45.0 * pi / 180),
+    seriestype=:shape, color=:bisque3, legend=false, framestyle=:box)
+l = @layout [a{0.66w} b{0.33w}]
+plot(p1, p2, layout=l)
+savefig("maps.png")
+```
+
+![maps](maps.png)
+
 ## CTD profile diagnostic plot
 
 The following shows how to read a built-in CTD file, and plot some hydrographic
@@ -54,10 +82,8 @@ scatter(index_recent.longitude, index_recent.latitude,
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
 # %% add a coastline for reference
-cl_file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "coastline_fine.csv.gz")
-cl = CSV.read(cl_file, DataFrame, header=1)
-plot!(cl.longitude, cl.latitude, seriestype=:shape, color=:bisque3)
+cl = coastline(:global_fine)
+plot!(cl.data.longitude, cl.data.latitude, seriestype=:shape, color=:bisque3)
 savefig("argo_map.png")
 ```
 
