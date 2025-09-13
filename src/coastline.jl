@@ -38,7 +38,7 @@ function coastline(name::Symbol=:global_fine)
         rval = coastline(joinpath(dir, "data", "coastline_coarse.csv.gz"), 1)
         rval.metadata["name"] = name
     else
-        error("    the only choices for 'name' are ':world_coarse' and ':world_fine'")
+        error("    the only choices for 'name' are :global_coarse and :global_fine, but :", name, " was given")
     end
     rval
 end
@@ -104,43 +104,48 @@ function coastline(longitude::Vector{Float64}, latitude::Vector{Float64})
     Coastline(metadata, data)
 end
 
-#<not-working-well>"""
-#<not-working-well>    plot_coastline(coastline::Coastline, ...)
-#<not-working-well>
-#<not-working-well>FIXME: this seems to work, but I need to explore more before writing documentation.
-#<not-working-well>Is there any benefit over the user just using [`plot`](@ref) directly?
-#<not-working-well>"""
-#<not-working-well>function plot_coastline(coastline::Coastline; clongitude::Real=0.0, clatitude::Real=0.0, span::Real=90.0,
-#<not-working-well>    seriestype=:shape, legend=false, color=:tan, kwargs...)
-#<not-working-well>    #println("plot_coastline() BEGIN")
-#<not-working-well>    #println("kwargs...: ", kwargs...)
-#<not-working-well>    #println("keys((; kwargs...)): ", keys((; kwargs...)))
-#<not-working-well>    # NB. we can see if 'legend' is in the kwargs by using
-#<not-working-well>    #     if "legend" in keys((; kwargs...))
-#<not-working-well>    # and I thought I would need to do that, but testing shows that if the
-#<not-working-well>    # user gives say 'legend' then it does not appear in kwargs, so no
-#<not-working-well>    # need for this complication.
-#<not-working-well>    aspect_ratio = 1.0 / cos(clatitude * pi / 180.0)
-#<not-working-well>    plot(coastline.data.longitude, coastline.data.latitude,
-#<not-working-well>        xlim=(clongitude - 2.0 * span * aspect_ratio, clongitude + 2.0 * span * aspect_ratio),
-#<not-working-well>        ylim=(clatitude - span, clatitude + span),
-#<not-working-well>        aspect_ratio=aspect_ratio,
-#<not-working-well>        legend=legend, seriestype=seriestype, color=color, framestyle=:box,
-#<not-working-well>        kwargs...)
-#<not-working-well>end
-#<not-working-well>
-#<not-working-well>"""
-#<not-working-well>    plot_coastline!(coastline::Coastline, ...)
-#<not-working-well>
-#<not-working-well>FIXME: this seems to work, but I need to explore more before writing documentation.
-#<not-working-well>Is there any benefit over the user just using [`plot`](@ref) directly?
-#<not-working-well>"""
-#<not-working-well>function plot_coastline!(coastline::Coastline; seriestype=:shape, legend=false, color=:tan, kwargs...)
-#<not-working-well>    #println("plot_coastline!() BEGIN")
-#<not-working-well>    #println("kwargs...: ", kwargs...)
-#<not-working-well>    #println("keys((; kwargs...)): ", keys((; kwargs...)))
-#<not-working-well>    plot!(coastline.data.longitude, coastline.data.latitude,
-#<not-working-well>        legend=legend, seriestype=seriestype, color=color,
-#<not-working-well>        kwargs...)
-#<not-working-well>end
-#<not-working-well>
+"""
+    plot_coastline(coastline::Coastline, ...)
+
+FIXME: this seems to work, but I need to explore more before writing documentation.
+Is there any benefit over the user just using [`plot`](@ref) directly?
+"""
+function plot_coastline(coastline::Coastline; clongitude::Real=0.0, clatitude::Real=0.0, span::Real=90.0,
+    seriestype=:shape, legend=false, color=:tan) #, kwargs...)
+    #println("plot_coastline() BEGIN")
+    #println("kwargs...: ", kwargs...)
+    #println("keys((; kwargs...)): ", keys((; kwargs...)))
+    # NB. we can see if 'legend' is in the kwargs by using
+    #     if "legend" in keys((; kwargs...))
+    # and I thought I would need to do that, but testing shows that if the
+    # user gives say 'legend' then it does not appear in kwargs, so no
+    # need for this complication.
+    aspect_ratio = 1.0 / cos(clatitude * pi / 180.0)
+    #println("lon: ", first(coastline.data.longitude, 3))
+    #println("lat: ", first(coastline.data.latitude, 3))
+    plot(coastline.data.longitude, coastline.data.latitude,
+        xlims=(clongitude - 2.0 * span * aspect_ratio, clongitude + 2.0 * span * aspect_ratio),
+        ylims=(clatitude - span, clatitude + span),
+        aspect_ratio=aspect_ratio,
+        legend=legend,
+        seriestype=seriestype, color=color, framestyle=:box)
+    #kwargs...)
+end
+
+"""
+    plot_coastline!(coastline::Coastline, ...)
+
+FIXME: this seems to work, but I need to explore more before writing documentation.
+Is there any benefit over the user just using `plot!()` directly?
+"""
+function plot_coastline!(coastline::Coastline; legend=false, seriestype=:shape, color=:tan)#, kwargs...)
+    #println("plot_coastline!() BEGIN")
+    #println("kwargs...: ", kwargs...)
+    #println("keys((; kwargs...)): ", keys((; kwargs...)))
+    plot!(coastline.data.longitude, coastline.data.latitude,
+        xlims=xlims(), ylims=ylims(),
+        legend=legend,
+        seriestype=seriestype, color=color, framestyle=:box)
+    #kwargs...)
+end
+

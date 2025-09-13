@@ -28,8 +28,8 @@ export get_argo_file
 export get_element
 export get_file
 export N2
-#<not-working-well>export plot_coastline
-#<not-working-well>export plot_coastline!
+export plot_coastline
+export plot_coastline!
 export plot_profile
 export plot_TS
 export pressure_from_depth
