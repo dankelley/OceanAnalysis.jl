@@ -21,7 +21,8 @@ end
 
 
 """
-    read_argo(filename, column=1; add_teos=true, require_valid=true, debug=0)
+    read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
+        require_valid::Bool=true, debug::Int64=0)
 
 Read an Argo file and return a Ctd object that holds salinity, temperature,
 pressure (and derived columns) but no other columns from the file.  As of
@@ -84,7 +85,11 @@ julia> names(d.data)
  "spiciness0"
 ```
 """
-function read_argo(filename, column=1; add_teos=true, require_valid=true, debug::Int64=0)
+function read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
+    require_valid::Bool=true, debug::Int64=0)
+    if ismissing(filename)
+        error("must give 'filename'")
+    end
     oad(debug, "read_argo(<filename>, column=$column, require_valid=$require_valid, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d

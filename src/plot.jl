@@ -76,12 +76,10 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    if which in derived_variables
-        SA_ = SA(ctd)
-        CT_ = CT(ctd)
-        sigma0_ = gsw_sigma0.(SA_, CT_)
-        spiciness0_ = gsw_spiciness0.(SA_, CT_)
-    end
+    SA = "SA" in data_names ? ctd.data.SA : SA(ctd)
+    CT = "CT" in data_names ? ctd.data.CT : CT(ctd)
+    sigma0 = "sigma0" in data_names ? ctd.data.sigma0 : sigma0(ctd)
+    spiciness0 = "spiciness0" in data_names ? ctd.data.spiciness0 : spiciness0(ctd)
     oad(debug, "    setting up coordinate system for vertical axis")
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
@@ -95,7 +93,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
     end
     if which == "temperature" || which == "CT"
         oad(debug, "    drawing '", which, "'")
-        rval = plot(which == "CT" ? CT_ : T, y, ylabel=ylabel,
+        rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
@@ -106,7 +104,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "salinity" || which == "SA"
         oad(debug, "    drawing '", which, "'")
-        rval = plot(which == "SA" ? SA_ : S, y, ylabel=ylabel,
+        rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
@@ -117,7 +115,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
         oad(debug, "    drawing '", which, "'")
-        rval = plot(sigma0_, y, ylabel=ylabel,
+        rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
             xlabel=if abbreviate
@@ -128,7 +126,7 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
         oad(debug, "    drawing '", which, "'")
-        rval = plot(spiciness0_,
+        rval = plot(spiciness0,
             y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
@@ -208,7 +206,7 @@ See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
-    framestyle=:box, color=:black, seriestype=:scatter, ms=2,
+    framestyle=:box, color=:black, seriestype=:scatter, markersize=2,
     legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
@@ -221,11 +219,12 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     # We start with the measurements ... 
     oad(debug, "    drawing data")
+    oad(debug, "    kwargs... ", kwargs...)
     rval = plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
         yrot=90, framestyle=framestyle,
-        seriestype=seriestype, ms=ms,
+        seriestype=seriestype, markersize=markersize,
         gridstyle=gridstyle, color=color, tickfontsize=tickfontsize,
         labelfontsize=labelfontsize; kwargs...)
     # ... then add density contours ...

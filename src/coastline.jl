@@ -1,5 +1,5 @@
 """
-    coastline(symbol::Symbol=:world)
+    coastline(symbol::Symbol=:world_fine)
 
 Access a built-in coastline dataset. The only valid choices for `name` are
 `:world_coarse` and `:world_fine`.  These are handled by reading the built-in
