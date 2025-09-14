@@ -19,6 +19,8 @@ OceanAnalysis.get_file
 OceanAnalysis.N2
 OceanAnalysis.OA
 OceanAnalysis.OceanAnalysis
+OceanAnalysis.plot_coastline
+OceanAnalysis.plot_coastline!
 OceanAnalysis.plot_profile
 OceanAnalysis.plot_TS
 OceanAnalysis.pressure_from_depth
