@@ -91,9 +91,8 @@ end
 
 """
     plot_coastline(coastline::Coastline;
-        xlims::Tuple{Real,Real}=(-180., 180.),
-        ylims::Tuple{Real,Real}=(-90., 90.),
-        seriestype=:shape, color=:bisque3, linewidth::Real=0.5)
+        xlims=(-180., 180.), ylims=(-90., 90.),
+        seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
 
 Plot a coastline with longitude and latitude axes (i.e. without a map projection).
 
@@ -113,16 +112,16 @@ These values are passed to the base-level `plot` function; for details, see the
 documentation provided by the `Plots` package.
 """
 function plot_coastline(coastline::Coastline;
-    xlims::Tuple{Real,Real}=(-180., 180.),
-    ylims::Tuple{Real,Real}=(-90., 90.),
-    seriestype=:shape, color=:bisque3, linewidth::Real=0.5)
+    xlims=(-180., 180.), ylims=(-90., 90.),
+    seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
+    #println("DAN in plot_coastline() kwargs...=$kwargs...")
     #println("xlims $xlims, ylims $ylims")
     aspect_ratio = 1.0 / cos(0.5 * (ylims[2] + ylims[1]) * pi / 180.0)
     #println("aspect_ratio: $aspect_ratio")
-    plot(coastline.data.longitude, coastline.data.latitude,
+    plot(coastline.data.longitude, coastline.data.latitude;
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         seriestype=seriestype, color=color, linewidth=linewidth,
-        legend=false, framestyle=:box)
+        legend=false, framestyle=:box, kwargs...)
 end
 
 """
@@ -146,9 +145,10 @@ These values are passed to the base-level `plot` function; for details, see the
 documentation provided by the `Plots` package.
 """
 function plot_coastline!(coastline::Coastline;
-    seriestype=:shape, color=:bisque3, linewidth::Real=0.5)
+    seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
+    #println("DAN in plot_coastline!()")
     plot!(coastline.data.longitude, coastline.data.latitude,
         xlims=xlims(), ylims=ylims(), # inherit from previous plot
-        seriestype=seriestype, color=color, linewidth=linewidth, legend=false)
+        seriestype=seriestype, color=color, linewidth=linewidth, legend=false, kwargs...)
 end
 
