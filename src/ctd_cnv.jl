@@ -52,6 +52,8 @@ julia> names(d.data)
 ```
 """
 function read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
+    #!ismissing(filename) || error("please supply 'filename'")
+    filename = expanduser(filename)
     open(filename) do file
         read_ctd_cnv(file, filename; add_teos=add_teos, debug=increment_debug(debug))
     end
@@ -237,16 +239,15 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debu
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
             longitude, latitude, time=time, add_teos=add_teos, debug=increment_debug(debug))
     end
-    oad(debug, "    adding non-standard variables to the '.data' component of return value")
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
         if !(name in standard_items)
-            oad(debug, "        adding '", name, "'")
+            oad(debug, "    adding non-standard column named ", name, " to data")
             rval.data[:, name] = data[:, name]
         end
     end
     # Add nonstandard metadata that are in the file
-    oad(debug, "        adding header and filename to the '.metadata' component of return value")
+    oad(debug, "    adding header and filename to metadata")
     rval.metadata["header"] = header
     rval.metadata["filename"] = filename
     oad(debug, "END read_ctd_cnv()")

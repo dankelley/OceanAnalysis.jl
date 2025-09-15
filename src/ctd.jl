@@ -99,7 +99,7 @@ function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressur
     if !ismissing(time)
         metadata["time"] = time
     end
-    oad(debug, "    passing metadata and data to Ctd() to construct a return value")
+    oad(debug, "    passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
     oad(debug, "END as_ctd()")
     rval

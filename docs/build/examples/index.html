@@ -8,12 +8,15 @@ p2 = plot_coastline(coastline(:global_fine), xlims=(-68, -59), ylims=(42, 48))
 l = @layout [a{0.6w} b{0.4w}]
 plot(p1, p2, layout=l)
 savefig(&quot;maps.png&quot;)</code></pre><p><img src="../maps.png" alt="maps"/></p><h2 id="CTD-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#CTD-profile-diagnostic-plot">CTD profile diagnostic plot</a><a id="CTD-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#CTD-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.</p><pre><code class="language-julia hljs"># %% Read a built-in CTD file
-using OceanAnalysis, Plots, Measures
+using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     &quot;data&quot;, &quot;ctd.cnv&quot;)
 ctd = read_ctd_cnv(filename)
 # %% Plot some diagrams that are often useful in analysis
-p1 = plot_profile(ctd, &quot;CT&quot;)
+title = &quot;$(Dates.format(ctd.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;)) at &quot; *
+        &quot;$(round(ctd.metadata[&quot;latitude&quot;],digits=3))N &quot; *
+        &quot;$(round(ctd.metadata[&quot;longitude&quot;],digits=3))E&quot;
+p1 = plot_profile(ctd, &quot;CT&quot;, title=title, titlefontsize=9)
 p2 = plot_profile(ctd, &quot;SA&quot;)
 p3 = plot_profile(ctd, &quot;sigma0&quot;)
 p4 = plot_TS(ctd)
@@ -46,15 +49,18 @@ scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
 # %% add a coastline for reference
 plot_coastline!(coastline(:global_fine))
 savefig(&quot;argo_map.png&quot;)</code></pre><p><img src="../argo_map.png" alt="Argo map"/></p><h2 id="Argo-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#Argo-profile-diagnostic-plot">Argo profile diagnostic plot</a><a id="Argo-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to display some useful diagnostic plots for a single Argo profile.</p><pre><code class="language-julia hljs"># %% Read a built-in Argo file, and plot some hydrographic diagrams
-using OceanAnalysis, Plots, Measures
+using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), &quot;data&quot;,
     &quot;D4902911_095.nc&quot;)
-ctd = read_argo(filename)
+a = read_argo(filename)
 # %% Plot an overview of hydrographic properties
-p1 = plot_profile(ctd, &quot;CT&quot;)
-p2 = plot_profile(ctd, &quot;SA&quot;)
-p3 = plot_profile(ctd, &quot;sigma0&quot;)
-p4 = plot_TS(ctd)
+title = &quot;$(Dates.format(a.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;)) at &quot; *
+        &quot;$(round(a.metadata[&quot;latitude&quot;],digits=3))N &quot; *
+        &quot;$(round(a.metadata[&quot;longitude&quot;],digits=3))E&quot;
+p1 = plot_profile(a, &quot;CT&quot;, title=title, titlefontsize=9)
+p2 = plot_profile(a, &quot;SA&quot;)
+p3 = plot_profile(a, &quot;sigma0&quot;)
+p4 = plot_TS(a)
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 800), margin=0.25cm,
     dpi=200)
-savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Sunday 14 September 2025 13:40">Sunday 14 September 2025</span>. Using Julia version 1.12.0-rc2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 15 September 2025 10:39">Monday 15 September 2025</span>. Using Julia version 1.12.0-rc2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

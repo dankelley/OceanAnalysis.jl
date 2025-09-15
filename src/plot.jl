@@ -166,23 +166,22 @@ end
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false,
-        framestyle=:box, color=:black, seriestype=:scatter, ms=2,
+        framestyle=:box, color=:black, seriestype=:scatter, markersize=2,
         legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
         debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
-By default, contours of sigma0 are shown, but contours of spiciness0 are not
-shown. The parameters `sigma0_levels` and `spiciness0_levels` control
-contouring. Setting the respective value to 0 prevents contouring.  Setting it
-to a positive integer provides a suggestion for the number of levels, with the
-actual number being set by [`pretty`](@ref)), which is provided with the
-integer.  Setting it to an empty vector, i.e. `[]`, causes automatic selection
-of levels, again with `[pretty`](@ref).  And, finally, setting it to a vector
-of numbers specifies those numbers as the levels.
+Whether contours of density and spiciness are drawn depends on values of the
+`sigma0_levels` and `spiciness0_level` arguments. There are 4 categories. (1)
+Setting either to 0 prevents contouring. (2) Setting either to `[]` enables
+contours with automatic selection of levels. (3) Setting either to a positive
+integer provides a suggestion for the number of levels, with the actual number
+being set by [`pretty`](@ref)), which is provided with the integer.  (4)
+Setting either to a vector of numbers specifies those numbers as the levels.
 
 By default, a freezing-point line is drawn (if it is within the range of the
-data); this drawing is turned off if `draw_freezing` is set to false.
+data). This behaviour is skipped if `draw_freezing` is false.
 
 By default, axis names are written in long form; set `abbreviate=true` for
 shorter versions.
@@ -191,15 +190,18 @@ Information about the analysis is printed if `debug` is set to true.
 
 Apart from that, the other parameters have the usual meanings for Julia plots.
 For example, `color` is set to black, to override the Julia default, etc.
+In addition to those parameters, the `kwargs...` argument represents
+any other argument that is accepted by `plot`.  This is illustrated
+in the example, which a title is added to the plot for a built-in
+CNV-formatted CTD file.
 
-# Examples
+
 ```julia
-# Display hydrographic properties stored in a built-in Argo file
-using OceanAnalysis, Plots
+using OceanAnalysis, Plots, Dates
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = read_argo(f, 1)
-plot_TS(d)
+f = joinpath(pkgdir, "data", "ctd.cnv")
+ctd = read_ctd_cnv(f);
+plot_TS(ctd, title="Built-in CTD file", titlefontsize=9)
 ```
 
 See also [`plot_profile`](@ref).

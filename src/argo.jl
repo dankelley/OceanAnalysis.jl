@@ -63,7 +63,7 @@ julia> pkgdir = dirname(dirname(pathof(OceanAnalysis)));
 
 julia> f = joinpath(pkgdir, "data", "D4902911_095.nc");
 
-julia> d = read_argo(f, 1);
+julia> d = read_argo(f);
 
 julia> d.metadata["time"]
 2019-10-14T23:43:44.003
@@ -74,15 +74,14 @@ julia> d.metadata["latitude"]
 julia> d.metadata["longitude"]
 -66.38298
 
-julia> names(d.data)
-7-element Vector{String}:
- "salinity"
- "temperature"
- "pressure"
- "SA"
- "CT"
- "sigma0"
- "spiciness0"
+julia> first(d.data,3)
+3×7 DataFrame
+ Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
+     │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
+─────┼────────────────────────────────────────────────────────────────────────
+   1 │   34.913       19.513      0.48  35.0786  19.5079  24.8272     3.31464
+   2 │   34.91        19.527      1.0   35.0756  19.5219  24.8213     3.31603
+   3 │   34.912       19.524      2.0   35.0776  19.5187  24.8237     3.31669
 ```
 """
 function read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
