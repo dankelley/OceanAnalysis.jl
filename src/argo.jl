@@ -152,57 +152,6 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
     return rval
 end # read_argo()
 
-# """
-#     Transform an item from a NetCDF file into a more useable object
-# 
-#     This converts the item into either a `Float64` object or `Vector{Float64}` object,
-#     depending on its length.  Also, values equal to the NetCDF "bad" flag for easier 
-#     Values exceeding 1e14 that `ismissing()` finds to be flags
-# """
-# function get_nc_value(item)
-#     bad = ismissing.(item)
-#     if any(bad)
-#         item[ismissing.(item)] .= NaN
-#     end
-#     if length(item) > 1
-#         rval = convert(Vector{Float64}, item)
-#     else
-#         rval = convert(Float64, item)
-#     end
-#     return rval |> fix_gsw_bad_code!
-# end
-
-function get_nc_value(d, name, require_valid=true)
-    if !(name in keys(d))
-        error("this file contains no ", name, " data")
-    end
-    #println("DAN in get_nc_value() with name='$name'")
-    local item = d[name]
-    ndim = ndims(item)
-    if ndim == 1
-        item = item[1]
-    elseif ndim == 2
-        item = item[:, 1]
-    else
-        error("ndim of \"$name\" must be 1 or 2, but it is $ndim")
-    end
-    bad = ismissing.(item)
-    if require_valid && all(bad)
-        error("the ", name, " field contains no non-missing values")
-    end
-    if any(bad)
-        if all(ismissing.(item))
-            return item
-        end
-        item[ismissing.(item)] .= NaN
-    end
-    if length(item) > 1
-        rval = convert(Vector{Float64}, item)
-    else
-        rval = convert(Float64, item)
-    end
-    return rval
-end
 
 """
     get_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)

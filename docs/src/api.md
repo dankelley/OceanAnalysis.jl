@@ -4,6 +4,7 @@
 OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
 OceanAnalysis.coastline
+OceanAnalysis.Amsr
 OceanAnalysis.Coastline
 OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
@@ -16,6 +17,7 @@ OceanAnalysis.get_argo_index
 OceanAnalysis.get_argo_file
 OceanAnalysis.get_element
 OceanAnalysis.get_file
+OceanAnalysis.get_nc_value
 OceanAnalysis.N2
 OceanAnalysis.OA
 OceanAnalysis.OceanAnalysis
@@ -26,6 +28,7 @@ OceanAnalysis.plot_TS
 OceanAnalysis.pressure_from_depth
 OceanAnalysis.pressure_from_z
 OceanAnalysis.pretty
+OceanAnalysis.read_amsr
 OceanAnalysis.read_argo
 OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv

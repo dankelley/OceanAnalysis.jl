@@ -9,6 +9,7 @@ using Dierckx
 using Statistics
 
 # Structs
+export Amsr
 export OA
 export Ctd
 export Coastline
@@ -27,6 +28,7 @@ export get_argo_index
 export get_argo_file
 export get_element
 export get_file
+export get_nc_value
 export N2
 export plot_coastline
 export plot_coastline!
@@ -35,6 +37,7 @@ export plot_TS
 export pressure_from_depth
 export pressure_from_z
 export pretty
+export read_amsr
 export read_argo
 export read_argo_index
 export read_ctd_cnv
@@ -89,3 +92,17 @@ struct Coastline <: OA
     data::DataFrames.DataFrame
 end
 
+"""
+    A type to hold AMSR data (SUBJECT TO CHANGE)
+
+This holds AMSR satellite data as read by [`read_amsr`](@ref).
+
+The `metadata` element is a Dict that holds the source `filename`, the
+`longitude` and `latitude`, and the `name` of the stored variable.
+
+The `data` element stores the data.
+"""
+struct Amsr <: OA
+    metadata::Dict{String,Any}
+    data::Matrix{Float64}
+end
