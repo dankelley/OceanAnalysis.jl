@@ -1,8 +1,8 @@
 # OceanAnalysis.jl
 
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
-oceanographic data. It is at a very early stage of development by someone who
-is in the early steps of exploring Julia as a supplement to R.
+oceanographic data. It is at a very early stage of development by someone
+who is new to Julia.  Problems are likely, and changes are a surety.
 
 Click the three-horizontal-line icon at the top left and then click on 'API' to
 get an in-depth description of the functions and types in the package.
@@ -93,17 +93,19 @@ camel-case notation.
 
 #### Non-breaking changes
 
+* Add support for coastline files.
+* Add support for AMSR datasets.
 * Add `pretty()`, for use in contouring (especially for `plot_TS()`).
 * Add `depth_from_pressure()`, `z_from_pressure()`, `pressure_from_depth()`,
   and `pressure_from_z()`.
 * Change the second digit of version string to indicate that the package is becoming
-  suitable for at least exploratory testing on real data.
+  suitable enough for exploratory testing on real data.
 
 ### 0.0.3
 
 #### Breaking changes
 
-There are no breaking changes; all change are additions or bug fixes.
+There are no breaking changes; all changes are additions or bug fixes.
 
 #### Non-breaking changes
 
@@ -116,7 +118,7 @@ There are no breaking changes; all change are additions or bug fixes.
 
 #### Breaking changes
 
-There are no breaking changes; all change are additions or bug fixes.
+There are no breaking changes; all changes are additions or bug fixes.
 
 #### Non-breaking changes
 
@@ -135,7 +137,7 @@ activate .
 test OceanAnalysis
 ```
 
-## Building and viewing documentation on development machine
+## Building the documentation
 
 To build, type the following in a shell terminal. (Change the `/Users/kelley`
 part, as appropriate.)

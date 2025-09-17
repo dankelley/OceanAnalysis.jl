@@ -1,8 +1,9 @@
 # OceanAnalysis.jl
 
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
-oceanographic data. It is at a very early stage of development by someone who
-is in the early steps of exploring Julia as a supplement to R.
+oceanographic data. It is at an early stage of development by someone who is in
+the early stages of exploring Julia as a supplement to R. The intention is to
+add/refine features based on tasks that come up in the author's everyday work.
 
 ## Installation
 
@@ -14,6 +15,8 @@ it by typing the following in a Julia console.
 ```julia
 using Pkg ; Pkg.add("OceanAnalysis")
 ```
+
+(This version will lag quite far behind the development version.)
 
 ### Development version
 
@@ -48,11 +51,8 @@ develop .
 ```
 
 This sets Julia to look for changes in the files in that directory. Thereafter,
-issuing `using OceanAnalysis` in a Julia session will rebuild from that local
-source. Note that using the `Pkg.add(url=...)` method after using the `develop`
-method will reset things so that Julia rebuilds from the github page instead
-of the local files.
-
+or at least until another `Pkg.add(url)` command is invoked, issuing `using
+OceanAnalysis` in a Julia session will rebuild from that local source.
 
 ## Usage Examples
 
@@ -136,9 +136,9 @@ There are no breaking changes; all change are additions or bug fixes.
 
 * Add `N2()` to compute the square of the buoyancy frequency.
 
-# Developer notes
+## Developer notes
 
-## Adding a package dependency
+### Adding a package dependency
 
 For example, to add `Downloads` as a dependency to the present package,
 navigate to the present-package source directory, start a Julia session, and
@@ -150,7 +150,7 @@ activate .
 add Downloads
 ```
 
-## Running tests
+### Running tests
 
 There is a small test suite built into the package.  To run it, type the
 following in a Julia console:
@@ -161,7 +161,7 @@ activate .
 test OceanAnalysis
 ```
 
-## Building and viewing documentation on development machine
+### Building and viewing documentation on development machine
 
 To build, type the following in a shell terminal. (Change the `/Users/kelley`
 part, as appropriate.)
@@ -179,3 +179,7 @@ cd("/Users/kelley/git/OceanAnalysis.jl/")
 using LiveServer
 serve(; dir="docs/build", launch_browser=true)
 ```
+
+NOTE: there is a way to host the documentation on a server, but the
+instructions for that span a lot of pages, and the path is not very clear to
+the author, who would prefer not to install travisCI, etc.
