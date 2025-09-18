@@ -56,11 +56,7 @@ function coastline(filename::String, header::Integer=1)
     header > 0 || error("'header' must be a non-negative integer")
     metadata = Dict()
     metadata["filename"] = expanduser(filename)
-    if header == 0
-        data = CSV.read(filename, DataFrame, header=header)
-    else
-        data = CSV.read(filename, DataFrame, header=header)
-    end
+    data = CSV.read(filename, DataFrame, header=header)
     Coastline(metadata, data)
 end
 
