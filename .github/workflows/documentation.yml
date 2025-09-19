@@ -29,9 +29,9 @@ jobs:
         run: |
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
+          Pkg.add(PackageSpec(name="MbedTLS_jll"))
+          Pkg.add(PackageSpec(name="LibGit2_jll"))
           Pkg.instantiate()
-      - name: add some things gh documenter needs
-        run: julia -e 'using Pkg; Pkg.add(PackageSpec(name="MbedTLS_jll")); Pkg.add(PackageSpec(name="LibGit2_jll")); Pkg.instantiate()'
       - name: Build and deploy
         run: julia --color=yes --project=docs docs/make.jl
         env:
