@@ -180,6 +180,5 @@ using LiveServer
 serve(; dir="docs/build", launch_browser=true)
 ```
 
-NOTE: there is a way to host the documentation on a server, but the
-instructions for that span a lot of pages, and the path is not very clear to
-the author, who would prefer not to install travisCI, etc.
+NOTE: there is a way to host the documentation on a server, but I don't
+understand it yet.
