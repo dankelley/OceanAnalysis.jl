@@ -28,9 +28,9 @@ jobs:
         shell: julia --color=yes --project=docs {0}
         run: |
           using Pkg
-          Pkg.develop(PackageSpec(path=pwd()))
           Pkg.add(PackageSpec(name="MbedTLS_jll"))
           Pkg.add(PackageSpec(name="LibGit2_jll"))
+          Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
       - name: Build and deploy
         run: julia --color=yes --project=docs docs/make.jl
