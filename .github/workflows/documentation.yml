@@ -31,7 +31,8 @@ jobs:
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
       - name: add MbedTLS_jll
-        run: julia -e 'using Pkg; Pkg.add(PackageSpec(name="MbedTLS_jll"))' # Adjust version as needed
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(name="MbedTLS_jll")); Pkg.instantiate()'
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(name="LibGit2_jll")); Pkg.instantiate()'
       - name: Build and deploy
         run: julia --color=yes --project=docs docs/make.jl
         env:
