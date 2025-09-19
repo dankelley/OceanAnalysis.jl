@@ -25,13 +25,14 @@ jobs:
           version: '1'
       - uses: julia-actions/cache@v2
       - name: Install dependencies
-        shell: julia --color=yes --project=docs {0}
-        run: |
-          using Pkg
-          Pkg.add(PackageSpec(name="MbedTLS_jll"))
-          Pkg.add(PackageSpec(name="LibGit2_jll"))
-          Pkg.develop(PackageSpec(path=pwd()))
-          Pkg.instantiate()
+        #shell: julia --color=yes --project=docs {0}
+        shell: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="MbedTLS_jll")); Pkg.add(PackageSpec(name="LibGit2_jll")); Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        #run: |
+        #  using Pkg
+        #  Pkg.add(PackageSpec(name="MbedTLS_jll"))
+        #  Pkg.add(PackageSpec(name="LibGit2_jll"))
+        #  Pkg.develop(PackageSpec(path=pwd()))
+        #  Pkg.instantiate()
       - name: Build and deploy
         run: julia --color=yes --project=docs docs/make.jl
         env:
