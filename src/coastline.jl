@@ -110,10 +110,7 @@ documentation provided by the `Plots` package.
 function plot_coastline(coastline::Coastline;
     xlims=(-180., 180.), ylims=(-90., 90.),
     seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
-    #println("DAN in plot_coastline() kwargs...=$kwargs...")
-    #println("xlims $xlims, ylims $ylims")
     aspect_ratio = 1.0 / cos(0.5 * (ylims[2] + ylims[1]) * pi / 180.0)
-    #println("aspect_ratio: $aspect_ratio")
     plot(coastline.data.longitude, coastline.data.latitude;
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         seriestype=seriestype, color=color, linewidth=linewidth,
@@ -142,7 +139,6 @@ documentation provided by the `Plots` package.
 """
 function plot_coastline!(coastline::Coastline;
     seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
-    #println("DAN in plot_coastline!()")
     plot!(coastline.data.longitude, coastline.data.latitude,
         xlims=xlims(), ylims=ylims(), # inherit from previous plot
         seriestype=seriestype, color=color, linewidth=linewidth, legend=false, kwargs...)
