@@ -109,7 +109,7 @@ filename = joinpath(pkgdir, "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 # Basic plot (left), profile-plot in oceanographic convention (right)
 p1=plot(N2(ctd), z_from_pressure.(ctd.data.pressure))
-p2=plot_profile(ctd, "N2")
+p2=plot_profile(ctd, which="N2")
 plot(p1, p2)
 ```
 """

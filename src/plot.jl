@@ -1,7 +1,7 @@
 """
-    plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
-        abbreviate::Bool=false, legend::Bool=false,
-        tickfontsize=8, labelfontsize=8, debug::Int64=0, kwargs...)
+    plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
+        abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
+        labelfontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -21,13 +21,13 @@ The default Julia font sizes on axes are overridden in this function, with
 8-point being used for both the numbers on axes (`tickfontize`) and the names
 of axes (`labelfontsize`).  (The `tickfontsize` matches the Julia default,
 but the `labelfontsize` is smaller than the Julia default. The idea is to
-not waste space with fonts that are larger than what journals require.)
+not waste space by using fonts that are larger than what journals require.)
 
 The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
 example, the default way to display the profile diagram is constructed with a
 blue line connecting points, but using e.g.
 ```julia
-plot_profile(ctd, "SA", seriestype=:scatter, seriescolor=:red)
+plot_profile(ctd, which="SA", seriestype=:scatter, seriescolor=:red)
 ```
 yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
 more on the many plotting controls available in Julia.
@@ -43,15 +43,15 @@ f = joinpath(pkgdir, "data", "D4902911_095.nc")
 d = read_argo(f, 1);
 # Plot profiles of Conservative Temperature, Absolute Salinity, and potential
 # density anomaly with respect to surface pressure.
-p1 = plot_profile(d, "CT")
-p2 = plot_profile(d, "SA")
-p3 = plot_profile(d, "sigma0")
+p1 = plot_profile(d, which="CT")
+p2 = plot_profile(d, which="SA")
+p3 = plot_profile(d, which="sigma0")
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 """
-function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure", abbreviate::Bool=false,
-    legend::Bool=false, tickfontsize=8, labelfontsize=8,
-    debug::Int64=0, kwargs...)
+function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
+    abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
+    labelfontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
     # We can plot proviles of whatever is in the file, plus some others. Of course,
@@ -95,7 +95,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            legend=legend, color=:black, gridstyle=:dash,
+            tickfontsize=tickfontsize, tickdirection=tickdirection,
+            labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
             else
@@ -106,7 +108,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            legend=legend, color=:black, gridstyle=:dash,
+            tickfontsize=tickfontsize, tickdirection=tickdirection,
+            labelfontsize=labelfontsize,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
             else
@@ -117,7 +121,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            legend=legend, color=:black, gridstyle=:dash,
+            tickfontsize=tickfontsize, tickdirection=tickdirection,
+            labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
             else
@@ -129,7 +135,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         rval = plot(spiciness0,
             y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            legend=legend, color=:black, gridstyle=:dash,
+            tickfontsize=tickfontsize, tickdirection=tickdirection,
+            labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "π [kg/m³]"
             else
@@ -141,7 +149,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         x = N2(ctd)
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            legend=legend, color=:black, gridstyle=:dash,
+            tickfontsize=tickfontsize, tickdirection=tickdirection,
+            labelfontsize=labelfontsize,
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
@@ -153,7 +163,9 @@ function plot_profile(ctd::Ctd, which::String="CT"; vertical::String="pressure",
         oad(debug, "    drawing $which")
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash, tickfontsize=tickfontsize, labelfontsize=labelfontsize,
+            legend=legend, color=:black, gridstyle=:dash,
+            tickfontsize=tickfontsize, tickdirection=tickdirection,
+            labelfontsize=labelfontsize,
             xlabel=which,
             yrot=90; kwargs...)
     else
@@ -167,8 +179,8 @@ end
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false,
         framestyle=:box, color=:black, seriestype=:scatter, markersize=2,
-        legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-        debug::Int64=0, kwargs...)
+        legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
+        labelfontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -209,8 +221,8 @@ See also [`plot_profile`](@ref).
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
     framestyle=:box, color=:black, seriestype=:scatter, markersize=2,
-    legend=false, gridstyle=:dash, tickfontsize=8, labelfontsize=8,
-    debug::Int64=0, kwargs...)
+    legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
+    labelfontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     local S = ctd.data.salinity
     local T = ctd.data.temperature
@@ -227,7 +239,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
         yrot=90, framestyle=framestyle,
         seriestype=seriestype, markersize=markersize,
-        gridstyle=gridstyle, color=color, tickfontsize=tickfontsize,
+        gridstyle=gridstyle, color=color,
+        tickfontsize=tickfontsize, tickdirection=tickdirection,
         labelfontsize=labelfontsize; kwargs...)
     # ... then add density contours ...
     xlim = xlims()

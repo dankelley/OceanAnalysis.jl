@@ -4,9 +4,9 @@ filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename)
 # %% Plot some diagrams that are often useful in analysis
-p1 = plot_profile(ctd, "CT")
-p2 = plot_profile(ctd, "SA")
-p3 = plot_profile(ctd, "sigma0")
+p1 = plot_profile(ctd, which="CT")
+p2 = plot_profile(ctd, which="SA")
+p3 = plot_profile(ctd, which="sigma0")
 p4 = plot_TS(ctd)
 title = "Argo observations at " *
         "$(round(ctd.metadata["latitude"],digits=3))N and " *

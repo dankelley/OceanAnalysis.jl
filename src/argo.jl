@@ -26,8 +26,8 @@ end
 
 Read an Argo file and return a [`Ctd`](@ref) object that holds salinity,
 temperature, pressure (and derived columns) but no other columns from the file.
-As of 2025-08-23, this code is still in rapid development; please report
-problems as issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
+This function is in an early stage of development; please report problems as
+    issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
 
 The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
 whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
@@ -154,7 +154,8 @@ end # read_argo()
 
 
 """
-    get_argo_index(destdir=".", age=1.0; server="https://data-argo.ifremer.fr", debug=0)
+    get_argo_index(destdir::String="."; age::Real=1.0,
+        server::String="https://data-argo.ifremer.fr", debug::Int64=0)
 
 Download an Argo index file, unless an existing local copy is newly downloaded.
 
@@ -174,7 +175,7 @@ file.
 
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
-function get_argo_index(destdir::String=".", age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo_index(destdir::String="."; age::Real=1.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo_index START")
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
@@ -189,13 +190,41 @@ end
 
 Download an Argo profile file, if an existing copy is less than `age` days old.
 
-Use [`read_argo`](@ref) to read such a downloaded file.
+# Arguments
+
+- `file::String` path to the file on a server, of the form
+`agency/#/profiles/-#_##.nc`, where `#` is the ID number of the float, `-`
+tells the status of the file (`R` for realtime files, `D` for delayed-mode
+files, etc.) and `##` is an identifier for the cast (usually but not always an
+integer value). This system matches the `file` information stored on argo
+servers, as downloaded by [`get_argo_index`](@ref) and read by
+[`read_argo_index`](@ref).
+
+- `destdir::String` name of the directory into which to save the file.
+
+- `age::Real` file-caching time in days.  If the requested file does not exist
+locally then `age` is ignored and the file is downloaded.  It will also be
+downloaded if there is an existing file but it was last downloaded more than
+`age` days ago
 
 # Returns
+
 - `::String`: Full name of the local file after downloading, or as cached recently.
 
-# """
-function get_argo_file(file::String="", destdir::String="."; age::Real=1.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+# Example
+
+```julia
+# Get most last-named file in the Argo index and plot a temperature profile
+using OceanAnalysis
+index_file = get_argo_index()
+index = read_argo_index(index_file)
+argo_file = get_argo_file(index.file[end])
+argo = read_argo(argo_file)
+plot_profile(argo, which="CT")
+```
+
+"""
+function get_argo_file(file::String="", destdir::String="."; age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo_file START")
     file_original = file
     oad(debug, "    file: ", file, " (original)")
@@ -212,7 +241,7 @@ end
 
 
 """
-    read_argo_index(file::String, trim=true; header=9, debug=0)
+    read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
 
 Read a file downloaded by [`get_argo_index`](@ref).
 
@@ -223,8 +252,15 @@ from the ifremer.fr server, as of 2025-09-08.
 First, the `date` column is converted to a DateTime column named `time`.  If
 `trim` is true, then the original `date` column is removed, along with the the
 columns named `institution`, `date_update`, `ocean`, and `profiler_type`.
+
+# Return
+
+`read_argo_index` returns a DataFrame with column names `"file"`, `"latitude"`,
+`"longitude"`, and `"time"`. Note that the `"file"` column holds information on
+the location on remote servers, as is required for use as the `file` argument
+    of [`get_argo_file`](@ref).
 """
-function read_argo_index(file::String, trim=true; header=9, debug=0)
+function read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
     file = expanduser(file)
     oad(debug, "read_argo_index START")
     if !isfile(file)
