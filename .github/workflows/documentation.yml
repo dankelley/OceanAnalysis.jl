@@ -27,7 +27,8 @@ jobs:
       - name: Install dependencies
         #shell: julia --color=yes --project=docs {0}
         #run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="MbedTLS_jll")); Pkg.add(PackageSpec(name="LibGit2_jll")); Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.add(["MbedTLS_jll", "LibGit2_jll", "MbedTLS_jll"]);Pkg.instantiate()'
+        #run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.add(["MbedTLS_jll", "LibGit2_jll", "MbedTLS_jll"]);Pkg.instantiate()'
+        run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.instantiate()'
         #  Pkg.add(PackageSpec(name="LibGit2_jll"))
         #  Pkg.develop(PackageSpec(path=pwd()))
         #  Pkg.instantiate()
