@@ -24,10 +24,10 @@ end
     read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
         require_valid::Bool=true, debug::Int64=0)
 
-Read an Argo file and return a Ctd object that holds salinity, temperature,
-pressure (and derived columns) but no other columns from the file.  As of
-2025-08-23, this code is still in rapid development; please report problems as
-issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
+Read an Argo file and return a [`Ctd`](@ref) object that holds salinity,
+temperature, pressure (and derived columns) but no other columns from the file.
+As of 2025-08-23, this code is still in rapid development; please report
+problems as issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
 
 The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
 whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
