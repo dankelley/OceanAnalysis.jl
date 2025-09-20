@@ -70,7 +70,7 @@ p3 = plot_TS(ctd)
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
 ```
 
-![Sample plot of CTD data in a .cnv file](examples/ctd_diagram.png)
+![Sample plot of CTD data in a .cnv file](docs/src/ctd_diagram.png)
 
 ### Argo file
 
@@ -86,7 +86,7 @@ p3 = plot_TS(ctd)
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
 ```
 
-![Sample plot of Argo data](examples/argo_profile.png)
+![Sample plot of Argo data](docs/src/argo_profile.png)
 
 ## History of changes
 
