@@ -24,7 +24,7 @@ makedocs(;
 
 # mimic https://github.com/ufechner7/FLORIDyn.jl/blob/main/docs/make.jl
 deploydocs(;
-    repo="github.com/dankelley/OceanAnalysis.jl.git",
+    repo="github.com/dankelley/OceanAnalysis.jl",
     devbranch="main",
     push_preview=true,
 )
