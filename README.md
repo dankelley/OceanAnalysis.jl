@@ -146,8 +146,9 @@ type the following.
 
 ```julia
 ]
-activate . # the "." is crucial
+activate . # the "." is crucial ... I keep forgetting this
 add Downloads
+# do we need to instantiate now?
 ```
 
 ### Running tests
