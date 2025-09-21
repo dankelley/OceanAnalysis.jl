@@ -15,6 +15,7 @@ SST = d.data
 heatmap(longitude, latitude, SST, framestyle=:box, aspect_ratio=:equal,
     xlims=(0, 360), ylims=(-90, 90), dpi=300, size=(800, 400),
     title=f * ": SST", titlefontsize=9)
+# savefig("amsr.png")
 ```
 
 ![AMSR-derived sea-surface temperature](amsr.png)
@@ -34,7 +35,7 @@ p1 = plot_coastline(coastline(:global_coarse))
 p2 = plot_coastline(coastline(:global_fine), xlims=(-68, -59), ylims=(42, 48))
 l = @layout [a{0.6w} b{0.4w}]
 plot(p1, p2, layout=l)
-savefig("maps.png")
+# savefig("maps.png")
 ```
 
 ![maps](maps.png)
@@ -51,9 +52,9 @@ filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename)
 # %% Plot some diagrams that are often useful in analysis
-p1 = plot_profile(ctd, "CT")
-p2 = plot_profile(ctd, "SA")
-p3 = plot_profile(ctd, "sigma0")
+p1 = plot_profile(ctd, which="CT")
+p2 = plot_profile(ctd, which="SA")
+p3 = plot_profile(ctd, which="sigma0")
 p4 = plot_TS(ctd)
 title = "Argo observations at " *
         "$(round(ctd.metadata["latitude"],digits=3))N and " *
@@ -61,7 +62,7 @@ title = "Argo observations at " *
         " on $(Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))"
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-savefig("ctd_diagram.png")
+# savefig("ctd_diagram.png")
 ```
 
 ![CTD diagram](ctd_diagram.png)
@@ -98,7 +99,7 @@ scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
 # %% add a coastline for reference
 plot_coastline!(coastline(:global_fine))
-savefig("argo_map.png")
+# savefig("argo_map.png")
 ```
 
 ![Argo map](argo_map.png)
@@ -109,16 +110,15 @@ The following shows how to display some useful diagnostic plots for a single
 Argo profile.
 
 ```julia
-savefig("argo_profile.png")
 # %% Read a built-in Argo file, and plot some hydrographic diagrams
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
     "D4902911_095.nc")
 a = read_argo(filename)
 # %% Plot an overview of hydrographic properties
-p1 = plot_profile(a, "CT")
-p2 = plot_profile(a, "SA")
-p3 = plot_profile(a, "sigma0")
+p1 = plot_profile(a, which="CT")
+p2 = plot_profile(a, which="SA")
+p3 = plot_profile(a, which="sigma0")
 p4 = plot_TS(a)
 title = "CTD observations at " *
         "$(round(a.metadata["latitude"],digits=3))N and " *
@@ -126,7 +126,7 @@ title = "CTD observations at " *
         " on $(Dates.format(a.metadata["time"], "yyyy-mm-dd"))"
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-savefig("argo_profile.png")
+# savefig("argo_profile.png")
 ```
 
 ![Argo profile](argo_profile.png)
