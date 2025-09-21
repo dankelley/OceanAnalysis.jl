@@ -15,7 +15,7 @@ makedocs(
 deploydocs(
     repo="github.com/dankelley/OceanAnalysis.jl.git",
     devbranch="main",
-    #target="build",
+    target="build",
     #deps=nothing,
     #make=nothing,
     #push_preview=true
