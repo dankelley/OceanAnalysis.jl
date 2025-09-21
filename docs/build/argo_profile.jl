@@ -4,9 +4,9 @@ filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
     "D4902911_095.nc")
 a = read_argo(filename)
 # %% Plot an overview of hydrographic properties
-p1 = plot_profile(a, "CT")
-p2 = plot_profile(a, "SA")
-p3 = plot_profile(a, "sigma0")
+p1 = plot_profile(a, which="CT")
+p2 = plot_profile(a, which="SA")
+p3 = plot_profile(a, which="sigma0")
 p4 = plot_TS(a)
 title = "CTD observations at " *
         "$(round(a.metadata["latitude"],digits=3))N and " *
