@@ -181,5 +181,4 @@ using LiveServer
 serve(; dir="docs/build", launch_browser=true)
 ```
 
-NOTE: I am still trying to learn how to make github actions build up and serve
-the documentation on the github site.
+NOTE: I am trying to learn how to host the documentation on GH.
