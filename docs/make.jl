@@ -12,12 +12,14 @@ makedocs(
         "API" => "api.md"
     ]
 )
-deploydocs(
+
+# mimic https://github.com/ufechner7/FLORIDyn.jl/blob/main/docs/make.jl
+deploydocs(;
     repo="github.com/dankelley/OceanAnalysis.jl.git",
-    #devbranch="main",
-    target="build",
-    branch = "gh-pages"
+    devbranch="main",
+    push_preview=true
+    #target="build",
+    #branch = "gh-pages"
     #deps=nothing,
     #make=nothing,
-    #push_preview=true
 )
