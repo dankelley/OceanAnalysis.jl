@@ -24,12 +24,12 @@ jobs:
         with:
           version: '1'
       - uses: julia-actions/cache@v2
-      - name: Install dependencies
+      #- name: Install dependencies
         #shell: julia --color=yes --project=docs {0}
         #run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="MbedTLS_jll")); Pkg.add(PackageSpec(name="LibGit2_jll")); Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         #run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.add(["MbedTLS_jll", "LibGit2_jll", "MbedTLS_jll"]);Pkg.instantiate()'
         #run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.instantiate()'
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+        #run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
         #  Pkg.add(PackageSpec(name="LibGit2_jll"))
         #  Pkg.develop(PackageSpec(path=pwd()))
         #  Pkg.instantiate()
@@ -41,8 +41,7 @@ jobs:
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
           julia --project=docs/ docs/make.jl        
-        #- name: Build and deploy
-        #  run: julia --color=yes --project=docs docs/make.jl
+      - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
