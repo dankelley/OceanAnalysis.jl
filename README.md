@@ -181,4 +181,4 @@ using LiveServer
 serve(; dir="docs/build", launch_browser=true)
 ```
 
-NOTE: I am trying to learn how to host the documentation on GH.
+NOTE: I don't yet know how to host the documentation on GH.
