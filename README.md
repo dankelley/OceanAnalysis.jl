@@ -146,7 +146,7 @@ type the following.
 
 ```julia
 ]
-activate .
+activate . # the "." is crucial
 add Downloads
 ```
 
