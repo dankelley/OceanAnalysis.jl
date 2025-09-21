@@ -1,21 +1,25 @@
 using Documenter, OceanAnalysis
+DocMeta.setdocmeta!(OceanAnalysis, :DocTestSetup, :(using OceanAnalysis); recursive=true)
+
 makedocs(;
     modules=[OceanAnalysis],
     authors="Dan Kelley",
-    repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
+    #repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
+    repo="https://github.com/dankelley/OceanAnalysis.jl/blob/{commit}{path}#{line}",
     sitename="OceanAnalysis.jl",
     checkdocs=:none,
     format=Documenter.HTML(;
       assets = String["assets/custom.css"],
       canonical = "https::dankelley.github.io/OceanAnalysis.jl/dev/",
-      repolink = "https::dankelley.github.io/OceanAnalysis.jl/dev/",
+      repolink = "https::dankelley.github.io/OceanAnalysis.jl",
+      prettyurls=get(ENV, "CI", "false") == "true",
     ),
     pages=[
         "Home" => "index.md",
         "Manual" => "manual.md",
         "Examples" => "examples.md",
         "API" => "api.md"
-    ]
+    ],
 )
 
 # mimic https://github.com/ufechner7/FLORIDyn.jl/blob/main/docs/make.jl
