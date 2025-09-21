@@ -1,13 +1,18 @@
-#push!(LOAD_PATH, "../src/")
 using Documenter, OceanAnalysis
-makedocs(
+makedocs(;
     modules=[OceanAnalysis],
+    authors="Dan Kelley",
     repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
     sitename="OceanAnalysis.jl",
-    authors="Dan Kelley",
+    checkdocs=:none,
+    format=Documenter.HTML(;
+      assets = String["assets/custom.css"],
+      canonical = "https::dankelley.github.io/OceanAnalysis.jl/dev/",
+      repolink = "https::dankelley.github.io/OceanAnalysis.jl",
+    ),
     pages=[
         "Home" => "index.md",
-        #"Manual" => "manual.md",
+        "Manual" => "manual.md",
         "Examples" => "examples.md",
         "API" => "api.md"
     ]
@@ -17,9 +22,5 @@ makedocs(
 deploydocs(;
     repo="github.com/dankelley/OceanAnalysis.jl.git",
     devbranch="main",
-    push_preview=true
-    #target="build",
-    #branch = "gh-pages"
-    #deps=nothing,
-    #make=nothing,
+    push_preview=true,
 )
