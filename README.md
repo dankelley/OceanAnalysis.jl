@@ -1,10 +1,8 @@
 # OceanAnalysis.jl
 
-FIXME: try these:
-* https::dankelley.github.io/OceanAnalysis.jl/dev/
-* https::dankelley.github.io/OceanAnalysis.jl
-
-FIXME: when/if online documentation is set up, trim things from the present file.
+This README file is just a landing page for GitHub perusal. For full online
+documentation, please visit
+[https::dankelley.github.io/OceanAnalysis.jl/dev/](https::dankelley.github.io/OceanAnalysis.jl/dev).
 
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
 oceanographic data. It is at an early stage of development by someone who is in
@@ -187,4 +185,3 @@ using LiveServer
 serve(; dir="docs/build", launch_browser=true)
 ```
 
-NOTE: I don't yet know how to host the documentation on GH.

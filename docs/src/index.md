@@ -33,54 +33,13 @@ using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 #### Unstable (for developers)
 
 Type the following in a Julia console to use the "develop" branch from the
-development website.  This is updated very frequently, because the author tests
-changes using this method.
+development website.  Be aware that this branch may hold features that are
+poorly documented, that are not destined for inclusion in the "main" branch,
+and that may simply fail.
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
 ```
-
-## Usage Examples
-
-### CTD file
-
-```julia
-# Read a built-in CTD file, and plot some hydrographic diagrams
-using OceanAnalysis, Plots, Measures
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
-    "ctd.cnv")
-ctd = read_ctd_cnv(filename)
-p1 = plot_profile(ctd, "SA")
-p2 = plot_profile(ctd, "CT")
-p3 = plot_TS(ctd)
-plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
-```
-
-![Sample plot of CTD data in a .cnv file](https://github.com/dankelley/OceanAnalysis.jl/blob/main/examples/cnv_example.png)
-
-### Argo file
-
-```julia
-# Read a built-in Argo file, and plot some hydrographic diagrams
-using OceanAnalysis, Plots, Measures
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
-    "D4902911_095.nc")
-ctd = read_argo(filename)
-p1 = plot_profile(ctd, "SA")
-p2 = plot_profile(ctd, "CT")
-p3 = plot_TS(ctd)
-plot(p1, p2, p3, layout=(1, 3), size=(800, 400), margin=0.25cm)
-```
-
-![Sample plot of Argo data](https://github.com/dankelley/OceanAnalysis.jl/blob/main/examples/argo_example.png)
-
-## History of changes
-
-### 0.1.0
-
-This version is in use by the author, and may also be suitable for other users
-who are comfortable with the possibility of changes to function names and
-arguments.
 
 #### Breaking changes
 
