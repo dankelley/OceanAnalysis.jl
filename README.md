@@ -6,8 +6,7 @@ the early stages of exploring Julia as a supplement to R. The intention is to
 add/refine features based on tasks that come up in the author's everyday work.
 
 Please note that this README file is just a landing page for GitHub perusal.
-Full documentation is available online at
-https::dankelley.github.io/OceanAnalysis.jl/dev.
+Full documentation is [available online](https::dankelley.github.io/OceanAnalysis.jl/dev).
 
 ## Installation
 
@@ -57,4 +56,3 @@ develop .
 This sets Julia to look for changes in the files in that directory. Thereafter,
 or at least until another `Pkg.add(url)` command is invoked, issuing `using
 OceanAnalysis` in a Julia session will rebuild from that local source.
-
