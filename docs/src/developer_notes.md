@@ -1,23 +1,10 @@
 # Developer Notes
 
-## Installation methods
+## Building locally
 
-### Setup to use the GH "main" branch version
-
-```julia
-using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
-```
-
-### Setup to use the GH "develop" branch version
-
-```julia
-using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
-```
-
-### Setup to use the local version
-
-In the commandline, navigate to the local source for the library, then enter
-the following .  Then start a Julia console and type the following.
+To avoid too much pressure on github and too much confusion amongst
+users, build and test locally before pushing to github.  To set this up,
+simply navigate to the source directory, enter Julia, and type the following.
 
 ```julia
 ]
@@ -48,7 +35,7 @@ activate .
 test OceanAnalysis
 ```
 
-## Building and viewing documentation on development machine
+## Updating documentation locally
 
 To build, type the following in a shell terminal. (Change the `/Users/kelley`
 part, as appropriate.)
@@ -67,7 +54,7 @@ using LiveServer
 serve(; dir="docs/build", launch_browser=true)
 ```
 
-## Building and viewing documentation on github
+## Updating documentation on github
 
 Pushing to the "main" branch will cause the remote (github) machine to build up
 the documentation and push it to the gh-pages branch.  No action is required on
