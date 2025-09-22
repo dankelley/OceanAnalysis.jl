@@ -7,7 +7,7 @@ add/refine features based on tasks that come up in the author's everyday work.
 
 Please note that this README file is just a landing page for GitHub perusal.
 Full documentation is available online at
-[https::dankelley.github.io/OceanAnalysis.jl/dev/](https::dankelley.github.io/OceanAnalysis.jl/dev).
+https::dankelley.github.io/OceanAnalysis.jl/dev.
 
 ## Installation
 
