@@ -1,4 +1,5 @@
 # Manual
 
-All functions and objects in the package are documented in the API section.
-
+Although details on the types defined by the package and the functions within
+the package pare provided in the API section, readers are advised to start with
+the Examples section.

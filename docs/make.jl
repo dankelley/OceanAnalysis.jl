@@ -24,8 +24,8 @@ makedocs(;
         "Home" => "index.md",
         "Manual" => "manual.md",
         "Examples" => "examples.md",
-        "Changelog" => "changelog.md",
         "API" => "api.md",
+        "Changelog" => "changelog.md",
         "Developer Notes" => "developer_notes.md"
     ],
 )
