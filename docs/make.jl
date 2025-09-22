@@ -23,9 +23,9 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Installation" => "installation.md",
-        "Manual" => "manual.md",
         "Examples" => "examples.md",
-        "API" => "api.md",
+        "Data Types" => "data_types.md",
+        "Function Reference" => "functions.md",
         "Changelog" => "changelog.md",
         "Developer Notes" => "developer_notes.md"
     ],
