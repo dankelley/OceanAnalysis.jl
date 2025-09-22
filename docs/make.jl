@@ -17,7 +17,7 @@ makedocs(;
     format=Documenter.HTML(;
       assets = String["assets/custom.css"],
       canonical = "https::dankelley.github.io/OceanAnalysis.jl/dev/",
-      repolink = "https::dankelley.github.io/OceanAnalysis.jl",
+      repolink = "https://dankelley.github.io/OceanAnalysis.jl",
       prettyurls=get(ENV, "CI", "false") == "true",
     ),
     pages=[

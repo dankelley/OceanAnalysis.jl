@@ -6,9 +6,7 @@ the early stages of exploring Julia as a supplement to R. The intention is to
 add/refine features based on tasks that come up in the author's everyday work.
 
 Please note that this README file is just a landing page for GitHub perusal.
-Full documentation is available online at https://dankelley.github.io/OceanAnalysis.jl/dev.
-
-[test](https://dankelley.github.io/OceanAnalysis.jl/dev/)
+Full documentation is available [online](https://dankelley.github.io/OceanAnalysis.jl/dev/).
 
 ## Installation
 
