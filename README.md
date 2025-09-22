@@ -1,6 +1,6 @@
 # OceanAnalysis.jl
 
-FIXME: For online documentation, possibly see one of the following
+FIXME: try these:
 * https::dankelley.github.io/OceanAnalysis.jl/dev/
 * https::dankelley.github.io/OceanAnalysis.jl
 
