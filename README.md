@@ -1,5 +1,11 @@
 # OceanAnalysis.jl
 
+FIXME: For online documentation, possibly see one of the following
+* https::dankelley.github.io/OceanAnalysis.jl/dev/
+* https::dankelley.github.io/OceanAnalysis.jl
+
+FIXME: when/if online documentation is set up, trim things from the present file.
+
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
 oceanographic data. It is at an early stage of development by someone who is in
 the early stages of exploring Julia as a supplement to R. The intention is to
