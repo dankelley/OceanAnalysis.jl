@@ -7,6 +7,7 @@ using Plots
 using CSV
 using Dierckx
 using Statistics
+using TiffImages
 
 # Types
 export Amsr
