@@ -1,5 +1,5 @@
 """
-    read_ctd_cnv(filename; add_teos=false, debug=0)
+    read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
 
 Read a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 

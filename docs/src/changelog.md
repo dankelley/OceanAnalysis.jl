@@ -19,6 +19,7 @@ camel-case notation.
 
 * Add support for AMSR data.
 * Add support for coastline data.
+* Add support for topography data.
 * Add `pretty()`, for use in contouring (especially for `plot_TS()`).
 * Add `depth_from_pressure()`, `z_from_pressure()`, `pressure_from_depth()`,
   and `pressure_from_z()`.

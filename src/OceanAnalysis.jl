@@ -24,6 +24,7 @@ information. Other derivable items include `"CT"` (Conservative Temperature),
 """
 module OceanAnalysis
 
+include("types.jl")
 include("setup.jl")
 include("argo.jl")
 include("amsr.jl")
@@ -35,6 +36,7 @@ include("geod.jl")
 include("netcdf.jl")
 include("plot.jl")
 include("seawater_properties.jl")
+include("topography.jl")
 include("utilities.jl")
 
 end # module OceanAnalysis

@@ -7,6 +7,7 @@ OceanAnalysis.OA
 OceanAnalysis.Amsr
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
+OceanAnalysis.Topography
 ```
 
 Functions:
@@ -26,6 +27,7 @@ OceanAnalysis.get_argo_file
 OceanAnalysis.get_element
 OceanAnalysis.get_file
 OceanAnalysis.get_nc_value
+OceanAnalysis.get_topography_file
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_coastline
@@ -39,6 +41,7 @@ OceanAnalysis.read_amsr
 OceanAnalysis.read_argo
 OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv
+OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
