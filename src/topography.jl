@@ -1,5 +1,6 @@
 using Downloads, TiffImages, NCDatasets, Plots
 using DataStructures: OrderedDict
+using Printf
 
 """
     get_topography_file(name::Symbol=:global_coarse; debug::Int64=0)
@@ -71,36 +72,34 @@ end
 
 
 """
-    get_topography_file(west::Real, east::Real, south::Real, north::Real;
-        resolution::Real = 4.0, destdir::String = ".",
+    get_topography_file(west::Real, east::Real,
+        south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
         server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)
 
 Download and cache a topography file.
 
 Topographic data are downloaded from a data server that holds the ETOPO1
-dataset (Amante, C. and B.W. Eakins, 2009), and saved as a netCDF file that has
-a name that reveals the data request, if a file of that name is not already
-    present on the local file system.  The return value is the name of the data
-    file, and its typical use is as the filename for a call to
-        [`read_topography`](@ref) in the `oce` package. Given the rules on file
-        naming, subsequent calls to [dod.topo()] with identical parameters will
-        simply return the name of the cached file, assuming the user has not
-        deleted it in the meantime.
+dataset (see Amante and Eakins, 2009, for an introduction to the data and see
+    Pante and Simon-Bouhet, 2013, for code that queries a server in a manner
+        similar to that used here), and saved as a netCDF file that has a name
+        that reveals the data request, if a file of that name is not already
+            present on the local file system.  The return value is the name of
+            the data file, and its typical use is as the filename for a call to
+                [`read_topography`](@ref). Subsequent calls to
+                `get_topography_file` with identical parameters will return the
+                name of an already-downloaded file, without downloading a new
+                copy.
 
-The specified longitude and latitude limits are rounded to 2 digits after
-the decimal place (corresponding to a footprint of approximately 1km), and
-these are used in the server request.
-
-It should be noted that the NOAA server has changed over time, so this function
-may stop working properly at any moment.
+The specified longitude and latitude limits are rounded to 2 digits after the
+decimal place (corresponding to an equatorial footprint of approximately 1 km),
+and these are used in the server request.
 
 The region of interest is defined by a rectangle bounded by the values of
-`west`, `east`, `south` and `north`. Longitude is converted to the 
--180 to 180 degree notation.
-
-The resolution is set by the value of `resolution`, which is minutes.
-The default, 4.0 minutes, corresponds to 4 nautical miles (approx. 7.4km)
-in the north-south direction, and less in the east-west direction.
+`west`, `east`, `south` and `north`. The resolution is set by the value of
+`resolution`, which is minutes. The default, 4.0 minutes, corresponds to 4
+nautical miles (approx. 7.4km) in the north-south direction, and less in the
+east-west direction. The default values of these 5 arguments yield
+a view of the Bay of Fundy region.
 
 The value of `server` ought not to be modified by users, except perhaps
 to experiment if the NOAA server changes.  (It is unlikely that merely
@@ -112,9 +111,16 @@ to be small on these servers.)
 - Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model:
 Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS
 NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M
+
+- Pante, Eric, and Benoit Simon-Bouhet. “Marmap: A Package for Importing,
+    Plotting and Analyzing Bathymetric and Topographic Data in R.” PLoS ONE 8,
+    no. 9 (2013): e73051. doi:10.1371/journal.pone.0073051.
+    (The package referenced was updated on 2025-Aug-2; for
+        the query generation, see the `fetch`
+        function of that packages sourcecode `R/getNOAA.bathy`.
 """
-function get_topography_file(west::Real, east::Real, south::Real, north::Real;
-    resolution::Real = 4.0, destdir::String = ".",
+function get_topography_file(west::Real, east::Real,
+    south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
     server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)
     oad(debug, "get_topography_file(west=$west,"*
         ", east=$east"*
@@ -139,20 +145,20 @@ function get_topography_file(west::Real, east::Real, south::Real, north::Real;
     end
     oad(debug, "    query database: '$database'")
     # The +-0.005 is to get rounding down for west and south, and rounding up for east and north.
-    east = round(east + 0.005, digits=2)
-    west = round(west - 0.005, digits=2)
-    south = round(south - 0.005, digits=2)
-    north = round(north + 0.005, digits=2)
+    east = round(east + 0.0005, digits=3)
+    west = round(west - 0.0005, digits=3)
+    south = round(south - 0.0005, digits=3)
+    north = round(north + 0.0005, digits=3)
     if west > 180.0
         west -= 360.0
     end
     if east > 180.0
         east -= 360.0
     end
-    wName = string(abs(west)) * (west <= 0 ? "W" : "E")
-    eName = string(abs(east)) * (east <= 0 ? "W" : "E")
-    sName = string(abs(south)) * (south <= 0 ? "S" : "N")
-    nName = string(abs(north)) * (north <= 0 ? "S" : "N")
+    wName = @sprintf("%.2f", abs(west)) * (west < 0 ? "W" : "E")
+    eName = @sprintf("%.2f", abs(east)) * (east < 0 ? "W" : "E")
+    sName = @sprintf("%.2f", abs(south)) * (south < 0 ? "S" : "N")
+    nName = @sprintf("%.2f", abs(north)) * (north < 0 ? "S" : "N")
     oad(debug, "    query wName: $wName, eName: $eName, sName: $sName, nName: $nName")
     resolutionName = string(resolution) * "min"
     oad(debug, "    query resolutionName: $resolutionName")
@@ -173,7 +179,7 @@ function get_topography_file(west::Real, east::Real, south::Real, north::Real;
         "&format=tiff"*
         "&pixelType=F32"* # was S32
         "&interpolation=+RSP_NearestNeighbor"*
-        "&compression=LZ77"*
+        #"&compression=LZ77"*
         "renderingRule={%22rasterFunction%22:%22none%22}&mosaicRule="*
         "{%22where%22:%22Name=%"* database* "%27%22}"*
         "&f=image"

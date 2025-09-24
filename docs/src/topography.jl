@@ -1,6 +1,6 @@
 # Bay of Fundy at approximately 1.6km resolution
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-68, -63, 43, 46, resolution=1)
+topo_file = get_topography_file(-68, -63, 43, 46, resolution=1, debug=1)
 topo = read_topography(topo_file);
 water_depth = -topo.data; # depth is the negative of height
 water_depth[water_depth .< 0.0] .= NaN; # trim land
