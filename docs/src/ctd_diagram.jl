@@ -8,7 +8,7 @@ p1 = plot_profile(ctd, which="CT")
 p2 = plot_profile(ctd, which="SA")
 p3 = plot_profile(ctd, which="sigma0")
 p4 = plot_TS(ctd)
-title = "Argo observations at " *
+title = "CTD observations at " *
         "$(round(ctd.metadata["latitude"],digits=3))N and " *
         "$(round(ctd.metadata["longitude"],digits=3))E" *
         " on $(Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))"
