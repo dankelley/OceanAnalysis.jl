@@ -24,6 +24,12 @@ jobs:
         with:
           version: '1'
       - uses: julia-actions/cache@v2
+      # START (workaround for failing GH action)
+      - name: Remove General registry (if exists)
+        run: julia -e 'using Pkg; try Pkg.Registry.rm("General") catch end'
+      - name: Add General registry
+        run: julia -e 'using Pkg; Pkg.Registry.add("General")'
+      # END
       - uses: julia-actions/julia-buildpkg@v1
       - name: Build documentation
         run: |
