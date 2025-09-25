@@ -179,8 +179,8 @@ function get_topography_file(west::Real, east::Real,
         "&format=tiff"*
         "&pixelType=F32"* # was S32
         "&interpolation=+RSP_NearestNeighbor"*
-        #"&compression=LZ77"*
-        "renderingRule={%22rasterFunction%22:%22none%22}&mosaicRule="*
+        "&compression=LZ77"*
+        "&renderingRule={%22rasterFunction%22:%22none%22}&mosaicRule="*
         "{%22where%22:%22Name=%"* database* "%27%22}"*
         "&f=image"
         oad(debug, "    about to download $url")
