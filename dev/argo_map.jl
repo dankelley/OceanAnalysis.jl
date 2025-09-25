@@ -19,6 +19,7 @@ scatter(index_recent.longitude, index_recent.latitude,
     ylims=SI_lat .+ (-10, 10),
     aspect_ratio=1.0 / cos(SI_lat * pi / 180.0),
     markersize=1, markerstrokecolor=:blue, color=:blue,
+    tickdirection=:out,
     framestyle=:box, dpi=200, legend=false)
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)

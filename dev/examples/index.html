@@ -7,8 +7,13 @@ latitude = d.metadata[&quot;latitude&quot;];
 SST = d.data
 heatmap(longitude, latitude, SST, framestyle=:box, aspect_ratio=:equal,
     xlims=(0, 360), ylims=(-90, 90), dpi=300, size=(800, 400),
-    title=f * &quot;: SST&quot;, titlefontsize=9)
-# savefig(&quot;amsr.png&quot;)</code></pre><p><img src="../amsr.png" alt="AMSR-derived sea-surface temperature"/></p><h2 id="Coastlines"><a class="docs-heading-anchor" href="#Coastlines">Coastlines</a><a id="Coastlines-1"></a><a class="docs-heading-anchor-permalink" href="#Coastlines" title="Permalink"></a></h2><p>The following shows how to plot a whole-earth view, for which the coarse-scale built-in coastline dataset is suitable, along with a Nova Scotia view, for which the fine-scale dataset is preferable.</p><pre><code class="language-julia hljs"># Plot world coastline earth with the coarse dataset and Nova Scotia with the fine dataset
+    tickdirection=:out, title=f * &quot;: SST&quot;, titlefontsize=9)
+cl = coastline(:global_fine)
+plot!(cl.data.longitude, cl.data.latitude,
+    seriestype=:shape, color=:lightgray, legend=false)
+plot!(cl.data.longitude .+ 360, cl.data.latitude,
+    seriestype=:shape, color=:lightgray, legend=false)
+#savefig(&quot;amsr.png&quot;)</code></pre><p><img src="../amsr.png" alt="AMSR-derived sea-surface temperature"/></p><h2 id="Coastlines"><a class="docs-heading-anchor" href="#Coastlines">Coastlines</a><a id="Coastlines-1"></a><a class="docs-heading-anchor-permalink" href="#Coastlines" title="Permalink"></a></h2><p>The following shows how to plot a whole-earth view, for which the coarse-scale built-in coastline dataset is suitable, along with a Nova Scotia view, for which the fine-scale dataset is preferable.</p><pre><code class="language-julia hljs"># Plot world coastline earth with the coarse dataset and Nova Scotia with the fine dataset
 using OceanAnalysis, Plots
 # Left: world view
 p1 = plot_coastline(coastline(:global_coarse))
@@ -16,9 +21,9 @@ p1 = plot_coastline(coastline(:global_coarse))
 p2 = plot_coastline(coastline(:global_fine), xlims=(-68, -59), ylims=(42, 48))
 l = @layout [a{0.6w} b{0.4w}]
 plot(p1, p2, layout=l)
-# savefig(&quot;maps.png&quot;)</code></pre><p><img src="../maps.png" alt="maps"/></p><h2 id="Topography"><a class="docs-heading-anchor" href="#Topography">Topography</a><a id="Topography-1"></a><a class="docs-heading-anchor-permalink" href="#Topography" title="Permalink"></a></h2><p>The following downloads topographic data in the region of the Bay of Fundy, and plots an image of water depth.</p><pre><code class="language-julia hljs"># Bay of Fundy at approximately 1.6km resolution
+#savefig(&quot;maps.png&quot;)</code></pre><p><img src="../maps.png" alt="maps"/></p><h2 id="Topography"><a class="docs-heading-anchor" href="#Topography">Topography</a><a id="Topography-1"></a><a class="docs-heading-anchor-permalink" href="#Topography" title="Permalink"></a></h2><p>The following downloads topographic data in the region of the Bay of Fundy, and plots an image of water depth.</p><pre><code class="language-julia hljs"># Bay of Fundy at approximately 1.6km resolution
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-68, -63, 43, 46, resolution=1)
+topo_file = get_topography_file(-68, -63, 43, 46, resolution=1, debug=1)
 topo = read_topography(topo_file);
 water_depth = -topo.data; # depth is the negative of height
 water_depth[water_depth .&lt; 0.0] .= NaN; # trim land
@@ -27,7 +32,7 @@ heatmap(topo.metadata[&quot;longitude&quot;], topo.metadata[&quot;latitude&quot;
         framestyle=:box, dpi=300,
         xlims=extrema(topo.metadata[&quot;longitude&quot;]),
         ylims=extrema(topo.metadata[&quot;latitude&quot;]),
-        color=:deep, clim=(0, 500))
+        tickdirection=:out, color=:deep, clim=(0, 400))
 cl = coastline();
 plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
 #savefig(&quot;topography.png&quot;)</code></pre><p><img src="../topography.png" alt="Topography diagram"/></p><h2 id="CTD-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#CTD-profile-diagnostic-plot">CTD profile diagnostic plot</a><a id="CTD-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#CTD-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.</p><pre><code class="language-julia hljs"># %% Read a built-in CTD file
@@ -46,7 +51,7 @@ title = &quot;Argo observations at &quot; *
         &quot; on $(Dates.format(ctd.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))&quot;
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-# savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Argo-subset-and-map"><a class="docs-heading-anchor" href="#Argo-subset-and-map">Argo subset and map</a><a id="Argo-subset-and-map-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-subset-and-map" title="Permalink"></a></h2><p>The following shows how to map Argo profile locations made within 500 km of Sable Island, within the past 365 days.</p><pre><code class="language-julia hljs"># %% Get the index
+#savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Argo-subset-and-map"><a class="docs-heading-anchor" href="#Argo-subset-and-map">Argo subset and map</a><a id="Argo-subset-and-map-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-subset-and-map" title="Permalink"></a></h2><p>The following shows how to map Argo profile locations made within 500 km of Sable Island, within the past 365 days.</p><pre><code class="language-julia hljs"># %% Get the index
 using OceanAnalysis, CSV, Dates, DataFrames, Plots
 index_file = get_argo_index(&quot;~/data/argo&quot;)
 index = read_argo_index(index_file) # 3.2e6 profiles
@@ -67,12 +72,13 @@ scatter(index_recent.longitude, index_recent.latitude,
     ylims=SI_lat .+ (-10, 10),
     aspect_ratio=1.0 / cos(SI_lat * pi / 180.0),
     markersize=1, markerstrokecolor=:blue, color=:blue,
+    tickdirection=:out,
     framestyle=:box, dpi=200, legend=false)
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
 # %% add a coastline for reference
 plot_coastline!(coastline(:global_fine))
-# savefig(&quot;argo_map.png&quot;)</code></pre><p><img src="../argo_map.png" alt="Argo map"/></p><h2 id="Argo-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#Argo-profile-diagnostic-plot">Argo profile diagnostic plot</a><a id="Argo-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to display some useful diagnostic plots for a single Argo profile.</p><pre><code class="language-julia hljs"># %% Read a built-in Argo file, and plot some hydrographic diagrams
+#savefig(&quot;argo_map.png&quot;)</code></pre><p><img src="../argo_map.png" alt="Argo map"/></p><h2 id="Argo-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#Argo-profile-diagnostic-plot">Argo profile diagnostic plot</a><a id="Argo-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to display some useful diagnostic plots for a single Argo profile.</p><pre><code class="language-julia hljs"># %% Read a built-in Argo file, and plot some hydrographic diagrams
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), &quot;data&quot;,
     &quot;D4902911_095.nc&quot;)
@@ -88,4 +94,4 @@ title = &quot;CTD observations at &quot; *
         &quot; on $(Dates.format(a.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))&quot;
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-# savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 16:51">Thursday 25 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 17:31">Thursday 25 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
