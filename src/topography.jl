@@ -112,12 +112,13 @@ to be small on these servers.)
 Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS
 NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M
 
-- Pante, Eric, and Benoit Simon-Bouhet. “Marmap: A Package for Importing,
-    Plotting and Analyzing Bathymetric and Topographic Data in R.” PLoS ONE 8,
-    no. 9 (2013): e73051. doi:10.1371/journal.pone.0073051.
-    (The package referenced was updated on 2025-Aug-2; for
-        the query generation, see the `fetch`
-        function of that packages sourcecode `R/getNOAA.bathy`.
+- Pante, Eric, and Benoit Simon-Bouhet. "Marmap: A Package for Importing,
+Plotting and Analyzing Bathymetric and Topographic Data in R." PLoS ONE 8,
+no. 9 (2013): e73051. doi:10.1371/journal.pone.0073051. (The package
+referenced was updated on 2025-Aug-2; for the query generation, see the
+`fetch` function of that package's source code in `R/getNOAA.bathy`.
+
+- API https://gis.ngdc.noaa.gov/arcgis/help/en/rest/services-reference/enterprise/export-image/
 """
 function get_topography_file(west::Real, east::Real,
     south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
