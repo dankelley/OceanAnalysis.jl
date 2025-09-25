@@ -9,7 +9,7 @@ heatmap(topo.metadata["longitude"], topo.metadata["latitude"], water_depth,
         framestyle=:box, dpi=300,
         xlims=extrema(topo.metadata["longitude"]),
         ylims=extrema(topo.metadata["latitude"]),
-        color=:deep, clim=(0, 400))
+        tickdirection=:out, color=:deep, clim=(0, 400))
 cl = coastline();
 plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
 savefig("topography.png")

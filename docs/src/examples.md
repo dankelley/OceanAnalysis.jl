@@ -14,8 +14,13 @@ latitude = d.metadata["latitude"];
 SST = d.data
 heatmap(longitude, latitude, SST, framestyle=:box, aspect_ratio=:equal,
     xlims=(0, 360), ylims=(-90, 90), dpi=300, size=(800, 400),
-    title=f * ": SST", titlefontsize=9)
-# savefig("amsr.png")
+    tickdirection=:out, title=f * ": SST", titlefontsize=9)
+cl = coastline(:global_fine)
+plot!(cl.data.longitude, cl.data.latitude,
+    seriestype=:shape, color=:lightgray, legend=false)
+plot!(cl.data.longitude .+ 360, cl.data.latitude,
+    seriestype=:shape, color=:lightgray, legend=false)
+#savefig("amsr.png")
 ```
 
 ![AMSR-derived sea-surface temperature](amsr.png)
@@ -35,7 +40,7 @@ p1 = plot_coastline(coastline(:global_coarse))
 p2 = plot_coastline(coastline(:global_fine), xlims=(-68, -59), ylims=(42, 48))
 l = @layout [a{0.6w} b{0.4w}]
 plot(p1, p2, layout=l)
-# savefig("maps.png")
+#savefig("maps.png")
 ```
 
 ![maps](maps.png)
@@ -48,7 +53,7 @@ and plots an image of water depth.
 ```julia
 # Bay of Fundy at approximately 1.6km resolution
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-68, -63, 43, 46, resolution=1)
+topo_file = get_topography_file(-68, -63, 43, 46, resolution=1, debug=1)
 topo = read_topography(topo_file);
 water_depth = -topo.data; # depth is the negative of height
 water_depth[water_depth .< 0.0] .= NaN; # trim land
@@ -57,7 +62,7 @@ heatmap(topo.metadata["longitude"], topo.metadata["latitude"], water_depth,
         framestyle=:box, dpi=300,
         xlims=extrema(topo.metadata["longitude"]),
         ylims=extrema(topo.metadata["latitude"]),
-        color=:deep, clim=(0, 500))
+        tickdirection=:out, color=:deep, clim=(0, 400))
 cl = coastline();
 plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
 #savefig("topography.png")
@@ -87,7 +92,7 @@ title = "Argo observations at " *
         " on $(Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))"
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-# savefig("ctd_diagram.png")
+#savefig("ctd_diagram.png")
 ```
 
 ![CTD diagram](ctd_diagram.png)
@@ -119,12 +124,13 @@ scatter(index_recent.longitude, index_recent.latitude,
     ylims=SI_lat .+ (-10, 10),
     aspect_ratio=1.0 / cos(SI_lat * pi / 180.0),
     markersize=1, markerstrokecolor=:blue, color=:blue,
+    tickdirection=:out,
     framestyle=:box, dpi=200, legend=false)
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
 # %% add a coastline for reference
 plot_coastline!(coastline(:global_fine))
-# savefig("argo_map.png")
+#savefig("argo_map.png")
 ```
 
 ![Argo map](argo_map.png)
@@ -151,7 +157,7 @@ title = "CTD observations at " *
         " on $(Dates.format(a.metadata["time"], "yyyy-mm-dd"))"
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-# savefig("argo_profile.png")
+#savefig("argo_profile.png")
 ```
 
 ![Argo profile](argo_profile.png)

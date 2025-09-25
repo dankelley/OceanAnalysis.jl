@@ -88,7 +88,8 @@ end
 """
     plot_coastline(coastline::Coastline;
         xlims=(-180., 180.), ylims=(-90., 90.),
-        seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
+        seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out,
+        kwargs...)
 
 Plot a coastline with longitude and latitude axes (i.e. without a map projection).
 
@@ -109,12 +110,13 @@ documentation provided by the `Plots` package.
 """
 function plot_coastline(coastline::Coastline;
     xlims=(-180., 180.), ylims=(-90., 90.),
-    seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
+    seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out,
+    kwargs...)
     aspect_ratio = 1.0 / cos(0.5 * (ylims[2] + ylims[1]) * pi / 180.0)
     plot(coastline.data.longitude, coastline.data.latitude;
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         seriestype=seriestype, color=color, linewidth=linewidth,
-        legend=false, framestyle=:box, kwargs...)
+        legend=false, framestyle=:box, tickdirection=tickdirection, kwargs...)
 end
 
 """
@@ -138,9 +140,10 @@ These values are passed to the base-level `plot` function; for details, see the
 documentation provided by the `Plots` package.
 """
 function plot_coastline!(coastline::Coastline;
-    seriestype=:shape, color=:bisque3, linewidth=0.5, kwargs...)
+    seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out, kwargs...)
     plot!(coastline.data.longitude, coastline.data.latitude,
         xlims=xlims(), ylims=ylims(), # inherit from previous plot
-        seriestype=seriestype, color=color, linewidth=linewidth, legend=false, kwargs...)
+        seriestype=seriestype, color=color, linewidth=linewidth, legend=false,
+        tickdirection=tickdirection, kwargs...)
 end
 
