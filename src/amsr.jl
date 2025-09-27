@@ -74,8 +74,7 @@ by `get_amsr_file`.
 
 # Arguments
 
-- `date` a Date object specifying the requested measurement time. This defaults
-to 4 days prior to the current date.
+- `date` a Date object specifying the requested measurement time. This defaults to 4 days prior to the current date.
 
 # Keywords
 
