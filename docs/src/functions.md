@@ -22,6 +22,7 @@ OceanAnalysis.depth_from_pressure
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!
 OceanAnalysis.geod_distance
+OceanAnalysis.get_amsr_file
 OceanAnalysis.get_argo_index
 OceanAnalysis.get_argo_file
 OceanAnalysis.get_element
