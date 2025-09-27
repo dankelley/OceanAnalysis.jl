@@ -27,6 +27,7 @@ export depth_from_pressure
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
 export geod_distance
+export get_amsr_file
 export get_argo_index
 export get_argo_file
 export get_element
