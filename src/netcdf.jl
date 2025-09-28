@@ -10,8 +10,7 @@ numerical values, not strings or other types.
 
 - `name` the name of an object contained in `nc`.
 
-- `require_value` boolean value indicating whether to report an error
-if the desired element consists entirely of bad values.
+- `require_value` boolean value indicating whether to report an error if the desired element consists entirely of bad values.
 """
 function get_nc_value(nc, name, require_valid=true)
     if !(name in keys(nc))

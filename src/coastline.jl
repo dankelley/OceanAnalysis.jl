@@ -98,15 +98,11 @@ The `aspect_ratio` of the plot is set as the reciprocal of the mean of the
 
 # Arguments
 
-- `coastline` the coastline, as constructed using [`coastline`](@ref) or (less
-commonly) [`Coastline`](@ref).
+- `coastline` the coastline, as constructed using [`coastline`](@ref) or (less commonly) [`Coastline`](@ref).
 
-- `xlims` and `ylims` control the ranges of the longitude and latitude axes,
-respectively.
+- `xlims` and `ylims` control the ranges of the longitude and latitude axes, respectively.
 
-- `seriestype`, `color` and `linewidth` control the rendering of land regions.
-These values are passed to the base-level `plot` function; for details, see the
-documentation provided by the `Plots` package.
+- `seriestype`, `color` and `linewidth` control the rendering of land regions. These values are passed to the base-level `plot` function; for details, see the documentation provided by the `Plots` package.
 """
 function plot_coastline(coastline::Coastline;
     xlims=(-180., 180.), ylims=(-90., 90.),
@@ -132,12 +128,11 @@ in the `kwargs...` grouping.
 
 # Arguments
 
-- `coastline` the coastline, as constructed using [`coastline`](@ref) or, by
-more advanced users, using [`Coastline`](@ref).
+- `coastline` the coastline, as constructed using [`coastline`](@ref) or, by more advanced users, using [`Coastline`](@ref).
 
-- `seriestype`, `color` and `linewidth` control the rendering of land regions.
-These values are passed to the base-level `plot` function; for details, see the
-documentation provided by the `Plots` package.
+# Keywords
+
+- `seriestype`, `color` and `linewidth` control the rendering of land regions. These values are passed to the base-level `plot` function; for details, see the documentation provided by the `Plots` package.
 """
 function plot_coastline!(coastline::Coastline;
     seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out, kwargs...)

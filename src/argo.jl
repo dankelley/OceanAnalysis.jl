@@ -192,24 +192,15 @@ Download an Argo profile file, if an existing copy is less than `age` days old.
 
 # Arguments
 
-- `file::String` path to the file on a server, of the form
-`agency/#/profiles/-#_##.nc`, where `#` is the ID number of the float, `-`
-tells the status of the file (`R` for realtime files, `D` for delayed-mode
-files, etc.) and `##` is an identifier for the cast (usually but not always an
-integer value). This system matches the `file` information stored on argo
-servers, as downloaded by [`get_argo_index`](@ref) and read by
-[`read_argo_index`](@ref).
+- `file`: path to the file on a server, of the form `agency/#/profiles/-#_##.nc`, where `#` is the ID number of the float, `-` tells the status of the file (`R` for realtime files, `D` for delayed-mode files, etc.) and `##` is an identifier for the cast (usually but not always an integer value). This system matches the `file` information stored on argo servers, as downloaded by [`get_argo_index`](@ref) and read by [`read_argo_index`](@ref).
 
-- `destdir::String` name of the directory into which to save the file.
+- `destdir`: name of the directory into which to save the file.
 
-- `age::Real` file-caching time in days.  If the requested file does not exist
-locally then `age` is ignored and the file is downloaded.  It will also be
-downloaded if there is an existing file but it was last downloaded more than
-`age` days ago
+- `age`: file-caching time in days.  If the requested file does not exist locally then `age` is ignored and the file is downloaded.  It will also be downloaded if there is an existing file but it was last downloaded more than `age` days ago
 
 # Returns
 
-- `::String`: Full name of the local file after downloading, or as cached recently.
+- `get_argo_file` returns the full path name of the local file after downloading, or as cached recently.
 
 # Example
 

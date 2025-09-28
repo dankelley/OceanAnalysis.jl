@@ -108,28 +108,28 @@ to be small on these servers.)
 
 # References
 
-- Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model:
+1. Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model:
 Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS
 NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M
 
-- Pante, Eric, and Benoit Simon-Bouhet. "Marmap: A Package for Importing,
+2. Pante, Eric, and Benoit Simon-Bouhet. "Marmap: A Package for Importing,
 Plotting and Analyzing Bathymetric and Topographic Data in R." PLoS ONE 8,
 no. 9 (2013): e73051. doi:10.1371/journal.pone.0073051. (The package
 referenced was updated on 2025-Aug-2; for the query generation, see the
 `fetch` function of that package's source code in `R/getNOAA.bathy`.
 
-- API https://gis.ngdc.noaa.gov/arcgis/help/en/rest/services-reference/enterprise/export-image/
+3. API https://gis.ngdc.noaa.gov/arcgis/help/en/rest/services-reference/enterprise/export-image/
 """
 function get_topography_file(west::Real, east::Real,
-    south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
-    server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)
-    oad(debug, "get_topography_file(west=$west,"*
-        ", east=$east"*
-        ", south=$south"*
-        ", north=$north"*
-        ", resolution=$resolution"*
-        ", destdir='$destdir'"*
-        ", server='$server') ... START"
+    south::Real, north::Real; resolution::Real=4.0, destdir::String=".",
+    server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)
+    oad(debug, "get_topography_file(west=$west," *
+               ", east=$east" *
+               ", south=$south" *
+               ", north=$north" *
+               ", resolution=$resolution" *
+               ", destdir='$destdir'" *
+               ", server='$server') ... START"
     )
     if resolution < 0.5
         resolution = 0.25
@@ -163,27 +163,27 @@ function get_topography_file(west::Real, east::Real,
     oad(debug, "    query wName: $wName, eName: $eName, sName: $sName, nName: $nName")
     resolutionName = string(resolution) * "min"
     oad(debug, "    query resolutionName: $resolutionName")
-    destfile = expanduser(joinpath(destdir, "topo_" * wName * "_" * eName * "_" * sName * "_" * nName* "_"*resolutionName *".nc"))
+    destfile = expanduser(joinpath(destdir, "topo_" * wName * "_" * eName * "_" * sName * "_" * nName * "_" * resolutionName * ".nc"))
     if isfile(destfile)
         oad(debug, "    destfile $destfile already exists, so not downloading new data")
         oad(debug, "read_topography_file() END")
         return destfile
     else
-        nlon = Int64(ceil(60.0*(east - west) / resolution))
-        nlat = Int64(ceil(60.0*(north - south) / resolution))
-        url = server * "/arcgis/rest/services/"*
-        "DEM_mosaics/DEM_all/ImageServer/exportImage"*
-        "?bbox="* string(west)* ","* string(south) * ","* string(east) * ","* string(north)*
-        "&bboxSR=4326"*
-        "&size="* string(nlon)* ","* string(nlat)*
-        "&imageSR=4326"*
-        "&format=tiff"*
-        "&pixelType=F32"* # was S32
-        "&interpolation=+RSP_NearestNeighbor"*
-        "&compression=LZ77"*
-        "&renderingRule={%22rasterFunction%22:%22none%22}&mosaicRule="*
-        "{%22where%22:%22Name=%"* database* "%27%22}"*
-        "&f=image"
+        nlon = Int64(ceil(60.0 * (east - west) / resolution))
+        nlat = Int64(ceil(60.0 * (north - south) / resolution))
+        url = server * "/arcgis/rest/services/" *
+              "DEM_mosaics/DEM_all/ImageServer/exportImage" *
+              "?bbox=" * string(west) * "," * string(south) * "," * string(east) * "," * string(north) *
+              "&bboxSR=4326" *
+              "&size=" * string(nlon) * "," * string(nlat) *
+              "&imageSR=4326" *
+              "&format=tiff" *
+              "&pixelType=F32" * # was S32
+              "&interpolation=+RSP_NearestNeighbor" *
+              "&compression=LZ77" *
+              "&renderingRule={%22rasterFunction%22:%22none%22}&mosaicRule=" *
+              "{%22where%22:%22Name=%" * database * "%27%22}" *
+              "&f=image"
         oad(debug, "    about to download $url")
         (tiff_file, io) = mktemp()
         Downloads.download(url, tiff_file)
@@ -205,13 +205,13 @@ function get_topography_file(west::Real, east::Real,
         oad(debug, "    created NetCDF file $destfile")
         defDim(nc, "lon", nlon)
         lon_var = defVar(nc, "lon", lon, ("lon",),
-                               attrib = OrderedDict("units" => "degrees_east",
-                                                    "long_name" => "longitude"))
+            attrib=OrderedDict("units" => "degrees_east",
+                "long_name" => "longitude"))
         oad(debug, "    stored lon in NetCDF file")
         defDim(nc, "lat", nlat)
         lat_var = defVar(nc, "lat", lat, ("lat",),
-                               attrib = OrderedDict("units" => "degrees_north",
-                                                    "lat_name" => "latitude"))
+            attrib=OrderedDict("units" => "degrees_north",
+                "lat_name" => "latitude"))
         oad(debug, "    stored lat in NetCDF file")
         z_var = defVar(nc, "z", Float64, ("lon", "lat"))
         z_var.attrib["units"] = "degrees"
