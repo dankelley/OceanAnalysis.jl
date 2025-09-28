@@ -234,10 +234,10 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debu
     oad(debug, "    calling as_ctd() to create a Ctd object, as the skeleton of the return value")
     if isnan(latitude) || isnan(longitude)
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
-            NaN, NaN, time=time, add_teos=add_teos, debug=increment_debug(debug))
+            time=time, add_teos=add_teos, debug=increment_debug(debug))
     else
-        rval = as_ctd(data.salinity, data.temperature, data.pressure,
-            longitude, latitude, time=time, add_teos=add_teos, debug=increment_debug(debug))
+        rval = as_ctd(data.salinity, data.temperature, data.pressure, longitude=longitude, latitude=latitude,
+            time=time, add_teos=add_teos, debug=increment_debug(debug))
     end
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)

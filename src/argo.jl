@@ -125,7 +125,7 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
         # them directly.
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
-        rval = as_ctd(salinity, temperature, pressure, longitude, latitude,
+        rval = as_ctd(salinity, temperature, pressure, longitude=longitude, latitude=latitude,
             time=time, add_teos=add_teos, debug=increment_debug(debug))
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         # Do some things directly, because get_nc_value() is designed for numeric items

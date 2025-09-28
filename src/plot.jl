@@ -178,7 +178,7 @@ end
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false,
-        framestyle=:box, color=:black, seriestype=:scatter, markersize=2,
+        framestyle=:box, color=:black, seriestype=:scatter, markersize=2.0, linewidth=1.0,
         legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
         labelfontsize=8, debug::Int64=0, kwargs...)
 
@@ -220,7 +220,7 @@ See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
-    framestyle=:box, color=:black, seriestype=:scatter, markersize=2,
+    framestyle=:box, color=:black, seriestype=:scatter, markersize=2.0, linewidth=1.0,
     legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
     labelfontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
@@ -265,8 +265,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     end
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        contour!(SAc, CTc, sigma0c, color=:gray50, linewidth=1.0, levels=levels,
-            cbar=false, clabels=true)
+        contour!(SAc, CTc, sigma0c, color=:gray50, levels=levels,
+            cbar=false, clabels=true, linewidth=linewidth)
     else
         oad(debug, "        not drawing sigma0 contours")
     end
