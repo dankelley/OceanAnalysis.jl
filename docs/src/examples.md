@@ -1,49 +1,34 @@
 # Examples
 
-## AMSR satellites
+## Satellite view of SST
 
-These store several data streams, including sea-surface temperature, which may
-be plotted as follows.
+The AMSR satellite provides several data streams, including sea-surface
+temperature, which may be plotted as follows.
+
 
 ```julia
+# North Atlantic Sea Surface Temperature
 using OceanAnalysis, Plots
 f = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc"
 d = read_amsr(f, "SST");
 longitude = d.metadata["longitude"];
 latitude = d.metadata["latitude"];
-SST = d.data
-heatmap(longitude, latitude, SST, framestyle=:box, aspect_ratio=:equal,
-    xlims=(0, 360), ylims=(-90, 90), dpi=300, size=(800, 400),
-    tickdirection=:out, title=f * ": SST", titlefontsize=9)
-cl = coastline(:global_fine)
-plot!(cl.data.longitude, cl.data.latitude,
-    seriestype=:shape, color=:lightgray, legend=false)
+SST = d.data;
+heatmap(longitude, latitude, SST, framestyle=:box,
+    xlims=(290.0, 360.0), ylims=(20.0, 60.0),
+    aspect_ratio=1.0 / cos(pi * 40.0 / 180.0),
+    color=:turbo, size=(800, 550), dpi=300,
+    title=f * ": SST", titlefontsize=9,
+    clim=(0, 30))
+cl = coastline(:global_fine);
 plot!(cl.data.longitude .+ 360, cl.data.latitude,
-    seriestype=:shape, color=:lightgray, legend=false)
+    seriestype=:shape, color=:bisque3, linewidth=0.8,
+    legend=false)
+contour!(longitude, latitude, SST, levels=0.0:2.5:40.0, color=:black)
 #savefig("amsr.png")
 ```
 
 ![AMSR-derived sea-surface temperature](amsr.png)
-
-## Coastlines
-
-The following shows how to plot a whole-earth view, for which the coarse-scale
-built-in coastline dataset is suitable, along with a Nova Scotia view, for
-which the fine-scale dataset is preferable.
-
-```julia
-# Plot world coastline earth with the coarse dataset and Nova Scotia with the fine dataset
-using OceanAnalysis, Plots
-# Left: world view
-p1 = plot_coastline(coastline(:global_coarse))
-# Right: Nova Scotia view
-p2 = plot_coastline(coastline(:global_fine), xlims=(-68, -59), ylims=(42, 48))
-l = @layout [a{0.6w} b{0.4w}]
-plot(p1, p2, layout=l)
-#savefig("maps.png")
-```
-
-![maps](maps.png)
 
 ## Topography
 
@@ -53,18 +38,20 @@ and plots an image of water depth.
 ```julia
 # Bay of Fundy at approximately 1.6km resolution
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-68, -63, 43, 46, resolution=1, debug=1)
+topo_file = get_topography_file(-68, -63, 43, 46, resolution=1)
 topo = read_topography(topo_file);
+lon = topo.metadata["longitude"]
+lat = topo.metadata["latitude"]
 water_depth = -topo.data; # depth is the negative of height
-water_depth[water_depth .< 0.0] .= NaN; # trim land
-heatmap(topo.metadata["longitude"], topo.metadata["latitude"], water_depth,
-        aspect_ratio=1.0/cos(44.5*pi/180.),
-        framestyle=:box, dpi=300,
-        xlims=extrema(topo.metadata["longitude"]),
-        ylims=extrema(topo.metadata["latitude"]),
-        tickdirection=:out, color=:deep, clim=(0, 400))
+water_depth[water_depth.<0.0] .= NaN; # trim land
+heatmap(lon, lat, water_depth,
+    xlims=extrema(lon), ylims=extrema(lat),
+    aspect_ratio=1.0 / cos(0.5 * (lat[1] + lat[end]) * pi / 180.),
+    framestyle=:box, dpi=300,
+    tickdirection=:out, color=:deep, clim=(0, 400))
 cl = coastline();
-plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
+plot!(cl.data.longitude, cl.data.latitude,
+    seriestype=:shape, color=:bisque3, legend=false, linewidth=0.5)
 #savefig("topography.png")
 ```
 
