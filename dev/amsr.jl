@@ -10,7 +10,7 @@ heatmap(longitude, latitude, SST, framestyle=:box,
     aspect_ratio=1.0 / cos(pi * 40.0 / 180.0),
     color=:turbo, size=(800, 550), dpi=300,
     title=f * ": SST", titlefontsize=9,
-    clim=(0, 30))
+    tickdirection=:out, clim=(0, 30))
 cl = coastline(:global_fine);
 plot!(cl.data.longitude .+ 360, cl.data.latitude,
     seriestype=:shape, color=:bisque3, linewidth=0.8,
