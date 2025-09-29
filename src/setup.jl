@@ -35,6 +35,7 @@ export get_file
 export get_nc_value
 export get_topography_file
 export N2
+export plot_amsr
 export plot_coastline
 export plot_coastline!
 export plot_profile

@@ -31,6 +31,7 @@ OceanAnalysis.get_nc_value
 OceanAnalysis.get_topography_file
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
+OceanAnalysis.plot_amsr
 OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
 OceanAnalysis.plot_profile

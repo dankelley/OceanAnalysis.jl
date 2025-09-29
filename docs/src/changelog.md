@@ -8,16 +8,16 @@ arguments.
 
 ### Breaking changes
 
-* Switch to snake-case for function names and argument names. For example, the name of `plotTS()` was changed to `plot_TS()`, and its argument `drawFreezing` was changed to `draw_freezing`.  The point of this is to fit what seems to be the Julia convention, which has the benefit of reinforcing to the user that this is distinct from the oce R package, which uses the camel-case notation.
+* Switch to the Julia convention of using snake-case for function and argument names. For example, `plotTS()` was renamed [`plot_TS`](@ref), and its argument `drawFreezing` was renamed `draw_freezing`.
 
 ### Non-breaking changes
 
-* Add support for AMSR data.
-* Add support for coastline data.
-* Add support for topography data.
-* Add `pretty()`, for use in contouring (especially for `plot_TS()`).
-* Add `depth_from_pressure()`, `z_from_pressure()`, `pressure_from_depth()`,
-  and `pressure_from_z()`.
+* Add support for AMSR data, with type [`Amsr`](@ref) plus functions [`get_amsr_file`](@ref), [`read_amsr`](@ref) and [`plot_amsr`](@ref).
+* Add support for coastline data with type [`Coastline`](@ref) plus functions [`coastline`](@ref), [`plot_coastline`](@ref) and [`plot_coastline!`](@ref).
+* Add support for topography data with type [`Topography`](@ref) plus functions [`get_topography_file`](@ref)  and [`read_topography`](@ref).
+* Add [`pretty`](@ref), for use in contouring (especially for [`plot_TS`](@ref)).
+* Add [`depth_from_pressure`](@ref), [`z_from_pressure`](@ref), [`pressure_from_depth`](@ref),
+  and [`pressure_from_z`](@ref).
 * Change the second digit of version string to indicate that the package is becoming
   suitable for at least exploratory testing on real data.
 
@@ -29,10 +29,11 @@ There are no breaking changes; all change are additions or bug fixes.
 
 ### Non-breaking changes
 
-* Add built-in data file `ctd.cnv.nc`, and use it in an example in the `Ctd()` documentation.
-* Add built-in data file `D4902911_095.nc`, and use it in an example in the `plot_profile()` documentation.
-* `get_element()` can now return `"N2"`.
-* `plot_profile()` can now plot `"N2"`.
+* Add [`plot_amsr`](@ref).
+* Add built-in data file `ctd.cnv.nc`, and use it in an example in the [`Ctd`](@ref) documentation.
+* Add built-in data file `D4902911_095.nc`, and use it in an example in the [`plot_profile`](@ref) documentation.
+* [`get_element`](@ref) can now return `"N2"`.
+* [`plot_profile`](@ref) can now plot `"N2"`.
 
 ## 0.0.2
 
@@ -42,5 +43,4 @@ There are no breaking changes; all change are additions or bug fixes.
 
 ### Non-breaking changes
 
-* Add `N2()` to compute the square of the buoyancy frequency.
-
+* Add [`N2`](@ref) to compute the square of the buoyancy frequency.

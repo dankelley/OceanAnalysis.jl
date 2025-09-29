@@ -51,6 +51,7 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
             metadata["filename"] = filename
             metadata["longitude"] = copy(nc["lon"])
             metadata["latitude"] = copy(nc["lat"])
+            metadata["field"] = field
             data = copy((Float64.(replace(nc[field], missing => NaN)))')
             oad(debug, "END read_amsr()")
             return Amsr(metadata, data)
@@ -118,4 +119,58 @@ function get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
     end
     oad(debug, "END get_amsr_file")
     destpath
+end
+
+"""
+    plot_amsr(amsr::Amsr;
+        xlims::Real=(-180.0, 180.0), ylims::Real=(-90.0, 90.0),
+        levels=[], color=:turbo, tickdirection=:out,
+        debug::Int64=0, kwargs...)
+
+Plot an AMSR map.
+
+# Examples
+
+```julia
+using OceanAnalysis
+file = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc"
+amsr = read_amsr(file, "SST");
+p1 = plot_amsr(amsr, xlims=(300,360), ylims=(40,60))
+p2 = plot_amsr(amsr, xlims=(300,360), ylims=(40,60), color=:auto)
+plot(p1, p2, layout=(2,1))
+```
+"""
+function plot_amsr(amsr::Amsr;
+    xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
+    color=:turbo, levels=[], clim=:auto,
+    debug::Int64=0)
+    oad(debug, "plot_amsr START")
+    if 0 == length(levels)
+        oad(debug, "    setting default levels")
+        levels = range(-5.0, 35.0, step=5.0)
+    else
+        oad(debug, "    using supplied levels")
+    end
+    oad(debug, "    levels: $levels")
+    oad(debug, "    xlims: $xlims")
+    oad(debug, "    ylims: $ylims")
+    longitude = amsr.metadata["longitude"]
+    latitude = amsr.metadata["latitude"]
+    p = heatmap(longitude, latitude, amsr.data, framestyle=:box,
+        xlims=xlims, ylims=ylims,
+        aspect_ratio=1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0),
+        color=color, tickdirection=tickdirection, clim=clim)
+    cl = coastline(:global_fine)
+    plot!(p, cl.data.longitude, cl.data.latitude,
+        seriestype=:shape, color=:bisque3, linewidth=0.5,
+        legend=false)
+    if any(xlims .> 180.0)
+        plot!(p, cl.data.longitude .+ 360, cl.data.latitude,
+            seriestype=:shape, color=:bisque3, linewidth=0.5,
+            legend=false)
+    end
+    contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
+        linewidth=0.5)
+    oad(debug, "END plot_amsr")
+    p
 end
