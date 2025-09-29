@@ -123,9 +123,9 @@ end
 
 """
     plot_amsr(amsr::Amsr;
-        xlims::Real=(-180.0, 180.0), ylims::Real=(-90.0, 90.0),
-        levels=[], color=:turbo, tickdirection=:out,
-        debug::Int64=0, kwargs...)
+        xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
+        color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
+        debug::Int64=0)
 
 Plot an AMSR map.
 
@@ -135,14 +135,12 @@ Plot an AMSR map.
 using OceanAnalysis
 file = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc"
 amsr = read_amsr(file, "SST");
-p1 = plot_amsr(amsr, xlims=(300,360), ylims=(40,60))
-p2 = plot_amsr(amsr, xlims=(300,360), ylims=(40,60), color=:auto)
-plot(p1, p2, layout=(2,1))
+plot_amsr(amsr, xlims=(300,360), ylims=(40,60))
 ```
 """
 function plot_amsr(amsr::Amsr;
     xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
-    color=:turbo, levels=[], clim=:auto,
+    color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
     debug::Int64=0)
     oad(debug, "plot_amsr START")
     if 0 == length(levels)
@@ -159,7 +157,8 @@ function plot_amsr(amsr::Amsr;
     p = heatmap(longitude, latitude, amsr.data, framestyle=:box,
         xlims=xlims, ylims=ylims,
         aspect_ratio=1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0),
-        color=color, tickdirection=tickdirection, clim=clim)
+        color=color, tickdirection=tickdirection, clim=clim,
+        size=size, dpi=dpi)
     cl = coastline(:global_fine)
     plot!(p, cl.data.longitude, cl.data.latitude,
         seriestype=:shape, color=:bisque3, linewidth=0.5,
