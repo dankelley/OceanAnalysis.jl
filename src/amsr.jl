@@ -127,7 +127,35 @@ end
         color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
         debug::Int64=0)
 
-Plot an AMSR map.
+Plot a heatmap of an AMSR field.  By default, SST is shown using the default
+Julia colorscheme, and the view is of the whole earth.  See the example
+for how to use another colorscheme, and how to narrow the geographical
+view. Note that the graph scales longitude and latitude so that a hypothetical
+circular island at the midpoint of the view would be drawn as a circle.
+
+# Arguments
+
+- `amsr` an [`Amsr`](@ref) object, as read by [`read_amsr`](@ref).
+
+# Keywords
+
+- `xlims`: The range of longitude.  (Use the 0-to-360 notation, since that is how AMSR data are stored.)
+
+- `ylims`: The range of latitude.
+
+- `tickdirection`: Direction of tick marks. The default is for them to point outward.
+
+- `color`: Colour scheme for the heatmap.
+
+- `levels`: Vector holding the desired contour levels, or `:auto` for automatic selection.
+
+- `clim`: A tuple specifying the range of the color scheme. If not provided, this defaults to the range of the data.
+
+- `size`: A tuple holding the size of the plo.
+
+- `dpi`: A number representing the resolution of the plot, in dots per inch.
+
+- `debug`: An integer controlling whether to print information during processing.
 
 # Examples
 
@@ -149,16 +177,18 @@ function plot_amsr(amsr::Amsr;
     else
         oad(debug, "    using supplied levels")
     end
-    oad(debug, "    levels: $levels")
-    oad(debug, "    xlims: $xlims")
-    oad(debug, "    ylims: $ylims")
+    oad(debug, "    levels: ", levels)
+    oad(debug, "    xlims: ", xlims)
+    oad(debug, "    ylims: ", ylims)
     longitude = amsr.metadata["longitude"]
     latitude = amsr.metadata["latitude"]
+    oad(debug, "    plotting a heatmap of ", amsr.metadata["field"])
     p = heatmap(longitude, latitude, amsr.data, framestyle=:box,
         xlims=xlims, ylims=ylims,
         aspect_ratio=1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0),
         color=color, tickdirection=tickdirection, clim=clim,
         size=size, dpi=dpi)
+    oad(debug, "    adding a coastline")
     cl = coastline(:global_fine)
     plot!(p, cl.data.longitude, cl.data.latitude,
         seriestype=:shape, color=:bisque3, linewidth=0.5,
@@ -168,8 +198,9 @@ function plot_amsr(amsr::Amsr;
             seriestype=:shape, color=:bisque3, linewidth=0.5,
             legend=false)
     end
+    oad(debug, "    adding contours")
     contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
-        linewidth=0.5)
+        linewidth=0.75)
     oad(debug, "END plot_amsr")
     p
 end
