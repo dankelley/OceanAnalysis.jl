@@ -14,8 +14,8 @@ D. Gillis wrote an R version that was modified for inclusion in the `oce`
 package by Dan Kelley.
 
 # Arguments
-- `lon1` and `lat1`, in degrees, give the location of a given point on the earth
-- `lon2` and `lat2`, in degrees, give the location of a given point on the earth
+- `lon1` and `lat1`, in degrees, give the location of a given point on the earth.
+- `lon2` and `lat2`, in degrees, give the location of a given point on the earth.
 - `a` and `f` are the semi-major axis and flattening parameter of the reference ellipsoid. (The default values are highly recommended.)
 
 # References

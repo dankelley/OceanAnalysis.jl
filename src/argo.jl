@@ -196,7 +196,7 @@ Download an Argo profile file, if an existing copy is less than `age` days old.
 
 - `destdir`: name of the directory into which to save the file.
 
-- `age`: file-caching time in days.  If the requested file does not exist locally then `age` is ignored and the file is downloaded.  It will also be downloaded if there is an existing file but it was last downloaded more than `age` days ago
+- `age`: file-caching time in days.  If the requested file does not exist locally then `age` is ignored and the file is downloaded.  It will also be downloaded if there is an existing file but it was last downloaded more than `age` days ago.
 
 # Returns
 
