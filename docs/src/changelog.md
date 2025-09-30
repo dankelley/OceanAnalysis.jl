@@ -12,7 +12,7 @@ arguments.
 
 ### Non-breaking changes
 
-* Add support for AMSR data, with type [`Amsr`](@ref) plus functions [`get_amsr_file`](@ref), [`read_amsr`](@ref) and [`plot_amsr`](@ref).
+* Add [`toc`](@ref) to provide a table of contents for an [`OA`](@ref) object.
 * Add support for coastline data with type [`Coastline`](@ref) plus functions [`coastline`](@ref), [`plot_coastline`](@ref) and [`plot_coastline!`](@ref).
 * Add support for topography data with type [`Topography`](@ref) plus functions [`get_topography_file`](@ref)  and [`read_topography`](@ref).
 * Add [`pretty`](@ref), for use in contouring (especially for [`plot_TS`](@ref)).

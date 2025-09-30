@@ -47,5 +47,6 @@ OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
+OceanAnalysis.toc
 OceanAnalysis.z_from_pressure
 ```

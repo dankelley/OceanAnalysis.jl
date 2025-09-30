@@ -252,3 +252,37 @@ function fix_gsw_bad_code!(x)
 end
 
 
+"""
+    toc(x::OA)
+
+Print a table of contents for an [`OA`](@ref) object.
+
+# Examples
+
+```juliadoc
+julia> using OceanAnalysis
+
+julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+
+julia> d = read_ctd_cnv(f);
+
+julia> d = read_ctd_cnv(f, add_teos=false);
+
+julia> toc(d)
+Ctd object
+    metadata: Dict with keys ["latitude", "time", "header", "longitude", "filename"]
+    data: DataFrame with columns ["salinity", "temperature", "pressure", "scan", "timeS", "pr", "depS", "t090", "sal00", "flag"]
+```
+"""
+function toc(x::OA)
+    println(typeof(x), " object")
+    println("    metadata: Dict with keys ", keys(x.metadata))
+    if x.data isa Matrix
+        println("    data: Matrix of size ", size(x.data))
+    elseif x.data isa DataFrame
+        println("    data: DataFrame with columns ", names(x.data))
+    else
+        println("    data: ", names(x.data))
+    end
+end
+

@@ -135,27 +135,27 @@ circular island at the midpoint of the view would be drawn as a circle.
 
 # Arguments
 
-- `amsr` an [`Amsr`](@ref) object, as read by [`read_amsr`](@ref).
+- `amsr`: An [`Amsr`](@ref) object, as read by [`read_amsr`](@ref).
 
 # Keywords
 
-- `xlims`: The range of longitude.  (Use the 0-to-360 notation, since that is how AMSR data are stored.)
+- `xlims`: The range of longitude to be shown.  This is based on the 0-to-360 notation, since that is how AMSR data are stored.
 
-- `ylims`: The range of latitude.
+- `ylims`: The range of latitude to be shown.
 
-- `tickdirection`: Direction of tick marks. The default is for them to point outward.
+- `tickdirection`: The direction of axis tick marks. The default is for them to point outward, opposite to the Julia default.
 
-- `color`: Colour scheme for the heatmap.
+- `color`: The colour scheme for the heatmap.  The default, `:turbo`, is a rainbow-like scheme.  Other popular choices include `:viridis` for a green-hued scheme, and `:auto` for the default yellow-hued Julia scheme.
 
-- `levels`: Vector holding the desired contour levels, or `:auto` for automatic selection.
+- `levels`: A vector holding the desired contour levels, a single integer giving the desired number of contours, or `:auto` for automatic selection. The default is useful for world views of sea-surface temperature.
 
-- `clim`: A tuple specifying the range of the color scheme. If not provided, this defaults to the range of the data.
+- `clim`: A tuple specifying the range of values to be represented by the color scheme. If not provided, this defaults to the range of the data in the chosen view.
 
-- `size`: A tuple holding the size of the plo.
+- `size`: A numeric tuple holding the size of the plot.
 
 - `dpi`: A number representing the resolution of the plot, in dots per inch.
 
-- `debug`: An integer controlling whether to print information during processing.
+- `debug`: An integer controlling whether to print information during processing. The default is to work silently; use any positive value to get some printing.
 
 # Examples
 
@@ -170,6 +170,8 @@ function plot_amsr(amsr::Amsr;
     xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
     color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
     debug::Int64=0)
+    2 == length(xlims) || error("xlims must be of length 2")
+    2 == length(ylims) || error("ylims must be of length 2")
     oad(debug, "plot_amsr START")
     if 0 == length(levels)
         oad(debug, "    setting default levels")
@@ -203,4 +205,15 @@ function plot_amsr(amsr::Amsr;
         linewidth=0.75)
     oad(debug, "END plot_amsr")
     p
+end
+
+import Base: summary
+function summary(x::OA)
+    println(typeof(x), " object")
+    println("    metadata: ", keys(x.metadata))
+    if x.data isa Matrix
+        println("    data: matrix of size ", size(x.data))
+    else
+        println("    data: ", names(x.data))
+    end
 end

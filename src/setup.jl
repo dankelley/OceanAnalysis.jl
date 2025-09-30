@@ -52,5 +52,6 @@ export salinity_from_conductivity
 export SA
 export T90_from_T48
 export T90_from_T68
+export toc
 export z_from_pressure
 
