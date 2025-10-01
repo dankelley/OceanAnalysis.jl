@@ -13,4 +13,4 @@ heatmap(longitude, latitude, SST, framestyle=:box,
 contour!(longitude, latitude, SST, levels=5:35:1, color=:black)
 cl = coastline(:global_fine)
 plot!(cl.data.longitude .+ 360, cl.data.latitude, seriestype=:shape, color=:bisque3, legend=false)
-savefig("emma.png")
+savefig("eo_01.png")
