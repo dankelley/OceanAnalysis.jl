@@ -43,7 +43,7 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
     filename = expanduser(filename)
     oad(debug, "read_amsr() BEGIN")
     NCDataset(filename, "r") do nc
-        oad(debug, "    about to read SST.")
+        oad(debug, "    about to read SST")
         if field == "?"
             return keys(nc)
         else
@@ -200,20 +200,32 @@ function plot_amsr(amsr::Amsr;
             seriestype=:shape, color=:bisque3, linewidth=0.5,
             legend=false)
     end
-    oad(debug, "    adding contours")
-    contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
-        linewidth=0.75)
+    if levels != 0
+        oad(debug, "    adding contours")
+        contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
+            linewidth=0.75)
+    end
     oad(debug, "END plot_amsr")
     p
 end
 
-import Base: summary
-function summary(x::OA)
-    println(typeof(x), " object")
-    println("    metadata: ", keys(x.metadata))
-    if x.data isa Matrix
-        println("    data: matrix of size ", size(x.data))
-    else
-        println("    data: ", names(x.data))
-    end
+"""
+    subset_amsr(a::Amsr, lonlims, latlims, debug=0)
+
+Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
+"""
+function subset_amsr(a::Amsr, lonlims, latlims, debug=0)
+    oad(debug, "subset_amsr BEGIN")
+    lonOK = lonlims[1] .< a.metadata["longitude"] .< lonlims[2]
+    latOK = latlims[1] .< a.metadata["latitude"] .< latlims[2]
+    metadata = Dict()
+    metadata["longitude"] = a.metadata["longitude"][lonOK]
+    metadata["latitude"] = a.metadata["latitude"][latOK]
+    metadata["field"] = a.metadata["field"]
+    metadata["filename"] = a.metadata["filename"]
+    data = a.data[latOK, lonOK]
+    rval = Amsr(metadata, data)
+    oad(debug, "END subset_amsr")
+    rval
 end
+

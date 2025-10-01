@@ -45,6 +45,7 @@ OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv
 OceanAnalysis.read_topography
 OceanAnalysis.SA
+OceanAnalysis.subset_amsr
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
 OceanAnalysis.toc

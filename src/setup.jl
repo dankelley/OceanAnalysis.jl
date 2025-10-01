@@ -50,6 +50,7 @@ export read_ctd_cnv
 export read_topography
 export salinity_from_conductivity
 export SA
+export subset_amsr
 export T90_from_T48
 export T90_from_T68
 export toc

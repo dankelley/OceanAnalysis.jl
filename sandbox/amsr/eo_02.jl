@@ -1,6 +1,20 @@
 # %%
 using OceanAnalysis, Plots, Dates
 
+function subset_amsr(a::Amsr, lonlims, latlims)
+    println("amsr_subset BEGIN")
+    lonOK = lonlims[1] .< a.metadata["longitude"] .< lonlims[2]
+    latOK = latlims[1] .< a.metadata["latitude"] .< latlims[2]
+    metadata = Dict()
+    metadata["longitude"] = a.metadata["longitude"][lonOK]
+    metadata["latitude"] = a.metadata["latitude"][latOK]
+    metadata["field"] = a.metadata["field"]
+    metadata["filename"] = a.metadata["filename"]
+    data = a.data[latOK, lonOK]
+    println("END subset_amsr")
+    Amsr(metadata, data)
+end
+
 # %% Read the data
 f = get_amsr_file(Date("2025-08-12"), debug=1)
 if !@isdefined a
@@ -27,31 +41,15 @@ lat0 = 59.200948
 lon0 = -55.027402 + 360.0 # add 360 to get in deg E
 
 asp = 1.0 / cos(lat0 * pi / 180.)
-span = 5.0 # degrees of span
-# OK: span 25 10 8 5?
+# OK: span 25 10 8 5=memoryFailure
 span = 5 # degrees of span
-xlims = [lon0 - asp * span; lon0 + asp * span]
-ylims = [lat0 - span; lat0 + span]
-println("xlims: ", xlims)
-println("ylims: ", ylims)
 
-
-# %%
-println("TESTING")
-alon = a.metadata["longitude"];
-alat = a.metadata["latitude"];
-lonOK = xlims[1] .< alon .< xlims[2];
-latOK = ylims[1] .< alat .< ylims[2];
+lonlims = [lon0 - asp * span; lon0 + asp * span]
+latlims = [lat0 - span; lat0 + span]
+b = subset_amsr(a, lonlims, latlims)
 
 # %%
-metadata = Dict()
-metadata["longitude"] = a.metadata["longitude"][lonOK];
-metadata["latitude"] = a.metadata["latitude"][latOK];
-metadata["field"] = "SST"
-data = a.data[latOK, lonOK]
-b = Amsr(metadata, data)
-
-# %%
+clear!(:a)
 GC.gc()
 
 # %%
@@ -60,10 +58,10 @@ if h
     println("TEST: heatmap")
     p = heatmap(a.metadata["longitude"],
         a.metadata["latitude"],
-        a.data, color=:turbo, xlims=xlims, ylims=ylims, aspect_ratio=asp)
+        a.data, color=:turbo, xlims=lonlims, ylims=latlims, aspect_ratio=asp)
 else
     println("TEST: plot_amsr")
-    p = plot_amsr(b, color=:turbo, xlims=xlims, ylims=ylims, levels=0,
+    p = plot_amsr(b, color=:turbo, xlims=lonlims, ylims=latlims, levels=0,
         clim=(7, 9), debug=1)
 end
 #dpi=300, size=(600, 600), debug=1)

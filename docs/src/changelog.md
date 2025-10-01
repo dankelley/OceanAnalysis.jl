@@ -12,6 +12,7 @@ arguments.
 
 ### Non-breaking changes
 
+* Add [`subset_amsr`](@ref).
 * Add [`toc`](@ref) to provide a table of contents for an [`OA`](@ref) object.
 * Add support for coastline data with type [`Coastline`](@ref) plus functions [`coastline`](@ref), [`plot_coastline`](@ref) and [`plot_coastline!`](@ref).
 * Add support for topography data with type [`Topography`](@ref) plus functions [`get_topography_file`](@ref)  and [`read_topography`](@ref).
