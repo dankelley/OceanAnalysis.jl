@@ -52,6 +52,10 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
             metadata["longitude"] = copy(nc["lon"])
             metadata["latitude"] = copy(nc["lat"])
             metadata["field"] = field
+            for a in ("sensor", "processing_level", "time_coverage_start",
+                "time_coverage_end")
+                metadata[a] = nc.attrib[a]
+            end
             data = copy((Float64.(replace(nc[field], missing => NaN)))')
             oad(debug, "END read_amsr()")
             return Amsr(metadata, data)
@@ -231,15 +235,21 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
     2 == length(latlims) || error("latlims must be a tuple of length 2")
     lonOK = lonlims[1] .<= a.metadata["longitude"] .<= lonlims[2]
     latOK = latlims[1] .<= a.metadata["latitude"] .<= latlims[2]
-    oad(debug, "    retaining ", 100 * sum(lonOK) / length(lonOK), " % of longitudes")
-    oad(debug, "    retaining ", 100 * sum(latOK) / length(latOK), " % of latitudes")
     metadata = Dict()
-    metadata["longitude"] = a.metadata["longitude"][lonOK]
-    metadata["latitude"] = a.metadata["latitude"][latOK]
-    metadata["field"] = a.metadata["field"]
-    metadata["filename"] = a.metadata["filename"]
+    for key in keys(a.metadata)
+        if key == "longitude"
+            metadata["longitude"] = a.metadata["longitude"][lonOK]
+        elseif key == "latitude"
+            metadata["latitude"] = a.metadata["latitude"][latOK]
+        else
+            metadata[key] = a.metadata[key]
+        end
+    end
     data = a.data[latOK, lonOK]
     rval = Amsr(metadata, data)
+    oad(debug, "    retaining ",
+        round(100.0 * sum(lonOK) / length(lonOK), digits=2), "% of longitudes and ",
+        round(100.0 * sum(latOK) / length(latOK), digits=2), "% of latitudes")
     oad(debug, "END subset_amsr")
     rval
 end
