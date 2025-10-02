@@ -51,9 +51,11 @@ end
 This holds AMSR satellite data as read by [`read_amsr`](@ref).
 
 The `metadata` element is a Dict that holds the source `filename`, the
-`longitude` and `latitude`, and the `name` of the stored variable.
+`sensor`, the `name` of the stored variable, the observation interval
+(`"time_coverage_start"` and `time_coverage_end`) and the vectors (`longitude`
+and `latitude`) that define the grid.
 
-The `data` element stores the data.
+The `data` element is a matrix holding the gridded data.
 """
 struct Amsr <: OA
     metadata::Dict{String,Any}
