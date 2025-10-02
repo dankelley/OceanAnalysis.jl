@@ -37,9 +37,10 @@ jobs:
             using Pkg
             Pkg.add("Documenter")
             Pkg.add("Plots")
-            if !haskey(Pkg.project().dependencies, "OceanAnalysis")
-                Pkg.develop(PackageSpec(path=pwd()))
-            end
+            #if !haskey(Pkg.project().dependencies, "OceanAnalysis")
+            #    Pkg.develop(PackageSpec(path=pwd()))
+            #end
+            Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
           julia --project=docs/ docs/make.jl        
       - uses: julia-actions/julia-docdeploy@v1
