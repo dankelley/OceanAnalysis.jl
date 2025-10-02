@@ -209,15 +209,30 @@ function plot_amsr(amsr::Amsr;
     p
 end
 
+
 """
-    subset_amsr(a::Amsr, lonlims, latlims, debug=0)
+    subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
 
 Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
+
+# Arguments
+
+- `a`: an [`Amsr`](@ref) object.
+
+- `lonlims`: A numeric tuple of length 2 specifying the minimum and maximum longitude values to be retained.
+
+- `latlims`: A numeric tuple of length 2 specifying the minimum and maximum latitude values to be retained.
+
+- `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 """
-function subset_amsr(a::Amsr, lonlims, latlims, debug=0)
+function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
     oad(debug, "subset_amsr BEGIN")
-    lonOK = lonlims[1] .< a.metadata["longitude"] .< lonlims[2]
-    latOK = latlims[1] .< a.metadata["latitude"] .< latlims[2]
+    2 == length(lonlims) || error("lonlims must be a tuple of length 2")
+    2 == length(latlims) || error("latlims must be a tuple of length 2")
+    lonOK = lonlims[1] .<= a.metadata["longitude"] .<= lonlims[2]
+    latOK = latlims[1] .<= a.metadata["latitude"] .<= latlims[2]
+    oad(debug, "    retaining ", 100 * sum(lonOK) / length(lonOK), " % of longitudes")
+    oad(debug, "    retaining ", 100 * sum(latOK) / length(latOK), " % of latitudes")
     metadata = Dict()
     metadata["longitude"] = a.metadata["longitude"][lonOK]
     metadata["latitude"] = a.metadata["latitude"][latOK]
