@@ -36,6 +36,7 @@ OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
 OceanAnalysis.plot_profile
 OceanAnalysis.plot_TS
+OceanAnalysis.plot_topography
 OceanAnalysis.pressure_from_depth
 OceanAnalysis.pressure_from_z
 OceanAnalysis.pretty

@@ -224,3 +224,48 @@ function get_topography_file(west::Real, east::Real,
     end
 end
 
+"""
+    plot_topography(topo::Topography;
+        xlims=:auto, ylims=:auto, domain=:sea,
+        color=:deep, clim=:auto, dpi=100, debug::Int64=0)
+
+Draw a [`heatmap`](@ref) image of topography.  This is still in development,
+e.g. wrt adding land (or sea) in flat colour.
+
+```juliadoc
+using OceanAnalysis
+topo_file = get_topography_file(-68, -55, 42, 48, resolution=0.5)
+topo = read_topography(topo_file);
+plot_topography(topo, domain=:sea,
+    color=:topo, clim=(-500, 500), dpi=500, debug=1)
+```
+"""
+function plot_topography(topo::Topography;
+    xlims=:auto, ylims=:auto, domain=:sea,
+    color=:deep, clim=:auto, dpi=100, debug::Int64=0)
+    oad(debug, "plot_topography() BEGIN")
+    domain in (:land, :sea) || error("'domain' should be :land or :sea")
+    oad(debug, "    topography size: ", size(topo.data))
+    longitude = topo.metadata["longitude"]
+    latitude = topo.metadata["latitude"]
+    data = topo.data
+    aspect_ratio = 1.0 / cos(0.5 * (latitude[1] + latitude[end]) * pi / 180.0)
+    if domain != :sea
+        error("This version of plot_topography() only works for domain=:sea")
+    end
+    if xlims == :auto
+        xlims = extrema(longitude)
+    end
+    if ylims == :auto
+        ylims = extrema(latitude)
+    end
+    if clim == :auto
+        clim = extrema(data)
+    end
+    p = heatmap(longitude, latitude, data,
+        xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
+        color=color, clim=clim, framestyle=:box, dpi=dpi)
+    println("FIXME: plot_topography() should show coast.")
+    oad(debug, "END plot_topography()")
+    p
+end
