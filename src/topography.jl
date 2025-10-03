@@ -229,8 +229,8 @@ end
         xlims=:auto, ylims=:auto, domain=:sea,
         color=:deep, clim=:auto, dpi=100, debug::Int64=0)
 
-Draw a [`heatmap`](@ref) image of topography.  This is still in development,
-e.g. wrt adding land (or sea) in flat colour.
+Draw a `heatmap` image of topography.  This is still in development, e.g. wrt
+adding land (or sea) in flat colour.
 
 ```juliadoc
 using OceanAnalysis
