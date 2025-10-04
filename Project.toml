@@ -1,5 +1,5 @@
 name = "OceanAnalysis"
-uuid = "61f55e37-f302-4851-abb1-1d1fa5c38034"
+uuid = "935d77d6-d85b-49cc-a465-c336e8287d34"
 version = "0.2.1"
 
 [deps]
