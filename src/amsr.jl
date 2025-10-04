@@ -235,19 +235,12 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
     2 == length(latlims) || error("latlims must be a tuple of length 2")
     lonOK = lonlims[1] .<= a.metadata["longitude"] .<= lonlims[2]
     latOK = latlims[1] .<= a.metadata["latitude"] .<= latlims[2]
-    metadata = Dict()
-    for key in keys(a.metadata)
-        if key == "longitude"
-            metadata["longitude"] = a.metadata["longitude"][lonOK]
-        elseif key == "latitude"
-            metadata["latitude"] = a.metadata["latitude"][latOK]
-        else
-            metadata[key] = a.metadata[key]
-        end
-    end
+    metadata = copy(a.metadata)
+    metadata["longitude"] = metadata["longitude"][lonOK]
+    metadata["latitude"] = metadata["latitude"][latOK]
     data = copy(a.data)[latOK, lonOK]
     rval = Amsr(metadata, data)
-    oad(debug, "    retaining ",
+    oad(debug, "    keeping ",
         round(100.0 * sum(lonOK) / length(lonOK), digits=2), "% of longitudes and ",
         round(100.0 * sum(latOK) / length(latOK), digits=2), "% of latitudes")
     oad(debug, "END subset_amsr")
