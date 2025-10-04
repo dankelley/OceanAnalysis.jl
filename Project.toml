@@ -1,6 +1,6 @@
 name = "OceanAnalysis"
 uuid = "935d77d6-d85b-49cc-a465-c336e8287d34"
-version = "0.2.1"
+version = "0.2.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -19,6 +19,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TiffImages = "731e570b-9d59-4bfa-96dc-6df516fadf69"
 
 [compat]
+julia = "1.11"
 CSV = "0.10.15"
 ColorSchemes = "3.31.0"
 DataFrames = "1.8.0"
