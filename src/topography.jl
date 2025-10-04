@@ -226,20 +226,25 @@ end
 
 """
     plot_topography(topo::Topography;
-        xlims=:auto, ylims=:auto, domain=:sea,
-        color=:deep, clim=:auto, dpi=100, debug::Int64=0)
+        xlims=:auto, ylims=:auto, tickdirection=:out,
+        domain=:sea, color=:land_sea, clim=:auto,
+        draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
+        debug::Int64=0, kwargs...)
 
-Draw a `heatmap` image of topography.  This is still in development, e.g. wrt
-adding land (or sea) in flat colour.
+Draw a `heatmap` image of topography.
 
-FIXME: describe arguments, but wait until I settle on their scope and action.
+The `domain` argument tells whether to display both land and sea values, or
+just land, or just sea. The default is to plot just the sea, with land a light
+brown color. The `aspect_ratio` argument should not be specified as part of
+`kwargs...`, because this function sets a reasonable default, based on the latitude
+at the centre of the plot.
 
 ```juliadoc
+# Waters near Prince Edward Island, Canada
 using OceanAnalysis
-topo_file = get_topography_file(-68, -55, 42, 48, resolution=0.5)
-topo = read_topography(topo_file);
-plot_topography(topo, domain=:sea,
-    color=:topo, clim=(-500, 500), dpi=500, debug=1)
+topo_file = get_topography_file(-64.8, -61.5, 45.6, 47.2, resolution=1)
+topo = read_topography(topo_file)
+plot_topography(topo)
 ```
 """
 function plot_topography(topo::Topography;
