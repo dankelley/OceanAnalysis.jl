@@ -245,7 +245,7 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
             metadata[key] = a.metadata[key]
         end
     end
-    data = a.data[latOK, lonOK]
+    data = copy(a.data)[latOK, lonOK]
     rval = Amsr(metadata, data)
     oad(debug, "    retaining ",
         round(100.0 * sum(lonOK) / length(lonOK), digits=2), "% of longitudes and ",
