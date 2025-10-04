@@ -1,10 +1,18 @@
 # History of changes
 
-## 0.1.0
+## 0.2.1
 
-This version is in use by the author, and may also be suitable for other users
-who are comfortable with the possibility of changes to function names and
-arguments.
+### Breaking changes
+
+None.
+
+### Non-breaking changed
+
+* Add [`plot_topography`](@ref).
+
+* Work towards more helpful `;` usage in functions.
+
+* Clean up quite a lot of code documentation.
 
 ### Breaking changes
 
@@ -15,7 +23,7 @@ arguments.
 * Add [`subset_amsr`](@ref).
 * Add [`toc`](@ref) to provide a table of contents for an [`OA`](@ref) object.
 * Add support for coastline data with type [`Coastline`](@ref) plus functions [`coastline`](@ref), [`plot_coastline`](@ref) and [`plot_coastline!`](@ref).
-* Add support for topography data with type [`Topography`](@ref) plus functions [`get_topography_file`](@ref), [`read_topography`](@ref), and [`plot_topography`](@ref).
+* Add support for topography data with type [`Topography`](@ref) plus functions [`get_topography_file`](@ref), and [`read_topography`](@ref).
 * Add [`pretty`](@ref), for use in contouring (especially for [`plot_TS`](@ref)).
 * Add [`depth_from_pressure`](@ref), [`z_from_pressure`](@ref), [`pressure_from_depth`](@ref),
   and [`pressure_from_z`](@ref).

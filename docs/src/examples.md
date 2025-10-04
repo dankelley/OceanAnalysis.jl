@@ -19,27 +19,18 @@ plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
 
 ## Topography
 
-The following downloads topographic data in the region of the Bay of Fundy,
-and plots an image of water depth.
+The following downloads topographic data for a domain including southern
+Nova Scotia, and plots in three plot styles.
 
 ```julia
-# Bay of Fundy at approximately 1.6km resolution
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-68, -63, 43, 46, resolution=1)
+topo_file = get_topography_file(-67, -63, 43, 46, resolution=1)
 topo = read_topography(topo_file);
-lon = topo.metadata["longitude"]
-lat = topo.metadata["latitude"]
-water_depth = -topo.data; # depth is the negative of height
-water_depth[water_depth.<0.0] .= NaN; # trim land
-heatmap(lon, lat, water_depth,
-    xlims=extrema(lon), ylims=extrema(lat),
-    aspect_ratio=1.0 / cos(0.5 * (lat[1] + lat[end]) * pi / 180.),
-    framestyle=:box, dpi=300,
-    tickdirection=:out, color=:deep, clim=(0, 400))
-cl = coastline();
-plot!(cl.data.longitude, cl.data.latitude,
-    seriestype=:shape, color=:bisque3, legend=false, linewidth=0.5)
-#savefig("topography.png")
+p1 = plot_topography(topo, domain=:both);
+p2 = plot_topography(topo, domain=:sea);
+p3 = plot_topography(topo, domain=:land);
+plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
+!savefig("topography.png")
 ```
 
 ![Topography diagram](topography.png)

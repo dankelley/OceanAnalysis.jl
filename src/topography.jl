@@ -1,4 +1,4 @@
-using Downloads, TiffImages, NCDatasets, Plots
+using Downloads, TiffImages, NCDatasets, Plots, ColorSchemes
 using DataStructures: OrderedDict
 using Printf
 
@@ -232,6 +232,8 @@ end
 Draw a `heatmap` image of topography.  This is still in development, e.g. wrt
 adding land (or sea) in flat colour.
 
+FIXME: describe arguments, but wait until I settle on their scope and action.
+
 ```juliadoc
 using OceanAnalysis
 topo_file = get_topography_file(-68, -55, 42, 48, resolution=0.5)
@@ -241,31 +243,75 @@ plot_topography(topo, domain=:sea,
 ```
 """
 function plot_topography(topo::Topography;
-    xlims=:auto, ylims=:auto, domain=:sea,
-    color=:deep, clim=:auto, dpi=100, debug::Int64=0)
+    xlims=:auto, ylims=:auto, tickdirection=:out,
+    domain=:sea, color=:land_sea, clim=:auto,
+    draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
+    debug::Int64=0, kwargs...)
     oad(debug, "plot_topography() BEGIN")
-    domain in (:land, :sea) || error("'domain' should be :land or :sea")
-    oad(debug, "    topography size: ", size(topo.data))
-    longitude = topo.metadata["longitude"]
-    latitude = topo.metadata["latitude"]
-    data = topo.data
+    domain in (:sea, :land, :both) || error("domain :$domain not permited; use :sea, :land, or :both")
+    oad(debug, "    domain: :", domain)
+    oad(debug, "    color: :", color)
+    oad(debug, "    clim: :", clim)
+    longitude = copy(topo.metadata["longitude"])
+    latitude = copy(topo.metadata["latitude"])
+    data = copy(topo.data)
     aspect_ratio = 1.0 / cos(0.5 * (latitude[1] + latitude[end]) * pi / 180.0)
-    if domain != :sea
-        error("This version of plot_topography() only works for domain=:sea")
-    end
     if xlims == :auto
         xlims = extrema(longitude)
     end
     if ylims == :auto
         ylims = extrema(latitude)
     end
-    if clim == :auto
-        clim = extrema(data)
+    oad(debug, "    data extrema: ", extrema(filter(!isnan, data)))
+    if domain == :sea
+        data .= -data
+        data[data.<0.0] .= NaN
+        oad(debug, "    setting land values to NaN")
+        if color == :land_sea
+            #color = :deep # [get(ColorSchemes.topo, i) for i in 0.0:0.6/1000:0.4]
+            oad(debug, "    setting colorscheme to reversed first half of :topo")
+            color = [get(ColorSchemes.topo, i) for i in 0.5:-0.6/1000:0.0]
+        end
+    elseif domain == :land
+        data[data.<0.0] .= NaN
+        oad(debug, "    setting sea values to NaN")
+        if color == :land_sea
+            #oad(debug, "    setting colorscheme to cgrad(:turbid,rev=true)")
+            #color = cgrad(:turbid, rev=true)
+            oad(debug, "    setting colorscheme to second half of :topo")
+            color = [get(ColorSchemes.topo, i) for i in 0.5:0.6/1000:1.0]
+        end
+    elseif domain == :both
+        if color == :land_sea
+            oad(debug, "    setting colorscheme to :topo")
+            color = :topo
+        end
     end
+    if clim == :auto
+        if domain == :both
+            clim = maximum(abs.(filter(!isnan, data))) .* (-1.0, 1.0)
+        else
+            clim = extrema(filter(!isnan, data))
+        end
+        oad(debug, "    clim defaulting to ", clim)
+    end
+    if domain == :sea
+        background_color_inside = land_color
+    elseif domain == :land
+        background_color_inside = sea_color
+    else
+        background_color_inside = :transparent
+    end
+    #println("kwargs... ", kwargs...)
     p = heatmap(longitude, latitude, data,
+        background_color_inside=background_color_inside,
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
-        color=color, clim=clim, framestyle=:box, dpi=dpi)
-    println("FIXME: plot_topography() should show coast.")
+        color=color, clim=clim, framestyle=:box, tickdirection=tickdirection; kwargs...)
+    if draw_coastline && domain == :sea
+        oad(debug, "    plotting the coastline")
+        cl = coastline()
+        plot!(p, cl.data.longitude, cl.data.latitude, seriestype=:path, color=:black, legend=false)
+    end
     oad(debug, "END plot_topography()")
     p
 end
