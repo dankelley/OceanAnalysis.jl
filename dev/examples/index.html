@@ -12,38 +12,38 @@ p1 = plot_topography(topo, domain=:both);
 p2 = plot_topography(topo, domain=:sea);
 p3 = plot_topography(topo, domain=:land);
 plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
-!savefig(&quot;topography.png&quot;)</code></pre><p><img src="../topography.png" alt="Topography diagram"/></p><h2 id="CTD-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#CTD-profile-diagnostic-plot">CTD profile diagnostic plot</a><a id="CTD-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#CTD-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.</p><pre><code class="language-julia hljs"># %% Read a built-in CTD file
+!savefig(&quot;topography.png&quot;)</code></pre><p><img src="../topography.png" alt="Topography diagram"/></p><h2 id="CTD-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#CTD-profile-diagnostic-plot">CTD profile diagnostic plot</a><a id="CTD-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#CTD-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.</p><pre><code class="language-julia hljs"># Read and plot a built-in CTD file
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     &quot;data&quot;, &quot;ctd.cnv&quot;)
 ctd = read_ctd_cnv(filename)
-# %% Plot some diagrams that are often useful in analysis
-p1 = plot_profile(ctd, which=&quot;CT&quot;)
-p2 = plot_profile(ctd, which=&quot;SA&quot;)
-p3 = plot_profile(ctd, which=&quot;sigma0&quot;)
-p4 = plot_TS(ctd)
-title = &quot;Argo observations at &quot; *
+p1 = plot_profile(ctd, which=&quot;CT&quot;);
+p2 = plot_profile(ctd, which=&quot;SA&quot;);
+p3 = plot_profile(ctd, which=&quot;sigma0&quot;);
+p4 = plot_TS(ctd);
+title = &quot;CTD observations at &quot; *
         &quot;$(round(ctd.metadata[&quot;latitude&quot;],digits=3))N and &quot; *
         &quot;$(round(ctd.metadata[&quot;longitude&quot;],digits=3))E&quot; *
         &quot; on $(Dates.format(ctd.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))&quot;
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-#savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Argo-subset-and-map"><a class="docs-heading-anchor" href="#Argo-subset-and-map">Argo subset and map</a><a id="Argo-subset-and-map-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-subset-and-map" title="Permalink"></a></h2><p>The following shows how to map Argo profile locations made within 500 km of Sable Island, within the past 365 days.</p><pre><code class="language-julia hljs"># %% Get the index
+#savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Argo-subset-and-map"><a class="docs-heading-anchor" href="#Argo-subset-and-map">Argo subset and map</a><a id="Argo-subset-and-map-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-subset-and-map" title="Permalink"></a></h2><p>The following shows how to map Argo profile locations made within 500 km of Sable Island, within the past 365 days.</p><pre><code class="language-julia hljs"># Map argo locations in last year, with red dots within 500km of Sable Island
 using OceanAnalysis, CSV, Dates, DataFrames, Plots
+# Get the index
 index_file = get_argo_index(&quot;~/data/argo&quot;)
 index = read_argo_index(index_file) # 3.2e6 profiles
-# %% Select profiles made within the past 365 days
+# Select profiles made within the past 365 days
 today = now(UTC)
 start = today - Dates.Year(1)
 index_recent = index[start.&lt;index.time.&lt;today, :] # 1.7e4 profiles
-# %% Isolate profiles made within 500 km of Sable Island
+# Isolate profiles made within 500 km of Sable Island
 SI_lon = -59.915
 SI_lat = 43.934
 distance = map(i -&gt; geod_distance(SI_lon, SI_lat,
         index_recent.longitude[i], index_recent.latitude[i]),
     1:nrow(index_recent))
 index_near = index_recent[distance.&lt;500, :]
-# %% Plot results on a ap
+# plot results on a map
 scatter(index_recent.longitude, index_recent.latitude,
     xlims=SI_lon .+ (-15, 15),
     ylims=SI_lat .+ (-10, 10),
@@ -53,22 +53,21 @@ scatter(index_recent.longitude, index_recent.latitude,
     framestyle=:box, dpi=200, legend=false)
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
-# %% add a coastline for reference
+# add a coastline for reference
 plot_coastline!(coastline(:global_fine))
-#savefig(&quot;argo_map.png&quot;)</code></pre><p><img src="../argo_map.png" alt="Argo map"/></p><h2 id="Argo-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#Argo-profile-diagnostic-plot">Argo profile diagnostic plot</a><a id="Argo-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to display some useful diagnostic plots for a single Argo profile.</p><pre><code class="language-julia hljs"># %% Read a built-in Argo file, and plot some hydrographic diagrams
+#savefig(&quot;argo_map.png&quot;)</code></pre><p><img src="../argo_map.png" alt="Argo map"/></p><h2 id="Argo-profile-diagnostic-plot"><a class="docs-heading-anchor" href="#Argo-profile-diagnostic-plot">Argo profile diagnostic plot</a><a id="Argo-profile-diagnostic-plot-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-profile-diagnostic-plot" title="Permalink"></a></h2><p>The following shows how to display some useful diagnostic plots for a single Argo profile.</p><pre><code class="language-julia hljs"># Read and plot a built-in Argo file
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), &quot;data&quot;,
     &quot;D4902911_095.nc&quot;)
 a = read_argo(filename)
-# %% Plot an overview of hydrographic properties
-p1 = plot_profile(a, which=&quot;CT&quot;)
-p2 = plot_profile(a, which=&quot;SA&quot;)
-p3 = plot_profile(a, which=&quot;sigma0&quot;)
-p4 = plot_TS(a)
+p1 = plot_profile(a, which=&quot;CT&quot;);
+p2 = plot_profile(a, which=&quot;SA&quot;);
+p3 = plot_profile(a, which=&quot;sigma0&quot;);
+p4 = plot_TS(a);
 title = &quot;CTD observations at &quot; *
         &quot;$(round(a.metadata[&quot;latitude&quot;],digits=3))N and &quot; *
         &quot;$(round(a.metadata[&quot;longitude&quot;],digits=3))E&quot; *
         &quot; on $(Dates.format(a.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))&quot;
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-#savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Sunday 5 October 2025 12:45">Sunday 5 October 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 7 October 2025 21:31">Tuesday 7 October 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
