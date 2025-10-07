@@ -1,5 +1,7 @@
 # OceanAnalysis.jl
 
+[![AutoMerge](https://github.com/JuliaRegistries/General/actions/workflows/automerge.yml/badge.svg)](https://github.com/JuliaRegistries/General/actions/workflows/automerge.yml)
+
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
 oceanographic data. It is at an early stage of development by someone who is in
 the early stages of exploring Julia as a supplement to R. The intention is to

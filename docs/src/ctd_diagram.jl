@@ -1,13 +1,12 @@
-# %% Read a built-in CTD file
+# Read and plot a built-in CTD file
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename)
-# %% Plot some diagrams that are often useful in analysis
-p1 = plot_profile(ctd, which="CT")
-p2 = plot_profile(ctd, which="SA")
-p3 = plot_profile(ctd, which="sigma0")
-p4 = plot_TS(ctd)
+p1 = plot_profile(ctd, which="CT");
+p2 = plot_profile(ctd, which="SA");
+p3 = plot_profile(ctd, which="sigma0");
+p4 = plot_TS(ctd);
 title = "CTD observations at " *
         "$(round(ctd.metadata["latitude"],digits=3))N and " *
         "$(round(ctd.metadata["longitude"],digits=3))E" *

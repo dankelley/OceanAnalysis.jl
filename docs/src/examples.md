@@ -41,17 +41,16 @@ The following shows how to read a built-in CTD file, and plot some hydrographic
 diagrams.
 
 ```julia
-# %% Read a built-in CTD file
+# Read and plot a built-in CTD file
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename)
-# %% Plot some diagrams that are often useful in analysis
-p1 = plot_profile(ctd, which="CT")
-p2 = plot_profile(ctd, which="SA")
-p3 = plot_profile(ctd, which="sigma0")
-p4 = plot_TS(ctd)
-title = "Argo observations at " *
+p1 = plot_profile(ctd, which="CT");
+p2 = plot_profile(ctd, which="SA");
+p3 = plot_profile(ctd, which="sigma0");
+p4 = plot_TS(ctd);
+title = "CTD observations at " *
         "$(round(ctd.metadata["latitude"],digits=3))N and " *
         "$(round(ctd.metadata["longitude"],digits=3))E" *
         " on $(Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))"
@@ -68,22 +67,23 @@ The following shows how to map Argo profile locations made within 500 km
 of Sable Island, within the past 365 days.
 
 ```julia
-# %% Get the index
+# Map argo locations in last year, with red dots within 500km of Sable Island
 using OceanAnalysis, CSV, Dates, DataFrames, Plots
+# Get the index
 index_file = get_argo_index("~/data/argo")
 index = read_argo_index(index_file) # 3.2e6 profiles
-# %% Select profiles made within the past 365 days
+# Select profiles made within the past 365 days
 today = now(UTC)
 start = today - Dates.Year(1)
 index_recent = index[start.<index.time.<today, :] # 1.7e4 profiles
-# %% Isolate profiles made within 500 km of Sable Island
+# Isolate profiles made within 500 km of Sable Island
 SI_lon = -59.915
 SI_lat = 43.934
 distance = map(i -> geod_distance(SI_lon, SI_lat,
         index_recent.longitude[i], index_recent.latitude[i]),
     1:nrow(index_recent))
 index_near = index_recent[distance.<500, :]
-# %% Plot results on a ap
+# plot results on a map
 scatter(index_recent.longitude, index_recent.latitude,
     xlims=SI_lon .+ (-15, 15),
     ylims=SI_lat .+ (-10, 10),
@@ -93,7 +93,7 @@ scatter(index_recent.longitude, index_recent.latitude,
     framestyle=:box, dpi=200, legend=false)
 scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
     markerstrokecolor=:red, color=:red)
-# %% add a coastline for reference
+# add a coastline for reference
 plot_coastline!(coastline(:global_fine))
 #savefig("argo_map.png")
 ```
@@ -106,16 +106,15 @@ The following shows how to display some useful diagnostic plots for a single
 Argo profile.
 
 ```julia
-# %% Read a built-in Argo file, and plot some hydrographic diagrams
+# Read and plot a built-in Argo file
 using OceanAnalysis, Plots, Measures, Dates
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
     "D4902911_095.nc")
 a = read_argo(filename)
-# %% Plot an overview of hydrographic properties
-p1 = plot_profile(a, which="CT")
-p2 = plot_profile(a, which="SA")
-p3 = plot_profile(a, which="sigma0")
-p4 = plot_TS(a)
+p1 = plot_profile(a, which="CT");
+p2 = plot_profile(a, which="SA");
+p3 = plot_profile(a, which="sigma0");
+p4 = plot_TS(a);
 title = "CTD observations at " *
         "$(round(a.metadata["latitude"],digits=3))N and " *
         "$(round(a.metadata["longitude"],digits=3))E" *
