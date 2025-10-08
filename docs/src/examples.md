@@ -8,7 +8,7 @@ temperature, which may be plotted as follows.
 ```julia
 # North Atlantic Sea Surface Temperature
 using OceanAnalysis, Plots
-f = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc"
+f = get_amsr_file("2025-09-07");
 a = read_amsr(f, "SST");
 plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
     levels=0.0:2.5:30.0, clim=(0, 30))

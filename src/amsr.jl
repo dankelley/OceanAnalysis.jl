@@ -63,7 +63,13 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
     end
 end
 
-
+"""
+    get_amsr_file(date::String)
+"""
+function get_amsr_file(date::String; kwargs...)
+    !ismissing(date) || error("must specify 'date', a string")
+    get_amsr_file(Date(date), kwargs...)
+end
 
 """
     get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
