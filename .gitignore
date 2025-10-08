@@ -5,10 +5,9 @@
 *swp
 *.pdf
 .DS_Store
-
 gmt.history
 [0-9]*.jl
 [0-9]*dan*
 docs/build
 docs/Manifest.toml
-
+Manifest.toml
