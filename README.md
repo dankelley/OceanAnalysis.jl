@@ -3,42 +3,58 @@
 [![AutoMerge](https://github.com/JuliaRegistries/General/actions/workflows/automerge.yml/badge.svg)](https://github.com/JuliaRegistries/General/actions/workflows/automerge.yml)
 
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
-oceanographic data. It is at an early stage of development, and it is developed
-using the "dog food" method, in which changes and additions are guided by the
-author's everyday work.
+oceanographic data. It is at an early stage of development by someone who is in
+the early stages of exploring Julia as a supplement to R. The intention is to
+add/refine features based on tasks that come up in the author's everyday work.
 
 Please note that this README file is just a landing page for GitHub perusal.
-The full documentation is available [online](https://dankelley.github.io/OceanAnalysis.jl/dev/).
+Full documentation is available [online](https://dankelley.github.io/OceanAnalysis.jl/dev/).
 
 ## Installation
 
 ### Official version
 
-The official version may be installed by typing the following in a Julia
-console.
+Once (if) the package is accepted by the Julia archive system, you may install
+it by typing the following in a Julia console.
 
 ```julia
 using Pkg ; Pkg.add("OceanAnalysis")
 ```
 
-### Semi-stable development version
+(This version will lag quite far behind the development version.)
 
-The version under development may be installed by typing the following in a
-Julia console.
+### Development version
+
+#### Somewhat stable (for early users)
+
+Type the following in a Julia console to use the "main" branch from the
+development website. This is updated after significant changes to the "develop"
+branch (that have passed the built-in test suite).
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 ```
 
-### Author's unstable version
+#### Unstable (for developers)
 
-The author installs from local source (which may include things not yet pushed
-to the GitHub site) by typing the following in a Julia console.
+Type the following in a Julia console to use the "develop" branch from the
+development website.  This is updated very frequently, because the author tests
+changes using this method.
 
 ```julia
-cd ~/git/OceanAnalysis.jl
-] develop .
+using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
 ```
 
-A similar strategy could be used by users who are planning to add to the
-package development by making a pull request.
+#### Brittle (for the core developer)
+
+In the commandline, navigate to the local source for the library.  Then start
+a Julia console and type the following.
+
+```julia
+]
+develop .
+```
+
+This sets Julia to look for changes in the files in that directory. Thereafter,
+or at least until another `Pkg.add(url)` command is invoked, issuing `using
+OceanAnalysis` in a Julia session will rebuild from that local source.
