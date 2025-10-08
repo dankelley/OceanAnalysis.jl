@@ -1,25 +1,30 @@
 # Installation methods
 
-## For users
+The official version may be installed by typing the following in a Julia
+console.
 
-### Using the GH "main" branch version
+```julia
+using Pkg ; Pkg.add("OceanAnalysis")
+```
+
+## Semi-stable development version
+
+The version under development may be installed by typing the following in a
+Julia console.
 
 ```julia
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 ```
 
-### Using the GH "develop" branch version
+## Author's unstable version
+
+The author installs from local source (which may include things not yet pushed
+to the GitHub site) by typing the following in a Julia console.
 
 ```julia
-using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl", rev="develop")
+cd ~/git/OceanAnalysis.jl
+] develop .
 ```
 
-## For developers
-
-In the commandline, navigate to the local source for the library, then enter
-the following .  Then start a Julia console and type the following.
-
-```julia
-]
-develop .
-```
+A similar strategy could be used by users who are planning to add to the
+package development by making a pull request.
