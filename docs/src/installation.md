@@ -7,8 +7,6 @@ console.
 using Pkg ; Pkg.add("OceanAnalysis")
 ```
 
-## Semi-stable development version
-
 The version under development may be installed by typing the following in a
 Julia console.
 
@@ -16,9 +14,8 @@ Julia console.
 using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 ```
 
-## Author's unstable version
 
-The author installs from local source (which may include things not yet pushed
+The author installs from local source (temphich may include things not yet pushed
 to the GitHub site) by typing the following in a Julia console.
 
 ```julia
