@@ -1,6 +1,6 @@
 """
     as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64};
-        longitude::Float64=-63.0, latitude::Float64=45.0, time=nothing,
+        longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
         add_teos::Bool=true, debug::Int64=0)
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and possibly a location.
@@ -63,7 +63,7 @@ Ctd(Dict{String, Any}("latitude" => 30.0, "time" => nothing, "longitude" => -63.
 ```
 """
 function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64};
-    longitude::Float64=-63.0, latitude::Float64=45.0, time=nothing,
+    longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
     add_teos::Bool=true, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
