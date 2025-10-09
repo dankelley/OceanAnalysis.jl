@@ -15,7 +15,7 @@ using Pkg ; Pkg.add(url="https://github.com/dankelley/OceanAnalysis.jl")
 ```
 
 
-The author installs from local source (temphich may include things not yet pushed
+The author installs from local source (which may include things not yet pushed
 to the GitHub site) by typing the following in a Julia console.
 
 ```julia

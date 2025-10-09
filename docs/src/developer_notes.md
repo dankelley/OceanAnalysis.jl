@@ -57,7 +57,5 @@ serve(; dir="docs/build", launch_browser=true)
 ## Updating documentation on github
 
 Pushing to the "main" branch will cause the remote (github) machine to build up
-the documentation and push it to the gh-pages branch.  No action is required on
-the developer's part except for pushing to "main".  But note that it makes
-sense to do a trial build locally before pushing to "main", to avoid wasting
-time on a remote server.
+the documentation and push it to the "gh-pages" branch.  No action is required
+on the developer's part except for pushing to "main".
