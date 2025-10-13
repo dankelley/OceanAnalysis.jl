@@ -1,5 +1,7 @@
 """
-    as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64};
+    as_ctd(salinity::Union{AbstractVector,AbstractRange},
+        temperature::Union{AbstractVector,AbstractRange},
+        pressure::Union{AbstractVector,AbstractRange},
         longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
         add_teos::Bool=true, debug::Int64=0)
 
@@ -62,7 +64,9 @@ Ctd(Dict{String, Any}("latitude" => 30.0, "time" => nothing, "longitude" => -63.
    1 │     32.0         15.0       0.0  32.1511  15.0642  23.6649   0.0683062)
 ```
 """
-function as_ctd(salinity::Vector{Float64}, temperature::Vector{Float64}, pressure::Vector{Float64};
+function as_ctd(salinity::Union{AbstractVector,AbstractRange},
+    temperature::Union{AbstractVector,AbstractRange},
+    pressure::Union{AbstractVector,AbstractRange};
     longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
     add_teos::Bool=true, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")

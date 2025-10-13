@@ -61,7 +61,8 @@ function coastline(filename::String, header::Integer=1)
 end
 
 """
-    coastline(longitude::Vector{Real}, latitude::Vector{Real})
+    coastline(longitude::Union{AbstractVector,AbstractRange},
+        latitude::Union{AbstractVector,AbstractRange})
 
 Create a Coastline from longitude and latitude values.  Use NaN values
 for each of these to indicate breaks in the coastline from continent
@@ -78,7 +79,8 @@ cl = coastline(data.longitude, data.latitude);
 plot_coastline(cl, xlims=(-68, -58), ylims=(43, 48))
 ```
 """
-function coastline(longitude::Vector{Float64}, latitude::Vector{Float64})
+function coastline(longitude::Union{AbstractVector,AbstractRange},
+    latitude::Union{AbstractVector,AbstractRange})
     metadata = Dict()
     metadata["source"] = "(user-supplied vectors of longitude and latitude)"
     data = DataFrame(longitude=longitude, latitude=latitude)

@@ -3,7 +3,7 @@
 Release notes:
 
 ### Changed
-- none
+- [`as_ctd`](@ref) accepts ranges as well as vectors for `salinity`, `temperature` and `pressure`.
 - BREAKING: none
 ### Added
 - add none
