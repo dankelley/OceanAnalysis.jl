@@ -4,7 +4,9 @@ Release notes:
 
 ### Changed
 - [`as_ctd`](@ref) accepts ranges as well as vectors for `salinity`, `temperature` and `pressure`.
+- [`coastline`](@ref) accepts ranges as well as vectors for `longitude` and `latitude`.
 - BREAKING: none
+
 ### Added
 - add none
 
