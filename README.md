@@ -3,9 +3,9 @@
 [![AutoMerge](https://github.com/JuliaRegistries/General/actions/workflows/automerge.yml/badge.svg)](https://github.com/JuliaRegistries/General/actions/workflows/automerge.yml)
 
 OceanAnalysis.jl is a Julia package designed to facilitate the analysis of
-oceanographic data. It is at an early stage of development, and it is developed
-using the "dog food" method, in which changes and additions are guided by the
-author's everyday work.
+oceanographic data. It is at an early stage of development using the "dog food"
+method, in which additions and changes are guided by the author's everyday
+work.
 
 Please note that this README file is just a landing page for GitHub perusal.
 The full documentation is available [online](https://dankelley.github.io/OceanAnalysis.jl/dev/).
