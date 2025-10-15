@@ -100,28 +100,36 @@ plot_coastline!(coastline(:global_fine))
 
 ![Argo map](argo_map.png)
 
-## Argo profile diagnostic plot
+## Argo trajectory
 
-The following shows how to display some useful diagnostic plots for a single
-Argo profile.
+The following shows how to display a trace of the positions of a single Argo
+float.
 
 ```julia
-# Read and plot a built-in Argo file
-using OceanAnalysis, Plots, Measures, Dates
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
-    "D4902911_095.nc")
-a = read_argo(filename)
-p1 = plot_profile(a, which="CT");
-p2 = plot_profile(a, which="SA");
-p3 = plot_profile(a, which="sigma0");
-p4 = plot_TS(a);
-title = "CTD observations at " *
-        "$(round(a.metadata["latitude"],digits=3))N and " *
-        "$(round(a.metadata["longitude"],digits=3))E" *
-        " on $(Dates.format(a.metadata["time"], "yyyy-mm-dd"))"
-plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
-    dpi=200, plot_title=title, plot_titlefontsize=11)
-#savefig("argo_profile.png")
+# Plot a float trajectory with colour for sequence number
+using OceanAnalysis, Plots, Statistics
+ID = r"D4902911" # focus on this ID
+index_file = get_argo_index("~/data/argo");
+index_all = read_argo_index(index_file) # 3.2e6 profiles
+index = index_all[occursin.(ID, index_all.file), :]
+sort!(index, :time) # this lets us join dots in time order
+lon, lat = index.longitude, index.latitude
+plot(lon, lat,
+    aspect_ratio=1.0 / cos(mean(lat) * pi / 180),
+    framestyle=:box, color=:gray, dpi=200,
+    title="Argo float $(ID.pattern) coloured by cycle index", titlefontsize=9)
+colors = cgrad(:turbo)
+scatter!(lon, lat, marker_z=1:length(lon),
+    markersize=3, markerstyle=:circle, color=colors)
+# Add land and 1km isobath
+plot_coastline!(coastline())
+topo_file = get_topography_file(-110., -30, 20, 60, resolution=30,
+    destdir="~/data/topo")
+topo = read_topography(topo_file)
+contour!(topo.metadata["longitude"], topo.metadata["latitude"],
+    topo.data, xlim=xlims(), ylim=ylims(),
+    color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
+#savefig("argo_trajectory.png")
 ```
 
-![Argo profile](argo_profile.png)
+![Argo trajectory](argo_trajectory.png)
