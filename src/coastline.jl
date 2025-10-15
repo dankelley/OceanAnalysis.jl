@@ -1,8 +1,8 @@
 """
     coastline(symbol::Symbol=:world_fine)
 
-Access a built-in coastline dataset. The only valid choices for `name` are
-`:world_coarse` and `:world_fine`.  These are handled by reading the built-in
+Access a built-in [`Coastline]`(@ref) dataset. The only valid choices for `name` are
+`:global_coarse` and `:global_fine`.  These are handled by reading the built-in
 datasets `data/coastline_coarse.csv.gz` and datasets
 `data/coastline_fine.csv.gz`, respectively.
 
@@ -33,7 +33,10 @@ end
 """
     coastline(filename::String, header::Integer=0)
 
-Return a coastline stored in the named CSV file (in either text or gzipped form).
+Create a [`Coastline]`(@ref) object from a CSV file.
+
+The file must have columns named `longitude` and `latitude`, with NaN values
+indicating breaks separating islands, etc.
 
 The work is done by passing `filename` and `header` to `CSV.read()`. The file
 must have 1 or more header lines, the last of which must contain column names
@@ -64,9 +67,10 @@ end
     coastline(longitude::Union{AbstractVector,AbstractRange},
         latitude::Union{AbstractVector,AbstractRange})
 
-Create a Coastline from longitude and latitude values.  Use NaN values
-for each of these to indicate breaks in the coastline from continent
-to continent, nation to nation, etc.
+Create a [`Coastline]`(@ref) object from longitude and latitude values.
+
+Use NaN values for both `longitude` and `latitude` to indicate breaks in the
+coastline from continent to continent, nation to nation, etc.
 
 # Examples
 ```juliadoc
