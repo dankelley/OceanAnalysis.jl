@@ -27,35 +27,38 @@ title = &quot;CTD observations at &quot; *
         &quot; on $(Dates.format(ctd.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))&quot;
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-#savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Argo-subset-and-map"><a class="docs-heading-anchor" href="#Argo-subset-and-map">Argo subset and map</a><a id="Argo-subset-and-map-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-subset-and-map" title="Permalink"></a></h2><p>The following shows how to map Argo profile locations made within 500 km of Sable Island, within the past 365 days.</p><pre><code class="language-julia hljs"># Map argo locations in last year, with red dots within 500km of Sable Island
+#savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Argo-subset-and-map"><a class="docs-heading-anchor" href="#Argo-subset-and-map">Argo subset and map</a><a id="Argo-subset-and-map-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-subset-and-map" title="Permalink"></a></h2><p>The following shows how to map Argo profile locations made within 200 km of Sable Island, during the past year. It also prints the IDs of those floats.</p><pre><code class="language-julia hljs"># Show Argo profiles within 200 km of Sable Island in last year
 using OceanAnalysis, CSV, Dates, DataFrames, Plots
 # Get the index
 index_file = get_argo_index(&quot;~/data/argo&quot;)
-index = read_argo_index(index_file) # 3.2e6 profiles
-# Select profiles made within the past 365 days
+index_all = read_argo_index(index_file) # 3.2e6 profiles
+# Set time subset
 today = now(UTC)
 start = today - Dates.Year(1)
-index_recent = index[start.&lt;index.time.&lt;today, :] # 1.7e4 profiles
-# Isolate profiles made within 500 km of Sable Island
+recent = start .&lt; index_all.time .&lt; today
+# Set distance subset
 SI_lon = -59.915
 SI_lat = 43.934
+radius = 200.0 # km
 distance = map(i -&gt; geod_distance(SI_lon, SI_lat,
-        index_recent.longitude[i], index_recent.latitude[i]),
-    1:nrow(index_recent))
-index_near = index_recent[distance.&lt;500, :]
-# plot results on a map
-scatter(index_recent.longitude, index_recent.latitude,
-    xlims=SI_lon .+ (-15, 15),
-    ylims=SI_lat .+ (-10, 10),
-    aspect_ratio=1.0 / cos(SI_lat * pi / 180.0),
-    markersize=1, markerstrokecolor=:blue, color=:blue,
-    tickdirection=:out,
-    framestyle=:box, dpi=200, legend=false)
-scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
-    markerstrokecolor=:red, color=:red)
-# add a coastline for reference
-plot_coastline!(coastline(:global_fine))
-#savefig(&quot;argo_map.png&quot;)</code></pre><p><img src="../argo_map.png" alt="Argo map"/></p><h2 id="Argo-trajectory"><a class="docs-heading-anchor" href="#Argo-trajectory">Argo trajectory</a><a id="Argo-trajectory-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-trajectory" title="Permalink"></a></h2><p>The following shows how to display a trace of the positions of a single Argo float.</p><pre><code class="language-julia hljs"># Plot a float trajectory with colour for sequence number
+        index_all.longitude[i], index_all.latitude[i]),
+    1:nrow(index_all))
+near = distance .&lt; radius
+# Filter by both time and distance
+index = index_all[recent.&amp;near, :]
+# Extend region of map to show geographic context
+aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
+scale = radius / 111.
+scatter(index.longitude, index.latitude,
+    xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
+    ylims=SI_lat .+ scale .* (-1.2, 1.2),
+    aspect_ratio=aspect_ratio,
+    tickdirection=:out, framestyle=:box, dpi=200, legend=false)
+plot_coastline!(coastline())
+# Print the float IDs in this subset
+float_IDs = replace.(index.file, r&quot;.*/(.*)_.*&quot; =&gt; s&quot;\1&quot;) |&gt; unique
+show(float_IDs)
+#savefig(&quot;argo_search.png&quot;)</code></pre><p><img src="../argo_search.png" alt="Argo search results"/></p><h2 id="Argo-trajectory"><a class="docs-heading-anchor" href="#Argo-trajectory">Argo trajectory</a><a id="Argo-trajectory-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-trajectory" title="Permalink"></a></h2><p>The following shows how to display a trace of the positions of a single Argo float.</p><pre><code class="language-julia hljs"># Plot a float trajectory with colour for sequence number
 using OceanAnalysis, Plots, Statistics
 ID = r&quot;D4902911&quot; # focus on this ID
 index_file = get_argo_index(&quot;~/data/argo&quot;);
@@ -78,4 +81,4 @@ topo = read_topography(topo_file)
 contour!(topo.metadata[&quot;longitude&quot;], topo.metadata[&quot;latitude&quot;],
     topo.data, xlim=xlims(), ylim=ylims(),
     color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
-#savefig(&quot;argo_trajectory.png&quot;)</code></pre><p><img src="../argo_trajectory.png" alt="Argo trajectory"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Wednesday 15 October 2025 18:49">Wednesday 15 October 2025</span>. Using Julia version 1.12.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#savefig(&quot;argo_trajectory.png&quot;)</code></pre><p><img src="../argo_trajectory.png" alt="Argo trajectory"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Wednesday 15 October 2025 21:36">Wednesday 15 October 2025</span>. Using Julia version 1.12.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
