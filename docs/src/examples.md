@@ -63,42 +63,45 @@ plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
 
 ## Argo subset and map
 
-The following shows how to map Argo profile locations made within 500 km
-of Sable Island, within the past 365 days.
+The following shows how to map Argo profile locations made within 200 km of
+Sable Island, during the past year. It also prints the IDs of those floats.
 
 ```julia
-# Map argo locations in last year, with red dots within 500km of Sable Island
+# Show Argo profiles within 200 km of Sable Island in last year
 using OceanAnalysis, CSV, Dates, DataFrames, Plots
 # Get the index
 index_file = get_argo_index("~/data/argo")
-index = read_argo_index(index_file) # 3.2e6 profiles
-# Select profiles made within the past 365 days
+index_all = read_argo_index(index_file) # 3.2e6 profiles
+# Set time subset
 today = now(UTC)
 start = today - Dates.Year(1)
-index_recent = index[start.<index.time.<today, :] # 1.7e4 profiles
-# Isolate profiles made within 500 km of Sable Island
+recent = start .< index_all.time .< today
+# Set distance subset
 SI_lon = -59.915
 SI_lat = 43.934
+radius = 200.0 # km
 distance = map(i -> geod_distance(SI_lon, SI_lat,
-        index_recent.longitude[i], index_recent.latitude[i]),
-    1:nrow(index_recent))
-index_near = index_recent[distance.<500, :]
-# plot results on a map
-scatter(index_recent.longitude, index_recent.latitude,
-    xlims=SI_lon .+ (-15, 15),
-    ylims=SI_lat .+ (-10, 10),
-    aspect_ratio=1.0 / cos(SI_lat * pi / 180.0),
-    markersize=1, markerstrokecolor=:blue, color=:blue,
-    tickdirection=:out,
-    framestyle=:box, dpi=200, legend=false)
-scatter!(index_near.longitude, index_near.latitude, markersize=1.5,
-    markerstrokecolor=:red, color=:red)
-# add a coastline for reference
-plot_coastline!(coastline(:global_fine))
-#savefig("argo_map.png")
+        index_all.longitude[i], index_all.latitude[i]),
+    1:nrow(index_all))
+near = distance .< radius
+# Filter by both time and distance
+index = index_all[recent.&near, :]
+# Extend region of map to show geographic context
+aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
+scale = radius / 111.
+scatter(index.longitude, index.latitude,
+    xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
+    ylims=SI_lat .+ scale .* (-1.2, 1.2),
+    aspect_ratio=aspect_ratio,
+    tickdirection=:out, framestyle=:box, dpi=200, legend=false)
+plot_coastline!(coastline())
+# Print the float IDs in this subset
+float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique
+show(float_IDs)
+#savefig("argo_search.png")
 ```
 
-![Argo map](argo_map.png)
+![Argo search results](argo_search.png)
 
 ## Argo trajectory
 
