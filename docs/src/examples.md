@@ -95,9 +95,9 @@ scatter(index.longitude, index.latitude,
     aspect_ratio=aspect_ratio,
     tickdirection=:out, framestyle=:box, dpi=200, legend=false)
 plot_coastline!(coastline())
-# Print the float IDs in this subset
 float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique
 title!("$(length(index.file)) profiles of $(length(float_IDs)) floats", titlefontsize=9)
+scale_bar(100)
 #savefig("argo_search.png")
 ```
 
