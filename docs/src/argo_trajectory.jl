@@ -21,4 +21,4 @@ topo = read_topography(topo_file)
 contour!(topo.metadata["longitude"], topo.metadata["latitude"],
     topo.data, xlim=xlims(), ylim=ylims(),
     color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
-#savefig("argo_trajectory.png")
+savefig("argo_trajectory.png")
