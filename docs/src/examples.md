@@ -1,6 +1,6 @@
 # Examples
 
-## Satellite view of SST
+## Satellite SST
 
 The AMSR satellite provides several data streams, including sea-surface
 temperature, which may be plotted as follows.
@@ -35,7 +35,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
 
 ![Topography diagram](topography.png)
 
-## CTD profile diagnostic plot
+## CTD hydrography
 
 The following shows how to read a built-in CTD file, and plot some hydrographic
 diagrams.
@@ -61,7 +61,7 @@ plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
 
 ![CTD diagram](ctd_diagram.png)
 
-## Argo subset and map
+## Argo search
 
 The following shows how to map Argo profile locations made within 200 km of
 Sable Island, during the past year. It also prints the IDs of those floats.
