@@ -155,7 +155,8 @@ Add a scalebar to a plot made with [`plot_coastline`]@ref).
 
 The length of the scalebar, in km, is given by `distance`, at a position dictated
 by `x` and `y`. In this version of the function, `x` must be either `:left` or
-`:right`, and `y` must be either `:bottom` or `:top`.
+`:right`, and `y` must be either `:bottom` or `:top`.  The default is to place
+the scale bar at the top-left.
 
 # Examples
 
@@ -168,8 +169,7 @@ scale_bar(100.0)
 """
 function scale_bar(distance::Real=100.0, x=:left, y=:top)
     distance > 0.0 || error("'distance' must be a positive number")
-    xlim = xlims()
-    ylim = ylims()
+    xlim, ylim = xlims(), ylims()
     ymid = (ylim[1] + ylim[2]) / 2.0
     km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
     dx = (xlim[2] - xlim[1]) / 20 # FIXME: may need to adjust the divisor to look nice
@@ -181,7 +181,7 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
     else
         error("x must be either :left or :right, not :", x)
     end
-    println("X: ", X)
+    #println("X: ", X)
     if y == :top
         y0 = ylim[2] - dy
     elseif y == :bottom
@@ -189,9 +189,9 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
     else
         error("y must be either :top or :bottom, not :", y)
     end
-    println("y0: ", y0)
+    #println("y0: ", y0)
     Y = [y0, y0]
-    println("Y: ", Y)
+    #println("Y: ", Y)
     plot!(X, Y, color=:black, linewidth=2)
     annotate!((X[1] + X[2]) / 2.0, Y[1] + dy / 2,
         Plots.text("$(trunc(Int, distance)) km", 8))
