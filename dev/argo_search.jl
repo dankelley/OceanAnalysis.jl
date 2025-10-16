@@ -28,4 +28,5 @@ scatter(index.longitude, index.latitude,
 plot_coastline!(coastline())
 float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique
 title!("$(length(index.file)) profiles of $(length(float_IDs)) floats", titlefontsize=9)
+scale_bar(100)
 savefig("argo_search.png")
