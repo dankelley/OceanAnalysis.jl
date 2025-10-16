@@ -153,9 +153,9 @@ end
 
 Add a scalebar to a plot made with [`plot_coastline`]@ref).
 
-The length of the scalebar, in km, is given by `distance`. The position is
-given by `x` and `y` which, in this preliminary version of the function, must
-both equal `:topleft`.
+The length of the scalebar, in km, is given by `distance`, at a position dictated
+by `x` and `y`. In this version of the function, `x` must be either `:left` or
+`:right`, and `y` must be either `:bottom` or `:top`.
 
 # Examples
 
@@ -166,18 +166,33 @@ plot_coastline(cl, xlim=(-70, -60), ylim=(42, 48), aspect_ratio=1 / cos(45 * pi 
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0, x=:topleft, y=:topleft)
-    (x == :topleft && y == :topleft) || error("x and y must both be :topleft")
+function scale_bar(distance::Real=100.0, x=:left, y=:top)
+    distance > 0.0 || error("'distance' must be a positive number")
     xlim = xlims()
     ylim = ylims()
     ymid = (ylim[1] + ylim[2]) / 2.0
     km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
-    dx = (xlim[2] - xlim[1]) / 20
+    dx = (xlim[2] - xlim[1]) / 20 # FIXME: may need to adjust the divisor to look nice
     dy = (ylim[2] - ylim[1]) / 20
-    y0 = ylim[2] - dy
-    X = xlim[1] + dx .+ [0.0, distance / km_per_degree_lon]
+    if x == :left
+        X = xlim[1] + dx .+ [0.0, distance / km_per_degree_lon]
+    elseif x == :right
+        X = xlim[2] - dx .- [0.0, distance / km_per_degree_lon]
+    else
+        error("x must be either :left or :right, not :", x)
+    end
+    println("X: ", X)
+    if y == :top
+        y0 = ylim[2] - dy
+    elseif y == :bottom
+        y0 = ylim[1] + dy
+    else
+        error("y must be either :top or :bottom, not :", y)
+    end
+    println("y0: ", y0)
     Y = [y0, y0]
+    println("Y: ", Y)
     plot!(X, Y, color=:black, linewidth=2)
-    annotate!((X[1] + X[2]) / 2.0, y0 + dy / 2,
+    annotate!((X[1] + X[2]) / 2.0, Y[1] + dy / 2,
         Plots.text("$(trunc(Int, distance)) km", 8))
 end
