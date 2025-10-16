@@ -9,7 +9,7 @@ Release notes:
 - BREAKING: none
 
 ### Added
-- add none
+- [`scale_bar`](@ref) to add a scale bar to a map plot
 
 
 
