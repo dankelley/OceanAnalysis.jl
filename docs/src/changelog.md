@@ -6,7 +6,7 @@ Release notes:
 - [`as_ctd`](@ref) accepts ranges as well as vectors for `salinity`, `temperature` and `pressure`.
 - [`coastline`](@ref) accepts ranges for `longitude` and `latitude`, in addition to vectors.
 - [`coastline`](@ref) on a CSV file throws an error if columns named "longitude" and "latitude" are not found.
-- Add an [`Argo]`(@ref) trajectory map to the Examples online documentation.
+- Add an [`Argo`](@ref) trajectory map to the Examples online documentation.
 - BREAKING: none
 
 ### Added
