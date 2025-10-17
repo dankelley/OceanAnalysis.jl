@@ -60,6 +60,9 @@ function coastline(filename::String, header::Integer=1)
     metadata = Dict()
     metadata["filename"] = expanduser(filename)
     data = CSV.read(filename, DataFrame, header=header)
+    column_names = names(data)
+    "longitude" in column_names || error("this CSV file lacks a 'longitude' column; found names ", column_names)
+    "latitude" in column_names || error("this CSV file lacks a 'latitude' column; found names ", column_names)
     Coastline(metadata, data)
 end
 
@@ -183,7 +186,7 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
     end
     #println("X: ", X)
     if y == :top
-        y0 = ylim[2] - dy
+        y0 = ylim[2] - 1.5 * dy
     elseif y == :bottom
         y0 = ylim[1] + dy
     else
@@ -192,7 +195,7 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
     #println("y0: ", y0)
     Y = [y0, y0]
     #println("Y: ", Y)
-    plot!(X, Y, color=:black, linewidth=2)
-    annotate!((X[1] + X[2]) / 2.0, Y[1] + dy / 2,
-        Plots.text("$(trunc(Int, distance)) km", 8))
+    plot!(X, Y, color=:black, linewidth=1.4)
+    annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
+        Plots.text("$(trunc(Int, distance)) km", 11))
 end
