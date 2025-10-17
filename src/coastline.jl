@@ -61,8 +61,8 @@ function coastline(filename::String, header::Integer=1)
     metadata["filename"] = expanduser(filename)
     data = CSV.read(filename, DataFrame, header=header)
     column_names = names(data)
-    "longitude" in column_names || error("this CSV file lacks a 'longitude' column; found names ", column_names)
-    "latitude" in column_names || error("this CSV file lacks a 'latitude' column; found names ", column_names)
+    "longitude" in column_names || error("no 'longitude' column in CSV file; found ", column_names)
+    "latitude" in column_names || error("no 'latitude' column in CSV file; found ", column_names)
     Coastline(metadata, data)
 end
 
