@@ -118,6 +118,7 @@ function plot_coastline(coastline::Coastline;
     seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out,
     kwargs...)
     aspect_ratio = 1.0 / cos(0.5 * (ylims[2] + ylims[1]) * pi / 180.0)
+    #println("aspect_ratio: ", aspect_ratio)
     plot(coastline.data.longitude, coastline.data.latitude;
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         seriestype=seriestype, color=color, linewidth=linewidth,
@@ -156,23 +157,25 @@ end
 
 Add a scalebar to a plot made with [`plot_coastline`]@ref).
 
-The length of the scalebar, in km, is given by `distance`, at a position dictated
-by `x` and `y`. In this version of the function, `x` must be either `:left` or
-`:right`, and `y` must be either `:bottom` or `:top`.  The default is to place
-the scale bar at the top-left.
+The length of the scalebar, in km, is given by `distance`, at a position
+dictated by `x` and `y`. The value of `x` must be `:left`, `:right` or a number
+(for longitude), and the value of `y` must be `:bottom`, `:top` or a number
+(for latitude).  The default is to place the scale bar at the top-left.
+If none of the corners are suitable, e.g. if the label covers important
+parts of the plot, use numeric values for `x` and `y`.
 
 # Examples
 
 ```juliadoc
 using OceanAnalysis, Plots
 cl = coastline();
-plot_coastline(cl, xlim=(-70, -60), ylim=(42, 48), aspect_ratio=1 / cos(45 * pi / 180))
+plot_coastline(cl, xlims=(-70, -60), ylims=(42, 48))
 scale_bar(100.0)
 ```
 """
 function scale_bar(distance::Real=100.0, x=:left, y=:top)
     distance > 0.0 || error("'distance' must be a positive number")
-    xlim, ylim = xlims(), ylims()
+    xlim, ylim = xlims(), ylims() # from existing plot_coastline() diagram
     ymid = (ylim[1] + ylim[2]) / 2.0
     km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
     dx = (xlim[2] - xlim[1]) / 20 # FIXME: may need to adjust the divisor to look nice
@@ -181,16 +184,20 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
         X = xlim[1] + dx .+ [0.0, distance / km_per_degree_lon]
     elseif x == :right
         X = xlim[2] - dx .- [0.0, distance / km_per_degree_lon]
+    elseif isa(x, Number)
+        X = x + dx .+ [0.0, distance / km_per_degree_lon]
     else
-        error("x must be either :left or :right, not :", x)
+        error("x must be :left, :right, or a number, but it is ", x)
     end
     #println("X: ", X)
     if y == :top
         y0 = ylim[2] - 1.5 * dy
     elseif y == :bottom
         y0 = ylim[1] + dy
+    elseif isa(y, Number)
+        y0 = y
     else
-        error("y must be either :top or :bottom, not :", y)
+        error("y must be :top, :bottom, or a number, but it is ", y)
     end
     #println("y0: ", y0)
     Y = [y0, y0]
