@@ -6,10 +6,10 @@ Release notes:
 - [`as_ctd`](@ref) accepts ranges as well as vectors for `salinity`, `temperature` and `pressure`.
 - [`coastline`](@ref) accepts ranges for `longitude` and `latitude`, in addition to vectors.
 - [`coastline`](@ref) on a CSV file throws an error if columns named "longitude" and "latitude" are not found.
-- Add an Argo-trajectory map to the Examples online documentation.
 - BREAKING: none
 
 ### Added
+- The Examples tab of the online documentation shows hot to create an Argo-trajectory map.
 - [`coriolis`](@ref) computes the Coriolis parameter.
 - [`gravity`](@ref) computes the acceleration due to earth gravity.
 - [`scale_bar`](@ref) adds a scale bar to a map plot.
