@@ -286,3 +286,19 @@ function toc(x::OA)
     end
 end
 
+
+"""
+    coriolis(latitude::Real)
+
+Compute the value of the Coriolis parameter, given a latitude
+in degrees.
+
+# Examples
+```juliadoctest
+julia> coriolis(45.0)
+0.00010312607931384281
+```
+"""
+function coriolis(latitude::Real)
+    1.458423e-4 * sin(latitude * pi / 180)
+end

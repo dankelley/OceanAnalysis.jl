@@ -20,8 +20,9 @@ export Topography
 # Functions
 export argo_id_cycle
 export as_ctd
-export coordinate_from_string
 export coastline
+export coordinate_from_string
+export coriolis
 export CT
 export depth_from_pressure
 export fix_gsw_bad_code

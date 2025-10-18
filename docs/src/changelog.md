@@ -3,6 +3,7 @@
 Release notes:
 
 ### Changed
+- [`coriolis`](@ref) added.
 - [`as_ctd`](@ref) accepts ranges as well as vectors for `salinity`, `temperature` and `pressure`.
 - [`coastline`](@ref) accepts ranges for `longitude` and `latitude`, in addition to vectors.
 - [`coastline`](@ref) on a CSV file throws an error if columns named "longitude" and "latitude" are not found.

@@ -16,6 +16,7 @@ Functions:
 OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
 OceanAnalysis.coastline
+OceanAnalysis.coriolis
 OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
 OceanAnalysis.depth_from_pressure
