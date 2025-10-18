@@ -153,16 +153,20 @@ function plot_coastline!(coastline::Coastline;
 end
 
 """
-    scale_bar(distance::Real=100.0, x=:topleft, y=:topleft)
+    scale_bar(distance::Real=100.0, x=:left, y=:top;
+        linewidth::Real=2.0, fontsize::Real=8)
 
-Add a scalebar to a plot made with [`plot_coastline`]@ref).
+Add a horizontal scalebar to a plot made with [`plot_coastline`]@ref).
 
 The length of the scalebar, in km, is given by `distance`, at a position
 dictated by `x` and `y`. The value of `x` must be `:left`, `:right` or a number
 (for longitude), and the value of `y` must be `:bottom`, `:top` or a number
 (for latitude).  The default is to place the scale bar at the top-left.
 If none of the corners are suitable, e.g. if the label covers important
-parts of the plot, use numeric values for `x` and `y`.
+parts of the plot, use numeric values for `x` and `y` as the longitude
+and latitude of the beginning of the line indicating the scale. The width
+of the line is given by `linewidth`, and the fontsize of the label
+is given by `fontsize`.
 
 # Examples
 
@@ -173,7 +177,7 @@ plot_coastline(cl, xlims=(-70, -60), ylims=(42, 48))
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0, x=:left, y=:top)
+function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, fontsize::Real=9)
     distance > 0.0 || error("'distance' must be a positive number")
     xlim, ylim = xlims(), ylims() # from existing plot_coastline() diagram
     ymid = (ylim[1] + ylim[2]) / 2.0
@@ -185,7 +189,8 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
     elseif x == :right
         X = xlim[2] - dx .- [0.0, distance / km_per_degree_lon]
     elseif isa(x, Number)
-        X = x + dx .+ [0.0, distance / km_per_degree_lon]
+        #X = x + dx .+ [0.0, distance / km_per_degree_lon]
+        X = x .+ [0.0, distance / km_per_degree_lon]
     else
         error("x must be :left, :right, or a number, but it is ", x)
     end
@@ -202,7 +207,7 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top)
     #println("y0: ", y0)
     Y = [y0, y0]
     #println("Y: ", Y)
-    plot!(X, Y, color=:black, linewidth=1.4)
+    plot!(X, Y, color=:black, linewidth=linewidth)
     annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
-        Plots.text("$(trunc(Int, distance)) km", 11))
+        Plots.text("$(trunc(Int, distance)) km", fontsize))
 end
