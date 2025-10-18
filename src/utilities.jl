@@ -302,3 +302,30 @@ julia> coriolis(45.0)
 function coriolis(latitude::Real)
     1.458423e-4 * sin(latitude * pi / 180)
 end
+
+"""
+    gravity(latitude::Real=45.0, z::Real=0.0)
+
+Gravitational acceleration for an ellipsoidal model of the earth.
+
+Computes g (in m/s^2) based on `latitude` (in degrees North)
+and elevation `z` (in m above the geoid), using the same formula
+as that in the first form of equation D.3 in reference 1.
+
+# References
+
+1. Intergovernmental Oceanographic Commission, SCOR, and IAPSO. The
+   International Thermodynamic Equation of Seawater–2010: Calculation and Use
+   of Thermodynamic Properties. No. 56. UNESCO, 2016.
+
+# Examples
+```juliadoctest
+
+julia> gravity()
+9.806199977310339
+```
+"""
+function gravity(latitude::Real=45.0, z::Real=0.0)
+    phi = latitude * π / 180.0
+    9.7803271 * (1.0 + 5.3024e-3 * sin(phi)^2 - 5.8e-6 * sin(2.0 * phi)^2) * (1.0 - 2.26e-7 * z)
+end

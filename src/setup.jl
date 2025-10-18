@@ -35,6 +35,7 @@ export get_element
 export get_file
 export get_nc_value
 export get_topography_file
+export gravity
 export N2
 export plot_amsr
 export plot_coastline

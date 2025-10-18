@@ -30,6 +30,7 @@ OceanAnalysis.get_element
 OceanAnalysis.get_file
 OceanAnalysis.get_nc_value
 OceanAnalysis.get_topography_file
+OceanAnalysis.gravity
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_amsr
