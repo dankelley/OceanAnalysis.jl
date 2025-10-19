@@ -62,15 +62,24 @@ on the developer's part except for pushing to "main".
 
 ## Updating on julia registry
 
-1. Test locally with `] activate ,` and then `test`.
+1. Test locally with `] activate .` followed by `test`. Exit from the packager
+   with control-C and then from Julia.  Then fix any problems that were noted
+   and rerun this step.
 
-2. Push to GH.
+2. Build and examine the documentation locally (see above).
 
-3. Wait approximately 10 minutes, then ensure that the GH actions all worked
-   properly.
+3. Push to GitHub.
 
-4. On GH, go to the latest commit, and insert a comment on it like below. The
-   details matter, e.g. the colon is required on the "Release notes" line.
+4. Use the package for a few days or weeks to be sure that the changes are
+   good. Be sure to follow the above steps for each change that is required.
+   (For example, don't forget to examine and evaluate the documentation for
+   each change.)
+
+5. When you think that things are stable, i.e. that no breaking changes will be
+   required in the future, go to the GitHub website and insert a comment on the
+   latest commit. The details of the comment *must* be in a particular format,
+   as exemplified below.  (For example, I wasted a lot of time not realizing
+   that a colon was required at the end of the 'Release notes:' line.)
 
 ```
 @JuliaRegistrator register
