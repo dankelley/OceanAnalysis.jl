@@ -1,4 +1,4 @@
-# Changelog from version 0.1.0 to version 0.1.1
+# Changelog from version 0.1.0 to version 0.2.0
 
 Release notes:
 
