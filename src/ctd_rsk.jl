@@ -2,19 +2,32 @@ using SQLite, DataFrames, Plots, Dates, Printf, Statistics
 
 """
     read_ctd_rsk(filename::String; add_teos::Bool=true,
-        longitude=-60.0, latitude=40.0, debug::Int64=0)
+        atmospheric_pressure=missing, longitude::Real=-60.0, latitude::Real=40.0,
+        debug::Int64=0)
 
 Read a CTD file from an RBR instrument.
 
-The sqlite scheme is used in such files, so the present function relies
-on the `SQLite` package. Only a fraction of the tables within the file
-are read in this version of the function.  The main tables that are
-examined are: `data`, which holds the data; `channels`, which is used
+These files store data in sqlite format, which the present function
+handles with the `SQLite` package. Only a subset of the tables within 
+RBR files are read in this version of the function.  The main such
+tables are: `data`, which holds the data; `channels`, which is used
 to rename the elements in `data`; and (if present) `geodata`, which
 may hold information on the sampling location. Other tables are consulted
 to learn things like the serial number of the instrument. Some
 information on the reading process is printed if you call the function
 with `debug=1`.
+
+Note that RBR files typically record 'gauge' pressure, which is the
+sum of atmospheric pressure and the sea pressure. Since oceanographic
+calculations are typically formulated in terms of sea pressure, so the
+pressure data stored in RBR files is not inserted into the value
+returned by this function.  Instead, the returned value is set to
+pressure stored in the file minus atmospheric pressure.  The value
+of atmospheric pressure is taken from the data file if it holds a
+table called `deriveDepth`. If such a table is not found, and if
+the `atmosphericPressure` argument was not supplied, a default of 10.1325
+dbar is used.  However, if that argument is supplied, then it
+supercedes a value stored in the file,
 
 If `add_teos` is true, then the TEOS10 quantities `CT`, `SA`, `sigma0` and
 `spiciness0` are computed.  These require knowledge of the sampling location,
@@ -30,16 +43,17 @@ features are not yet provided in this package.
 # Examples
 ```juliadoc
 using OceanAnalysis, Plots
-ctd = read_ctd_rsk("~/git/oce/create_data/rsk/060130_20150904_1159.rsk")
-pS = plot_profile(ctd, which="salinity");
-pT = plot_profile(ctd, which="temperature");
-pTS = plot_TS(ctd);
-ppt = plot(ctd.data.time, ctd.data.pressure)
-plot(pS, pT, ppt, pTS, layout=(2,2))
+ctd = read_ctd_rsk("~/git/oce/create_data/rsk/060130_20150904_1159.rsk");
+Sp = plot_profile(ctd, which="salinity");
+Tp = plot_profile(ctd, which="temperature");
+TS = plot_TS(ctd);
+pt = plot(ctd.data.time, ctd.data.pressure);
+plot(Sp, Tp, pt, TS, layout=(2,2))
 ```
 """
 function read_ctd_rsk(filename::String; add_teos::Bool=true,
-    longitude=-60.0, latitude=40.0, debug::Int64=0)
+    atmospheric_pressure=missing, longitude::Real=-60.0, latitude::Real=40.0,
+    debug::Int64=0)
     oad(debug, "read_ctd_rsk() START")
     filename = expanduser(filename)
     # FIXME: how do we close the db?
@@ -77,13 +91,27 @@ function read_ctd_rsk(filename::String; add_teos::Bool=true,
     oad(debug, "        setting salinities over 40 g/kg to NaN")
     data.salinity[data.salinity.>40.0] .= NaN
     if "geodata" in tables.name
-        oad(debug, "        reading 'geodata' table (FIXME: not sure on contents' names)")
+        oad(debug, "        reading 'geodata' table (which supercedes 'longitude' and 'latitude' arguments)")
         geodata = DBInterface.execute(db, "SELECT * FROM geodata") |> DataFrame
         longitude = geodata.longitude
         latitude = geodata.latitude
     end
+    if "deriveDepth" in tables.name
+        if ismissing(atmospheric_pressure)
+            oad(debug, "    reading 'deriveDepth' table (to find 'atmospheric_pressure' argument)")
+            deriveDepth = DBInterface.execute(db, "SELECT * FROM deriveDepth") |> DataFrame
+            atmospheric_pressure = deriveDepth.atmosphericPressure
+        else
+            oad(debug, "    ignoring atmospheric pressure stored in the 'deriveDepth' table, because user supplied a value as an argument")
+        end
+    else
+        if ismissing(atmospheric_pressure)
+            atmospheric_pressure = 10.1325
+            oad(debug, "    file has no 'deriveDepth' table, and atmospheric_pressure not provided, so latter defaults to ", atmospheric_pressure, " dbar")
+        end
+    end
     if "instruments" in tables.name
-        oad(debug, "    reading 'instruments' table")
+        oad(debug, "    reading 'instruments' table (from which we get 'model' and 'serial_number')")
         instruments = DBInterface.execute(db, "SELECT * FROM instruments") |> DataFrame
         model = instruments.model
         serial_number = instruments.serialID[1]
@@ -98,6 +126,10 @@ function read_ctd_rsk(filename::String; add_teos::Bool=true,
     # FIXME: this could go in a new method that takes
     # metadata::Dict, data::Vector{Real} as args, and adds
     # these things if they are not present
+    oad(debug, "    adding 'atmospheric_pressure' to metadata")
+    metadata["atmospheric_pressure"] = atmospheric_pressure
+    oad(debug, "    subtracting ", atmospheric_pressure, " dbar from file pressure")
+    data.pressure = data.pressure .- atmospheric_pressure
     if add_teos
         oad(debug, "    adding teos-10 variables because add_teos is true")
         oad(debug, "        adding 'SA' column to data")
