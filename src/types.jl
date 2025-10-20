@@ -20,7 +20,7 @@ a Dict named `metadata` that stores information about the data, such as the
 the observation was made.
 
 Objects of type `Ctd` are returned by [`as_ctd`](@ref), [`read_ctd_cnv`](@ref),
-[`read_rsk`](@ref) and [`read_argo`](@ref).  Such objects can be passed to
+[`read_ctd_rsk`](@ref) and [`read_argo`](@ref).  Such objects can be passed to
 plotting functions [`plot_profile`](@ref) and [`plot_TS`](@ref), and to some
 functions relating to seawater properties, such as [`SA`](@ref) and other
 TEOS-10 related functions, as well as functions relating to the distributions

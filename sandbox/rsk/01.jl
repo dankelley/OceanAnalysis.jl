@@ -1,3 +1,5 @@
+# This has been incorporated into src/ctd_rsk.jl
+
 using SQLite, DataFrames, Plots, Dates, Printf, Statistics
 using OceanAnalysis, GibbsSeaWater
 function oad(debug::Int64=0, msg="")
@@ -6,7 +8,7 @@ function oad(debug::Int64=0, msg="")
     end
 end
 
-function read_ctd_rsk(filename::String; debug::Int64=0)
+function read_ctd_rsk_trial(filename::String; debug::Int64=0)
     f = expanduser(filename)
     db = SQLite.DB(f)
     tables = DBInterface.execute(db, "SELECT name FROM sqlite_master WHERE type='table'") |> DataFrame
@@ -65,7 +67,7 @@ function read_ctd_rsk(filename::String; debug::Int64=0)
 end
 
 
-ctd = read_rsk("~/git/oce/create_data/rsk/060130_20150904_1159.rsk", debug=1)
+ctd = read_ctd_rsk_trial("~/git/oce/create_data/rsk/060130_20150904_1159.rsk", debug=1)
 
 
 toc(ctd)
