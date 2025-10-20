@@ -46,6 +46,7 @@ OceanAnalysis.read_amsr
 OceanAnalysis.read_argo
 OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv
+OceanAnalysis.read_ctd_rsk
 OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.scale_bar

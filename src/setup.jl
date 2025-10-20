@@ -50,6 +50,7 @@ export read_amsr
 export read_argo
 export read_argo_index
 export read_ctd_cnv
+export read_ctd_rsk
 export read_topography
 export salinity_from_conductivity
 export SA

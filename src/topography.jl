@@ -166,7 +166,7 @@ function get_topography_file(west::Real, east::Real,
     destfile = expanduser(joinpath(destdir, "topo_" * wName * "_" * eName * "_" * sName * "_" * nName * "_" * resolutionName * ".nc"))
     if isfile(destfile)
         oad(debug, "    destfile $destfile already exists, so not downloading new data")
-        oad(debug, "read_topography_file() END")
+        oad(debug, "END read_topography_file()")
         return destfile
     else
         nlon = Int64(ceil(60.0 * (east - west) / resolution))
@@ -219,7 +219,7 @@ function get_topography_file(west::Real, east::Real,
         oad(debug, "    stored z (the topography matrix) in NetCDF file")
         close(nc)
         oad(debug, "    closed NetCDF file")
-        oad(debug, "read_topography_file() END")
+        oad(debug, "END read_topography_file()")
         return destfile
     end
 end

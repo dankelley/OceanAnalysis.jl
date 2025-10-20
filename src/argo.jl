@@ -176,12 +176,12 @@ file.
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
 function get_argo_index(destdir::String="."; age::Real=1.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
-    oad(debug, "get_argo_index START")
+    oad(debug, "get_argo_index() START")
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
     remote_file = joinpath(server, file)
     rval = get_file(remote_file, local_file, age, debug=increment_debug(debug))
-    oad(debug, "END get_argo_index")
+    oad(debug, "END get_argo_index()")
     rval
 end
 
@@ -216,7 +216,7 @@ plot_profile(argo, which="CT")
 
 """
 function get_argo_file(file::String="", destdir::String="."; age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
-    oad(debug, "get_argo_file START")
+    oad(debug, "get_argo_file() START")
     file_original = file
     oad(debug, "    file: ", file, " (original)")
     file = replace.(file, r".*/" => "")
@@ -226,7 +226,7 @@ function get_argo_file(file::String="", destdir::String="."; age::Real=30.0, ser
     url = joinpath(server, "dac", file_original)
     oad(debug, "    url: ", url)
     rval = get_file(url, file, age, debug=increment_debug(debug))
-    oad(debug, "END get_argo_file")
+    oad(debug, "END get_argo_file()")
     rval
 end
 
@@ -253,7 +253,7 @@ the location on remote servers, as is required for use as the `file` argument
 """
 function read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
     file = expanduser(file)
-    oad(debug, "read_argo_index START")
+    oad(debug, "read_argo_index() START")
     if !isfile(file)
         error("No file: ", file)
     end
@@ -287,7 +287,7 @@ function read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::
         oad(debug, "    trimming 'profiler_type' column")
         select!(df, Not(:profiler_type))
     end
-    oad(debug, "END read_argo_index")
+    oad(debug, "END read_argo_index()")
     return df
 end
 

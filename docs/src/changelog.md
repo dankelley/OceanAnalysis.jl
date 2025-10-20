@@ -7,7 +7,7 @@ Release notes:
 - BREAKING: none
 
 ### Added
-- none
+- [`read_ctd_rsk`](@ref) added, to read RBR 'Ruskin' files.
 
 
 # Changelog from version 0.1.0 to version 0.2.0

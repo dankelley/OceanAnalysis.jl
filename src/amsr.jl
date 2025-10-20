@@ -113,7 +113,7 @@ the first argument to a call to [`read_amsr`](@ref).
 function get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
     destdir::String=".", server::String="https://data.remss.com/amsr2/ocean/L3/v08.2",
     debug::Integer=0)
-    oad(debug, "get_amsr_file START")
+    oad(debug, "get_amsr_file() START")
     destfile = @sprintf(
         "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
         type, year(date), month(date), day(date))
@@ -127,7 +127,7 @@ function get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
     else
         oad(debug, "    $destpath has already been downloaded")
     end
-    oad(debug, "END get_amsr_file")
+    oad(debug, "END get_amsr_file()")
     destpath
 end
 
@@ -182,7 +182,7 @@ function plot_amsr(amsr::Amsr;
     debug::Int64=0)
     2 == length(xlims) || error("xlims must be of length 2")
     2 == length(ylims) || error("ylims must be of length 2")
-    oad(debug, "plot_amsr START")
+    oad(debug, "plot_amsr() START")
     if 0 == length(levels)
         oad(debug, "    setting default levels")
         levels = range(-5.0, 35.0, step=5.0)
@@ -215,7 +215,7 @@ function plot_amsr(amsr::Amsr;
         contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
             linewidth=0.75)
     end
-    oad(debug, "END plot_amsr")
+    oad(debug, "END plot_amsr()")
     p
 end
 
@@ -249,7 +249,7 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
     oad(debug, "    keeping ",
         round(100.0 * sum(lonOK) / length(lonOK), digits=2), "% of longitudes and ",
         round(100.0 * sum(latOK) / length(latOK), digits=2), "% of latitudes")
-    oad(debug, "END subset_amsr")
+    oad(debug, "END subset_amsr()")
     rval
 end
 
