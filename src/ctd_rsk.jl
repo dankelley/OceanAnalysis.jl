@@ -11,13 +11,21 @@ on the `SQLite` package. Only a fraction of the tables within the file
 are read in this version of the function.  The main tables that are
 examined are: `data`, which holds the data; `channels`, which is used
 to rename the elements in `data`; and (if present) `geodata`, which
-may hold information on the sampling location.
+may hold information on the sampling location. Other tables are consulted
+to learn things like the serial number of the instrument. Some
+information on the reading process is printed if you call the function
+with `debug=1`.
 
-If `add_teos` is true, then the TEOS10 quantities `CT`, SA`, `sigma0` and
+If `add_teos` is true, then the TEOS10 quantities `CT`, `SA`, `sigma0` and
 `spiciness0` are computed.  These require knowledge of the sampling location,
 which is inferred from the `geodata` table (if it exists) or from
 the function arguments named `longitude` and `latitude`, otherwise. (The
-default values of these parameters correspond to the western North Atlantic.)
+default values of these parameters specify a position in the western
+North Atlantic.)
+
+Note that these data files are in a raw form from the instrument, and 
+so some trimming to the downcast portion(s) may be needed.  Such
+features are not yet provided in this package.
 
 # Examples
 ```juliadoc
