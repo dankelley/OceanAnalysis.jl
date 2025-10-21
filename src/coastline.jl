@@ -97,8 +97,8 @@ end
 """
     plot_coastline(coastline::Coastline;
         xlims=(-180., 180.), ylims=(-90., 90.),
-        seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out,
-        kwargs...)
+        seriestype=:shape, color=:bisque3, linewidth=0.5,
+        tickdirection=:out, debug::Int64=0, kwargs...)
 
 Plot a coastline with longitude and latitude axes (i.e. without a map projection).
 
@@ -115,14 +115,18 @@ The `aspect_ratio` of the plot is set as the reciprocal of the mean of the
 """
 function plot_coastline(coastline::Coastline;
     xlims=(-180., 180.), ylims=(-90., 90.),
-    seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out,
-    kwargs...)
+    seriestype=:shape, color=:bisque3, linewidth=0.5,
+    tickdirection=:out, debug::Int64=0, kwargs...)
+    oad(debug, "plot_coastline() START")
     aspect_ratio = 1.0 / cos(0.5 * (ylims[2] + ylims[1]) * pi / 180.0)
-    #println("aspect_ratio: ", aspect_ratio)
-    plot(coastline.data.longitude, coastline.data.latitude;
+    oad(debug, "    computed aspect_ratio=", aspect_ratio)
+    rval = plot(coastline.data.longitude, coastline.data.latitude;
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         seriestype=seriestype, color=color, linewidth=linewidth,
-        legend=false, framestyle=:box, tickdirection=tickdirection, kwargs...)
+        legend=false, framestyle=:box, tickdirection=tickdirection,
+        kwargs...)
+    oad(debug, "END plot_coastline()")
+    rval
 end
 
 """

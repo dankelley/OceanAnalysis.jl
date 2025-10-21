@@ -27,7 +27,7 @@ TEOS-10 related functions, as well as functions relating to the distributions
 of such properties, such as [`N2`](@ref).
 
 """
-struct Ctd <: OA
+mutable struct Ctd <: OA
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
 end
@@ -41,7 +41,7 @@ may hold the source filename or other information (or may be empty).  Its
 with NaN values separating continents and/or elements within them such
 as countries or subregions of countries.
 """
-struct Coastline <: OA
+mutable struct Coastline <: OA
     metadata::Dict{String,Any}
     data::DataFrames.DataFrame
 end
@@ -58,7 +58,7 @@ and `latitude`) that define the grid.
 
 The `data` element is a matrix holding the gridded data.
 """
-struct Amsr <: OA
+mutable struct Amsr <: OA
     metadata::Dict{String,Any}
     data::Matrix{Float64}
 end
@@ -74,7 +74,7 @@ vectors holding the `longitude` and `latitude` values that define the grid.
 The `data` element stores a matrix of topography data in terms of height
 above mean sea level, in metres.
 """
-struct Topography <: OA
+mutable struct Topography <: OA
     metadata::Dict{String,Any}
     data::Matrix{Float64}
 end
