@@ -8,6 +8,7 @@ Release notes:
 
 ### Added
 - [`read_ctd_rsk`](@ref) added, to read RBR 'Ruskin' files.
+- [`set_teos`](@ref) added, to add TEOS-10 hydrographic quantities to an object containing hydrographic data.
 
 
 # Changelog from version 0.1.0 to version 0.2.0

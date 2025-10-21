@@ -50,6 +50,7 @@ OceanAnalysis.read_ctd_rsk
 OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.scale_bar
+OceanAnalysis.set_teos
 OceanAnalysis.subset_amsr
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68

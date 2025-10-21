@@ -76,23 +76,10 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
     oad(debug, "    given longitude:  ", longitude)
     oad(debug, "    given latitude:   ", latitude)
-    oad(debug, "    assembling data (a DataFrame) from the above")
+    oad(debug, "    assembling data (a DataFrame)")
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
-    if add_teos
-        oad(debug, "    adding TEOS-10 variables")
-        data.SA = gsw_sa_from_sp.(salinity, pressure, longitude, latitude) |> fix_gsw_bad_code!
-        oad(debug, "    created SA, starting with ", first(data.SA, 2))
-        data.CT = gsw_ct_from_t.(data.SA, temperature, pressure) |> fix_gsw_bad_code!
-        oad(debug, "    created CT, stating with : ", first(data.CT, 2))
-        data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
-        oad(debug, "    created sigma0, starting with ", first(data.sigma0, 2))
-        data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
-        oad(debug, "    created spiciness0, starting with ", first(data.spiciness0, 2))
-    end
     oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
-    # DELETE     Note that we are inserting the longitude and latitude from the function call,
-    # DELETE     not the -30,30 values that we invented in order to estimate SA, CT, sigma0 and spicines0
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
     if !ismissing(time)
@@ -100,6 +87,57 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     end
     oad(debug, "    passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
+    if add_teos
+        oad(debug, "    inserting TEOS-10 values into data")
+        rval = set_teos(rval, debug=debug)
+    end
     oad(debug, "END as_ctd()")
     rval
 end # as_ctd()
+
+
+"""
+    set_teos(x::OA; debug::Int64=0)
+
+Add, or modify, TEOS-10 components to hydrographic data.
+
+Compute the TEOS-10 quantities `SA` (Absolute Salinity), `CT` (Conservative
+Temperature), `sigma0` (potential density anomaly with respect to surface pressure),
+and `spiciness0` (seawater spiciness with respect to surface pressure).
+These items are inserted into the `data` component of the returned value. If
+they are already present in `x`, then new values are inserted in the
+return value.
+
+An error is reported if the `x.data` lacks `salinity`, `temperature` or
+`pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
+"""
+function set_teos(x::OA; debug::Int64=0)
+    oad(debug, "insert_teos10(OA) START")
+    metadata = copy(x.metadata)
+    data = copy(x.data)
+    metadata_names = keys(metadata)
+    oad(debug, "    metadata_names: ", metadata_names)
+    data_names = names(data)
+    oad(debug, "    data_names: ", data_names)
+    data_needed = ("salinity", "temperature", "pressure")
+    has_needed_data = [x in data_names for x in data_needed]
+    sum(has_needed_data) == 3 || error("lacking 'salinity', 'temperature' or 'pressure' in data ")
+    metadata_needed = ("longitude", "latitude")
+    has_needed_metadata = [x in metadata_names for x in metadata_needed]
+    sum(has_needed_metadata) == 2 || error("lacking 'longitude' or 'latitude' in metadata ")
+    oad(debug, "    have requisite hydrographic and location data, so can set TEOS-10 variables")
+    S, T, p = data.salinity, data.temperature, data.pressure
+    lon, lat = metadata["longitude"], metadata["latitude"]
+    data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
+    oad(debug, "        SA completed, starting with ", first(data.SA, 2))
+    data.CT = gsw_ct_from_t.(data.SA, T, p) |> fix_gsw_bad_code!
+    oad(debug, "        CT completed, stating with : ", first(data.CT, 2))
+    data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
+    oad(debug, "        sigma0 completed, starting with ", first(data.sigma0, 2))
+    data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
+    oad(debug, "        spiciness0 completed, starting with ", first(data.spiciness0, 2))
+    rval = Ctd(metadata, data)
+    oad(debug, "END set_teos(OA)")
+    rval
+end
+

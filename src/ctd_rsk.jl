@@ -130,22 +130,14 @@ function read_ctd_rsk(filename::String; add_teos::Bool=true,
     metadata["atmospheric_pressure"] = atmospheric_pressure
     oad(debug, "    subtracting ", atmospheric_pressure, " dbar from file pressure")
     data.pressure = data.pressure .- atmospheric_pressure
-    if add_teos
-        oad(debug, "    adding teos-10 variables because add_teos is true")
-        oad(debug, "        adding 'SA' column to data")
-        data.SA = gsw_sa_from_sp.(data.salinity, data.pressure, -63, 40)
-        oad(debug, "        adding 'CT' column to data")
-        data.CT = gsw_ct_from_t.(data.SA, data.temperature, data.pressure)
-        oad(debug, "        adding 'sigma0' column to data")
-        data.sigma0 = gsw_sigma0.(data.SA, data.CT)
-        oad(debug, "        adding 'spiciness0' column to data")
-        data.spiciness0 = gsw_spiciness0.(data.SA, data.CT)
-    end
     oad(debug, "    adding 'longitude' to metadata")
     metadata["longitude"] = longitude
     oad(debug, "    adding 'latitude' to metadata")
     metadata["latitude"] = latitude
     rval = Ctd(metadata, data)
+    if add_teos
+        rval = set_teos(rval)
+    end
     oad(debug, "END read_ctd_rsk()")
     rval
 end
