@@ -217,24 +217,30 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, f
 end
 
 """
-   station_map(longitude, latitude;
-       scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
+    station_map(longitude, latitude;
+        scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
 
 Using [`plot_coastline`](@ref), draw a map that shows the location of a station
-(or stations), with some nearby coastline. The geographical region
-is determined by finding the nearest distance to land and multiplying
-its span by the `scale` argument. Adjusting `markersize` and `color` will
-alter the look of the station point(s).
+(or stations) specified by `longitude` and `latitude`, each of which may be a
+single number or a vector of numbers (with longitude in the -180 to +180
+convention). The span of the map is set automatically by finding the distance
+to the nearest point of land and multiplying by `scale`; thus, setting larger
+values of the latter will show a wider view. Adjusting `markersize` and `color`
+alters the look of the station point(s).
 
 # Examples
 
 ```juliadoc
 using OceanAnalysis
-station_map(-55.0, 45.0) # shows Canadian Maritime provinces
+# Show a station south of Newfoundland, east of Cape Breton
+station_map(-56.0, 45.5)
 ```
 """
-function station_map(longitude, latitude; scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
+function station_map(longitude, latitude;
+    scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
     oad(debug, "station_map() START")
+    length(longitude) == length(latitude) || error("lengths of longitude and latitude must match, but they are ",
+        length(longitude), " and ", length(latitude), ", respectively")
     cl = coastline()
     lon0 = mean(longitude)
     lat0 = mean(latitude)
