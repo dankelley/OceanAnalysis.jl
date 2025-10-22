@@ -215,3 +215,40 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, f
     annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
         Plots.text("$(trunc(Int, distance)) km", fontsize))
 end
+
+"""
+   station_map(longitude, latitude;
+       scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
+
+Using [`plot_coastline`](@ref), draw a map that shows the location of a station
+(or stations), with some nearby coastline. The geographical region
+is determined by finding the nearest distance to land and multiplying
+its span by the `scale` argument. Adjusting `markersize` and `color` will
+alter the look of the station point(s).
+
+# Examples
+
+```juliadoc
+using OceanAnalysis
+station_map(-55.0, 45.0) # shows Canadian Maritime provinces
+```
+"""
+function station_map(longitude, latitude; scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
+    oad(debug, "station_map() START")
+    cl = coastline()
+    lon0 = mean(longitude)
+    lat0 = mean(latitude)
+    distance_to_land = geod_distance.(lon0, lat0, cl.data.longitude, cl.data.latitude)
+    distance_to_nearest_land = minimum(x for x in distance_to_land if !isnan(x))
+    oad(debug, "    distance to nearest land is ", distance_to_nearest_land, "km")
+    S = scale * distance_to_nearest_land / 111.0 # 1 lat deg ~ 111 km distance
+    ar = 1.0 / cos(lat0 * pi / 180) # aspect ratio
+    oad(debug, "    aspect ratio is ", ar, "km")
+    map = plot_coastline(cl,
+        xlims=lon0 .+ (-ar * S, ar * S), ylims=lat0 .+ (-S, S);
+        debug=increment_debug(debug))
+    scatter!(map, [longitude], [latitude], label=false, markersize=markersize, color=color)
+    oad(debug, "END station_map()")
+    map
+end
+
