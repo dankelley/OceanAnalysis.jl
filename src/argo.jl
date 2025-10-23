@@ -194,9 +194,16 @@ Download an Argo profile file, if an existing copy is less than `age` days old.
 
 - `file`: path to the file on a server, of the form `agency/#/profiles/-#_##.nc`, where `#` is the ID number of the float, `-` tells the status of the file (`R` for realtime files, `D` for delayed-mode files, etc.) and `##` is an identifier for the cast (usually but not always an integer value). This system matches the `file` information stored on argo servers, as downloaded by [`get_argo_index`](@ref) and read by [`read_argo_index`](@ref).
 
+# Keywords
+
 - `destdir`: name of the directory into which to save the file.
 
 - `age`: file-caching time in days.  If the requested file does not exist locally then `age` is ignored and the file is downloaded.  It will also be downloaded if there is an existing file but it was last downloaded more than `age` days ago.
+
+- `server`: base URL for the server (it is very unlikely that users will set this
+
+- `debug`: integer indicating whether to print information during processing. The default
+value of 0 means to work silently.
 
 # Returns
 
@@ -215,7 +222,7 @@ plot_profile(argo, which="CT")
 ```
 
 """
-function get_argo_file(file::String="", destdir::String="."; age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo_file(file::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo_file() START")
     file_original = file
     oad(debug, "    file: ", file, " (original)")
