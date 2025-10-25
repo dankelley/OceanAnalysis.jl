@@ -223,10 +223,16 @@ end
 Using [`plot_coastline`](@ref), draw a map that shows the location of a station
 (or stations) specified by `longitude` and `latitude`, each of which may be a
 single number or a vector of numbers (with longitude in the -180 to +180
-convention). The span of the map is set automatically by finding the distance
-to the nearest point of land and multiplying by `scale`; thus, setting larger
-values of the latter will show a wider view. Adjusting `markersize` and `color`
-alters the look of the station point(s).
+convention). The map span is computed automatically by computing
+the distance between the centroid of the stations and the nearest point of land
+and also computing the span across the stations.  The maximum of these
+two distances is multiplied by `scale`, and from this the x and y
+limits of the plot are set.  Altering the value of `scale` is thus
+the way a user can control the view. The size and colour of the station
+markers are set by `markersize` and `color`, respectively.
+
+For more advanced views, including map projections, consider using
+the `GMT` package instead of `station_map`.
 
 # Examples
 
@@ -246,12 +252,17 @@ function station_map(longitude, latitude;
     lat0 = mean(latitude)
     distance_to_land = geod_distance.(lon0, lat0, cl.data.longitude, cl.data.latitude)
     distance_to_nearest_land = minimum(x for x in distance_to_land if !isnan(x))
-    oad(debug, "    distance to nearest land is ", distance_to_nearest_land, "km")
-    S = scale * distance_to_nearest_land / 111.0 # 1 lat deg ~ 111 km distance
-    ar = 1.0 / cos(lat0 * pi / 180) # aspect ratio
-    oad(debug, "    aspect ratio is ", ar, "km")
+    oad(debug, "    distance_to_nearest_land: ", distance_to_nearest_land, " km")
+    distance_across_stations = maximum(geod_distance.(lon0, lat0, longitude, latitude))
+    oad(debug, "    distance_across_stations: ", distance_across_stations, " km")
+    # Next approximates 1 degree of latitude as 111 km
+    S = scale * maximum([distance_to_nearest_land, distance_across_stations]) / 111.0
+    oad(debug, "    S: ", S)
+    aspect_ratio = 1.0 / cos(lat0 * pi / 180) # aspect ratio
+    oad(debug, "    aspect_ratio: ", aspect_ratio)
     map = plot_coastline(cl,
-        xlims=lon0 .+ (-ar * S, ar * S), ylims=lat0 .+ (-S, S);
+        xlims=lon0 .+ aspect_ratio .* (-S, S),
+        ylims=lat0 .+ (-S, S);
         debug=increment_debug(debug))
     scatter!(map, [longitude], [latitude], label=false, markersize=markersize, color=color)
     oad(debug, "END station_map()")
