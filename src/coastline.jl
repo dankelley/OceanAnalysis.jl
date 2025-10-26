@@ -217,8 +217,7 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, f
 end
 
 """
-    station_map(longitude, latitude;
-        scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
+    station_map(longitude, latitude; scale::Real=5.0, debug::Int64=0, kwargs...)
 
 Using [`plot_coastline`](@ref), draw a map that shows the location of a station
 (or stations) specified by `longitude` and `latitude`, each of which may be a
@@ -228,22 +227,27 @@ the distance between the centroid of the stations and the nearest point of land
 and also computing the span across the stations.  The maximum of these
 two distances is multiplied by `scale`, and from this the x and y
 limits of the plot are set.  Altering the value of `scale` is thus
-the way a user can control the view. The size and colour of the station
-markers are set by `markersize` and `color`, respectively.
+the way a user can control the view. The station locations
+are drawn by calling `scatter` from the `Plots` package, to which
+the `kwargs...` elements are passed directly; the example
+shows how to use this fact to alter the station symbols.
 
-For more advanced views, including map projections, consider using
-the `GMT` package instead of `station_map`.
+Map projections are not offered by `station_map`; to get such views, consider
+using the `GMT` package.
 
 # Examples
 
 ```juliadoc
-using OceanAnalysis
-# Show a station south of Newfoundland, east of Cape Breton
-station_map(-56.0, 45.5)
+using OceanAnalysis, Plots
+# Red circle marks a station south of Newfoundland
+p1 = station_map(-56.0, 45.5)
+# The same, but using a large light-blue diamond
+p2 = station_map(-56.0, 45.0,
+    markercolor=:lightblue, markershape=:diamond, markersize=6)
+plot(p1, p2)
 ```
 """
-function station_map(longitude, latitude;
-    scale::Real=5.0, markersize=2, color=:red, debug::Int64=0)
+function station_map(longitude, latitude; scale::Real=5.0, debug::Int64=0, kwargs...)
     oad(debug, "station_map() START")
     length(longitude) == length(latitude) || error("lengths of longitude and latitude must match, but they are ",
         length(longitude), " and ", length(latitude), ", respectively")
@@ -261,10 +265,10 @@ function station_map(longitude, latitude;
     aspect_ratio = 1.0 / cos(lat0 * pi / 180) # aspect ratio
     oad(debug, "    aspect_ratio: ", aspect_ratio)
     map = plot_coastline(cl,
-        xlims=lon0 .+ aspect_ratio .* (-S, S),
-        ylims=lat0 .+ (-S, S);
+        xlims=lon0 .+ aspect_ratio .* (-S, S), ylims=lat0 .+ (-S, S);
         debug=increment_debug(debug))
-    scatter!(map, [longitude], [latitude], label=false, markersize=markersize, color=color)
+    #println("kwargs...:", kwargs...)
+    scatter!(map, [longitude], [latitude], label=false; kwargs...)
     oad(debug, "END station_map()")
     map
 end
