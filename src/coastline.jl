@@ -239,10 +239,11 @@ using the `GMT` package.
 
 ```juliadoc
 using OceanAnalysis, Plots
-# Red circle marks a station south of Newfoundland
-p1 = station_map(-56.0, 45.5)
+# Red circle marks a station south of due east of Fort Louisbourg
+# and due south of Saint Pierre and Miquelon.
+p1 = station_map(-56.33, 45.90)
 # The same, but using a large light-blue diamond
-p2 = station_map(-56.0, 45.0,
+p2 = station_map(-56.33, 45.90,
     markercolor=:lightblue, markershape=:diamond, markersize=6)
 plot(p1, p2)
 ```
