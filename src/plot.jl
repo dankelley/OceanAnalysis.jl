@@ -1,7 +1,7 @@
 """
     plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
-        labelfontsize=8, debug::Int64=0, kwargs...)
+        guidefontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the
 variable named by `which` depends on pressure.  The variable is drawn on the x
@@ -19,8 +19,8 @@ and
 
 The default Julia font sizes on axes are overridden in this function, with
 8-point being used for both the numbers on axes (`tickfontize`) and the names
-of axes (`labelfontsize`).  (The `tickfontsize` matches the Julia default,
-but the `labelfontsize` is smaller than the Julia default. The idea is to
+of axes (`guidefontsize`).  (The `tickfontsize` matches the Julia default,
+but the `guidefontsize` is smaller than the Julia default. The idea is to
 not waste space by using fonts that are larger than what journals require.)
 
 The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
@@ -51,7 +51,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
-    labelfontsize=8, debug::Int64=0, kwargs...)
+    guidefontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
     # We can plot proviles of whatever is in the file, plus some others. Of course,
@@ -97,7 +97,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash,
             tickfontsize=tickfontsize, tickdirection=tickdirection,
-            labelfontsize=labelfontsize,
+            guidefontsize=guidefontsize,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
             else
@@ -110,7 +110,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash,
             tickfontsize=tickfontsize, tickdirection=tickdirection,
-            labelfontsize=labelfontsize,
+            guidefontsize=guidefontsize,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
             else
@@ -123,7 +123,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash,
             tickfontsize=tickfontsize, tickdirection=tickdirection,
-            labelfontsize=labelfontsize,
+            guidefontsize=guidefontsize,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
             else
@@ -137,7 +137,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash,
             tickfontsize=tickfontsize, tickdirection=tickdirection,
-            labelfontsize=labelfontsize,
+            guidefontsize=guidefontsize,
             xlabel=if abbreviate
                 "π [kg/m³]"
             else
@@ -151,7 +151,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash,
             tickfontsize=tickfontsize, tickdirection=tickdirection,
-            labelfontsize=labelfontsize,
+            guidefontsize=guidefontsize,
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
@@ -165,7 +165,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
             yaxis=:flip, xmirror=true, framestyle=:box,
             legend=legend, color=:black, gridstyle=:dash,
             tickfontsize=tickfontsize, tickdirection=tickdirection,
-            labelfontsize=labelfontsize,
+            guidefontsize=guidefontsize,
             xlabel=which,
             yrot=90; kwargs...)
     else
@@ -180,7 +180,7 @@ end
         draw_freezing=true, abbreviate=false,
         framestyle=:box, color=:black, seriestype=:scatter, markersize=2.0, linewidth=1.0,
         legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
-        labelfontsize=8, debug::Int64=0, kwargs...)
+        guidefontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -222,7 +222,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false,
     framestyle=:box, color=:black, seriestype=:scatter, markersize=2.0, linewidth=1.0,
     legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
-    labelfontsize=8, debug::Int64=0, kwargs...)
+    guidefontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     local S = ctd.data.salinity
     local T = ctd.data.temperature
@@ -241,7 +241,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         seriestype=seriestype, markersize=markersize,
         gridstyle=gridstyle, color=color,
         tickfontsize=tickfontsize, tickdirection=tickdirection,
-        labelfontsize=labelfontsize; kwargs...)
+        guidefontsize=guidefontsize; kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
