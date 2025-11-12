@@ -29,6 +29,7 @@ OceanAnalysis.get_argo_file
 OceanAnalysis.get_element
 OceanAnalysis.get_file
 OceanAnalysis.get_nc_value
+OceanAnalysis.get_section
 OceanAnalysis.get_topography_file
 OceanAnalysis.gravity
 OceanAnalysis.N2

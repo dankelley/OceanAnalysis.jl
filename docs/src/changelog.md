@@ -7,7 +7,7 @@ Release notes:
 - BREAKING: none
 
 ### Added
-- none
+- [`get_section`](@ref) for downloading oceanographic 'section' data
 
 
 # Changelog from version 0.2.0 to version 0.2.1

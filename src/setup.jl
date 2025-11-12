@@ -34,6 +34,7 @@ export get_argo_file
 export get_element
 export get_file
 export get_nc_value
+export get_section
 export get_topography_file
 export gravity
 export N2
