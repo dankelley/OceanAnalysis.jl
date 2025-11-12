@@ -30,7 +30,9 @@ blue line connecting points, but using e.g.
 plot_profile(ctd, which="SA", seriestype=:scatter, seriescolor=:red)
 ```
 yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
-more on the many plotting controls available in Julia.
+more on the many plotting controls available in Julia. Note that
+specifying `seriestype=:line` will yield a warning, and the
+value will be changed to `:path` for the plot.
 
 See also the [`plot_TS`](@ref) function.
 
@@ -50,7 +52,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
-    abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
+    seriestype=:path, abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
     guidefontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
@@ -81,6 +83,10 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     sigma0 = "sigma0" in data_names ? ctd.data.sigma0 : sigma0(ctd)
     spiciness0 = "spiciness0" in data_names ? ctd.data.spiciness0 : spiciness0(ctd)
     oad(debug, "    setting up coordinate system for vertical axis")
+    if seriestype == :line
+        @warn "plot_profile() switching seriestype from :line to :path"
+        seriestype = :path
+    end
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
         y = p
@@ -207,6 +213,9 @@ any other argument that is accepted by `plot`.  This is illustrated
 in the example, which a title is added to the plot for a built-in
 CNV-formatted CTD file.
 
+Note that specifying `seriestype=:line` will yield a warning, and the
+value will be changed to `:path` for the plot.
+
 
 ```julia
 using OceanAnalysis, Plots, Dates
@@ -234,6 +243,10 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     # We start with the measurements ... 
     oad(debug, "    drawing data")
     oad(debug, "    kwargs... ", kwargs...)
+    if seriestype == :line
+        @warn "plot_TS() switching seriestype from :line to :path"
+        seriestype = :path
+    end
     rval = plot(SA, CT, legend=legend,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
