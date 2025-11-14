@@ -1,30 +1,36 @@
 using ZipFile, ProgressMeter
 
 """
-    Download a remote file or identify an existing version if it is young
+    get_file(url::String="", destdir::String=".", age::Real=1.0; debug::Int64=0)
 
-The contents of `url` are downloaded and stored as `file`, but only if either
-`file` does not exist locally or its age is less than `age` days.
+Download/cache a remote file
+
+The `url` is a remote source for a file to be downloaded. If no file
+of that name exists in the destination directory, `destdir`,
+then the file is downloaded and its name is returned. However,
+if such a file already exists, and if its age is under `age`
+days, then the file is assumed to be up-to-date and is not
+downloaded.  Some processing steps are printed if `debug>0`.
 """
-function get_file(url::String="", file::String="", age::Real=1.0; debug::Int64=0)
+function get_file(url::String="", destdir::String=".", age::Real=1.0; debug::Int64=0)
     oad(debug, "get_file START")
-    if length(url) < 1 || length(file) < 1
-        error("Must give 'url' and 'file'")
-    end
-    file = expanduser(file)
+    length(url) > 0 || error("Must give 'url")
+    file = replace(url, r".*/" => "")
+    file = expanduser(joinpath(destdir, file))
     oad(debug, "    url: \"", url, "\"")
     oad(debug, "    file: \"", file, "\"")
     if isfile(file)
         file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(file))) / Dates.Millisecond(1000) / 86400.0
+        if file_age > age
+            oad(debug, "    downloading file, since the existing version is ",
+                round(file_age, digits=4), " days old, exceeding threshold of ", age, " days")
+            Downloads.download(url, file)
+        else
+            oad(debug, "    using the cached version of the file, since it is under ", age, " days old")
+        end
     else
-        file_age = 1e8 # so old that it will be forced to download
-    end
-    if file_age > age
-        oad(debug, "    downloading file, since the existing version is ",
-            round(file_age, digits=4), " days old, exceeding threshold of ", age, " days")
+        oad(debug, "    downloading file, since it is not cached in the '$destdir' directory")
         Downloads.download(url, file)
-    else
-        oad(debug, "    using cached file, since its age ", round(file_age, digits=4), " is under ", age, " days")
     end
     oad(debug, "END get_file")
     file
