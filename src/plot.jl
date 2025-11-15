@@ -315,7 +315,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         saturation_fraction = 0.0
         CTf = gsw_ct_freezing.(SAf, pf, saturation_fraction)
         plot!(xlim=xlim, ylim=ylim)
-        plot!(SAf, CTf, color=:blue, linewidth=0.5, linestyle=:dash)
+        plot!(SAf, CTf, linewidth=0.75, color=:black, linestyle=:dash)
     end
     oad(debug, "END plot_TS()")
     rval

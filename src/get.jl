@@ -1,7 +1,7 @@
 using ZipFile, ProgressMeter
 
 """
-    get_file(url::String="", destdir::String=".", age::Real=1.0; debug::Int64=0)
+    get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int64=0)
 
 Download/cache a remote file
 
@@ -12,7 +12,7 @@ if such a file already exists, and if its age is under `age`
 days, then the file is assumed to be up-to-date and is not
 downloaded.  Some processing steps are printed if `debug>0`.
 """
-function get_file(url::String="", destdir::String=".", age::Real=1.0; debug::Int64=0)
+function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int64=0)
     oad(debug, "get_file START")
     length(url) > 0 || error("Must give 'url")
     file = replace(url, r".*/" => "")
