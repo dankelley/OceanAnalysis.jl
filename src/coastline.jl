@@ -181,13 +181,13 @@ plot_coastline(cl, xlims=(-70, -60), ylims=(42, 48))
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, fontsize::Real=9)
+function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, fontsize::Real=8)
     distance > 0.0 || error("'distance' must be a positive number")
     xlim, ylim = xlims(), ylims() # from existing plot_coastline() diagram
     ymid = (ylim[1] + ylim[2]) / 2.0
     km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
     dx = (xlim[2] - xlim[1]) / 20 # FIXME: may need to adjust the divisor to look nice
-    dy = (ylim[2] - ylim[1]) / 20
+    dy = (ylim[2] - ylim[1]) / 15
     if x == :left
         X = xlim[1] + dx .+ [0.0, distance / km_per_degree_lon]
     elseif x == :right
