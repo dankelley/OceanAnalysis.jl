@@ -8,6 +8,7 @@ Release notes:
 
 ### Added
 - [`get_section`](@ref) for downloading oceanographic 'section' data.
+- [`plot_section`](@ref) for plotting oceanographic 'section' data.
 
 
 # Changelog from version 0.2.0 to version 0.2.1

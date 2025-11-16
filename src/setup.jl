@@ -42,6 +42,7 @@ export plot_amsr
 export plot_coastline
 export plot_coastline!
 export plot_profile
+export plot_section
 export plot_topography
 export plot_TS
 export pressure_from_depth
