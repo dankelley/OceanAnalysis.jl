@@ -42,7 +42,7 @@ using OceanAnalysis, Plots
 # Read an Argo file
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = read_argo(f, 1);
+d = read_argo(f);
 # Plot profiles of Conservative Temperature, Absolute Salinity, and potential
 # density anomaly with respect to surface pressure.
 p1 = plot_profile(d, which="CT")
