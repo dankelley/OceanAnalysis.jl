@@ -11,9 +11,10 @@ mutable struct Section <: OA
     data::Vector{Ctd}
 end
 
-function as_section(ctds; debug = 0)
+function as_section(ctds; debug=0)
     OAD(debug, "as_section() START")
     nctds = length(ctds)
+    nctds > 0 || error("as_section() provided with zero-length first argument")
     metadata = Dict()
     metadata["name"] = "test section"
     data = Vector{Ctd}(undef, nctds)
@@ -21,7 +22,6 @@ function as_section(ctds; debug = 0)
         OAD(debug, "  save $i-th entry")
         data[i] = ctds[i]
     end
-    # FIXME: add the ctd objects, one by one
     OAD(debug, "END as_section()")
     Section(metadata, data)
 end
