@@ -1,33 +1,3 @@
-#<moved to src/plot.jl> """
-#<moved to src/plot.jl>     plot_section(x, y, z, levels=:auto;
-#<moved to src/plot.jl>         title="", xlab="Distance from Shore [km]", ylab="Pressure [db]", show_stations=true)
-#<moved to src/plot.jl> 
-#<moved to src/plot.jl> Draw an oceanographic section plot, with contours for z=z(x,y). This is a
-#<moved to src/plot.jl> preliminary version of the function, subject to changes.  More documentation
-#<moved to src/plot.jl> will be added later, after a period of real-world testing and modification.
-#<moved to src/plot.jl> """
-#<moved to src/plot.jl> function plot_section(x, y, z, levels=:auto;
-#<moved to src/plot.jl>     title="", xlab="Distance from Shore [km]", ylab="Pressure [db]", show_stations=true)
-#<moved to src/plot.jl>     if levels == :auto
-#<moved to src/plot.jl>         levels = pretty(z, 10)
-#<moved to src/plot.jl>     end
-#<moved to src/plot.jl>     figure_size = (600, 400)
-#<moved to src/plot.jl>     font_size = 10.0
-#<moved to src/plot.jl>     rval = contour(x, y, z, yflip=true, color=:black,
-#<moved to src/plot.jl>         xlab=xlab, ylab=ylab, title=title, titlelocation=:left,
-#<moved to src/plot.jl>         framestyle=:box, levels=levels, cbar=false, clabels=true,
-#<moved to src/plot.jl>         size=figure_size, tickdirection=:out,
-#<moved to src/plot.jl>         titlefontsize=font_size, labelfontsize=font_size, tickfontsize=font_size, dpi=dpi)
-#<moved to src/plot.jl>     if show_stations
-#<moved to src/plot.jl>         xlim, ylim = xlims(), ylims()
-#<moved to src/plot.jl>         for xx in x
-#<moved to src/plot.jl>             plot!(repeat([xx], 2), collect(ylim), xlim=xlim, ylim=ylim,
-#<moved to src/plot.jl>                 seriestype=:path, color=:lightgray, linewidth=0.5, grid=false, label=false)
-#<moved to src/plot.jl>         end
-#<moved to src/plot.jl>     end
-#<moved to src/plot.jl>     rval
-#<moved to src/plot.jl> end
-
 """
     as_section(ctds; name="", source="", debug=0)
 
