@@ -1,7 +1,7 @@
 """
     as_ctd(salinity::Union{AbstractVector,AbstractRange},
         temperature::Union{AbstractVector,AbstractRange},
-        pressure::Union{AbstractVector,AbstractRange},
+        pressure::Union{AbstractVector,AbstractRange};
         longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
         add_teos::Bool=true, debug::Int64=0)
 

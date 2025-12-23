@@ -3,8 +3,8 @@ using DataFrames
 """
     Base type in the OceanAnalysis package.
 
-This is an abstract type. The other types in the package will derive from this.
-At the moment, the only such case is [`Ctd`](@ref).
+This is an abstract type, from which other types in the library
+are derived.
 """
 abstract type OA end
 
@@ -78,3 +78,21 @@ mutable struct Topography <: OA
     metadata::Dict{String,Any}
     data::Matrix{Float64}
 end
+
+
+"""
+    A type to hold section data (SUBJECT TO CHANGE)
+
+    This holds section data as assembled by [`as_section`](@ref).
+
+The `metadata` element is a Dict that holds the `name` of the section
+(typically an EXPOCODE), as well as the `source` of the data (typically a URL).
+
+The `data` element stores a Vector of Ctd objects.
+
+"""
+mutable struct Section <: OA
+    metadata::Dict{String,Any}
+    data::Vector{Ctd}
+end
+

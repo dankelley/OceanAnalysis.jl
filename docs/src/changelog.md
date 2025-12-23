@@ -7,6 +7,7 @@ Release notes:
 - BREAKING: none
 
 ### Added
+- [`as_section`](@ref) for assembling 'ctd' data into a section.
 - [`get_section`](@ref) for downloading oceanographic 'section' data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.
 

@@ -22,6 +22,7 @@ makedocs(;
     repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
     #repo="https://github.com/dankelley/OceanAnalysis.jl/blob/{commit}{path}#{line}",
     sitename="OceanAnalysis.jl",
+    #warnonly=true,
     checkdocs=:none,
     format=Documenter.HTML(;
         assets=String["assets/custom.css"],

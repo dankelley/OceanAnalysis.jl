@@ -29,6 +29,10 @@ to them.
   is in the 0-360 degree range for the built-in datasets. See the documentation
   for [`coastline`](@ref) for reading and plotting such data.
 
+- [`Section`](@ref) holds a collection of CTD (or similar) stations in an
+  oceanographic "section". See [`as_section`](@ref) for how Section objects are
+  typically constructed.
+
 - [`Topography`](@ref) holds topographic information. The `metadata` item is a
   Dict holding items named `"longitude"` and `"latitude"`.  The `data` item is
   a matrix of earth height above mean sea level, in metres. Topographic

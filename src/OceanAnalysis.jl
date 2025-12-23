@@ -37,6 +37,7 @@ include("get.jl")
 include("netcdf.jl")
 include("plot.jl")
 include("seawater_properties.jl")
+include("section.jl")
 include("topography.jl")
 include("utilities.jl")
 

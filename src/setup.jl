@@ -15,11 +15,13 @@ export Amsr
 export OA
 export Ctd
 export Coastline
+export Section
 export Topography
 
 # Functions
 export argo_id_cycle
 export as_ctd
+export as_section
 export coastline
 export coordinate_from_string
 export coriolis

@@ -94,6 +94,7 @@ Release notes:
 
 ### Added
 - The Examples tab of the online documentation shows hot to create an Argo-trajectory map.
+- [`as_section`](@ref) assembles CTD profiles into an oceanographic section.
 - [`coriolis`](@ref) computes the Coriolis parameter.
 - [`gravity`](@ref) computes the acceleration due to earth gravity.
 - [`scale_bar`](@ref) adds a scale bar to a map plot.

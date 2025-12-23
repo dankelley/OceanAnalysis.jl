@@ -7,6 +7,7 @@ OceanAnalysis.OA
 OceanAnalysis.Amsr
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
+OceanAnalysis.Section
 OceanAnalysis.Topography
 ```
 
@@ -15,6 +16,7 @@ Functions:
 ```@docs
 OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
+OceanAnalysis.as_section
 OceanAnalysis.coastline
 OceanAnalysis.coriolis
 OceanAnalysis.coordinate_from_string
