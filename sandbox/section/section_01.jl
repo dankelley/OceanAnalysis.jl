@@ -11,5 +11,5 @@ s[2] = b;
 s[3] = c;
 S = [s[1].data.salinity s[2].data.salinity s[3].data.salinity]
 contour(1:3, 1:181, S, yflip=true)
-savefig("section_01.pdf")
+savefig("section_01.png")
 
