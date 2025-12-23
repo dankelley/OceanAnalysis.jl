@@ -6,24 +6,25 @@ function OAD(debug, msg)
     end
 end
 
-mutable struct Section <: OA
+mutable struct Section_TEST <: OA
     metadata::Dict{String,Any}
     data::Vector{Ctd}
 end
 
-function as_section(ctds; debug=0)
+function as_section_TEST(ctds; name::String="", source::String="", debug=0)
     OAD(debug, "as_section() START")
     nctds = length(ctds)
-    nctds > 0 || error("as_section() provided with zero-length first argument")
+    nctds > 0 || error("  as_section() provided with zero-length first argument")
     metadata = Dict()
-    metadata["name"] = "test section"
+    metadata["name"] = name
+    metadata["source"] = source
     data = Vector{Ctd}(undef, nctds)
     for i in 1:nctds
-        OAD(debug, "  save $i-th entry")
+        OAD(debug, "  save $i-th entry") # FIXME: maybe use a progress bar instead
         data[i] = ctds[i]
     end
     OAD(debug, "END as_section()")
-    Section(metadata, data)
+    Section_TEST(metadata, data)
 end
 
 # Create fake data (with S and T varying between stations)
@@ -36,14 +37,10 @@ b.data.temperature = 1.0 .+ b.data.temperature;
 c.data.salinity = 2.0 .+ c.data.salinity;
 c.data.temperature = 1.0 .+ c.data.temperature;
 
-section = as_section((a, b, c), debug=1);
-println("The section entries start as follows")
+# next takes 0.02 seconds
+@time section = as_section_TEST((a, b, c), name="sample section");
+
+println("Section \""* section.metadata["name"] * "\" has entries with data starting:")
 for i in 1:length(section.data)
     println(first(section.data[i].data, 2))
 end
-
-println("FIXME: add way to discover longitude and latitude with [] syntax or similar")
-println("FIXME: add way to access individual CTD entries")
-println("FIXME: add way to plot")
-println("FIXME: add way to grid to pressure levels (as in oce)")
-println("FIXME: document (REMINDER: we are not gridding to pressure levels)")
