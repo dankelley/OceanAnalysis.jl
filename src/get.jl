@@ -95,3 +95,51 @@ function get_section(url::String; destdir=".", debug::Int64=0)
     return (destdir)
 end
 
+"""
+    get_element(x::OA, element::String; debug)
+
+Get an element from an object.
+
+If `x.metadata` holds an item of the given name, return that item. If not,
+and if `x.data` holds such an item, return that item. Finally, if `x`
+is a [`Ctd`](@ref) object, some computed things may be returned. These are
+`N2`, `SA`, `CT`, `sigma0` and `spiciness0`.
+"""
+function get_element(x::OA, element::String; debug::Int64=0)
+    oad(debug, "get_element([OA object], name=$element) START")
+    # If element is in metadata, return that
+    if element in keys(x.metadata)
+        return copy(x.metadata[element])
+    end
+    # If element is in data, return that
+    if element in names(x.data)
+        return copy(x.data[:, element])
+    end
+    # If this is a Ctd object, we can return certain computed things
+    if typeof(x) == Ctd
+        if element == "N2"
+            return copy(N2(x))
+        end
+        SP = x.data.salinity
+        T = x.data.temperature
+        p = x.data.pressure
+        longitude = x.metadata["longitude"]
+        latitude = x.metadata["latitude"]
+        local SA = gsw_sa_from_sp.(SP, p, longitude, latitude) |> fix_gsw_bad_code!
+        if element == "SA"
+            return copy(SA)
+        end
+        local CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
+        if element == "CT"
+            return copy(CT)
+        end
+        if element == "sigma0"
+            return copy(gsw_sigma0.(SA, CT)) |> fix_gsw_bad_code!
+        end
+        if element == "spiciness0"
+            return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
+        end
+    end
+    # The item is not handled, so return an empty result
+    return Nothing
+end

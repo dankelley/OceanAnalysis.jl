@@ -116,42 +116,6 @@ T90_from_T48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
 #T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1.00024
 
 """
-    get_element(ctd::Ctd, name::String; debug)
-
-Get an element from an object.
-"""
-function get_element(o::Ctd, name::String; debug::Int64=0)
-    oad(debug, "get_element([Ctd object], name=$name) START")
-    # Handle values stored directly in Ctd objects
-    nameSymbol = Symbol(name)
-    if nameSymbol in fieldnames(Ctd)
-        return copy(getproperty(o, nameSymbol))
-    end
-    # Handle items computable via functions of Ctd objects
-    if name == "N2"
-        return copy(N2(o))
-    end
-    # Handle TEOS10 variables
-    local SA = gsw_sa_from_sp.(o.salinity, o.pressure, o.longitude, o.latitude) |> fix_gsw_bad_code!
-    if name == "SA"
-        return copy(SA)
-    end
-    local CT = gsw_ct_from_t.(SA, o.temperature, o.pressure) |> fix_gsw_bad_code!
-    if name == "CT"
-        return copy(CT)
-    end
-    if name == "sigma0"
-        return copy(gsw_sigma0.(SA, CT)) |> fix_gsw_bad_code!
-
-    elseif name == "spiciness0"
-        return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
-
-    end
-    # The item is not handled, so return an empty result
-    return Nothing
-end
-
-"""
     pretty(x, n::Int64=5; debug::Int64=0)
 
 Calculate sub-intervals with 125 scaling
