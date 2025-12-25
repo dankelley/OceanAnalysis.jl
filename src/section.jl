@@ -77,13 +77,8 @@ using OceanAnalysis, Plots
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)
 section = read_section(dir);
-# Plot a map -- {FIXME: put this into a plot() function}
-longitude = get_element(section, "longitude")
-latitude = get_element(section, "latitude")
-plot(longitude, latitude,
-     aspect_ratio = 1.0 / cos(0.5*sum(extrema(latitude)) * pi / 180),
-     seriestype=:scatter, framestyle=:box, legend=false, ms=1)
-plot_coastline!(coastline(), color=:lightgray)
+# Show station locations
+plot(section, "map")
 ```
 """
 function read_section(dir::String; debug::Int64=0)

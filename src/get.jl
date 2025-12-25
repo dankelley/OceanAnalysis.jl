@@ -108,8 +108,7 @@ are `N2`, `SA`, `CT`, `sigma0` and `spiciness0`.
 
 If `x` is a [`Section`](@ref) object, then `get_element` can return any
 item from the `metadata` of the constituent [`Ctd`](@ref)
-objects that are stored in `x.data`.  For an example,
-see the documentation for [`read_section`](@ref).
+objects that are stored in `x.data`.
 """
 function get_element(x::OA, element::String; debug::Int64=0)
     oad(debug, "get_element([OA object], name=$element) START")
