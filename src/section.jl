@@ -88,3 +88,46 @@ function read_section(dir::String; debug::Int64=0)
     ctds = map((file) -> read_ctd_woce(joinpath(dir, file)), files)
     as_section(ctds)
 end
+
+"""
+    section_is_gridded(Section:section; debug:Int64=0)
+
+Return true if section is gridded (that is, if it has more than 1
+CTD station, and if the pressure levels match across all the
+CTD stations.
+"""
+function section_is_gridded(section::Section; debug::Int64=0)
+    oad(debug, "section_is_gridded() START")
+    nctds = length(section.data)
+    rval = true
+    if nctds < 2
+        oad(debug, "  section has <2 stations")
+        rval = false
+    end
+    oad(debug, "  check that CTDs have equal pressures")
+    pressure0 = section.data[1]["pressure"]
+    for i in 2:nctds
+        pressure = section.data[i]["pressure"]
+        if pressure != pressure0
+            oad(debug, "    pressure mismatch between first CTD and $i-th CTD; use grid_section() first")
+            rval = false
+            break
+        end
+    end
+    status = rval ? "gridded" : "not gridded"
+    oad(debug, "  section is $status")
+    oad(debug, "END section_is_gridded()")
+    rval
+end
+
+"""
+    section_grid(section::Section; debug::Int64=0)
+
+Grid a section, altering all the CTD objects to employ a uniform
+z grid. This is done by linear interpolation.
+FIXME: code as in oce
+"""
+function section_grid(section::Section; debug::Int64=0)
+    oad(debug, "section_grid() START")
+    oad(debug, "END section_grid()")
+end

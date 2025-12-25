@@ -82,22 +82,11 @@ function plot_section(section::Section, which="map";
             error("xvar=\"$xvar\" not allowed; try one of the following: ", xvar_allowed)
         yvar in yvar_allowed ||
             error("yvar=\"$yvar\" not allowed; try one of the following: ", yvar_allowed)
-        pl = "FIXME: write code to handle which=$which"
-        oad(debug, "  check that section has more than 1 station")
-        nctds = length(section.data)
-        if nctds < 2
-            error("cannot plot a section with under 2 stations")
-        end
-        oad(debug, "  check that CTDs have equal pressures")
-        pressure0 = section.data[1]["pressure"]
-        for i in 2:nctds
-            pressure = section.data[i]["pressure"]
-            if pressure != pressure0
-                error("Pressure mismatch between first CTD and $i-th CTD; use grid_section() first")
-            end
+        if !section_is_gridded(section)
+            error("section is not gridded; try using section_grid() first")
         end
         oad(debug, "  assemble field for plotting")
-        # FIXME: check for sameness of pressures; if not, tell user to use (new fcn)
+        pl = "FIXME: write code to handle which=$which"
         # FIXME: extract field to matrix, then contour
         # FIXME: permit contouring or heatmaps
     else

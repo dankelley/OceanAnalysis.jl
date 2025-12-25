@@ -57,6 +57,8 @@ OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.scale_bar
 OceanAnalysis.set_teos
+OceanAnalysis.section_grid
+OceanAnalysis.section_is_gridded
 OceanAnalysis.station_map
 OceanAnalysis.subset_amsr
 OceanAnalysis.T90_from_T48

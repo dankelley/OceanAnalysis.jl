@@ -61,6 +61,8 @@ export read_topography
 export salinity_from_conductivity
 export SA
 export scale_bar
+export section_grid
+export section_is_gridded
 export set_teos
 export station_map
 export subset_amsr
