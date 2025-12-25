@@ -15,7 +15,7 @@ scatter!(lon, lat, marker_z=1:length(lon),
     markersize=3, markerstyle=:circle, color=colors)
 # Add land and 1km isobath
 plot_coastline!(coastline())
-topo_file = get_topography_file(-110., -30, 20, 60, resolution=30,
+topo_file = get_topography(-110.0, -30, 20, 60, resolution=30,
     destdir="~/data/topo")
 topo = read_topography(topo_file)
 contour!(topo.metadata["longitude"], topo.metadata["latitude"],

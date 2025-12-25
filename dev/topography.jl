@@ -1,5 +1,5 @@
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-67, -63, 43, 46, resolution=1)
+topo_file = get_topography(-67, -63, 43, 46, resolution=1)
 topo = read_topography(topo_file);
 p1 = plot_topography(topo, domain=:both);
 p2 = plot_topography(topo, domain=:sea);
