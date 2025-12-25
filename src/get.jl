@@ -101,18 +101,24 @@ end
 Get an element from an object.
 
 If `x.metadata` holds an item of the given name, return that item. If not,
-and if `x.data` holds such an item, return that item. Finally, if `x`
-is a [`Ctd`](@ref) object, some computed things may be returned. These are
-`N2`, `SA`, `CT`, `sigma0` and `spiciness0`.
+and if `x.data` holds such an item, return that item.
+
+If `x` is a [`Ctd`](@ref) object, some computed things may be returned. These
+are `N2`, `SA`, `CT`, `sigma0` and `spiciness0`.
+
+If `x` is a [`Section`](@ref) object, then `get_element` can return any
+item from the `metadata` of the constituent [`Ctd`](@ref)
+objects that are stored in `x.data`.  For an example,
+see the documentation for [`read_section`](@ref).
 """
 function get_element(x::OA, element::String; debug::Int64=0)
     oad(debug, "get_element([OA object], name=$element) START")
     # If element is in metadata, return that
     if element in keys(x.metadata)
-        return copy(x.metadata[element])
+        return x.metadata[element]
     end
-    # If element is in data, return that
-    if element in names(x.data)
+    # If element is in data (and if data is a DataFrame), return that
+    if isa(x.data, DataFrame) && element in names(x.data)
         return copy(x.data[:, element])
     end
     # If this is a Ctd object, we can return certain computed things
@@ -138,6 +144,11 @@ function get_element(x::OA, element::String; debug::Int64=0)
         end
         if element == "spiciness0"
             return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
+        end
+    elseif typeof(x) == Section
+        # assume all CTDs have same metadata names
+        if element in keys(x.data[1].metadata)
+            return copy(map(ctd -> get_element(ctd, element), x.data))
         end
     end
     # The item is not handled, so return an empty result
