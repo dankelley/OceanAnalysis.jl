@@ -186,7 +186,7 @@ function get_argo_index(destdir::String="."; age::Real=1.0, server::String="http
 end
 
 """
-    get_argo_file(file::String="", destdir::String="."; age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
+    get_argo(file::String="", destdir::String="."; age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
 
 Download an Argo profile file, if an existing copy is less than `age` days old.
 
@@ -207,7 +207,7 @@ value of 0 means to work silently.
 
 # Returns
 
-- `get_argo_file` returns the full path name of the local file after downloading, or as cached recently.
+- `get_argo` returns the full path name of the local file after downloading, or as cached recently.
 
 # Example
 
@@ -216,14 +216,14 @@ value of 0 means to work silently.
 using OceanAnalysis
 index_file = get_argo_index()
 index = read_argo_index(index_file)
-argo_file = get_argo_file(index.file[end])
+argo_file = get_argo(index.file[end])
 argo = read_argo(argo_file)
 plot_profile(argo, which="CT")
 ```
 
 """
-function get_argo_file(file::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
-    oad(debug, "get_argo_file() START")
+function get_argo(file::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+    oad(debug, "get_argo() START")
     file_original = file
     oad(debug, "    file: ", file, " (original)")
     file = replace.(file, r".*/" => "")
@@ -233,7 +233,7 @@ function get_argo_file(file::String=""; destdir::String=".", age::Real=30.0, ser
     url = joinpath(server, "dac", file_original)
     oad(debug, "    url: ", url)
     rval = get_file(url, file, age, debug=increment_debug(debug))
-    oad(debug, "END get_argo_file()")
+    oad(debug, "END get_argo()")
     rval
 end
 
@@ -256,7 +256,7 @@ columns named `institution`, `date_update`, `ocean`, and `profiler_type`.
 `read_argo_index` returns a DataFrame with column names `"file"`, `"latitude"`,
 `"longitude"`, and `"time"`. Note that the `"file"` column holds information on
 the location on remote servers, as is required for use as the `file` argument
-    of [`get_argo_file`](@ref).
+    of [`get_argo`](@ref).
 """
 function read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
     file = expanduser(file)

@@ -3,7 +3,7 @@ using DataStructures: OrderedDict
 using Printf
 
 """
-    get_topography_file(name::Symbol=:global_coarse; debug::Int64=0)
+    get_topography(name::Symbol=:global_coarse; debug::Int64=0)
 
 Access a built-in topography dataset.
 
@@ -14,15 +14,15 @@ spanning approximately 30 nautical miles.
 See also [`read_topography`](@ref).
 
 """
-function get_topography_file(name::Symbol=:global_coarse; debug::Int64=0)
-    oad(debug, "get_topography_file(name) BEGIN")
+function get_topography(name::Symbol=:global_coarse; debug::Int64=0)
+    oad(debug, "get_topography(name) BEGIN")
     dir = dirname(dirname(pathof(OceanAnalysis)))
     if name == :global_coarse
         rval = joinpath(dir, "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
     else
         error("    expecting 'name' to be :global_coarse, but :", name, " was provided")
     end
-    oad(debug, "END get_topography_file()")
+    oad(debug, "END get_topography()")
     rval
 end
 
@@ -34,14 +34,14 @@ longitude in `rval.metadata["longitude"]`, latitude in
 `rval.metadata["latitude"]`, and depth in `rval.data`. Note that the depth
 matrix is transposed, to make it easier to plot.
 
-See also [`get_topography_file`](@ref).
+See also [`get_topography`](@ref).
 
 # Examples
 
 ```juliadoc
 # Plot world view of ocean depth
 using OceanAnalysis, Plots
-topo_file = get_topography_file(:global_coarse);
+topo_file = get_topography(:global_coarse);
 topo = read_topography(topo_file);
 water_depth = -topo.data / 1000.0; # depth (i.e. negative height) in km
 water_depth[water_depth .< 0.0] .= NaN; # trim land
@@ -72,7 +72,7 @@ end
 
 
 """
-    get_topography_file(west::Real, east::Real,
+    get_topography(west::Real, east::Real,
         south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
         server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)
 
@@ -86,7 +86,7 @@ dataset (see Amante and Eakins, 2009, for an introduction to the data and see
             present on the local file system.  The return value is the name of
             the data file, and its typical use is as the filename for a call to
                 [`read_topography`](@ref). Subsequent calls to
-                `get_topography_file` with identical parameters will return the
+                `get_topography` with identical parameters will return the
                 name of an already-downloaded file, without downloading a new
                 copy.
 
@@ -120,10 +120,10 @@ referenced was updated on 2025-Aug-2; for the query generation, see the
 
 3. API https://gis.ngdc.noaa.gov/arcgis/help/en/rest/services-reference/enterprise/export-image/
 """
-function get_topography_file(west::Real, east::Real,
+function get_topography(west::Real, east::Real,
     south::Real, north::Real; resolution::Real=4.0, destdir::String=".",
     server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)
-    oad(debug, "get_topography_file(west=$west," *
+    oad(debug, "get_topography(west=$west," *
                ", east=$east" *
                ", south=$south" *
                ", north=$north" *
@@ -242,7 +242,7 @@ at the centre of the plot.
 ```juliadoc
 # Waters near Prince Edward Island, Canada
 using OceanAnalysis
-topo_file = get_topography_file(-64.8, -61.5, 45.6, 47.2, resolution=1)
+topo_file = get_topography(-64.8, -61.5, 45.6, 47.2, resolution=1)
 topo = read_topography(topo_file)
 plot_topography(topo)
 ```

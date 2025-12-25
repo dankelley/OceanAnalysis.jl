@@ -52,3 +52,44 @@ function as_section(ctds::Vector{Ctd}; name::String="", source::String="", debug
     oad(debug, "END as_section()")
     Section(metadata, data)
 end # as_section()
+
+
+"""
+    read_section(Section::s, debug::Int64=0)
+
+Read an oceanographic section, as downloaded with [`get_section`](@ref).
+
+This uses [`read_ctd_woce`](@ref) to read WOCE-format CTD files in the
+directory named `dir`. These are then aggregated into a section
+using [`as_section`](@ref).
+
+# Arguments
+
+- `dir`: String naming a directory that holds WOCE-format CTD files.
+
+# Keywords
+
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+
+# Examples
+```juliadoc
+using OceanAnalysis, Plots
+url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
+dir = get_section(url)
+section = read_section(dir);
+# Plot a map -- {FIXME: put this into a plot() function}
+longitude = map(ctd -> get_element(ctd, "longitude"), section.data);
+latitude = map(ctd -> get_element(ctd, "latitude"), section.data);
+plot(longitude, latitude,
+     aspect_ratio = 1.0 / cos(0.5*sum(extrema(latitude)) * pi / 180),
+     seriestype=:scatter, framestyle=:box, legend=false, ms=1)
+plot_coastline!(coastline(), color=:lightgray)
+```
+"""
+function read_section(dir::String; debug::Int64=0)
+    files = readdir(dir)
+    length(files) > 0 || error("no ctd files found in $dir")
+    # Reading typically takes about 7 ms per file
+    ctds = map((file) -> read_ctd_woce(joinpath(dir, file)), files)
+    as_section(ctds)
+end

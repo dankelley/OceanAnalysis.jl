@@ -64,22 +64,22 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
 end
 
 """
-    get_amsr_file(date::String)
+    get_amsr(date::String)
 """
-function get_amsr_file(date::String; kwargs...)
+function get_amsr(date::String; kwargs...)
     !ismissing(date) || error("must specify 'date', a string")
-    get_amsr_file(Date(date), kwargs...)
+    get_amsr(Date(date), kwargs...)
 end
 
 """
-    get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
+    get_amsr(date::Date=Dates.today() - Day(4); type::String="3day",
         destdir::String=".", server::String="https://data.remss.com/amsr2/ocean/L3/v08.2",
         debug::Integer=0)
 
 Download a Advanced Microwave Scanning Radiometer data file.
 
 This works by constructing a filename to be downloaded. If that file does not
-exist in `destdir`, then it is downloaded from the server, and `get_amsr_file`
+exist in `destdir`, then it is downloaded from the server, and `get_amsr`
 returns the full path to that existing file. Otherwise, the file is downloaded,
 and the return value is the path to the resultant local file.
 
@@ -89,7 +89,7 @@ specified, an attempt will be made to download a file named
 `https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2023/".
 
 See [`read_amsr`](@ref) for how to deal with the files downloaded
-by `get_amsr_file`.
+by `get_amsr`.
 
 # Arguments
 
@@ -107,13 +107,13 @@ by `get_amsr_file`.
 
 # Return
 
-`get_amsr_file` returns a string that is the full pathname of the downloaded file, which may be supplied as
+`get_amsr` returns a string that is the full pathname of the downloaded file, which may be supplied as
 the first argument to a call to [`read_amsr`](@ref).
 """
-function get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
+function get_amsr(date::Date=Dates.today() - Day(4); type::String="3day",
     destdir::String=".", server::String="https://data.remss.com/amsr2/ocean/L3/v08.2",
     debug::Integer=0)
-    oad(debug, "get_amsr_file() START")
+    oad(debug, "get_amsr() START")
     destfile = @sprintf(
         "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
         type, year(date), month(date), day(date))
@@ -127,7 +127,7 @@ function get_amsr_file(date::Date=Dates.today() - Day(4); type::String="3day",
     else
         oad(debug, "    $destpath has already been downloaded")
     end
-    oad(debug, "END get_amsr_file()")
+    oad(debug, "END get_amsr()")
     destpath
 end
 

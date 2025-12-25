@@ -59,7 +59,7 @@ Release notes:
 - BREAKING: rename `readCtdCnv()` as `read_ctd_cnv()`.
 ### Added
 - add `coastline()`, `plot_coastline()` and `plot_coastline!()`
-- add `get_amsr_file()`, `read_amsr()` and `plot_amsr()`
-- add `get_topography_file()`, `read_topography()` and `plot_topography()`
+- add `get_amsr()`, `read_amsr()` and `plot_amsr()`
+- add `get_topography()`, `read_topography()` and `plot_topography()`
 - add `N2()`
-- add `get_argo_index()`, `get_argo_file()` and `read_argo()`
+- add `get_argo_index()`, `get_argo()` and `read_argo()`

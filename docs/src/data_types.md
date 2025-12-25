@@ -36,5 +36,5 @@ to them.
 - [`Topography`](@ref) holds topographic information. The `metadata` item is a
   Dict holding items named `"longitude"` and `"latitude"`.  The `data` item is
   a matrix of earth height above mean sea level, in metres. Topographic
-  files in NetCDF format may be accessed or downloaded with [`get_topography_file`](@ref),
+  files in NetCDF format may be accessed or downloaded with [`get_topography`](@ref),
   and read with [`read_topography`](@ref).

@@ -8,7 +8,7 @@ temperature, which may be plotted as follows.
 ```julia
 # North Atlantic Sea Surface Temperature
 using OceanAnalysis, Plots
-f = get_amsr_file("2025-09-07");
+f = get_amsr("2025-09-07");
 a = read_amsr(f, "SST");
 plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
     levels=0.0:2.5:30.0, clim=(0, 30))
@@ -24,7 +24,7 @@ Nova Scotia, and plots in three plot styles.
 
 ```julia
 using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography_file(-67, -63, 43, 46, resolution=1)
+topo_file = get_topography(-67, -63, 43, 46, resolution=1)
 topo = read_topography(topo_file);
 p1 = plot_topography(topo, domain=:both);
 p2 = plot_topography(topo, domain=:sea);
@@ -126,7 +126,7 @@ scatter!(lon, lat, marker_z=1:length(lon),
     markersize=3, markerstyle=:circle, color=colors)
 # Add land and 1km isobath
 plot_coastline!(coastline())
-topo_file = get_topography_file(-110., -30, 20, 60, resolution=30,
+topo_file = get_topography(-110., -30, 20, 60, resolution=30,
     destdir="~/data/topo")
 topo = read_topography(topo_file)
 contour!(topo.metadata["longitude"], topo.metadata["latitude"],

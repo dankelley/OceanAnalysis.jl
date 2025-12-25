@@ -30,14 +30,14 @@ export depth_from_pressure
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
 export geod_distance
-export get_amsr_file
+export get_amsr
 export get_argo_index
-export get_argo_file
+export get_argo
 export get_element
 export get_file
 export get_nc_value
 export get_section
-export get_topography_file
+export get_topography
 export gravity
 export N2
 export plot_amsr
@@ -56,6 +56,7 @@ export read_argo_index
 export read_ctd_cnv
 export read_ctd_rsk
 export read_ctd_woce
+export read_section
 export read_topography
 export salinity_from_conductivity
 export SA

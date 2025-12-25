@@ -25,14 +25,14 @@ OceanAnalysis.depth_from_pressure
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!
 OceanAnalysis.geod_distance
-OceanAnalysis.get_amsr_file
+OceanAnalysis.get_amsr
 OceanAnalysis.get_argo_index
-OceanAnalysis.get_argo_file
+OceanAnalysis.get_argo
 OceanAnalysis.get_element
 OceanAnalysis.get_file
 OceanAnalysis.get_nc_value
 OceanAnalysis.get_section
-OceanAnalysis.get_topography_file
+OceanAnalysis.get_topography
 OceanAnalysis.gravity
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
@@ -52,6 +52,7 @@ OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv
 OceanAnalysis.read_ctd_rsk
 OceanAnalysis.read_ctd_woce
+OceanAnalysis.read_section
 OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.scale_bar
