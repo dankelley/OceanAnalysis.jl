@@ -7,20 +7,27 @@ Users who need more powerful tools for reading and analysing oceanographic
 data, ought consider using the `oce` package in the R language, which has more
 capabilities and has been in wide use for over a decade.
 
-The functions that read data return objects that are structs holding two items.
-The first is a Dict named `metadata`, which has contents that vary with data
-type. The second is named `data`, the contents of which depend on the data
-type. The elements of both may be accessed directly using the dot notation,
-with for example `ctd.data.salinity` refering to the salinity column of ctd
-data read by [`read_ctd_cnv`](@ref).  It is also possible to retrieve (or set)
-that value using `ctd["salinity"]`.  The advantage of this notation is that it
-can locate information whether it is in the `data` or the `metadata` component
-of the object. It is also possible to obtain derived information, e.g.
-`ctd["SA"]` calculates and then returns the Absolute Salinity, which is not
-typically stored in CTD files, but which can be computed from the stored
-information. Other derivable items include `"CT"` (Conservative Temperature),
-`"sigma0"` (potential density anomaly with respect to surface pressure), and
-`spiciness0` (spiciness).
+The functions that read data return objects that are structs holding two items:
+`data` and `metadata`.
+
+* The `data` item holds the actual data. The form of the data depends on the
+class of the object.  For example, in a [`Ctd`](@ref) object, `data` is a
+`DataFrame`, whereas in a [`Section`](@ref) object, `data` is a Vector of
+[`Ctd`](@ref) objects.
+
+* The `metadata` item holds information about the data.  For example, with a
+[`Ctd`](@ref) object, `metadata` holds the location and time of sampling, along
+with other information, depending on the source of the data.
+
+As a convenience, [`get_element`](@ref) may be used to extract information from
+either the `metadata` or `data` parts of an OceanAnalysis object.
+
+FIXME: discuss the fact that [`get_element`](@ref) can return derived
+quantities.
+
+FIXME: discuss `[` here.  I think maybe we ought to cause `[` to call
+`get_element` regardless of the object class. But, in that case, s there any
+need for [`get_element`](@ref) at all?
 """
 module OceanAnalysis
 

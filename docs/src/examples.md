@@ -149,12 +149,7 @@ using OceanAnalysis, Plots
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)
 section = read_section(dir);
-longitude = get_element(section, "longitude");
-latitude = get_element(section, "latitude");
-plot(longitude, latitude,
-    aspect_ratio=1.0 / cos(0.5 * sum(extrema(latitude)) * pi / 180.0),
-    seriestype=:scatter, framestyle=:box, legend=false, ms=2)
-plot_coastline!(coastline())
+plot(section, "map")
 #savefig("section_map.png")
 ```
 

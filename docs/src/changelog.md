@@ -9,6 +9,7 @@ Release notes:
 ### Added
 - [`as_section`](@ref) for assembling 'ctd' data into a section.
 - [`get_section`](@ref) for downloading oceanographic 'section' data.
+- [`read_section`](@ref) for reading 'section' data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.
 - [`read_ctd_woce`](@ref) for reading CTD data in WOCE format (used by many data servers)
 
