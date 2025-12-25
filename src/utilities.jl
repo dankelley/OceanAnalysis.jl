@@ -3,19 +3,46 @@ function increment_debug(debug::Int64=0)
     debug > 0 ? debug + 1 : 0
 end
 
-function Base.getindex(oce::OA, name::String)
+"""
+    getindex(x::OA, name::String)
+
+Retrieve an element from the `metadata` or `data` portion of an [`OA`](@ref)
+object, or something that can be computed from the information in the object.
+The work is done with [`get_element`](@ref), the documentation of which gives
+more details.
+
+For example, the following plots a time-series of pressure in a dataset
+provided with the package.
+
+```julia
+using OceanAnalysis, Plots
+f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+d = read_ctd_cnv(f);
+plot(d["timeS"], d["pressure"], seriestype=:scatter, framestyle=:box,
+    xlab="Time [s]", ylab="Pressure [dbar]", legend=false, markersize=1)
+```
+"""
+function Base.getindex(x::OA, name::String)
+    #println("in [ with name=\"$name\"")
     #println("Getting data element '$name' from an OA object")
-    derived = ["SA", "CT", "sigma0", "spiciness0"]
-    if name in names(oce.data)
-        return oce.data[:, name]
-    elseif name in derived
-        println("FIXME: compute derived quantity '", name, "'")
-        return SA(oce)
-    elseif name in keys(oce.metadata)
-        return oce.metadata[name]
-    else
-        error("no '", name, "' present in or computable for this object")
-    end
+    get_element(x, name)
+    #<> derived = ["SA", "CT", "sigma0", "spiciness0"]
+    #<> if name in names(oce.data)
+    #<>     println("  CASE 1")
+    #<>     return oce.data[:, name]
+    #<> elseif name in derived
+    #<>     println("  CASE 2")
+    #<>     if name == "SA"
+    #<>         return SA(oce)
+    #<>     else
+    #<>         error("FIXME: code for other [ things besides SA")
+    #<>     end
+    #<> elseif name in keys(oce.metadata)
+    #<>     println("  CASE 3")
+    #<>     return oce.metadata[name]
+    #<> else
+    #<>     error("no '", name, "' present in or computable for this object")
+    #<> end
 end
 
 function Base.setindex!(oce::OA, value, name::String)
