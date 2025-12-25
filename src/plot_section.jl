@@ -34,7 +34,8 @@ end
 
 
 """
-    plot_section(section::Section, which="map"; debug::Int64=0)
+    plot_section(section::Section, which="map";
+        xvar="latitude", yvar="pressure", debug::Int64=0)
 
 # Arguments
 
@@ -43,6 +44,10 @@ end
 - `which` a String indicating the type of plot. So far, the only choice is `"map"`.
 
 # Keywords
+
+- `xvar` a String indicating what to put on the horizontal axis (one of `"distance"`, `"latitude"` or `"longitude"`).
+
+- `yvar` a String indicating what to put on the vertical axis (one of `"depth"` "` or `"pressure"`).
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
@@ -56,19 +61,50 @@ section = read_section(dir);
 plot_section(section, "map")
 ```
 """
-function plot_section(section::Section, which="map"; debug::Int64=0)
+function plot_section(section::Section, which="map";
+    xvar="latitude", yvar="pressure", debug::Int64=0)
     oad(debug, "plot_section(which=\"$which\") BEGIN")
+    # assume all CTDs have the same data-column names
+    fields = names(section.data[1].data)
     if which == "map"
         longitude = get_element(section, "longitude")
         latitude = get_element(section, "latitude")
-        p = plot(longitude, latitude,
+        pl = plot(longitude, latitude,
             aspect_ratio=1.0 / cos(0.5 * sum(extrema(latitude)) * pi / 180),
             seriestype=:scatter, framestyle=:box, legend=false,
             markersize=2)
         plot_coastline!(coastline())
+    elseif which in fields
+        oad(debug, "    which=$which is a permitted field")
+        xvar_allowed = ("longitude", "latitude", "distance")
+        yvar_allowed = ("depth", "pressure")
+        xvar in xvar_allowed ||
+            error("xvar=\"$xvar\" not allowed; try one of the following: ", xvar_allowed)
+        yvar in yvar_allowed ||
+            error("yvar=\"$yvar\" not allowed; try one of the following: ", yvar_allowed)
+        pl = "FIXME: write code to handle which=$which"
+        oad(debug, "  check that section has more than 1 station")
+        nctds = length(section.data)
+        if nctds < 2
+            error("cannot plot a section with under 2 stations")
+        end
+        oad(debug, "  check that CTDs have equal pressures")
+        pressure0 = section.data[1]["pressure"]
+        for i in 2:nctds
+            pressure = section.data[i]["pressure"]
+            if pressure != pressure0
+                error("Pressure mismatch between first CTD and $i-th CTD; use grid_section() first")
+            end
+        end
+        oad(debug, "  assemble field for plotting")
+        # FIXME: check for sameness of pressures; if not, tell user to use (new fcn)
+        # FIXME: extract field to matrix, then contour
+        # FIXME: permit contouring or heatmaps
+    else
+        error("unknown 'which' value '$which'; try one of the following: ", ["map"; fields])
     end
     oad(debug, "END plot_section()")
-    p
+    pl
 end
 
 
