@@ -123,11 +123,32 @@ end
 """
     section_grid(section::Section; debug::Int64=0)
 
-Grid a section, altering all the CTD objects to employ a uniform
-z grid. This is done by linear interpolation.
-FIXME: code as in oce
+Grid a section, altering all the CTD objects to employ a uniform pressure grid.
+
+The pressure grid is set up to range from 0 to the maximum pressure across all
+the CTDs in `section`, incrementing by `pressure_step`. Once this is set up,
+the other fields are interpolated to this grid using linear interpolation, with
+missing values inserted for gridded pressures that exceed the maximum value in
+any given CTD.
+
+# Arguments
+
+- `section` a Section
+
+- `pressure_step` desired pressure increment, in dbar.
+
+# Keywords
+
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+
+
 """
-function section_grid(section::Section; debug::Int64=0)
+function section_grid(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
     oad(debug, "section_grid() START")
+    oad(debug, "  setting up uniform pressure grid with pressure step $pressure_step")
+    pressure_maximum = extrema(map(ctd -> extrema(ctd["pressure"])[2], section.data))[2]
+    gridded_pressure = range(0.0, pressure_maximum, step=pressure_step)
+    oad(debug, "  interpolating data to this grid FIXME: NOT DONE YET")
+    println(gridded_pressure)
     oad(debug, "END section_grid()")
 end
