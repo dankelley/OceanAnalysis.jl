@@ -112,7 +112,7 @@ An error is reported if the `x.data` lacks `salinity`, `temperature` or
 `pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
 """
 function set_teos(x::OA; debug::Int64=0)
-    oad(debug, "insert_teos10(OA) START")
+    oad(debug, "insert_teos10 START")
     metadata = copy(x.metadata)
     data = copy(x.data)
     metadata_names = keys(metadata)
@@ -137,7 +137,39 @@ function set_teos(x::OA; debug::Int64=0)
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
     oad(debug, "        spiciness0 completed, starting with ", first(data.spiciness0, 2))
     rval = Ctd(metadata, data)
-    oad(debug, "END set_teos(OA)")
+    oad(debug, "END set_teos")
     rval
 end
 
+"""
+    grid_grid(ctd::Ctd;
+        pressure_grid::Vector{Float64}=missing, pressure_step::Float64=2.0;
+        method::Symbol=:interpolate, debug::Int64=0)
+
+Grid a CTD to standardized pressure levels.
+
+The levels are as given by `pressure_grid` or, if that is not provided,
+as the pressure range within `ctd`, incrementing `pressure_step`.
+
+# Arguments
+
+- `ctd` a [`Ctd`](@ref) to be gridded. It must contain a `pressure` column.
+
+# Keywords
+
+- `method`: a symbol indicating the gridding method. At the moment, only one choice is accepted, namely `:interpolate`, which means to use linear interpolation of each field to the specified pressure grid.
+
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+
+# Example
+"""
+function grid_ctd(ctd::Ctd;
+    pressure_grid::Vector{Float64}=missing, pressure_step::Float64=2.0,
+    method::Symbol=:interpolate, debug::Int64=0)
+    oad(debug, "grid_ctd() START")
+    if ismissing(pressure_grid)
+        pressure_grid = range(0, extremum(ctd.data.pressure)[2], step=pressure_step)
+        oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
+    end
+    oad(debug, "END grid_ctd()")
+end

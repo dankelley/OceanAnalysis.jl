@@ -83,7 +83,7 @@ function plot_section(section::Section, which="map";
         yvar in yvar_allowed ||
             error("yvar=\"$yvar\" not allowed; try one of the following: ", yvar_allowed)
         if !section_is_gridded(section)
-            error("section is not gridded; try using section_grid() first")
+            error("cannot handle ungridded section; use grid_section() first")
         end
         oad(debug, "  assemble field for plotting")
         pl = "FIXME: write code to handle which=$which"

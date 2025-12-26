@@ -34,6 +34,8 @@ OceanAnalysis.get_nc_value
 OceanAnalysis.get_section
 OceanAnalysis.get_topography
 OceanAnalysis.gravity
+OceanAnalysis.grid_ctd
+OceanAnalysis.grid_section
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_amsr
@@ -57,7 +59,6 @@ OceanAnalysis.read_topography
 OceanAnalysis.SA
 OceanAnalysis.scale_bar
 OceanAnalysis.set_teos
-OceanAnalysis.section_grid
 OceanAnalysis.section_is_gridded
 OceanAnalysis.station_map
 OceanAnalysis.subset_amsr

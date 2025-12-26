@@ -81,14 +81,15 @@ end
 
 
 """
-    A type to hold section data (SUBJECT TO CHANGE)
+    Section is a type that holds section data
 
-    This holds section data as assembled by [`as_section`](@ref).
+The `data` portion of a Section object is a [`Vector`](@ref) of [`CTD`](@ref)
+objects, while the `metadata` portion may contain information about the
+collection.
 
-The `metadata` element is a Dict that holds the `name` of the section
-(typically an EXPOCODE), as well as the `source` of the data (typically a URL).
-
-The `data` element stores a Vector of Ctd objects.
+Section objects may be assembled from CTD objects using [`as_section`](@ref) or
+read from CTD files with [`read_section`](@ref). They may be gridded with
+[`grid_section`](@ref) and plotted with [`plot_section`](@ref).
 
 """
 mutable struct Section <: OA

@@ -39,6 +39,8 @@ export get_nc_value
 export get_section
 export get_topography
 export gravity
+export grid_ctd
+export grid_section
 export N2
 export plot_amsr
 export plot_coastline
@@ -61,7 +63,6 @@ export read_topography
 export salinity_from_conductivity
 export SA
 export scale_bar
-export section_grid
 export section_is_gridded
 export set_teos
 export station_map

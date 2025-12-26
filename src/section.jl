@@ -121,7 +121,7 @@ function section_is_gridded(section::Section; debug::Int64=0)
 end
 
 """
-    section_grid(section::Section; debug::Int64=0)
+    grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
 
 Grid a section, altering all the CTD objects to employ a uniform pressure grid.
 
@@ -133,7 +133,7 @@ any given CTD.
 
 # Arguments
 
-- `section` a Section
+- `section` a [`Section`](@ref) object.
 
 - `pressure_step` desired pressure increment, in dbar.
 
@@ -143,12 +143,13 @@ any given CTD.
 
 
 """
-function section_grid(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
-    oad(debug, "section_grid() START")
+function grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
+    oad(debug, "grid_section() START")
     oad(debug, "  setting up uniform pressure grid with pressure step $pressure_step")
     pressure_maximum = extrema(map(ctd -> extrema(ctd["pressure"])[2], section.data))[2]
     gridded_pressure = range(0.0, pressure_maximum, step=pressure_step)
     oad(debug, "  interpolating data to this grid FIXME: NOT DONE YET")
     println(gridded_pressure)
-    oad(debug, "END section_grid()")
+    warning("FIXME: grid_section should use grid_ctd() on each CTD in data")
+    oad(debug, "END grid_section()")
 end
