@@ -142,7 +142,7 @@ function set_teos(x::OA; debug::Int64=0)
 end
 
 """
-    grid_grid(ctd::Ctd;
+    grid_ctd(ctd::Ctd;
         pressure_grid::Vector{Float64}=missing, pressure_step::Float64=2.0;
         method::Symbol=:interpolate, debug::Int64=0)
 
@@ -162,14 +162,39 @@ as the pressure range within `ctd`, incrementing `pressure_step`.
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # Example
+
+```juliadoc
+using OceanAnalysis, Plots
+f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+ctd = read_ctd_cnv(f);
+pressure_grid = 0.0:1.0:100.0;
+ctd2 = grid_ctd(ctd, pressure_grid=pressure_grid);
+plot(ctd["salinity"], -ctd["pressure"], seriestype=:path, legend=false, framestyle=:box)
+plot!(ctd2["salinity"], -ctd2["pressure"], seriestype=:path, color=:red, legend=false, framestyle=:box)
+```
 """
 function grid_ctd(ctd::Ctd;
-    pressure_grid::Vector{Float64}=missing, pressure_step::Float64=2.0,
+    pressure_grid::Union{AbstractVector,AbstractRange}=missing, pressure_step::Float64=2.0,
     method::Symbol=:interpolate, debug::Int64=0)
     oad(debug, "grid_ctd() START")
+    method == :interpolate || error("only method=:interpolate is handled in this version")
     if ismissing(pressure_grid)
         pressure_grid = range(0, extremum(ctd.data.pressure)[2], step=pressure_step)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
     end
+    pressure = ctd.data.pressure
+    Interpolations.deduplicate_knots!(pressure)
+    nrow = length(pressure_grid)
+    ncol = size(ctd.data)[2]
+    rval = zeros(nrow, ncol)
+    for i in 1:ncol
+        itp = linear_interpolation((pressure,), ctd.data[:, i], extrapolation_bc=NaN)
+        rval[:, i] = itp.(pressure_grid)
+    end
+    data = DataFrame(rval, :auto)
+    rename!(data, names(ctd.data))
+    rval = Ctd(ctd.metadata, data)
     oad(debug, "END grid_ctd()")
+    rval
 end
+

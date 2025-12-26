@@ -83,7 +83,7 @@ end
 """
     Section is a type that holds section data
 
-The `data` portion of a Section object is a [`Vector`](@ref) of [`CTD`](@ref)
+The `data` portion of a Section object is a Vector of [`Ctd`](@ref)
 objects, while the `metadata` portion may contain information about the
 collection.
 
