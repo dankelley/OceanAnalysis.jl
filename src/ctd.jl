@@ -149,7 +149,7 @@ end
 Grid a CTD to standardized pressure levels.
 
 The levels are as given by `pressure_grid` or, if that is not provided,
-as the pressure range within `ctd`, incrementing `pressure_step`.
+as the pressure range within `ctd`, incrementing by `pressure_step`.
 
 # Arguments
 

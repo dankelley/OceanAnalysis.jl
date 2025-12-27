@@ -20,10 +20,10 @@ the `name` of the section and the `source` of the data.
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # Examples
-```julia
+```juliadoc
 julia> using OceanAnalysis
 julia> # Create fake data
-       f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
 julia> a = read_ctd_cnv(f, add_teos=false);
 julia> b = read_ctd_cnv(f, add_teos=false);
 julia> b.data.salinity = 1.0 .+ b.data.salinity;
@@ -141,15 +141,33 @@ any given CTD.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
+# Examples
+
+```juliadoc
+using OceanAnalysis
+url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
+dir = get_section(url)
+section = read_section(dir);
+section_gridded = grid_section(section)
+```
 
 """
 function grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
     oad(debug, "grid_section() START")
     oad(debug, "  setting up uniform pressure grid with pressure step $pressure_step")
+    nctds = length(section.data)
+    nctds > 0 || error("  grid_section() requires at least 1 CTD station in 'data'")
+    metadata = section.metadata
+    metadata["gridded"] = true
+    data = Vector{Ctd}(undef, nctds)
     pressure_maximum = extrema(map(ctd -> extrema(ctd["pressure"])[2], section.data))[2]
-    gridded_pressure = range(0.0, pressure_maximum, step=pressure_step)
+    pressure_grid = range(0.0, pressure_maximum, step=pressure_step);
     oad(debug, "  interpolating data to this grid FIXME: NOT DONE YET")
-    println(gridded_pressure)
-    warning("FIXME: grid_section should use grid_ctd() on each CTD in data")
+    for i in eachindex(section.data)
+        data[i] = grid_ctd(section.data[i], pressure_grid=pressure_grid, debug=debug)
+    end
+    oad(debug, "  constructing return value")
+    rval = Section(metadata, data)
     oad(debug, "END grid_section()")
+    rval
 end
