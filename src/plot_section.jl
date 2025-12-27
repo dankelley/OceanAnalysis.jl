@@ -35,7 +35,7 @@ end
 
 """
     plot_section(section::Section, which="map";
-        xvar="latitude", yvar="pressure", debug::Int64=0)
+        xvar="latitude", yvar="pressure", debug::Int64=0, kwargs...)
 
 # Arguments
 
@@ -51,6 +51,8 @@ end
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
+- `kwargs`: optional items, passed down to lower-level plotting functions. A typical example is to set `size` to control the size of the plot.
+
 # Examples
 
 ```julia
@@ -62,17 +64,17 @@ plot_section(section, "map")
 ```
 """
 function plot_section(section::Section, which="map";
-    xvar="latitude", yvar="pressure", debug::Int64=0)
+    xvar="latitude", yvar="pressure", debug::Int64=0, kwargs...)
     oad(debug, "plot_section(which=\"$which\") BEGIN")
     # assume all CTDs have the same data-column names
     fields = names(section.data[1].data)
     if which == "map"
-        longitude = get_element(section, "longitude")
-        latitude = get_element(section, "latitude")
+        longitude = section["longitude"]
+        latitude = section["latitude"]
         pl = plot(longitude, latitude,
             aspect_ratio=1.0 / cos(0.5 * sum(extrema(latitude)) * pi / 180),
             seriestype=:scatter, framestyle=:box, legend=false,
-            markersize=2)
+            markersize=2; kwargs...)
         plot_coastline!(coastline())
     elseif which in fields
         oad(debug, "    which=$which is a permitted field")
