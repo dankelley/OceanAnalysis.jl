@@ -1,36 +1,36 @@
-"""
-    plot_section(x, y, z, levels=:auto;
-        title="", xlab="Distance from Shore [km]", ylab="Pressure [db]",
-        font_size=8, show_stations=true, dpi=200, kwargs...)
-
-Draw an oceanographic section plot, with contours for `z` as a function
-of `x` and `y`. This is a preliminary version of the function, subject
-to changes that are suggested by every-day work.
-
-Note that `x` and `y` must each be ordered, because `contour()` insists
-on that. The other options ought to be reasonably self-explanatory.
-
-"""
-function plot_section_old(x, y, z, levels=:auto;
-    title="", xlab="Distance from Shore [km]", ylab="Pressure [db]",
-    font_size=8, show_stations=true, dpi=200, kwargs...)
-    if levels == :auto
-        levels = pretty(z, 10)
-    end
-    rval = contour(x, y, z, yflip=true, color=:black,
-        xlab=xlab, ylab=ylab, title=title, titlelocation=:left,
-        framestyle=:box, levels=levels, cbar=false, clabels=true,
-        tickdirection=:out, titlefontsize=font_size, labelfontsize=font_size, tickfontsize=font_size,
-        dpi=dpi, kwargs...)
-    if show_stations
-        xlim, ylim = xlims(), ylims()
-        for xx in x
-            plot!(repeat([xx], 2), collect(ylim), xlim=xlim, ylim=ylim,
-                seriestype=:path, color=:lightgray, linewidth=0.75, grid=false, label=false)
-        end
-    end
-    rval
-end
+# """
+#     plot_section(x, y, z, levels=:auto;
+#         title="", xlab="Distance from Shore [km]", ylab="Pressure [db]",
+#         font_size=8, show_stations=true, dpi=200, kwargs...)
+# 
+# Draw an oceanographic section plot, with contours for `z` as a function
+# of `x` and `y`. This is a preliminary version of the function, subject
+# to changes that are suggested by every-day work.
+# 
+# Note that `x` and `y` must each be ordered, because `contour()` insists
+# on that. The other options ought to be reasonably self-explanatory.
+# 
+# """
+# function plot_section_old(x, y, z, levels=:auto;
+#     title="", xlab="Distance from Shore [km]", ylab="Pressure [db]",
+#     font_size=8, show_stations=true, dpi=200, kwargs...)
+#     if levels == :auto
+#         levels = pretty(z, 10)
+#     end
+#     rval = contour(x, y, z, yflip=true, color=:black,
+#         xlab=xlab, ylab=ylab, title=title, titlelocation=:left,
+#         framestyle=:box, levels=levels, cbar=false, clabels=true,
+#         tickdirection=:out, titlefontsize=font_size, labelfontsize=font_size, tickfontsize=font_size,
+#         dpi=dpi, kwargs...)
+#     if show_stations
+#         xlim, ylim = xlims(), ylims()
+#         for xx in x
+#             plot!(repeat([xx], 2), collect(ylim), xlim=xlim, ylim=ylim,
+#                 seriestype=:path, color=:lightgray, linewidth=0.75, grid=false, label=false)
+#         end
+#     end
+#     rval
+# end
 
 
 """
@@ -88,9 +88,19 @@ function plot_section(section::Section, which="map";
             error("cannot handle ungridded section; use grid_section() first")
         end
         oad(debug, "  assemble field for plotting")
-        pl = "FIXME: write code to handle which=$which"
-        # FIXME: extract field to matrix, then contour
+        nrows, ncols = length(section.data[1]["pressure"]), length(section.data)
+        z = zeros(nrows, ncols)
+        #println("size(z): $(size(z))")
+        for i in 1:ncols
+            rval = section.data[i][which]
+            #println("i=4i, size(rval): $(size(rval))")
+            z[:, i] = rval
+        end
         # FIXME: permit contouring or heatmaps
+        # FIXME: set the x and y variables
+        x = section["latitude"]
+        pl = contour(section["latitude"], section.data[1]["pressure"], z; yflip=true, framestyle=:box, xlab="lat", ylab="p", kwargs...)
+        #pl = heatmap(z)
     else
         error("unknown 'which' value '$which'; try one of the following: ", ["map"; fields])
     end

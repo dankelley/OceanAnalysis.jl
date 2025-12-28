@@ -125,9 +125,12 @@ function get_element(x::OA, element::String; debug::Int64=0)
         if element == "N2"
             return copy(N2(x))
         end
+        p = x.data.pressure
+        if element == "z"
+            return gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
+        end
         SP = x.data.salinity
         T = x.data.temperature
-        p = x.data.pressure
         longitude = x.metadata["longitude"]
         latitude = x.metadata["latitude"]
         local SA = gsw_sa_from_sp.(SP, p, longitude, latitude) |> fix_gsw_bad_code!

@@ -109,7 +109,9 @@ function section_is_gridded(section::Section; debug::Int64=0)
     for i in 2:nctds
         pressure = section.data[i]["pressure"]
         if pressure != pressure0
-            oad(debug, "    pressure mismatch between first CTD and $i-th CTD; use grid_section() first")
+            oad(debug, "  mismatch between section.data[1].pressure and section.data[$i].pressure")
+            #println(pressure0)
+            #println(pressure)
             rval = false
             break
         end
@@ -161,7 +163,7 @@ function grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64
     metadata["gridded"] = true
     data = Vector{Ctd}(undef, nctds)
     pressure_maximum = extrema(map(ctd -> extrema(ctd["pressure"])[2], section.data))[2]
-    pressure_grid = range(0.0, pressure_maximum, step=pressure_step);
+    pressure_grid = range(0.0, pressure_maximum, step=pressure_step)
     oad(debug, "  interpolating data to this grid FIXME: NOT DONE YET")
     for i in eachindex(section.data)
         data[i] = grid_ctd(section.data[i], pressure_grid=pressure_grid, debug=debug)

@@ -187,9 +187,14 @@ function grid_ctd(ctd::Ctd;
     nrow = length(pressure_grid)
     ncol = size(ctd.data)[2]
     rval = zeros(nrow, ncol)
+    column_names = names(ctd.data)
     for i in 1:ncol
-        itp = linear_interpolation((pressure,), ctd.data[:, i], extrapolation_bc=NaN)
-        rval[:, i] = itp.(pressure_grid)
+        if column_names[i] == "pressure"
+            rval[:, i] = pressure_grid
+        else
+            itp = linear_interpolation((pressure,), ctd.data[:, i], extrapolation_bc=NaN)
+            rval[:, i] = itp.(pressure_grid)
+        end
     end
     data = DataFrame(rval, :auto)
     rename!(data, names(ctd.data))
