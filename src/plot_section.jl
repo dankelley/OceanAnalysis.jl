@@ -1,38 +1,3 @@
-# """
-#     plot_section(x, y, z, levels=:auto;
-#         title="", xlab="Distance from Shore [km]", ylab="Pressure [db]",
-#         font_size=8, show_stations=true, dpi=200, kwargs...)
-# 
-# Draw an oceanographic section plot, with contours for `z` as a function
-# of `x` and `y`. This is a preliminary version of the function, subject
-# to changes that are suggested by every-day work.
-# 
-# Note that `x` and `y` must each be ordered, because `contour()` insists
-# on that. The other options ought to be reasonably self-explanatory.
-# 
-# """
-# function plot_section_old(x, y, z, levels=:auto;
-#     title="", xlab="Distance from Shore [km]", ylab="Pressure [db]",
-#     font_size=8, show_stations=true, dpi=200, kwargs...)
-#     if levels == :auto
-#         levels = pretty(z, 10)
-#     end
-#     rval = contour(x, y, z, yflip=true, color=:black,
-#         xlab=xlab, ylab=ylab, title=title, titlelocation=:left,
-#         framestyle=:box, levels=levels, cbar=false, clabels=true,
-#         tickdirection=:out, titlefontsize=font_size, labelfontsize=font_size, tickfontsize=font_size,
-#         dpi=dpi, kwargs...)
-#     if show_stations
-#         xlim, ylim = xlims(), ylims()
-#         for xx in x
-#             plot!(repeat([xx], 2), collect(ylim), xlim=xlim, ylim=ylim,
-#                 seriestype=:path, color=:lightgray, linewidth=0.75, grid=false, label=false)
-#         end
-#     end
-#     rval
-# end
-
-
 """
     plot_section(section::Section, which="map";
         xvar="latitude", yvar="pressure", debug::Int64=0, kwargs...)
@@ -69,6 +34,7 @@ function plot_section(section::Section, which="map";
     # assume all CTDs have the same data-column names
     fields = names(section.data[1].data)
     if which == "map"
+        oad(debug, "  plotting a map")
         longitude = section["longitude"]
         latitude = section["latitude"]
         pl = plot(longitude, latitude,
@@ -77,16 +43,35 @@ function plot_section(section::Section, which="map";
             markersize=2; kwargs...)
         plot_coastline!(coastline())
     elseif which in fields
-        oad(debug, "    which=$which is a permitted field")
-        xvar_allowed = ("longitude", "latitude", "distance")
-        yvar_allowed = ("depth", "pressure")
-        xvar in xvar_allowed ||
-            error("xvar=\"$xvar\" not allowed; try one of the following: ", xvar_allowed)
-        yvar in yvar_allowed ||
-            error("yvar=\"$yvar\" not allowed; try one of the following: ", yvar_allowed)
-        if !section_is_gridded(section)
-            error("cannot handle ungridded section; use grid_section() first")
+        oad(debug, "  see if section is gridded")
+        section_is_gridded(section) || error("cannot handle ungridded section; use grid_section() first")
+        if xvar == "longitude"
+            xlab = "Longitude [°E]"
+            x = section["longitude"]
+        elseif xvar == "latitude"
+            xlab = "Latitude [°N]"
+            x = section["latitude"]
+        elseif xvar == "distance"
+            xlab = "Distance [km]"
+            x = geod_distance.(section["longitude"], section["latitude"],
+                section["longitude"][1], section["latitude"][1])
+        else
+            error("xvar=\"$xvar\" not allowed; try \"Distance\", \"Latitude\", or \"Longitude\"")
         end
+        if yvar == "depth"
+            ylab = "Depth [m]"
+            y = section.data[1]["z"]
+        elseif yvar == "pressure"
+            ylab = "Pressure [dbar]"
+            y = section.data[1]["pressure"]
+        elseif yvar == "z"
+            ylab = "Vertical Coordinate [m]"
+            y = section.data[1]["depth"]
+        else
+            error("yvar=\"$yvar\" not allowed; try \"depth\", \"pressure\", or \"z\"")
+        end
+        oad(debug, "  set x=$(first(x,3)) (+ more) for yvar=$xvar")
+        oad(debug, "  set y=$(first(y,3)) (+ more) for yvar=$yvar")
         oad(debug, "  assemble field for plotting")
         nrows, ncols = length(section.data[1]["pressure"]), length(section.data)
         z = zeros(nrows, ncols)
@@ -96,10 +81,16 @@ function plot_section(section::Section, which="map";
             #println("i=4i, size(rval): $(size(rval))")
             z[:, i] = rval
         end
+        levels = pretty(z, 20)
+        oad(debug, "  levels: $levels")
         # FIXME: permit contouring or heatmaps
         # FIXME: set the x and y variables
-        x = section["latitude"]
-        pl = contour(section["latitude"], section.data[1]["pressure"], z; yflip=true, framestyle=:box, xlab="lat", ylab="p", kwargs...)
+        @warn "FIXME: order x and y (and match z) before trying to contour"
+        #pl = contour(section["latitude"], section.data[1]["pressure"], z;
+        pl = contour(x, y, z;
+            contourlabels=true, color=:black, cbar=false, levels=levels,
+            yflip=yvar == "pressure" || yvar == "depth" ? true : false,
+            xlab=xlab, ylab=ylab, framestyle=:box, kwargs...)
         #pl = heatmap(z)
     else
         error("unknown 'which' value '$which'; try one of the following: ", ["map"; fields])

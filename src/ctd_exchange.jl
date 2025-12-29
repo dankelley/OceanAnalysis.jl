@@ -32,7 +32,7 @@ julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ar07_74JC2
 julia> d = read_ctd_exchange(f);
 
 julia> println(keys(d.metadata))
-["depth", "latitude", "time", "header", "section", "longitude", "station", "expocode", "cast"]
+["latitude", "time", "header", "section", "longitude", "bottom_depth", "station", "expocode", "cast"]
 
 julia> println(first(d.data, 3))
 3×8 DataFrame
@@ -91,7 +91,7 @@ function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true,
     delete!(metadata, "LONGITUDE")
     metadata["latitude"] = parse(Float64, metadata["LATITUDE"])
     delete!(metadata, "LATITUDE")
-    metadata["depth"] = parse(Float64, metadata["DEPTH"])
+    metadata["bottom_depth"] = parse(Float64, metadata["DEPTH"])
     delete!(metadata, "DEPTH")
     metadata["section"] = metadata["SECT_ID"]
     delete!(metadata, "SECT_ID")
@@ -123,6 +123,8 @@ function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true,
     seekstart(stream)
     data = CSV.read(stream, DataFrame; delim=",", header=false, skipto=header_length + 1, footerskip=1, silencewarnings=true)
     rename!(data, data_names)
+    rows, cols = size(data)
+    oad(debug, "  read $rows of data, each with $cols columns")
     rval = Ctd(metadata, data)
     oad(debug, "END read_ctd_exchange()")
     rval

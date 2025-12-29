@@ -130,6 +130,9 @@ function get_element(x::OA, element::String; debug::Int64=0)
         if element == "z"
             return gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
         end
+        if element == "depth"
+            return -gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
+        end
         SP = x.data.salinity
         T = x.data.temperature
         longitude = x.metadata["longitude"]
