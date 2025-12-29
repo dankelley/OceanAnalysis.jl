@@ -141,8 +141,9 @@ scale_bar(500, :right, :top)
 ## Oceanographic section
 
 The following downloads an oceanographic section that has CTD files in WOCE
-format. Then it reads those CTD files into a Section object. Finally, a map of
-sampling locations is created.
+format. (See https://cchdo.ucsd.edu for paths to other sections.)  Then, after
+reading those CTD files into a Section object, it draws a map of the locations
+of the CTD profiles.
 
 ```julia
 using OceanAnalysis, Plots
