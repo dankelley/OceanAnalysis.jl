@@ -44,16 +44,14 @@ Download a zipfile from `url` and expand its contents into files within a
 destination directory inferred from the URL or as defined by `destdir`, if the
 latter is not missing.
 
-The work starts by downloading a zipfile to the local directory, if
-it is not already present.  Then a directory name is constructed
-based on `url` and the value of `destdir`. If no such
-directory exists, it is created. Then the zipfile is expanded,
-storing the contents in this new directory.
+The work starts by downloading a zipfile to the local directory, if it is not
+already present.  Then a directory name is constructed based on `url` and the
+value of `destdir`. If no such directory exists, it is created. Then the
+zipfile is expanded, storing the contents in this new directory.
 
 The return value is the name of the new directory.
 
-Setting `debug=1` will cause the printing of some of the processing
-steps.
+Setting `debug=1` will cause the printing of some of the processing steps.
 
 # Examples
 
@@ -68,27 +66,30 @@ println("Downloaded ", length(readdir(sdir)), " files to '", sdir, "'")
 function get_section(url::String; destdir=".", debug::Int64=0)
     # FIXME: maybe an argument to reset for a fresh download+extraction
     oad(debug, "get_section() START")
-    destdir = joinpath(destdir, replace(url, r".*/(.*)_ct1.zip" => s"\1"))
+    oad(debug, "  url: \"", url, "\"")
+    oad(debug, "  destdir: \"", destdir, "\" (originally)")
+    destdir = joinpath(destdir, replace(url, r".*/(.*_ct[0-9]*).zip" => s"\1"))
+    oad(debug, "  destdir: \"", destdir, "\" (after modification)")
     zip = replace(url, r".*/" => "")
     if isfile(zip)
-        oad(debug, "    using existing zipfile ", zip)
+        oad(debug, "  using existing zipfile ", zip)
     else
-        oad(debug, "    downloading zipfile from ", url)
+        oad(debug, "  downloading zipfile from ", url)
         Downloads.download(url, zip)
     end
     archive = ZipFile.Reader(zip)
     if isdir(destdir)
-        oad(debug, "    using existing directory ", destdir)
+        oad(debug, "  using existing directory ", destdir)
     else
-        oad(debug, "    creating directory ", destdir)
+        oad(debug, "  creating directory ", destdir)
         mkpath(destdir)
     end
-    oad(debug, "    saving ", length(archive.files), " files in ", destdir)
+    oad(debug, "  saving ", length(archive.files), " files in ", destdir)
     # show a progress bar, but typically the work completes before it even appears.
-    progress = Progress(length(archive.files), enabled=debug == 1 ? true : false)
+    #<> progress = Progress(length(archive.files), enabled=debug == 1 ? true : false)
     for file in archive.files
         write(joinpath(destdir, file.name), read(file, String))
-        next!(progress)
+        #<> next!(progress)
     end
     close(archive)
     oad(debug, "END get_section()")

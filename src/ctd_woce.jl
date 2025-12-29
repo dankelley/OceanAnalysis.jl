@@ -69,9 +69,11 @@ function read_ctd_woce(stream::IOStream, filename::String=""; add_teos=true, deb
     metadata["header"] = header
     for i in eachindex(header)
         if occursin(r"=", header[i])
-            s = split(header[i], r"[ ]*=[ ]*")
-            metadata[s[1]] = s[2]
-            #println(s[1] * " <- " * s[2])
+            key, value = split(header[i], r"[ ]*=[ ]*")
+            if key == "SECT"
+                key = "SECT_ID"
+            end
+            metadata[key] = value
         end
     end
     # Change from strings to numeric, and also rename
@@ -81,8 +83,8 @@ function read_ctd_woce(stream::IOStream, filename::String=""; add_teos=true, deb
     delete!(metadata, "LATITUDE")
     metadata["depth"] = parse(Float64, metadata["DEPTH"])
     delete!(metadata, "DEPTH")
-    metadata["section"] = metadata["SECT"]
-    delete!(metadata, "SECT")
+    metadata["section"] = metadata["SECT_ID"]
+    delete!(metadata, "SECT_ID")
     metadata["station"] = metadata["STNNBR"]
     delete!(metadata, "STNNBR")
     metadata["cast"] = metadata["CASTNO"]
