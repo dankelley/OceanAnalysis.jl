@@ -81,7 +81,7 @@ function plot_section(section::Section, which="map";
             #println("i=4i, size(rval): $(size(rval))")
             z[:, i] = rval
         end
-        levels = pretty(z, 20)
+        levels = pretty(z, 12)
         oad(debug, "  levels: $levels")
         # FIXME: permit contouring or heatmaps
         # FIXME: set the x and y variables
@@ -90,7 +90,9 @@ function plot_section(section::Section, which="map";
         pl = contour(x, y, z;
             contourlabels=true, color=:black, cbar=false, levels=levels,
             yflip=yvar == "pressure" || yvar == "depth" ? true : false,
-            xlab=xlab, ylab=ylab, framestyle=:box, kwargs...)
+            xlab=xlab, ylab=ylab, framestyle=:box,
+            titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
+            kwargs...)
         #pl = heatmap(z)
     else
         error("unknown 'which' value '$which'; try one of the following: ", ["map"; fields])

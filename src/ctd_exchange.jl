@@ -93,7 +93,7 @@ function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true,
     delete!(metadata, "LATITUDE")
     metadata["bottom_depth"] = parse(Float64, metadata["DEPTH"])
     delete!(metadata, "DEPTH")
-    metadata["section"] = metadata["SECT_ID"]
+    metadata["section_id"] = metadata["SECT_ID"]
     delete!(metadata, "SECT_ID")
     metadata["station"] = metadata["STNNBR"]
     delete!(metadata, "STNNBR")

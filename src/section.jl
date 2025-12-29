@@ -37,13 +37,11 @@ julia> for i in 1:length(s.data)
 [30.921, 30.9205, 30.9206]
 ```
 """
-function as_section(ctds::Vector{Ctd}; name::String="", source::String="", debug::Int64=0)
+function as_section(ctds::Vector{Ctd}; debug::Int64=0)
     oad(debug, "as_section() START")
     nctds = length(ctds)
     nctds > 0 || error("  as_section() provided with zero-length first argument")
     metadata = Dict()
-    metadata["name"] = name
-    metadata["source"] = source
     data = Vector{Ctd}(undef, nctds)
     for i in 1:nctds
         oad(debug, "  save $i-th entry") # FIXME: maybe use a progress bar instead
@@ -82,11 +80,23 @@ plot(section, "map")
 ```
 """
 function read_section(dir::String; debug::Int64=0)
+    oad(debug, "read_section() START")
     files = readdir(dir)
     length(files) > 0 || error("no ctd files found in $dir")
     # Reading typically takes about 7 ms per file
     ctds = map((file) -> read_ctd_exchange(joinpath(dir, file), debug=increment_debug(debug)), files)
-    as_section(ctds)
+    oad(debug, "  read $(length(ctds)) CTD files")
+    rval = as_section(ctds)
+    meta = ctds[1].metadata
+    for transfer in ["section_id", "expocode"]
+        if transfer in keys(meta)
+            rval.metadata[transfer] = meta[transfer]
+            oad(debug, "  inserted $transfer into section.metadata")
+        end
+    end
+    rval.metadata["source"] = abspath(dir)
+    oad(debug, "END read_section()")
+    rval
 end
 
 """

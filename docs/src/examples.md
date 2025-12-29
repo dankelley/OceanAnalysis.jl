@@ -140,18 +140,29 @@ scale_bar(500, :right, :top)
 
 ## Oceanographic section
 
-The following downloads an oceanographic section that has CTD files in WOCE
-format. (See https://cchdo.ucsd.edu for paths to other sections.)  Then, after
-reading those CTD files into a Section object, it draws a map of the locations
-of the CTD profiles.
+The following code downloads data from a section survey in the North Atlantic
+ocean. (See [https://cchdo.ucsd.edu](https://cchdo.ucsd.edu) for paths to other
+sections, noting that only the data type named 'exchange' is handled by the
+OceanAnalysis package.) Then it reads the data, and isolates a subset that runs
+roughly orthogonal to the mean path of the Gulf Stream. Finally, it plots a
+chart of sampling locations, along with cross-section diagrams of salinity and
+temperature.
 
 ```julia
 using OceanAnalysis, Plots
-url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
-dir = get_section(url)
-section = read_section(dir);
-plot(section, "map")
-#savefig("section_map.png")
+url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip";
+dir = get_section(url);
+s = read_section(dir);
+s.data = s.data[s["longitude"].<-68.0];
+sg = grid_section(s);
+
+p1 = plot_section(s, xlim=(-80, -65), ylim=(35, 43));
+scale_bar(500);
+p2 = plot_section(sg, "salinity", ylim=(0, 2000));
+p3 = plot_section(sg, "temperature", ylim=(0, 2000));
+l = @layout [a; b c]
+plot(p1, p2, p3, layout=l, dpi=200);
+#savefig("section.png")
 ```
 
-![Section map](section_map.png)
+![Section diagram](section.png)
