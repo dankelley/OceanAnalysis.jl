@@ -12,7 +12,7 @@ Release notes:
 - [`read_section`](@ref) for reading Section data.
 - [`grid_section`](@ref) for gridding Section data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.
-- [`read_ctd_woce`](@ref) for reading CTD data in WOCE format (used by many data servers)
+- [`read_ctd_exchange`](@ref) for reading CTD data in 'exchange' format (used by many data servers)
 - [`grid_ctd`](@ref) for gridding Ctd data.
 
 

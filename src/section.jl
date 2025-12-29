@@ -59,7 +59,7 @@ end # as_section()
 
 Read an oceanographic section, as downloaded with [`get_section`](@ref).
 
-This uses [`read_ctd_woce`](@ref) to read WOCE-format CTD files in the
+This uses [`read_ctd_exchange`](@ref) to read WOCE-format CTD files in the
 directory named `dir`. These are then aggregated into a section
 using [`as_section`](@ref).
 
@@ -85,7 +85,7 @@ function read_section(dir::String; debug::Int64=0)
     files = readdir(dir)
     length(files) > 0 || error("no ctd files found in $dir")
     # Reading typically takes about 7 ms per file
-    ctds = map((file) -> read_ctd_woce(joinpath(dir, file)), files)
+    ctds = map((file) -> read_ctd_exchange(joinpath(dir, file), debug=increment_debug(debug)), files)
     as_section(ctds)
 end
 
