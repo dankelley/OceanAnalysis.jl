@@ -7,8 +7,10 @@ p1 = plot_section(s, xlim=(-80, -65), ylim=(35, 43))
 scale_bar(500)
 sg = grid_section(s);
 levels = 30.0:0.5:40.0
-p2 = plot_section(sg, "salinity", contourlabels=true, color=:black, cbar=false, ylim=(0, 2000), yflip=true, debug=1)
-#p3 = plot_section(sg, "temperature", contourlabels=true, color=:black, cbar=false, ylim=(0, 2000), yflip=true, debug=1)
-plot(p1, p2)
-savefig("section_06_salinity.pdf")
+#p2 = plot_section(sg, "salinity", contourlabels=true, color=:black, cbar=false, ylim=(0, 2000), yflip=true, debug=1)
+p2 = plot_section(sg, "salinity", ylim=(0, 2000), yflip=true, debug=1)
+p3 = plot_section(sg, "temperature", ylim=(0, 2000), debug=1)
+l = @layout [a; b c]
+plot(p1, p2, p3, layout=l)
+savefig("section_06_a03.pdf")
 
