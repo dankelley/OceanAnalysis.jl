@@ -84,10 +84,9 @@ function plot_section(section::Section, which="map";
         levels = pretty(z, 12)
         oad(debug, "  levels: $levels")
         # FIXME: permit contouring or heatmaps
-        # FIXME: set the x and y variables
-        @warn "FIXME: order x and y (and match z) before trying to contour"
-        #pl = contour(section["latitude"], section.data[1]["pressure"], z;
-        pl = contour(x, y, z;
+        ix = sortperm(x)
+        iy = sortperm(y)
+        pl = contour(x[ix], y[iy], z[iy, ix];
             contourlabels=true, color=:black, cbar=false, levels=levels,
             yflip=yvar == "pressure" || yvar == "depth" ? true : false,
             xlab=xlab, ylab=ylab, framestyle=:box,
