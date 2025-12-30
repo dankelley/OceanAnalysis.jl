@@ -2,7 +2,7 @@ using FileIO, JLD2
 
 """
     plot_section(section::Section, which="map";
-        xvar="latitude", yvar="pressure", debug::Int64=0, kwargs...)
+        type=:contour, xvar="latitude", yvar="pressure", debug::Int64=0, kwargs...)
 
 # Arguments
 
