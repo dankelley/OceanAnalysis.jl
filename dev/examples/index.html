@@ -48,14 +48,12 @@ near = distance .&lt; radius
 index = index_all[recent.&amp;near, :]
 # Extend region of map to show geographic context
 aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
-scale = radius / 111.
-scatter(index.longitude, index.latitude,
+scale = radius / 111.0
+plot_stations(index.longitude, index.latitude,
     xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
     ylims=SI_lat .+ scale .* (-1.2, 1.2),
-    aspect_ratio=aspect_ratio,
-    tickdirection=:out, framestyle=:box, dpi=200, legend=false)
-plot_coastline!(coastline())
-float_IDs = replace.(index.file, r&quot;.*/(.*)_.*&quot; =&gt; s&quot;\1&quot;) |&gt; unique
+    tickdirection=:out, framestyle=:box, legend=false)
+float_IDs = replace.(index.file, r&quot;.*/(.*)_.*&quot; =&gt; s&quot;\1&quot;) |&gt; unique;
 title!(&quot;$(length(index.file)) profiles of $(length(float_IDs)) floats&quot;, titlefontsize=9)
 scale_bar(100, :right, :top)
 #savefig(&quot;argo_search.png&quot;)</code></pre><p><img src="../argo_search.png" alt="Argo search results"/></p><h2 id="Argo-trajectory"><a class="docs-heading-anchor" href="#Argo-trajectory">Argo trajectory</a><a id="Argo-trajectory-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-trajectory" title="Permalink"></a></h2><p>The following shows how to display a trace of the positions of a single Argo float.</p><pre><code class="language-julia hljs"># Plot a float trajectory with colour for sequence number
@@ -89,10 +87,10 @@ s = read_section(dir);
 s.data = s.data[s[&quot;longitude&quot;].&lt;-68.0];
 sg = grid_section(s);
 
-p1 = plot_section(s, xlim=(-80, -65), ylim=(35, 43));
+p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
 scale_bar(500);
 p2 = plot_section(sg, &quot;salinity&quot;, ylim=(0, 2000));
 p3 = plot_section(sg, &quot;temperature&quot;, ylim=(0, 2000));
 l = @layout [a; b c]
 plot(p1, p2, p3, layout=l, dpi=200);
-#savefig(&quot;section.png&quot;)</code></pre><p><img src="../section.png" alt="Section diagram"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 31 December 2025 18:04">Wednesday 31 December 2025</span>. Using Julia version 1.12.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#savefig(&quot;section.png&quot;)</code></pre><p><img src="../section.png" alt="Section diagram"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 31 December 2025 19:00">Wednesday 31 December 2025</span>. Using Julia version 1.12.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
