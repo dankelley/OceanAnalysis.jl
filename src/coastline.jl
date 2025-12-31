@@ -95,10 +95,7 @@ function coastline(longitude::Union{AbstractVector,AbstractRange},
 end
 
 """
-    plot_coastline(coastline::Coastline;
-        xlims=(-180., 180.), ylims=(-90., 90.),
-        seriestype=:shape, color=:bisque3, linewidth=0.5,
-        tickdirection=:out, debug::Int64=0, kwargs...)
+    plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
 
 Plot a coastline with longitude and latitude axes (i.e. without a map projection).
 
@@ -107,23 +104,42 @@ The `aspect_ratio` of the plot is set as the reciprocal of the mean of the
 
 # Arguments
 
-- `coastline` the coastline, as constructed using [`coastline`](@ref) or (less commonly) [`Coastline`](@ref).
+- `coastline` a [`Coastline`](@ref) object, as constructed using [`coastline`](@ref) or [`Coastline`](@ref).
 
-- `xlims` and `ylims` control the ranges of the longitude and latitude axes, respectively.
+# Keywords
 
-- `seriestype`, `color` and `linewidth` control the rendering of land regions. These values are passed to the base-level `plot` function; for details, see the documentation provided by the `Plots` package.
+- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+
+- `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
+
+# Examples
+```juliadoc
+using OceanAnalysis, Plots
+#plot_stations([-59.9], [43.9]; xlim=(-70, -50), ylim=(40, 50), color=:green, markercolor=:red)
+# Default world view
+world = plot_coastline(coastline())
+# Nova Scotia view, with light-gray for land
+ns = plot_coastline(coastline(); color=:gray80, xlim=(-70.0, -55.0), ylim=(43.0, 48.0))
+plot(world, ns)
+```
 """
-function plot_coastline(coastline::Coastline;
-    xlims=(-180., 180.), ylims=(-90., 90.),
-    seriestype=:shape, color=:bisque3, linewidth=0.5,
-    tickdirection=:out, debug::Int64=0, kwargs...)
+function plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
     oad(debug, "plot_coastline() START")
-    aspect_ratio = 1.0 / cos(0.5 * (ylims[2] + ylims[1]) * pi / 180.0)
-    oad(debug, "    computed aspect_ratio=", aspect_ratio)
-    rval = plot(coastline.data.longitude, coastline.data.latitude;
-        xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
-        seriestype=seriestype, color=color, linewidth=linewidth,
-        legend=false, framestyle=:box, tickdirection=tickdirection,
+    longitude = coastline["longitude"]
+    latitude = coastline["latitude"]
+    if haskey(kwargs, :ylim)
+        kw = (; kwargs...)
+        mid_latitude = 0.5 * sum(kw[:ylim])
+    else
+        mid_latitude = 0.5 * sum(extrema(filter(!isnan, latitude)))
+    end
+    oad(debug, "  mid_latitude=$mid_latitude")
+    aspect_ratio = 1.0 / cos(mid_latitude * pi / 180.0)
+    oad(debug, "  aspect_ratio=$aspect_ratio")
+    rval = plot(longitude, latitude;
+        xlims=(-180.0, 180.0), ylims=(-90.0, 90.0), aspect_ratio=aspect_ratio,
+        seriestype=:shape, color=:bisque3, linewidth=0.5,
+        legend=false, framestyle=:box, tickdirection=:out,
         kwargs...)
     oad(debug, "END plot_coastline()")
     rval
@@ -142,18 +158,19 @@ in the `kwargs...` grouping.
 
 # Arguments
 
-- `coastline` the coastline, as constructed using [`coastline`](@ref) or, by more advanced users, using [`Coastline`](@ref).
+- `coastline` a [`Coastline`](@ref) object, as constructed using [`coastline`](@ref) or [`Coastline`](@ref).
 
 # Keywords
 
-- `seriestype`, `color` and `linewidth` control the rendering of land regions. These values are passed to the base-level `plot` function; for details, see the documentation provided by the `Plots` package.
+- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+
+- `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
 """
-function plot_coastline!(coastline::Coastline;
-    seriestype=:shape, color=:bisque3, linewidth=0.5, tickdirection=:out, kwargs...)
-    plot!(coastline.data.longitude, coastline.data.latitude,
+function plot_coastline!(coastline::Coastline; kwargs...)
+    plot!(coastline["longitude"], coastline["latitude"],
         xlims=xlims(), ylims=ylims(), # inherit from previous plot
-        seriestype=seriestype, color=color, linewidth=linewidth, legend=false,
-        tickdirection=tickdirection, kwargs...)
+        seriestype=:shape, color=:bisque3, linewidth=0.5, legend=false, tickdirection=:out,
+        kwargs...)
 end
 
 """
