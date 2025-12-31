@@ -5,7 +5,7 @@ s = read_section(dir);
 s.data = s.data[s["longitude"].<-68.0];
 sg = grid_section(s);
 
-p1 = plot_section(s, xlim=(-80, -65), ylim=(35, 43));
+p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
 scale_bar(500);
 p2 = plot_section(sg, "salinity", ylim=(0, 2000));
 p3 = plot_section(sg, "temperature", ylim=(0, 2000));

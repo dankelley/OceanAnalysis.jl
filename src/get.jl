@@ -17,19 +17,19 @@ function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int
     length(url) > 0 || error("Must give 'url")
     file = replace(url, r".*/" => "")
     file = expanduser(joinpath(destdir, file))
-    oad(debug, "    url: \"", url, "\"")
-    oad(debug, "    file: \"", file, "\"")
+    oad(debug, "  url: \"", url, "\"")
+    oad(debug, "  file: \"", file, "\"")
     if isfile(file)
         file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(file))) / Dates.Millisecond(1000) / 86400.0
         if file_age > age
-            oad(debug, "    downloading file, since the existing version is ",
+            oad(debug, "  downloading file, since the existing version is ",
                 round(file_age, digits=4), " days old, exceeding threshold of ", age, " days")
             Downloads.download(url, file)
         else
-            oad(debug, "    using the cached version of the file, since it is under ", age, " days old")
+            oad(debug, "  using the cached version of the file, since it is under ", age, " days old")
         end
     else
-        oad(debug, "    downloading file, since it is not cached in the '$destdir' directory")
+        oad(debug, "  downloading file, since it is not cached in the '$destdir' directory")
         Downloads.download(url, file)
     end
     oad(debug, "END get_file")

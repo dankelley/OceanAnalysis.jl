@@ -19,14 +19,12 @@ near = distance .< radius
 index = index_all[recent.&near, :]
 # Extend region of map to show geographic context
 aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
-scale = radius / 111.
-scatter(index.longitude, index.latitude,
+scale = radius / 111.0
+plot_stations(index.longitude, index.latitude,
     xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
     ylims=SI_lat .+ scale .* (-1.2, 1.2),
-    aspect_ratio=aspect_ratio,
-    tickdirection=:out, framestyle=:box, dpi=200, legend=false)
-plot_coastline!(coastline())
-float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique
+    tickdirection=:out, framestyle=:box, legend=false)
+float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
 title!("$(length(index.file)) profiles of $(length(float_IDs)) floats", titlefontsize=9)
 scale_bar(100, :right, :top)
 savefig("argo_search.png")

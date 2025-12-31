@@ -179,8 +179,11 @@ function get_argo_index(destdir::String="."; age::Real=1.0, server::String="http
     oad(debug, "get_argo_index() START")
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
+    oad(debug, "  local_file: \"$local_file\"")
     remote_file = joinpath(server, file)
-    rval = get_file(remote_file, local_file, age, debug=increment_debug(debug))
+    oad(debug, "  remote_file: \"$remote_file\"")
+    oad(debug, "  age: \"$age\"")
+    rval = get_file(remote_file; destdir, age, debug=increment_debug(debug))
     oad(debug, "END get_argo_index()")
     rval
 end
