@@ -8,7 +8,7 @@ using FileIO, JLD2
 
 - `section` a Section, as created with [`as_section`](@ref) or [`read_section`](@ref).
 
-- `which` a String indicating the type of plot. There are two main options. The first (and default) option is to use `"map"`,  to get a station map. The points are drawn with [`scatter`](@ref), and `kwargs...` is passed to that function, to permit altering the symbol shape, size, colour, etc. The second option creates cross-section diagrams, plotting the named variable as stored within the constituent [`Ctd`](@ref) elements of `section`. The data are drawn with [`contour`](@ref), [`contourf`](@ref) or [`heatmap`](@ref), and `kwargs...` is passed to whichever is chosen, to permit customization.  Note that in the second option, [`is_section_gridded`](@ref) is called first to ensure that the section has been gridded with [`grid_section`](@ref), with an error being reported if not.
+- `which` a String indicating the type of plot. Two cases are handled. (1) If `which="map"` then a station map is drawn. The points are drawn with [`scatter`](@ref), and `kwargs...` is passed to that function, to permit altering the symbol shape, size, colour, etc.  (2) Otherwise, if `which` names a hydrographic variable stored in the dataset, then a cross-section diagram is created to show the variation of that property from station to station. This is done with [`contour`](@ref), [`contourf`](@ref) or [`heatmap`](@ref), with `kwargs...` being provided to the function to permit customization.  If `show_stations` is true, then vertical lines are drawn on top of the property graph. Note that case 2, [`is_section_gridded`](@ref) is called first to ensure that the section has been gridded with [`grid_section`](@ref), with an error being reported if not.
 
 # Keywords
 
@@ -17,6 +17,8 @@ using FileIO, JLD2
 - `xvar` a Symbol, used only on cross-section diagrams, indicating what to put on the horizontal axis (one of `:distance`, `:latitude` or `:longitude`).
 
 - `yvar` as `xvar`, but for the y axis. The permitted values are `:depth` and `:pressure`.
+
+- `show_stations` a Bool value indicating whether to draw vertical gray dotted lines to indicate station locations on cross-section diagrams.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
@@ -41,7 +43,8 @@ plot(p1, p2, p3, layout=l, dpi=300);
 ```
 """
 function plot_section(section::Section, which="map";
-    type=:contourf, xvar=:latitude, yvar=:pressure, debug::Int64=0, kwargs...)
+    type=:contourf, xvar=:latitude, yvar=:pressure, show_stations=false,
+    debug::Int64=0, kwargs...)
     oad(debug, "plot_section(which=\"$which\") BEGIN")
     # assume all CTDs have the same data-column names
     fields = names(section.data[1].data)
@@ -137,6 +140,11 @@ function plot_section(section::Section, which="map";
                 kwargs...)
         else
             error("type=$(repr(type)) not allowed; try :contour, :contourf or :heatmap")
+        end
+        if show_stations
+            vline!(section["latitude"],
+                color=RGBA(0.5, 0.5, 0.5, 0.7),
+                linewidth=1, linestyle=:dot, label=false)
         end
     else
         error("unknown 'which' value '$which'; try one of the following: ", ["map"; fields])
