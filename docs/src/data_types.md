@@ -18,9 +18,9 @@ to them.
   item is a DataFrame with columns named `salinity`, `temperature` and
   `pressure`, along (in some cases with other columns in the data file). The
   following functions return [`Ctd`](@ref) values: [`as_ctd`](@ref),
-  [`read_ctd_cnv`](@ref), and [`read_argo`](@ref).  Objects of type
-  [`Ctd`](@ref) may be plotted with [`plot_profile`](@ref) and
-  [`plot_TS`](@ref).
+  [`read_ctd_cnv`](@ref), [`read_ctd_exchange`](@ref), [`read_ctd_rsk`](@ref)
+  and [`read_argo`](@ref).  Objects of type [`Ctd`](@ref) may be plotted with
+  [`plot_profile`](@ref) and [`plot_TS`](@ref).
 
 - [`Coastline`](@ref) holds coastline shapes. The `metadata` item is a Dict
   that holds the name of the file from which the data were read (or an
@@ -29,12 +29,17 @@ to them.
   is in the 0-360 degree range for the built-in datasets. See the documentation
   for [`coastline`](@ref) for reading and plotting such data.
 
-- [`Section`](@ref) holds a collection of CTD (or similar) stations in an
-  oceanographic "section". See [`as_section`](@ref) for how Section objects are
-  typically constructed.
+- [`Section`](@ref) holds a collection of [`Ctd`](@ref) objects constructed
+  from hydrographic profiles. Sections may be built up from such profiles with
+  [`as_section`](@ref) or [`read_section`](@ref). Archived sections may be
+  downloaded with [`get_section`](@ref).  Plots of station locations can be
+  created with [`plot_stations`](@ref). Cross-section diagrams of the
+  hydrographic data stored in sections (after they are gridded with
+  [`grid_section`](@ref)) may be created with [`plot_section`](@ref).
 
 - [`Topography`](@ref) holds topographic information. The `metadata` item is a
   Dict holding items named `"longitude"` and `"latitude"`.  The `data` item is
-  a matrix of earth height above mean sea level, in metres. Topographic
-  files in NetCDF format may be accessed or downloaded with [`get_topography`](@ref),
-  and read with [`read_topography`](@ref).
+  a matrix of earth height above mean sea level, in metres. Topographic files
+  in NetCDF format may be accessed or downloaded with [`get_topography`](@ref),
+  and read with [`read_topography`](@ref). Plots of [`Topography`](@ref)
+  objects may created with [`plot_topography`](@ref).
