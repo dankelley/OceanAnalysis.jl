@@ -167,7 +167,7 @@ in the `kwargs...` grouping.
 - `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
 """
 function plot_coastline!(coastline::Coastline; kwargs...)
-    plot!(coastline["longitude"], coastline["latitude"],
+    plot!(coastline["longitude"], coastline["latitude"];
         xlims=xlims(), ylims=ylims(), # inherit from previous plot
         seriestype=:shape, color=:bisque3, linewidth=0.5, legend=false, tickdirection=:out,
         kwargs...)

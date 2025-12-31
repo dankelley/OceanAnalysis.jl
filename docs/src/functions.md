@@ -43,6 +43,7 @@ OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
 OceanAnalysis.plot_profile
 OceanAnalysis.plot_section
+OceanAnalysis.plot_stations
 OceanAnalysis.plot_TS
 OceanAnalysis.plot_topography
 OceanAnalysis.pressure_from_depth

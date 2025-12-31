@@ -75,8 +75,8 @@ using OceanAnalysis, Plots
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)
 section = read_section(dir);
-# Show station locations
-plot(section, "map")
+display(section.metadata)
+println("Section contains ", length(section.data), " CTD profiles")
 ```
 """
 function read_section(dir::String; debug::Int64=0)

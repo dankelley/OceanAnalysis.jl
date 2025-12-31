@@ -26,7 +26,7 @@ FIXME: discuss the fact that [`get_element`](@ref) can return derived
 quantities.
 
 FIXME: discuss `[` here.  I think maybe we ought to cause `[` to call
-`get_element` regardless of the object class. But, in that case, s there any
+`get_element` regardless of the object class. But, in that case, is there any
 need for [`get_element`](@ref) at all?
 """
 module OceanAnalysis
@@ -45,6 +45,7 @@ include("get.jl")
 include("netcdf.jl")
 include("plot_profile.jl")
 include("plot_section.jl")
+include("plot_stations.jl")
 include("plot_TS.jl")
 include("seawater_properties.jl")
 include("section.jl")

@@ -1,14 +1,14 @@
 using FileIO, JLD2
 
 """
-    plot_section(section::Section, which="map";
+    plot_section(section::Section, which="salinity";
         type=:contourf, xvar=:latitude, yvar=:pressure, debug::Int64=0, kwargs...)
 
 # Arguments
 
 - `section` a Section, as created with [`as_section`](@ref) or [`read_section`](@ref).
 
-- `which` a String indicating the type of plot. Two cases are handled. (1) If `which="map"` then a station map is drawn. The points are drawn with [`scatter`](@ref), and `kwargs...` is passed to that function, to permit altering the symbol shape, size, colour, etc.  (2) Otherwise, if `which` names a hydrographic variable stored in the dataset, then a cross-section diagram is created to show the variation of that property from station to station. This is done with [`contour`](@ref), [`contourf`](@ref) or [`heatmap`](@ref), with `kwargs...` being provided to the function to permit customization.  If `show_stations` is true, then vertical lines are drawn on top of the property graph. Note that case 2, [`is_section_gridded`](@ref) is called first to ensure that the section has been gridded with [`grid_section`](@ref), with an error being reported if not.
+- `which` a String indicating the name of the hydrographic variable to be plotted. This must be present in each of the [`Ctd`](@ref) objects stored within the `section.data`.  Another requirement is that the section has been gridded, using [`grid_section`](@ref). The plotting is done with `contour`, `contourf` or `heatmap` as directed by the `type` argument. In each case, `kwargs...` is passed to the function to permit customization.  If `show_stations` is true, then `vline` is used to draw vertical lines indicating station locations. Note that case 2, [`section_is_gridded`](@ref) is called first to ensure that the section has been gridded with [`grid_section`](@ref), with an error being reported if not.
 
 # Keywords
 
@@ -20,7 +20,7 @@ using FileIO, JLD2
 
 - `show_stations` a Bool value indicating whether to draw vertical gray dotted lines to indicate station locations on cross-section diagrams.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional integer value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 - `kwargs`: optional items, passed down to lower-level plotting functions. For example, `size` controls the size of the plot, `xlim` and `ylim` control the viewing window, and `color` controls the colour.
 
@@ -32,35 +32,25 @@ url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);
 s = read_section(dir);
 s.data = s.data[s["longitude"].<-68.0];
-sg = grid_section(s);
-
-p1 = plot_section(s, xlim=(-80, -65), ylim=(35, 43));
+p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
 scale_bar(500);
+# Note that we must grid to get the cross-section diagrams
+sg = grid_section(s);
 p2 = plot_section(sg, "salinity", ylim=(0, 2000));
 p3 = plot_section(sg, "temperature", ylim=(0, 2000));
 l = @layout [a; b c]
-plot(p1, p2, p3, layout=l, dpi=300);
+plot(p1, p2, p3, layout=l, dpi=300)
 ```
 """
-function plot_section(section::Section, which="map";
-    type=:contourf, xvar=:latitude, yvar=:pressure, show_stations=false,
+function plot_section(section::Section, which::String="salinity";
+    type::Symbol=:contourf, xvar=:latitude, yvar=:pressure, show_stations::Bool=false,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_section(which=\"$which\") BEGIN")
+    oad(debug, "  see if section is gridded")
+    section_is_gridded(section) || error("cannot handle ungridded section; use grid_section() first")
     # assume all CTDs have the same data-column names
     fields = names(section.data[1].data)
-    if which == "map"
-        oad(debug, "  plotting a map")
-        longitude = section["longitude"]
-        latitude = section["latitude"]
-        pl = scatter(longitude, latitude;
-            aspect_ratio=1.0 / cos(0.5 * sum(extrema(latitude)) * pi / 180),
-            framestyle=:box, legend=false,
-            markershape=:xcross, markercolor=:black, markersize=3,
-            kwargs...)
-        plot_coastline!(coastline())
-    elseif which in fields
-        oad(debug, "  see if section is gridded")
-        section_is_gridded(section) || error("cannot handle ungridded section; use grid_section() first")
+    if which in fields
         if xvar == :longitude
             xlab = "Longitude [°E]"
             x = section["longitude"]
@@ -99,13 +89,15 @@ function plot_section(section::Section, which="map";
         end
         levels = pretty(z, 12)
         oad(debug, "  levels: $levels")
+        oad(debug, "  putting x and y (and z) in ascending order")
         ix = sortperm(x)
         iy = sortperm(y)
         x = x[ix]
         y = y[iy]
         z = z[iy, ix]
         # Kludge required for Julia as of 2025-12-30 (see link in the debug message)
-        # (Actually, I think this is only needed for heatmap, but I'll do for all cases.)
+        # (Actually, I think this is only needed for heatmap.)
+        oad(debug, "  applying a patch to avoid a heatmap problem")
         kw = (; kwargs...)
         if haskey(kwargs, :ylim)
             oad(debug, "  Avoiding heatmap() error handling ylim together with yflip=true; see")
@@ -119,6 +111,7 @@ function plot_section(section::Section, which="map";
         z = z[keep_y, :]
         # ok, now can plot
         if type == :contour
+            oad(debug, "  using contour()")
             pl = contour(x, y, z;
                 contourlabels=true, color=:black, cbar=false, levels=levels,
                 yflip=yvar == :pressure || yvar == :depth ? true : false,
@@ -126,6 +119,8 @@ function plot_section(section::Section, which="map";
                 titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
                 kwargs...)
         elseif type == :contourf
+            oad(debug, "  using contourf()")
+            jldsave("dan.jld2"; x, y, z)
             pl = contourf(x, y, z;
                 contourlabels=true, color=:turbo, cbar=false, levels=levels,
                 yflip=yvar == :pressure || yvar == :depth ? true : false,
@@ -133,6 +128,7 @@ function plot_section(section::Section, which="map";
                 titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
                 kwargs...)
         elseif type == :heatmap
+            oad(debug, "  using heatmap()")
             pl = heatmap(x, y, z;
                 yflip=yvar == :pressure || yvar == :depth ? true : false,
                 xlab=xlab, ylab=ylab, framestyle=:box, color=:turbo, tickdirection=:out,
@@ -142,13 +138,13 @@ function plot_section(section::Section, which="map";
             error("type=$(repr(type)) not allowed; try :contour, :contourf or :heatmap")
         end
         if show_stations
-            vline!(section["latitude"],
-                color=RGBA(0.5, 0.5, 0.5, 0.7),
-                linewidth=1, linestyle=:dot, label=false)
+            oad(debug, "  drawing stations")
+            vline!(x, color=RGBA(0.5, 0.5, 0.5, 0.7), linewidth=1, linestyle=:dot, label=false)
         end
     else
-        error("unknown 'which' value '$which'; try one of the following: ", ["map"; fields])
+        error("which=\"$which\" not handled; try one of the following: ", fields)
     end
     oad(debug, "END plot_section()")
     pl
 end
+
