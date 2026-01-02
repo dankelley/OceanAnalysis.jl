@@ -19,4 +19,11 @@
 
 ## 04.jl
 
-* Find chunk starting indices (function-based code)
+* Find chunk starting indices (function-based code).  Look into headers (maybe
+  1/4 way done with that).
+
+## 05.jl
+
+* As 04.jl but now read ensemble_number and time (not in a function yet)
+
+
