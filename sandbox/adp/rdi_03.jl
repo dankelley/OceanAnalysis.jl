@@ -13,7 +13,7 @@ while true
     end
 end
 offset = 1 # NB oce/C code uses 0, since C is zero-indexed
-for chunk in 1:4
+for chunk in 1:100
     global offset
     # Do the conversion manually (as in C within oce) to avoid
     # problems if done in a big-endian context.
