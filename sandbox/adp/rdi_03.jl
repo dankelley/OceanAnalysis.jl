@@ -1,52 +1,39 @@
 file = "/Users/kelley/data/archive/sleiwex/2008/moorings/m09/adp/rdi_2615/raw/adp_rdi_2615.000"
-#file = "adp_rdi.000"
+file = "adp_rdi.000"
 buf = read(file);
 nbuf = length(buf)
-offset = 0
-while true
-    if buf[offset+1] == 0x7f & buf[offset+2] == 0x7f
+start = 1
+while true # Find first 7f 7f byte pair, in case file starts mid-chunk
+    if buf[start] == 0x7f & buf[start+1] == 0x7f
         break
     end
-    global offset += 1
-    if offset >= nbuf - 1
+    global start += 1
+    if start >= nbuf - 1
         error("no 0x7f 0x74 in file $file")
     end
 end
-offset = 1 # NB oce/C code uses 0, since C is zero-indexed
-for chunk in 1:100
-    global offset
-    # Do the conversion manually (as in C within oce) to avoid
-    # problems if done in a big-endian context.
-    #> bytes_to_check = Int16(reinterpret(UInt16, buf[3:4])[1])
-    local bytes_to_check = buf[offset+2] + 256 * buf[offset+3]
-    println("chunk $chunk, offset $offset, bytes_to_check $bytes_to_check")
+starts = Vector{Int64}()
+for chunk in 1:40
+    global start
+    if start >= nbuf # got to end of buffer before 
+        println("EOF encountered after chunk $(chunk-1)")
+        break
+    end
+    # Do next manually, since (I think) Julia obeys OS endianness
+    #> bytes_to_check = Int16(reinterpret(UInt16, buf[2:3])[1])
+    local bytes_to_check = buf[start+2] + 256 * buf[start+3]
+    println("chunk $chunk, start $start, bytes_to_check $bytes_to_check")
     local bytes_to_read = bytes_to_check - 4
     local checksum::UInt16 = 0
-    for i in range(offset, length=bytes_to_check)
-        checksum += buf[i]
+    for i in range(start, length=bytes_to_check)
+        checksum += buf[i] # relies on overflow wrapping around zero
     end
-    local c1 = buf[offset+bytes_to_check]
-    local c2 = buf[offset+bytes_to_check+1]
-    local desired_checksum = c1 + 256 * c2
+    local desired_checksum = buf[start+bytes_to_check] + 256 * buf[start+bytes_to_check+1]
     if checksum == desired_checksum
-        println("  good checksum=$checksum")
+        push!(starts, start)
     else
         println("  bad checksum=$checksum (desired_checksum=$desired_checksum)")
     end
-    offset += bytes_to_check + 2
+    start += bytes_to_check + 2
 end
-
-#bytes_to_check = (unsigned int)b1 + 256 * (unsigned int)b2;
-
-#io = IOBuffer([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]); # 8 bytes
-## Read into a Vector{Int16}
-#array = zeros(Int16, 4) # Pre-allocate array of 4 Int16s (8 bytes total)
-#read!(io, array)
-#size(io)
-#buf = read("adp_rdi.000");
-#io = IOBuffer([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]); # 8 bytes
-## Read into a Vector{Int16}
-#array = zeros(Int16, 4) # Pre-allocate array of 4 Int16s (8 bytes total)
-#read!(io, array)
-#size(io)
-#buf = read("adp_rdi.000");
+println(starts)
