@@ -13,6 +13,10 @@
 * Conclude: at 1e2 to 1e3 bytes per RDI ensemble, a 1Gb file holds 1e6 to 1e7
   entries. Estimate: 1Gb file in 1/20 second.
 
-* 03.jl
+## 03.jl
 
+* Find chunk starting indices (non-function code -- easier to trace)
 
+## 04.jl
+
+* Find chunk starting indices (function-based code)
