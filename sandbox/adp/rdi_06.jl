@@ -198,6 +198,47 @@ velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], m
 correlation_magnitude = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
 echo_intensity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
 percent_good = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+
+# Determine data types are in the file
+#   0x00 0x01 velocity
+#   0x00 0x02 correlation
+#   0x00 0x03 echo_intensity
+#   0x00 0x04 percent_good
+#   0x00 0x06 bottom_track
+#   0x00 0x0a sentinel_vertical_beam_velocity
+#   0x00 0x0b sentinel_vertical_beam_correlation
+#   0x00 0x0c sentinel_vertical_beam_amplitude
+#   0x00 0x0d sentinel_vertical_beam_percent_good
+#   0x00 0x20 VMDASS
+#   0x00 0x30 binary_fixed_attitude_header
+#   0x00 0x32 sentinel_transformation_matrix
+#   0x00 0x0a sentinel_data
+#   0x00 0x0b sentinel_correlation
+#   0x00 0x0c sentinel_amplitude
+#   0x00 0x0d sentinel_percent_good
+#   0x80 0x00 variable_leader
+codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
+have_data = Symbol[]
+for t in 1:metadata["ntypes"]
+    codes[t, 1] = buf[metadata["data_offsets"][t].+1]
+    codes[t, 2] = buf[metadata["data_offsets"][t].+2]
+    if codes[t, :] == [0x00, 0x01]
+        push!(have_data, :velocity)
+    end
+    if codes[t, :] == [0x00, 0x02]
+        push!(have_data, :correlation)
+    end
+    if codes[t, :] == [0x00, 0x03]
+        push!(have_data, :echo_intensity)
+    end
+    if codes[t, :] == [0x00, 0x04]
+        push!(have_data, :percent_good)
+    end
+end
+metadata["codes"] = codes
+metadata["have_data"] = have_data
+
+
 for e in 1#:metadata["nensembles"]
     if buf[D_[e]] == 0 && buf[D_[e]+1] == 1
         #println("VELOCITY")
@@ -213,25 +254,10 @@ for e in 1#:metadata["nensembles"]
     end
 end
 println("velocity for first ensemble")
-display(velocity[1, :, :])
+display(velocity[1, 1:2, :])
 println("R velocity, ensemble 1, cell 1: 0.034  0.035  0.005 -0.018")
 println("R velocity, ensemble 1, cell 2: 0.049  0.013  0.081 -0.009")
 # heatmap(v[1,:,:],c=:RdBu)
 
-# 0x00 0x01 velocity
-# 0x00 0x02 correlation
-# 0x00 0x03 echo_intensity
-# 0x00 0x04 percent_good
-# 0x00 0x06 bottom_track
-# 0x00 0x0a sentinel_vertical_beam_velocity
-# 0x00 0x0b sentinel_vertical_beam_correlation
-# 0x00 0x0c sentinel_vertical_beam_amplitude
-# 0x00 0x0d sentinel_vertical_beam_percent_good
-# 0x00 0x20 VMDASS
-# 0x00 0x30 binary_fixed_attitude_header
-# 0x00 0x32 sentinel_transformation_matrix
-# 0x00 0x0a sentinel_data
-# 0x00 0x0b sentinel_correlation
-# 0x00 0x0c sentinel_amplitude
-# 0x00 0x0d sentinel_percent_good
+display(metadata)
 
