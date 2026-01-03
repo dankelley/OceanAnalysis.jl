@@ -26,4 +26,7 @@
 
 * As 04.jl but now read ensemble_number and time (not in a function yet)
 
+## 06.jl
 
+* As 05.jl but read sound_speed, pitch, heading and roll.
+* IMPORTANTLY, add a function to convert two-byte sequences to integers.
