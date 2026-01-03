@@ -195,9 +195,9 @@ println("R roll -2.39 -2.49 -2.43 -2.37 -2.39 -2.39 -2.44 -2.38 -2.35")
 # Read velocity, if it is in the file
 # set up array nensembles (9) x ncells (84) x nbeams (4)
 velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-correlation_magnitude = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-echo_intensity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-percent_good = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+correlation_magnitude = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+echo_intensity = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+percent_good = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
 
 # Determine data types are in the file
 #   0x00 0x01 velocity
@@ -239,25 +239,75 @@ metadata["codes"] = codes
 metadata["have_data"] = have_data
 
 
-for e in 1#:metadata["nensembles"]
-    if buf[D_[e]] == 0 && buf[D_[e]+1] == 1
-        #println("VELOCITY")
-        #byte_per_chunk = 2 + 8 * metadata["ncells"] # Figure 8 of ref 1
-        #println("byte_per_chunk: $byte_per_chunk")
-        for c in 1:metadata["ncells"]
-            #println("c=$c")
-            for b in 1:4
-                #println("byte k=$k: $(0.001*two_byte_signed(D_[1]+2+2*(k-1)))")
-                velocity[e, c, b] = 0.001 * two_byte_signed(D_[1] + 2 + 8 * (c - 1) + 2 * (b - 1))
+ne = metadata["nensembles"]
+nc = metadata["ncells"]
+nb = metadata["nbeams"]
+println("\nTry to read data (just first ensemble)")
+for e in 1:2#:metadata["nensembles"]
+    p = D_[e] # pointer used thoughout the looop
+    println("before velocity, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
+    if buf[p] == 0 && buf[p+1] == 1
+        p = p + 2 # skip the two-byte type indicator
+        for c in 1:nc
+            for b in 1:nb
+                velocity[e, c, b] = 0.001 * two_byte_signed(p)
+                p = p + 2
             end
         end
+        println(" after velocity, p=$p")
     end
+    println("before correlation_magnitude, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
+    if buf[p] == 0 && buf[p+1] == 2
+        p = p + 2 # skip the two-byte type indicator
+        for c in 1:nc
+            for b in 1:nb
+                correlation_magnitude[e, c, b] = buf[p]
+                p = p + 1
+            end
+        end
+        println(" after correlation_magnitude, p=$p")
+    end
+    println("before echo_intensity, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
+    if buf[p] == 0 && buf[p+1] == 3
+        p = p + 2 # skip the two-byte type indicator
+        for c in 1:nc
+            for b in 1:nb
+                echo_intensity[e, c, b] = buf[p]
+                p = p + 1
+            end
+        end
+        println(" after echo_intensity, p=$p")
+    end
+    println("before percent_good, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
+    if buf[p] == 0 && buf[p+1] == 4
+        p = p + 2 # skip the two-byte type indicator
+        for c in 1:nc
+            for b in 1:nb
+                percent_good[e, c, b] = buf[p]
+                p = p + 1
+            end
+        end
+        println(" after percent_good, p=$p")
+    end
+    println("bottom p=$p")
 end
-println("velocity for first ensemble")
-display(velocity[1, 1:2, :])
-println("R velocity, ensemble 1, cell 1: 0.034  0.035  0.005 -0.018")
-println("R velocity, ensemble 1, cell 2: 0.049  0.013  0.081 -0.009")
-# heatmap(v[1,:,:],c=:RdBu)
 
 display(metadata)
+println("R velocity, ensemble 1, cell 1: 0.034  0.035  0.005 -0.018")
+println("R velocity, ensemble 1, cell 2: 0.049  0.013  0.081 -0.009")
+for e in 1:2
+    println("ensemble $e")
+    for c in 1:2
+        println("  cell $c")
+        println("    velocity              $(velocity[e,c,1:4])")
+        println("    correlation_magnitude $(correlation_magnitude[e,c,1:4])")
+        println("    echo_intensity        $(echo_intensity[e,c,1:4])")
+        println("    percent_good          $(percent_good[e,c,1:4])")
+    end
+end
+
+
+# R: why is the 4+ needed to match?
+#> nc=84;4+cumsum(c(6+2*4,59,65,2+8*nc,2+4*nc,2+4*nc,2+4*nc))
+#[1]   18   77  142  816 1154 1492 1830
 
