@@ -13,3 +13,6 @@ cat("pitch\n")
 print(adp[["pitch"]])
 cat("roll\n")
 print(adp[["roll"]])
+
+print(dim(adp[["v"]]))
+print(adp[["v"]][1,,])

@@ -1,5 +1,9 @@
 using Dates
 
+# References
+# 1. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
+
+
 debug = true
 
 function find_rdi_chunks(buf; debug::Bool=false)
@@ -25,13 +29,13 @@ function find_rdi_chunks(buf; debug::Bool=false)
         local bytes_to_check = buf[start+2] + 256 * buf[start+3]
         #println("chunk $chunk, start $start, bytes_to_check $bytes_to_check")
         #local bytes_to_read = bytes_to_check - 4
-        number_of_data_types = buf[start+5]
-        if number_of_data_types < 1 | number_of_data_types > 200
-            error("something is wrong with number_of_data_types (=$number_of_data_types)")
+        ntypes = buf[start+5]
+        if ntypes < 1 | ntypes > 200
+            error("something is wrong with ntypes (=$ntypes)")
         end
         if debug & chunk == 1
-            if 6 != number_of_data_types
-                println("FIXME: number of data types: ", number_of_data_types)
+            if 6 != ntypes
+                println("FIXME: ntypes: ", ntypes)
             end
         end
         local checksum::UInt16 = 0
@@ -51,14 +55,14 @@ end
 
 function read_header(buf, start::Int64=1; debug::Bool=false)
     metadata = Dict()
-    number_of_data_types = Int(buf[start+5])
-    metadata["number_of_data_types"] = number_of_data_types
-    if number_of_data_types < 1 | number_of_data_types > 200
-        error("something is wrong with number_of_data_types (=$number_of_data_types)")
+    ntypes = Int(buf[start+5])
+    metadata["ntypes"] = ntypes
+    if ntypes < 1 | ntypes > 200
+        error("something is wrong with ntypes (=$ntypes)")
     end
     # data_offset in 2-byte elements
-    data_offsets = Vector{Int}(undef, number_of_data_types)
-    for i in 1:number_of_data_types
+    data_offsets = Vector{Int}(undef, ntypes)
+    for i in 1:ntypes
         tmp = start + 4 + 2 * i
         data_offsets[i] = buf[tmp] + 256 * buf[tmp+1]
     end
@@ -66,7 +70,7 @@ function read_header(buf, start::Int64=1; debug::Bool=false)
     # Now look past 'header' to 'fixed leader', but
     # just for things that will not change over the
     # course of sampling.
-    start_fl = start + 5 + 2 * number_of_data_types
+    start_fl = start + 5 + 2 * ntypes
     version_major = string(buf[start_fl+3])
     version_minor = string(buf[start_fl+4])
     metadata["version"] = version_major * "." * version_minor
@@ -104,10 +108,10 @@ function read_header(buf, start::Int64=1; debug::Bool=false)
     metadata["beam_angle"] = beam_angle
     println("sys_config_LSB $sys_config_LSB")
     println("sys_config_MSB $sys_config_MSB")
-    number_of_beams = Int(buf[start_fl+9])
-    metadata["number_of_beams"] = number_of_beams
-    number_of_cells = Int(buf[start_fl+10])
-    metadata["number_of_cells"] = number_of_cells
+    nbeams = Int(buf[start_fl+9])
+    metadata["nbeams"] = nbeams
+    ncells = Int(buf[start_fl+10])
+    metadata["ncells"] = ncells
     depth_cell_length = 0.01 * (buf[start_fl+13] + 256 * buf[start_fl+14])
     metadata["depth_cell_length"] = depth_cell_length
     bin1_distance = 0.01 * buf[start_fl+33] + 256 * buf[start_fl+34]
@@ -133,13 +137,15 @@ println("EXPECT data offsets 18 77 142 816 1154 1492")
 println("EXPECT version 16.28")
 println("EXPECT 4 beams, 84 cells")
 
-first_leader_starts = chunk_starts .+ 6 .+ 2 * metadata["number_of_data_types"];
+first_leader_starts = chunk_starts .+ 6 .+ 2 * metadata["ntypes"];
 
 H_ = chunk_starts; # FIXME: rename throughout
-FL_ = H_ .+ 6 .+ 2 * metadata["number_of_data_types"];
+metadata["nensembles"] = length(H_)
+FL_ = H_ .+ 6 .+ 2 * metadata["ntypes"];
 0 == buf[FL_[1]] || stop("problem @ FL_[1]")
 0 == buf[FL_[1]+1] || stop("problem @ FL_[1] + 2")
-VL_ = FL_ .+ 59;
+VL_ = FL_ .+ 59; # See table in Figure 8 of ref1
+D_ = VL_ .+ 65; # See table in Figure 8 of ref1
 0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
 0x00 == buf[VL_[1]+1]
 
@@ -185,4 +191,47 @@ println("R pitch 1.421236 1.241172 1.201080 1.140976 1.161010 1.171018 1.211098 
 roll = 0.01 * two_byte_signed.(VL_ .+ 22)
 println("roll: $roll")
 println("R roll -2.39 -2.49 -2.43 -2.37 -2.39 -2.39 -2.44 -2.38 -2.35")
+
+# Read velocity, if it is in the file
+# set up array nensembles (9) x ncells (84) x nbeams (4)
+velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+correlation_magnitude = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+echo_intensity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+percent_good = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+for e in 1#:metadata["nensembles"]
+    if buf[D_[e]] == 0 && buf[D_[e]+1] == 1
+        #println("VELOCITY")
+        #byte_per_chunk = 2 + 8 * metadata["ncells"] # Figure 8 of ref 1
+        #println("byte_per_chunk: $byte_per_chunk")
+        for c in 1:metadata["ncells"]
+            #println("c=$c")
+            for b in 1:4
+                #println("byte k=$k: $(0.001*two_byte_signed(D_[1]+2+2*(k-1)))")
+                velocity[e, c, b] = 0.001 * two_byte_signed(D_[1] + 2 + 8 * (c - 1) + 2 * (b - 1))
+            end
+        end
+    end
+end
+println("velocity for first ensemble")
+display(velocity[1, :, :])
+println("R velocity, ensemble 1, cell 1: 0.034  0.035  0.005 -0.018")
+println("R velocity, ensemble 1, cell 2: 0.049  0.013  0.081 -0.009")
+# heatmap(v[1,:,:],c=:RdBu)
+
+# 0x00 0x01 velocity
+# 0x00 0x02 correlation
+# 0x00 0x03 echo_intensity
+# 0x00 0x04 percent_good
+# 0x00 0x06 bottom_track
+# 0x00 0x0a sentinel_vertical_beam_velocity
+# 0x00 0x0b sentinel_vertical_beam_correlation
+# 0x00 0x0c sentinel_vertical_beam_amplitude
+# 0x00 0x0d sentinel_vertical_beam_percent_good
+# 0x00 0x20 VMDASS
+# 0x00 0x30 binary_fixed_attitude_header
+# 0x00 0x32 sentinel_transformation_matrix
+# 0x00 0x0a sentinel_data
+# 0x00 0x0b sentinel_correlation
+# 0x00 0x0c sentinel_amplitude
+# 0x00 0x0d sentinel_percent_good
 

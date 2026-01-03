@@ -30,3 +30,5 @@
 
 * As 05.jl but read sound_speed, pitch, heading and roll.
 * IMPORTANTLY, add a function to convert two-byte sequences to integers.
+* Read 1st ensemble v (and check) ... need to figure out about storage (all in a Dict?)
+* Maybe store data as 3D array, forcing user to say which field they want
