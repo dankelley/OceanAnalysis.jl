@@ -107,6 +107,7 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     metadata["depth_cell_length"] = depth_cell_length
     bin1_distance = 0.01 * buf[start_fl+33] + 256 * buf[start_fl+34]
     metadata["bin1_distance"] = bin1_distance
+    metadata["distance"] = range(bin1_distance, step=depth_cell_length, length=ncells)
     metadata
 end
 
@@ -148,8 +149,9 @@ adp = read_adp_rdi(file);
 heatmap(adp["velocity"][1, :, :], c=cgrad(:RdBu, rev=true))
 plot(adp["time"], adp["heading"],
     ylab="Heading", label=false, framestyle=:box)
+heatmap(adp["time"], adp["distance"], adp["velocity"][:,:,1],
+    size=(800,600), ylab="Distance [m]", c=:RdBu)
 ```
-
 
 # References
 1. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.

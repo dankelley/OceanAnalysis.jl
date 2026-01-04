@@ -47,3 +47,4 @@ file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
 @test adp.data["percent_good"][1, 1, :] == [0x64, 0x64, 0x64, 0x64]
 @test adp.data["percent_good"][1, 2, :] == [0x64, 0x64, 0x64, 0x64]
 @test adp.data["percent_good"][2, 1, :] == [0x64, 0x64, 0x64, 0x64]
+@test adp["distance"] == range(2.23, step=0.5, length=84)
