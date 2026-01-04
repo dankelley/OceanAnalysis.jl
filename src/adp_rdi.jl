@@ -139,6 +139,16 @@ At present, only 4 data items can be read: `:velocity` (with byte code 0x00
 `:percent_good` (0x00 0x04). More types may be added later, as needs arise.
 (NB. the `oce::read_adp()` R code handles 18 types.)
 
+# Examples
+
+```juliadoc
+using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
+adp = read_adp_rdi(file);
+heatmap(adp["velocity"][1, :, :], c=cgrad(:RdBu, rev=true))
+```
+
+
 # References
 1. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
 """
