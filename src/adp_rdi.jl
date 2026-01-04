@@ -146,6 +146,8 @@ using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
 adp = read_adp_rdi(file);
 heatmap(adp["velocity"][1, :, :], c=cgrad(:RdBu, rev=true))
+plot(adp["time"], adp["heading"],
+    ylab="Heading", label=false, framestyle=:box)
 ```
 
 
