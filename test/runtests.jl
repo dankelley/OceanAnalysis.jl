@@ -96,3 +96,7 @@ end
     d = geod_distance(0.0, 45.0, 40.0, 46.0)
     @test d ≈ 3095.1741526503 atol = 1e-11
 end
+
+@testset "adp_rdi agrees with oce/R" begin
+    include("adp_rdi.jl")
+end

@@ -12,8 +12,9 @@ using Statistics
 using TiffImages
 
 # Types
-export Amsr
 export OA
+export Adp
+export Amsr
 export Ctd
 export Coastline
 export Section
@@ -54,6 +55,7 @@ export plot_TS
 export pressure_from_depth
 export pressure_from_z
 export pretty
+export read_adp_rdi
 export read_amsr
 export read_argo
 export read_argo_index

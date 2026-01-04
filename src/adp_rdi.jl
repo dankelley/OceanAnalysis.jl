@@ -1,19 +1,10 @@
 using Dates, Plots
-using OceanAnalysis
-using Test
-
-oad(debug, a) = debug == 0 || println(a)
-
-show_plot = false
 
 
-# References
-# 1. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
-
-function find_rdi_chunks(buf; debug::Int64=0)
+function find_adp_rdi_ensembles(buf; debug::Int64=0)
     nbuf = length(buf)
     start = 1
-    while true # Find first 7f 7f byte pair, in case file starts mid-chunk
+    while true # Find first 7f 7f byte pair, in case file starts mid-ensemble
         if buf[start] == 0x7f & buf[start+1] == 0x7f
             break
         end
@@ -23,15 +14,19 @@ function find_rdi_chunks(buf; debug::Int64=0)
         end
     end
     starts = Vector{Int64}()
-    for chunk in 1:40
-        if start >= nbuf # got to end of buffer before 
-            println("EOF encountered after chunk $(chunk-1)")
+    ensemble::Int64 = 0
+    while true
+        ensemble = ensemble + 1
+        if start >= nbuf
+            if debug > 0
+                println("EOF encountered whilst attempting to read ensemble $ensemble")
+            end
             break
         end
         # Do next manually, since (I think) Julia obeys OS endianness
         #> bytes_to_check = Int16(reinterpret(UInt16, buf[2:3])[1])
         local bytes_to_check = buf[start+2] + 256 * buf[start+3]
-        #println("chunk $chunk, start $start, bytes_to_check $bytes_to_check")
+        #println("ensemble $ensemble, start $start, bytes_to_check $bytes_to_check")
         #local bytes_to_read = bytes_to_check - 4
         ntypes = buf[start+5]
         if ntypes < 1 | ntypes > 200
@@ -52,7 +47,7 @@ function find_rdi_chunks(buf; debug::Int64=0)
     starts
 end
 
-function read_header(buf, start::Int64=1; debug::Int64=0)
+function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     metadata = Dict()
     ntypes = Int(buf[start+5])
     metadata["ntypes"] = ntypes
@@ -102,8 +97,8 @@ function read_header(buf, start::Int64=1; debug::Int64=0)
         beam_angle = NaN
     end
     metadata["beam_angle"] = beam_angle
-    println("sys_config_LSB $sys_config_LSB")
-    println("sys_config_MSB $sys_config_MSB")
+    #println("sys_config_LSB $sys_config_LSB")
+    #println("sys_config_MSB $sys_config_MSB")
     nbeams = Int(buf[start_fl+9])
     metadata["nbeams"] = nbeams
     ncells = Int(buf[start_fl+10])
@@ -116,85 +111,88 @@ function read_header(buf, start::Int64=1; debug::Int64=0)
 end
 
 
-function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
-    oad(debug, "read_adcp() START")
-    oad(debug, "  ensembles: $ensembles")
+# R oce::read_adp() handles the following (or at least has intentions to do so)
+#   0x00 0x01 velocity
+#   0x00 0x02 correlation
+#   0x00 0x03 echo_intensity
+#   0x00 0x04 percent_good
+#   0x00 0x06 bottom_track
+#   0x00 0x0a sentinel_vertical_beam_velocity
+#   0x00 0x0b sentinel_vertical_beam_correlation
+#   0x00 0x0c sentinel_vertical_beam_amplitude
+#   0x00 0x0d sentinel_vertical_beam_percent_good
+#   0x00 0x20 VMDASS
+#   0x00 0x30 binary_fixed_attitude_header
+#   0x00 0x32 sentinel_transformation_matrix
+#   0x00 0x0a sentinel_data
+#   0x00 0x0b sentinel_correlation
+#   0x00 0x0c sentinel_amplitude
+#   0x00 0x0d sentinel_percent_good
+#   0x80 0x00 variable_leader
+"""
+    read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
+
+Read an acoustic-Doppler profiler file that is in RDI format.
+
+At present, only 4 data items can be read: `:velocity` (with byte code 0x00
+0x01), `:correlation_magnitude` (0x00 0x02), `:echo_intensity`  (0x00 0x03) and
+`:percent_good` (0x00 0x04). More types may be added later, as needs arise.
+(NB. the `oce::read_adp()` R code handles 18 types.)
+
+# References
+1. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
+"""
+function read_adp_rdi(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
+    oad(debug, "read_adp_rdi() START")
+    oad(debug, "  ensembles: $ensembles (FIXME: use this argument)")
+    function two_byte_unsigned(i)
+        # Skip reinterpret() to avoid issues of endianness
+        #reinterpret(UInt16, [buf[i], buf[i+1]])
+        UInt16(buf[i+1]) << 8 | UInt16(buf[i])
+    end
     function two_byte_signed(i)
+        # Skip reinterpret() to avoid issues of endianness
         #reinterpret(Int16, [buf[i], buf[i+1]])
-        #signed(UInt16(byte_high)<<8|UInt16(byte_low))
-        #global buf
         signed(UInt16(buf[i+1]) << 8 | UInt16(buf[i]))
     end
     buf = read(file)
-    chunk_starts = find_rdi_chunks(buf)
-    metadata = read_header(buf, chunk_starts[1])
+    # H_ holds pointers to the starts of ensembles.
+    oad(debug, "  About to determine ensemble starting indices")
+    H_ = find_adp_rdi_ensembles(buf)
+    oad(debug, "  About to read header information in first ensemble")
+    metadata = read_adp_rdi_header(buf, H_[1])
     metadata["file"] = file
-
-    H_ = chunk_starts # FIXME: rename throughout
+    data = Dict()
     metadata["nensembles"] = length(H_)
+    # FL_ holds pointers to the starts of fixed-length headers (See Figure 8 of [1])
     FL_ = H_ .+ 6 .+ 2 * metadata["ntypes"]
     0 == buf[FL_[1]] || stop("problem @ FL_[1]")
     0 == buf[FL_[1]+1] || stop("problem @ FL_[1] + 2")
-    VL_ = FL_ .+ 59 # See table in Figure 8 of ref1
-    D_ = VL_ .+ 65 # See table in Figure 8 of ref1
+    # VL_ holds pointers to the starts of variable-length headers
+    VL_ = FL_ .+ 59 # (see Figure 8 of [1])
+    # D_ holds pointers to the starts of data sections
+    D_ = VL_ .+ 65 # (see Figure 8 of [1])
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
-    ensemble_number = buf[VL_.+2] + 245 * buf[VL_.+3]
+    oad(debug, "  inferring time-series information")
+    data["ensemble"] = buf[VL_.+2] + 245 * buf[VL_.+3]
     year = 2000 .+ buf[VL_.+4]
     month = Int.(buf[VL_.+5])
     day = Int.(buf[VL_.+6])
     hour = Int.(buf[VL_.+7])
     minute = Int.(buf[VL_.+8])
     second = Int.(buf[VL_.+9])
-    time = DateTime.(year, month, day, hour, minute, second)
-    display(time)
-
-    # sound_speed
-    # RDI p139 says bytes 15,16 so use 14,15 here
-    #sound_speed = buf[VL_.+i] .+ 256 .* buf[VL_.+(i+1)]
-    sound_speed = Float64.(two_byte_signed.(VL_ .+ 14))
-    println("sound_speed $sound_speed")
-    println("R soundSpeed 1497 1497 1497 1497 1497 1497 1497 1497 1497")
-
+    data["time"] = DateTime.(year, month, day, hour, minute, second)
+    # sound_speed (RDI p139 says bytes 15,16 so use 14,15 here);
+    data["sound_speed"] = Float64.(two_byte_signed.(VL_ .+ 14))
     # heading RDI p139 says bytes 19,20 -- use 18,19 here
-    heading = 0.01 * two_byte_signed.(VL_ .+ 18)
-    println("heading: $heading")
-    println("R heading 278.14 277.31 276.78 276.39 276.56 277.07 277.56 277.47 276.98")
-
+    data["heading"] = 0.01 * two_byte_signed.(VL_ .+ 18)
     # pitch RDI p139 says bytes 21,22 -- use 20,21 here
-    pitch = 0.01 * two_byte_signed.(VL_ .+ 20)
-    println("pitch: $pitch")
-    println("R pitch 1.421236 1.241172 1.201080 1.140976 1.161010 1.171018 1.211098 1.161001 1.120942")
-
+    data["pitch"] = 0.01 * two_byte_signed.(VL_ .+ 20)
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
-    roll = 0.01 * two_byte_signed.(VL_ .+ 22)
-    #println("roll: $roll")
-    #println("R roll -2.39 -2.49 -2.43 -2.37 -2.39 -2.39 -2.44 -2.38 -2.35")
-
-    # Set up arrays
-    velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-    correlation_magnitude = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-    echo_intensity = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-    percent_good = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
-    # Determine data types are in the file
-    #   0x00 0x01 velocity
-    #   0x00 0x02 correlation
-    #   0x00 0x03 echo_intensity
-    #   0x00 0x04 percent_good
-    #   0x00 0x06 bottom_track
-    #   0x00 0x0a sentinel_vertical_beam_velocity
-    #   0x00 0x0b sentinel_vertical_beam_correlation
-    #   0x00 0x0c sentinel_vertical_beam_amplitude
-    #   0x00 0x0d sentinel_vertical_beam_percent_good
-    #   0x00 0x20 VMDASS
-    #   0x00 0x30 binary_fixed_attitude_header
-    #   0x00 0x32 sentinel_transformation_matrix
-    #   0x00 0x0a sentinel_data
-    #   0x00 0x0b sentinel_correlation
-    #   0x00 0x0c sentinel_amplitude
-    #   0x00 0x0d sentinel_percent_good
-    #   0x80 0x00 variable_leader
+    data["roll"] = 0.01 * two_byte_signed.(VL_ .+ 22)
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
+    oad(debug, "  determining data types")
     have_data = Symbol[]
     for t in 1:metadata["ntypes"]
         codes[t, 1] = buf[metadata["data_offsets"][t].+1]
@@ -211,17 +209,30 @@ function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug:
         if codes[t, :] == [0x00, 0x04]
             push!(have_data, :percent_good)
         end
+        # FIXME: add other code-recognition here
     end
-    metadata["codes"] = codes
-    metadata["have_data"] = have_data
-
+    metadata["codes"] = codes # FIXME will users ever need this?
+    metadata["have_data"] = have_data # FIXME is this useful, when user can do keys(x.data)?
+    # Set up arrays
+    # FIXME: add other array-allocation here
+    if :velocity in have_data
+        velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+    end
+    if :correlation_magnitude in have_data
+        correlation_magnitude = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+    end
+    if :echo_intensity in have_data
+        echo_intensity = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+    end
+    if :percent_good in have_data
+        percent_good = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
+    end
     ne = metadata["nensembles"]
     nc = metadata["ncells"]
     nb = metadata["nbeams"]
-    println("\nTry to read data (just first ensemble)")
-    for e in 1:2#:metadata["nensembles"]
+    oad(debug, "  about to read $ne ensembles, each with $nc cells and $nb beams")
+    for e in 1:ne
         p = D_[e] # pointer used thoughout the looop
-        println("before velocity, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
         if buf[p] == 0 && buf[p+1] == 1
             p = p + 2 # skip the two-byte type indicator
             for c in 1:nc
@@ -230,9 +241,7 @@ function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug:
                     p = p + 2
                 end
             end
-            println(" after velocity, p=$p")
         end
-        println("before correlation_magnitude, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
         if buf[p] == 0 && buf[p+1] == 2
             p = p + 2 # skip the two-byte type indicator
             for c in 1:nc
@@ -241,9 +250,7 @@ function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug:
                     p = p + 1
                 end
             end
-            println(" after correlation_magnitude, p=$p")
         end
-        println("before echo_intensity, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
         if buf[p] == 0 && buf[p+1] == 3
             p = p + 2 # skip the two-byte type indicator
             for c in 1:nc
@@ -252,9 +259,7 @@ function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug:
                     p = p + 1
                 end
             end
-            println(" after echo_intensity, p=$p")
         end
-        println("before percent_good, p=$p; buf[p]=$(buf[p]), buf[p+1]=$(buf[p+1])")
         if buf[p] == 0 && buf[p+1] == 4
             p = p + 2 # skip the two-byte type indicator
             for c in 1:nc
@@ -263,13 +268,9 @@ function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug:
                     p = p + 1
                 end
             end
-            println(" after percent_good, p=$p")
         end
-        println("bottom p=$p")
+        # FIXME: add other array-assignment here
     end
-
-    display(metadata)
-    data = Dict()
     if :velocity in metadata["have_data"]
         data["velocity"] = velocity
     end
@@ -279,63 +280,11 @@ function read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug:
     if :echo_intensity in metadata["have_data"]
         data["echo_intensity"] = echo_intensity
     end
-    println("size(percent_good): $(size(percent_good))")
     if :percent_good in metadata["have_data"]
         data["percent_good"] = percent_good
     end
-    rval = adp = Adp(metadata, data)
-    oad(debug, "END read_adcp()")
+    rval = Adp(metadata, data)
+    # FIXME: do RDI files have a transformation matrix?
+    oad(debug, "END read_adp_rdi()")
     rval
 end
-
-#file = "/Users/kelley/data/archive/sleiwex/2008/moorings/m09/adp/rdi_2615/raw/adp_rdi_2615.000"
-file = "adp_rdi.000"
-adp = read_adcp(file)
-
-if show_plot
-    heatmap(adp.data["velocity"][1, :, :], color=:RdBu)
-    savefig("rdi_07.png")
-end
-
-# Test some metadata
-println("starting tests...")
-@test adp["beam_angle"] == 20.0
-println("DAN 1")
-@test adp["data_offsets"] == [18, 77, 142, 816, 1154, 1492]
-println("DAN 2")
-@test adp["depth_cell_length"] == 0.5
-println("DAN 3")
-@test adp["direction"] == "up"
-@test adp["frequency"] == 300
-@test adp["have_data"] == [:velocity, :correlation_magnitude, :echo_intensity, :percent_good]
-@test adp["nbeams"] == 4
-@test adp["ncells"] == 84
-@test adp["nensembles"] == 9
-@test adp["version"] == "16.28"
-# Test sizes of data items
-@test size(adp.data["velocity"]) == (9, 84, 4)
-@test size(adp.data["correlation_magnitude"]) == (9, 84, 4)
-@test size(adp.data["echo_intensity"]) == (9, 84, 4)
-@test size(adp.data["percent_good"]) == (9, 84, 4)
-# Test first 2 cells of first 2 ensembles
-@test adp.data["velocity"][1, 1, :] ≈ [0.034; 0.035; 0.005; -0.018] atol = 0.001
-@test adp.data["velocity"][1, 2, :] ≈ [0.049, 0.013, 0.081, -0.009] atol = 0.001
-@test adp.data["velocity"][2, 1, :] ≈ [0.073, 0.126, 0.07, -0.068] atol = 0.001
-@test adp.data["velocity"][2, 2, :] ≈ [-0.012, 0.045, 0.027, -0.027] atol = 0.001
-@test adp.data["correlation_magnitude"][1, 1, :] == [0x19, 0x16, 0x19, 0x18]
-@test adp.data["correlation_magnitude"][1, 2, :] == [0x17, 0x1e, 0x19, 0x17]
-@test adp.data["correlation_magnitude"][2, 1, :] == [0x19, 0x1b, 0x1b, 0x14]
-@test adp.data["correlation_magnitude"][2, 2, :] == [0x17, 0x19, 0x19, 0x19]
-@test adp.data["echo_intensity"][1, 1, :] == [0x34, 0x2e, 0x30, 0x2d]
-@test adp.data["echo_intensity"][1, 2, :] == [0x37, 0x30, 0x33, 0x2f]
-@test adp.data["echo_intensity"][2, 1, :] == [0x34, 0x2e, 0x30, 0x2d]
-@test adp.data["echo_intensity"][2, 2, :] == [0x36, 0x30, 0x33, 0x2f]
-@test adp.data["percent_good"][1, 1, :] == [0x64, 0x64, 0x64, 0x64]
-@test adp.data["percent_good"][1, 2, :] == [0x64, 0x64, 0x64, 0x64]
-@test adp.data["percent_good"][2, 1, :] == [0x64, 0x64, 0x64, 0x64]
-
-println("FIXME: test the times")
-display(time)
-println("R time: 2008-06-25 10:00:00, 10:00:10, 10:00:40, 10:00:50, 10:01:00, 10:01:10, 10:01:20")
-println("... ending tests")
-

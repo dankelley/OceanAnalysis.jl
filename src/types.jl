@@ -8,6 +8,23 @@ are derived.
 """
 abstract type OA end
 
+
+"""
+    A type to hold acoustic-Doppler profiler data
+
+Adp is a type used to store data from an ADP (acoustic-Doppler profiler).
+It holds two items: `data` (a Dict that holds data in array form) and
+`metadata` (a Dict with information about the data).
+
+Adp objects may be created with [`read_adp_rdi`](@ref), a function that is
+still in an early stage of development.
+"""
+mutable struct Adp <: OA
+    metadata::Dict{String,Any}
+    data::Dict{String,Any}
+end
+
+
 """
     A type to hold CTD data
 
@@ -25,7 +42,6 @@ plotting functions [`plot_profile`](@ref) and [`plot_TS`](@ref), and to some
 functions relating to seawater properties, such as [`SA`](@ref) and other
 TEOS-10 related functions, as well as functions relating to the distributions
 of such properties, such as [`N2`](@ref).
-
 """
 mutable struct Ctd <: OA
     metadata::Dict{String,Any}

@@ -33,6 +33,7 @@ module OceanAnalysis
 
 include("types.jl")
 include("setup.jl")
+include("adp_rdi.jl")
 include("argo.jl")
 include("amsr.jl")
 include("ctd.jl")
