@@ -9,7 +9,8 @@ tm_expected = [1.4619022 -1.4619022 0.0000000 0.0000000;
     0.2660444 0.2660444 0.2660444 0.2660444;
     1.0337210 1.0337210 -1.0337210 -1.0337210]
 @test adp["transformation_matrix"] ≈ tm_expected atol = 1e-5
-
+@test adp["beam_configuration"] == :four_beam_janus
+@test adp["convex"] == true
 
 
 # R tm.c <- if (res@metadata$beamPattern == "convex") 1 else -1 # control sign of first 2 rows of transformationMatrix
@@ -45,8 +46,9 @@ tm_expected = [1.4619022 -1.4619022 0.0000000 0.0000000;
 # $ beamPattern                  : chr "convex"
 # $ beamConfig                   : chr "janus"
 
-println("- add 'orientation'        -- upward")
-println("- add 'beam_configuration' -- janus")
-println("- add 'convex'             -- true")
-println("- add 'type'               -- workhorse")
+println("+ add 'orientation'           DONE")
+println("+ add 'transformation_matrix' DONE")
+println("+ add 'convex'                DONE")
+println("+ add 'beam_configuration'    DONE")
+#println("- add 'type'               -- workhorse")
 

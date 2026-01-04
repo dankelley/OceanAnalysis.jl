@@ -96,14 +96,26 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     else
         beam_angle = NaN
     end
-
     metadata["beam_angle"] = beam_angle
+    if sys_config_MSB[1:4] == [0, 1, 0, 0]
+        metadata["beam_configuration"] = :four_beam_janus
+    elseif sys_config_MSB[1:4] == [0, 1, 0, 1]
+        metadata["beam_configuration"] = :five_beam_janus_demod
+    elseif sys_config_MSB[1:4] == [1, 1, 1, 1]
+        metadata["beam_configuration"] = :five_beam_janus_two_demod # spelling?
+    else
+        metadata["beam_configuration"] = :unknown
+    end
     # compute transformation matrix (formula borrowed from R/oce)
     C = metadata["convex"] ? 1.0 : -1.0
     A = 1.0 / (2.0 * sin(metadata["beam_angle"] * pi / 180.0))
     B = 1.0 / (4.0 * cos(metadata["beam_angle"] * pi / 180.0))
     D = A / sqrt(2.0)
-    metadata["transformation_matrix"] = [C*A -C*A 0.0 0.0; 0.0 0.0 -C*A C*A; B B B B; D D -D -D]
+    metadata["transformation_matrix"] = [
+        C*A -C*A 0.0 0.0;
+        0.0 0.0 -C*A C*A;
+        B B B B;
+        D D -D -D]
     #println("sys_config_LSB $sys_config_LSB")
     #println("sys_config_MSB $sys_config_MSB")
     nbeams = Int(buf[start_fl+9])
@@ -112,15 +124,23 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     metadata["ncells"] = ncells
     depth_cell_length = 0.01 * (buf[start_fl+13] + 256 * buf[start_fl+14])
     metadata["depth_cell_length"] = depth_cell_length
+    # Coordinate system
+    cs_bits = reverse(digits(buf[start_fl+26], base=2, pad=8))
+    coordinate_system = :unknown
+    if cs_bits[4] == 0 && cs_bits[5] == 0
+        coordinate_system = :beam
+    elseif cs_bits[4] == 0 && cs_bits[5] == 1
+        coordinate_system = :instrument
+    elseif cs_bits[4] == 1 && cs_bits[5] == 0
+        coordinate_system = :ship
+    elseif cs_bits[4] == 1 && cs_bits[5] == 1
+        coordinate_system = :earth
+    end
+    metadata["coordinate_system"] = coordinate_system
+    # cell geometry
     bin1_distance = 0.01 * buf[start_fl+33] + 256 * buf[start_fl+34]
     metadata["bin1_distance"] = bin1_distance
     metadata["distance"] = range(bin1_distance, step=depth_cell_length, length=ncells)
-    # oce/read_adp_rdi() gives as follows for adp[["transformationMatrix"]]
-    #           [,1]       [,2]       [,3]       [,4]
-    # [1,] 1.4619022 -1.4619022  0.0000000  0.0000000
-    # [2,] 0.0000000  0.0000000 -1.4619022  1.4619022
-    # [3,] 0.2660444  0.2660444  0.2660444  0.2660444
-    # [4,] 1.0337210  1.0337210 -1.0337210 -1.0337210
     metadata
 end
 

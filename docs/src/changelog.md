@@ -13,7 +13,7 @@ Release notes:
 
 - [`as_section`](@ref) for assembling 'ctd' data into a section.
 - [`get_section`](@ref) for downloading oceanographic section data.
-- [`read_adp_rdi]`(@ref) for reading RDI acoustic-Doppler profiler data.
+- [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.
 - [`read_section`](@ref) for reading Section data.
 - [`grid_section`](@ref) for gridding Section data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.

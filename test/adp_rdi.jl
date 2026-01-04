@@ -5,6 +5,8 @@ file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
 adp = read_adp_rdi(file); # takes 0.7s the first call, 0.001s afterwards (9-ensemble file)
 # Test some metadata
 @test adp["beam_angle"] == 20.0
+@test adp["beam_configuration"] == :four_beam_janus
+@test adp["convex"] == true
 @test adp["data_offsets"] == [18, 77, 142, 816, 1154, 1492]
 @test adp["depth_cell_length"] == 0.5
 @test adp["direction"] == "up"
