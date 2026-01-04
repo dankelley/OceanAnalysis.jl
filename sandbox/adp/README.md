@@ -32,3 +32,12 @@
 * IMPORTANTLY, add a function to convert two-byte sequences to integers.
 * Read 1st ensemble v (and check) ... need to figure out about storage (all in a Dict?)
 * Maybe store data as 3D array, forcing user to say which field they want
+
+## 07.jl
+
+* As 06.jl but read a bit more and, finally, do it as a function.
+* More tasks:
+    * test times
+    * do more metadata
+    * only get storage if data exist
+    * is it acceptably fast? run twice -- is second faster?

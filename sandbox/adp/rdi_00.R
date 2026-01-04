@@ -27,3 +27,7 @@ for (ensemble in 1:2) {
     }
     cat("\n")
 }
+cm = colormap(zlim=c(-0.2,0.2), col=oceColorsTwo)
+png("rdi_00.png")
+imagep(t(-adp[["v"]][1,,]), colormap=cm)
+dev.off()
