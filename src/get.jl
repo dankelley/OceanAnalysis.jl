@@ -151,6 +151,12 @@ function get_element(x::OA, element::String; debug::Int64=0)
         if element == "spiciness0"
             return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
         end
+    elseif x isa Adp
+        if element in keys(x.metadata)
+            return x.metadata[element]
+        elseif element in keys(x.data)
+            return x.data[element]
+        end
     elseif typeof(x) == Section
         # assume all CTDs have same metadata names
         if element in keys(x.data[1].metadata)

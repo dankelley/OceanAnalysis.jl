@@ -2,8 +2,8 @@ using Dates, Plots, OceanAnalysis, Test
 
 #file = "/Users/kelley/data/archive/sleiwex/2008/moorings/m09/adp/rdi_2615/raw/adp_rdi_2615.000"
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
-@time adp = read_adp_rdi(file);
-@time adp = read_adp_rdi(file);
+@time adp = read_adp_rdi(file); # 0.6s for 9-profile case
+@time adp = read_adp_rdi(file); # 0.001s for 9-profile case
 # Test some metadata
 @test adp["beam_angle"] == 20.0
 @test adp["data_offsets"] == [18, 77, 142, 816, 1154, 1492]
@@ -21,12 +21,15 @@ file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
         "2008-06-25 10:00:30", "2008-06-25 10:00:40", "2008-06-25 10:00:50",
         "2008-06-25 10:01:00", "2008-06-25 10:01:10", "2008-06-25 10:01:20"],
     "y-m-d H:M:S")
+# One test should demonstrate that [] works
+@test adp["sound_speed"] == [1497, 1497, 1497, 1497, 1497, 1497, 1497, 1497, 1497]
 @test adp.data["sound_speed"] == [1497, 1497, 1497, 1497, 1497, 1497, 1497, 1497, 1497]
 @test adp.data["heading"] ≈ [278.14, 277.31, 276.78, 276.39, 276.56, 277.07, 277.56, 277.47, 276.98] atol = 0.01
 @test adp.data["pitch"] ≈ [1.421236, 1.241172, 1.201080, 1.140976, 1.161010, 1.171018, 1.211098, 1.161001, 1.120942] atol = 0.01
 @test adp.data["roll"] ≈ [-2.39, -2.49, -2.43, -2.37, -2.39, -2.39, -2.44, -2.38, -2.35] atol = 0.01
 
 # Test array sizes
+@test size(data["velocity"]) == (9, 84, 4)
 @test size(adp.data["velocity"]) == (9, 84, 4)
 @test size(adp.data["correlation_magnitude"]) == (9, 84, 4)
 @test size(adp.data["echo_intensity"]) == (9, 84, 4)
