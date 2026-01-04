@@ -85,8 +85,8 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
         frequency = NaN
     end
     metadata["frequency"] = frequency
-    direction = sys_config_LSB[1] == 0 ? "down" : "up"
-    metadata["direction"] = direction
+    metadata["direction"] = sys_config_LSB[1] == 0 ? "down" : "up"
+    metadata["convex"] = sys_config_LSB[5] == 1
     if sys_config_MSB[7:8] == [0; 0]
         beam_angle = 15.0
     elseif sys_config_MSB[7:8] == [0; 1]
@@ -96,7 +96,14 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     else
         beam_angle = NaN
     end
+
     metadata["beam_angle"] = beam_angle
+    # compute transformation matrix (formula borrowed from R/oce)
+    C = metadata["convex"] ? 1.0 : -1.0
+    A = 1.0 / (2.0 * sin(metadata["beam_angle"] * pi / 180.0))
+    B = 1.0 / (4.0 * cos(metadata["beam_angle"] * pi / 180.0))
+    D = A / sqrt(2.0)
+    metadata["transformation_matrix"] = [C*A -C*A 0.0 0.0; 0.0 0.0 -C*A C*A; B B B B; D D -D -D]
     #println("sys_config_LSB $sys_config_LSB")
     #println("sys_config_MSB $sys_config_MSB")
     nbeams = Int(buf[start_fl+9])
@@ -108,6 +115,12 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     bin1_distance = 0.01 * buf[start_fl+33] + 256 * buf[start_fl+34]
     metadata["bin1_distance"] = bin1_distance
     metadata["distance"] = range(bin1_distance, step=depth_cell_length, length=ncells)
+    # oce/read_adp_rdi() gives as follows for adp[["transformationMatrix"]]
+    #           [,1]       [,2]       [,3]       [,4]
+    # [1,] 1.4619022 -1.4619022  0.0000000  0.0000000
+    # [2,] 0.0000000  0.0000000 -1.4619022  1.4619022
+    # [3,] 0.2660444  0.2660444  0.2660444  0.2660444
+    # [4,] 1.0337210  1.0337210 -1.0337210 -1.0337210
     metadata
 end
 

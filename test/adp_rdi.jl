@@ -2,8 +2,7 @@ using Dates, Plots, OceanAnalysis, Test
 
 #file = "/Users/kelley/data/archive/sleiwex/2008/moorings/m09/adp/rdi_2615/raw/adp_rdi_2615.000"
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
-@time adp = read_adp_rdi(file);
-@time adp = read_adp_rdi(file);
+adp = read_adp_rdi(file); # takes 0.7s the first call, 0.001s afterwards (9-ensemble file)
 # Test some metadata
 @test adp["beam_angle"] == 20.0
 @test adp["data_offsets"] == [18, 77, 142, 816, 1154, 1492]
@@ -48,3 +47,10 @@ file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
 @test adp.data["percent_good"][1, 2, :] == [0x64, 0x64, 0x64, 0x64]
 @test adp.data["percent_good"][2, 1, :] == [0x64, 0x64, 0x64, 0x64]
 @test adp["distance"] == range(2.23, step=0.5, length=84)
+tm_expected = [1.4619022 -1.4619022 0.0000000 0.0000000;
+    0.0000000 0.0000000 -1.4619022 1.4619022;
+    0.2660444 0.2660444 0.2660444 0.2660444;
+    1.0337210 1.0337210 -1.0337210 -1.0337210]
+@test adp["transformation_matrix"] ≈ tm_expected atol = 1e-5
+
+

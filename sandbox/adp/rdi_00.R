@@ -32,4 +32,5 @@ png("rdi_00.png")
 imagep(t(-adp[["v"]][1,,]), colormap=cm)
 dev.off()
 print(adp[["distance"]])
+print(adp[["transformationMatrix"]])
 
