@@ -189,7 +189,7 @@ function get_argo_index(destdir::String="."; age::Real=1.0, server::String="http
 end
 
 """
-    get_argo(file::String="", destdir::String="."; age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
+    get_argo(filename::String="", destdir::String="."; age::Real=1.0; server::String="https://data-argo.ifremer.fr", debug=0)
 
 Download an Argo profile file, if an existing copy is less than `age` days old.
 
@@ -225,24 +225,24 @@ plot_profile(argo, which="CT")
 ```
 
 """
-function get_argo(file::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo() START")
-    file_original = file
-    oad(debug, "    file: ", file, " (original)")
+    file_original = filename
+    oad(debug, "    filename: ", filename, " (original)")
     file = replace.(file, r".*/" => "")
-    oad(debug, "    file: ", file, " (after trimming)")
-    file = joinpath(destdir, file)
-    oad(debug, "    file: ", file, " (after prefixing with destdir)")
+    oad(debug, "    filename: ", filename, " (after trimming)")
+    file = joinpath(destdir, filename)
+    oad(debug, "    filename: ", filename, " (after prefixing with destdir)")
     url = joinpath(server, "dac", file_original)
     oad(debug, "    url: ", url)
-    rval = get_file(url, file, age, debug=increment_debug(debug))
+    rval = get_file(url, filename, age, debug=increment_debug(debug))
     oad(debug, "END get_argo()")
     rval
 end
 
 
 """
-    read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
+    read_argo_index(filename::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
 
 Read a file downloaded by [`get_argo_index`](@ref).
 
@@ -261,14 +261,14 @@ columns named `institution`, `date_update`, `ocean`, and `profiler_type`.
 the location on remote servers, as is required for use as the `file` argument
     of [`get_argo`](@ref).
 """
-function read_argo_index(file::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
-    file = expanduser(file)
+function read_argo_index(filename::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
+    file = expanduser(filename)
     oad(debug, "read_argo_index() START")
     if !isfile(file)
-        error("No file: ", file)
+        error("No file file named ", filename)
     end
-    oad(debug, "    file: ", file)
-    df = CSV.read(file, DataFrame, header=header)
+    oad(debug, "    filename: ", filename)
+    df = CSV.read(filename, DataFrame, header=header)
     norig = nrow(df)
     dropmissing!(df)
     nnew = nrow(df)

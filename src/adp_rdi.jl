@@ -164,14 +164,30 @@ end
 #   0x00 0x0d sentinel_percent_good
 #   0x80 0x00 variable_leader
 """
-    read_adcp(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
+    read_adp_rdi(filename::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
 
-Read an acoustic-Doppler profiler file that is in RDI format.
+Read an acoustic-Doppler profiler file in RDI format.
 
-At present, only 4 data items can be read: `:velocity` (with byte code 0x00
-0x01), `:correlation_magnitude` (0x00 0x02), `:echo_intensity`  (0x00 0x03) and
-`:percent_good` (0x00 0x04). More types may be added later, as needs arise.
-(NB. the `oce::read_adp()` R code handles 18 types.)
+This function is designed to read the PD0 format, as described in Chapter
+4 of Reference 1.  (During development, the results were compared with
+those from the `read.adp.rdi()` function of the R `oce` package, which was
+based on Reference 2.)
+
+At present, only 4 data items can be read: `:velocity`
+(with byte code 0x00 0x01), `:correlation_magnitude` (0x00 0x02),
+`:echo_intensity`  (0x00 0x03) and `:percent_good` (0x00 0x04). More
+types may be added later, as needs arise. (NB. the R code in
+`oce::read.adp.rdi()` handles 18 types.)
+
+# Arguments
+
+- `filename` an ADCP file in the 'PD0' format as described in the Teledyne RD Instruments documentation (references 1 and 2).
+
+- `ensembles` an indication of which ensembles (data profiles) to read.  This may be an singe integer or a vector of integers. In the first case, if `ensembles=0` then the whole file is read, otherwise the stated number of ensembles is read (provided that the file holds that number). In the second case, the value of `ensembles` dictates the indices of ensembles that are to be read. In both cases, the indices are trimmed to be from 1 to the number of ensembles in the file. The default is to read the whole file. and e.g. `ensembles=1:10:101` would read ensemble 1, ensemble 11, and so on, up to ensemble 101.
+
+# Keywords
+
+- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
 # Examples
 
@@ -187,11 +203,11 @@ heatmap(adp["time"], adp["distance"], adp["velocity"][:,:,1],
 ```
 
 # References
-1. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
+1. Teledyne RD Instruments. “Workhorse II Commands and Output Data Format.” November 2025. P/N 957-6156-00. https://www.teledynemarine.com/en-us/support/SiteAssets/RDI/Manuals%20and%20Guides/Workhorse%20II/WorkHorse_Commands_and_Output_Data_Format.pdf.
+2. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
+3. Teledyne RD Instruments. “Acoustic Doppler Current Profiler Principles of Operation: A Practical Primer.” January 2011. https://www.comm-tec.com/Docs/Manuali/RDI/BBPRIME.pdf.
 """
-function read_adp_rdi(file::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
-    oad(debug, "read_adp_rdi() START")
-    oad(debug, "  ensembles: $ensembles (FIXME: use this argument)")
+function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int},Vector{Int64}}=0; debug::Int64=0)
     function two_byte_unsigned(i)
         # Skip reinterpret() to avoid issues of endianness
         #reinterpret(UInt16, [buf[i], buf[i+1]])
@@ -202,13 +218,33 @@ function read_adp_rdi(file::String, ensembles::Union{Int64,Vector{Int64}}=0; deb
         #reinterpret(Int16, [buf[i], buf[i+1]])
         signed(UInt16(buf[i+1]) << 8 | UInt16(buf[i]))
     end
-    buf = read(file)
+    oad(debug, "read_adp_rdi() START")
+    buf = read(filename)
     # H_ holds pointers to the starts of ensembles.
-    oad(debug, "  About to determine ensemble starting indices")
+    oad(debug, "  About to determine the ensemble indices")
     H_ = find_adp_rdi_ensembles(buf)
+    nH_ = length(H_)
+    #println("H_ $H_")
+    # interpret ensembles, possibly subsetting H_
+    if length(ensembles) == 1
+        ensembles > -1 || error("negative 'ensembles' (here, $ensembles) are not allowed")
+        if ensembles != 0
+            H_ = H_[1:min(nH_, ensembles)]
+        end
+        oad(debug, "  Using $(length(H_)) of the $nH_ ensembles in the file")
+    else
+        #println("ensembles $ensembles")
+        ensembles = ensembles[1 .< ensembles .< nH_]
+        #println("ensembles $ensembles")
+        H_ = H_[ensembles]
+        oad(debug, "  Using $(length(H_)) of the $nH_ ensembles in the file")
+        nH_ = length(H_)
+    end
+    #println("H_ $H_")
+    nH_ = length(H_)
     oad(debug, "  About to read header information in first ensemble")
     metadata = read_adp_rdi_header(buf, H_[1])
-    metadata["file"] = file
+    metadata["filename"] = filename
     data = Dict()
     metadata["nensembles"] = length(H_)
     # FL_ holds pointers to the starts of fixed-length headers (See Figure 8 of [1])
@@ -221,7 +257,7 @@ function read_adp_rdi(file::String, ensembles::Union{Int64,Vector{Int64}}=0; deb
     D_ = VL_ .+ 65 # (see Figure 8 of [1])
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
-    oad(debug, "  inferring time-series information")
+    oad(debug, "  Inferring time-series information")
     data["ensemble"] = buf[VL_.+2] + 245 * buf[VL_.+3]
     year = 2000 .+ buf[VL_.+4]
     month = Int.(buf[VL_.+5])
@@ -239,7 +275,7 @@ function read_adp_rdi(file::String, ensembles::Union{Int64,Vector{Int64}}=0; deb
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
     data["roll"] = 0.01 * two_byte_signed.(VL_ .+ 22)
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
-    oad(debug, "  determining data types")
+    oad(debug, "  Determining data types")
     have_data = Symbol[]
     for t in 1:metadata["ntypes"]
         codes[t, 1] = buf[metadata["data_offsets"][t].+1]
@@ -277,7 +313,7 @@ function read_adp_rdi(file::String, ensembles::Union{Int64,Vector{Int64}}=0; deb
     ne = metadata["nensembles"]
     nc = metadata["ncells"]
     nb = metadata["nbeams"]
-    oad(debug, "  about to read $ne ensembles, each with $nc cells and $nb beams")
+    oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams")
     for e in 1:ne
         p = D_[e] # pointer used thoughout the looop
         if buf[p] == 0 && buf[p+1] == 1
