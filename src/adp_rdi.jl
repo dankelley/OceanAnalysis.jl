@@ -50,7 +50,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
         #DELETE end
         if checksum == desired_checksum
             push!(starts, start)
-        else
+            #else
             #println("  bad checksum=$checksum (desired_checksum=$desired_checksum)")
         end
         start += bytes_to_check + 2
@@ -58,7 +58,8 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
     starts
 end
 
-function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
+# read the header, and compute a few things, for the setup of 'metadata'
+function read_adp_rdi_header(buf, start::Int64=1)
     metadata = Dict()
     ntypes = Int(buf[start+5])
     metadata["ntypes"] = ntypes
@@ -66,15 +67,17 @@ function read_adp_rdi_header(buf, start::Int64=1; debug::Int64=0)
     ntypes < 201 || error("ntypes=$ntypes exceeds 200")
     # data_offset in 2-byte elements
     data_offsets = Vector{Int}(undef, ntypes)
+    # FIXME: is it ok to read this just once per file?
     for i in 1:ntypes
         tmp = start + 4 + 2 * i
         data_offsets[i] = UInt16(buf[tmp+1]) << 8 | UInt16(buf[tmp])
-        #DELETE OLD = buf[tmp] + 256 * buf[tmp+1]
-        #DELETE if OLD != data_offsets[i]
-        #DELETE     error("problem in read header line 71 (at i=$i)")
-        #DELETE else
-        #DELETE     println("ok at i=$i")
-        #DELETE end
+        #println("data_offsets[$i]=$(data_offsets[i]) based on start=$start, tmp=$tmp, buf[tmp+1]=$(repr(buf[tmp+1])), buf[tmp]=$(repr(buf[tmp]))")
+        #OLD = buf[tmp] + 256 * buf[tmp+1]
+        #if OLD != data_offsets[i]
+        #    error("problem in read header line 71 (at i=$i)")
+        #else
+        #    println("ok at i=$i")
+        #end
     end
     metadata["data_offsets"] = data_offsets
     # Now look past 'header' to 'fixed leader', but
@@ -264,6 +267,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     nH_ = length(H_)
     oad(debug, "  About to read header information in first ensemble")
     metadata = read_adp_rdi_header(buf, H_[1])
+    data_offsets = metadata["data_offsets"]
+    println(data_offsets)
     metadata["filename"] = filename
     data = Dict()
     metadata["nensembles"] = length(H_)
@@ -296,62 +301,62 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     data["roll"] = 0.01 * two_byte_signed.(VL_ .+ 22)
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
     oad(debug, "  Determining data types")
-    have_data = Symbol[]
+    data_types = Symbol[]
     for t in 1:metadata["ntypes"]
         codes[t, 1] = buf[metadata["data_offsets"][t].+1]
         codes[t, 2] = buf[metadata["data_offsets"][t].+2]
         if codes[t, :] == [0x00, 0x01]
-            push!(have_data, :velocity)
+            push!(data_types, :velocity)
         end
         if codes[t, :] == [0x00, 0x02]
-            push!(have_data, :correlation_magnitude)
+            push!(data_types, :correlation_magnitude)
         end
         if codes[t, :] == [0x00, 0x03]
-            push!(have_data, :echo_intensity)
+            push!(data_types, :echo_intensity)
         end
         if codes[t, :] == [0x00, 0x04]
-            push!(have_data, :percent_good)
+            push!(data_types, :percent_good)
         end
         if codes[t, :] == [0x00, 0x05]
-            push!(have_data, :status)
+            push!(data_types, :status)
         end
         if codes[t, :] == [0x00, 0x06]
-            push!(have_data, :bottom_track)
+            push!(data_types, :bottom_track)
         end
         if codes[t, :] == [0x01, 0x59]
-            push!(have_data, :ISM)
+            push!(data_types, :ISM)
         end
         if codes[t, :] == [0x0C, 0x02]
-            push!(have_data, :ambient_sound)
+            push!(data_types, :ambient_sound)
         end
         # FIXME: add other code-recognition here
     end
     metadata["codes"] = codes # FIXME will users ever need this?
-    metadata["have_data"] = have_data # FIXME is this useful, when user can do keys(x.data)?
+    metadata["data_types"] = data_types # FIXME is this useful, when user can do keys(x.data)?
     # Set up arrays
     # FIXME: add other array-allocation here
-    if :velocity in have_data
+    if :velocity in data_types
         velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
-    if :correlation_magnitude in have_data
+    if :correlation_magnitude in data_types
         correlation_magnitude = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
-    if :echo_intensity in have_data
+    if :echo_intensity in data_types
         echo_intensity = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
-    if :percent_good in have_data
+    if :percent_good in data_types
         percent_good = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
-    if :status in have_data
+    if :status in data_types
         @warn "FIXME: set up storage for 'status'"
     end
-    if :bottom_track in have_data
+    if :bottom_track in data_types
         @warn "FIXME: set up storage for 'bottom_track'"
     end
-    if :ambient_sound in have_data
+    if :ambient_sound in data_types
         @warn "FIXME: set up storage for 'ambient_sound'"
     end
-    if :ISM in have_data
+    if :ISM in data_types
         @warn "FIXME: set up storage for 'ISM'"
     end
     ne = metadata["nensembles"]
@@ -427,16 +432,16 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     if missed_ISM > 0
         @warn "FIXME: skipped $missed_ISM 'ISM' entries"
     end
-    if :velocity in metadata["have_data"]
+    if :velocity in metadata["data_types"]
         data["velocity"] = velocity
     end
-    if :correlation_magnitude in metadata["have_data"]
+    if :correlation_magnitude in metadata["data_types"]
         data["correlation_magnitude"] = correlation_magnitude
     end
-    if :echo_intensity in metadata["have_data"]
+    if :echo_intensity in metadata["data_types"]
         data["echo_intensity"] = echo_intensity
     end
-    if :percent_good in metadata["have_data"]
+    if :percent_good in metadata["data_types"]
         data["percent_good"] = percent_good
     end
     rval = Adp(metadata, data)
