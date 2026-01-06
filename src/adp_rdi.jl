@@ -35,6 +35,10 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
         if ntypes < 1 | ntypes > 200
             error("something is wrong with ntypes (=$ntypes)")
         end
+        if start + bytes_to_check + 1 > nbuf
+            @warn "got to EOF while trying to read ensemble number $ensemble"
+            break
+        end
         local checksum::UInt16 = 0
         for i in range(start, length=bytes_to_check)
             checksum += buf[i] # relies on overflow wrapping around zero
@@ -359,7 +363,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     missed_ambient_sound = 0
     missed_ISM = 0
     for e in 1:ne
-        p = D_[e] # pointer used thoughout the looop
+        p = D_[e] # pointer used thoughout the loop
         if buf[p] == 0 && buf[p+1] == 1
             p = p + 2 # skip the two-byte type indicator
             for c in 1:nc
