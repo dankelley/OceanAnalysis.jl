@@ -245,37 +245,37 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     buf = read(filename)
     # H_ holds pointers to the starts of ensembles.
     oad(debug, "  About to determine the ensemble indices")
-    H_ = find_adp_rdi_ensembles(buf)
-    nH_ = length(H_)
+    E_ = find_adp_rdi_ensembles(buf)
+    nE_ = length(E_)
     #println("H_ $H_")
     # interpret ensembles, possibly subsetting H_
     if length(ensembles) == 1
         ensembles > -1 || error("negative 'ensembles' (here, $ensembles) are not allowed")
         if ensembles != 0
-            H_ = H_[1:min(nH_, ensembles)]
+            E_ = E_[1:min(nE_, ensembles)]
         end
-        oad(debug, "  Using $(length(H_)) of the $nH_ ensembles in the file")
+        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file")
     else
         #println("ensembles $ensembles")
-        ensembles = ensembles[1 .< ensembles .< nH_]
+        ensembles = ensembles[1 .< ensembles .< nE_]
         #println("ensembles $ensembles")
-        H_ = H_[ensembles]
-        oad(debug, "  Using $(length(H_)) of the $nH_ ensembles in the file")
-        nH_ = length(H_)
+        E_ = E_[ensembles]
+        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file")
+        nE_ = length(E_)
     end
     #println("H_ $H_")
-    nH_ = length(H_)
+    nE_ = length(E_)
     oad(debug, "  About to read header information in first ensemble")
-    metadata = read_adp_rdi_header(buf, H_[1])
+    metadata = read_adp_rdi_header(buf, E_[1])
     data_offsets = metadata["data_offsets"]
     println(data_offsets)
     metadata["filename"] = filename
     data = Dict()
-    metadata["nensembles"] = length(H_)
+    metadata["nensembles"] = length(E_)
     # FL_ holds pointers to the starts of fixed-length headers (See Figure 8 of [1])
-    FL_ = H_ .+ 6 .+ 2 * metadata["ntypes"]
-    0 == buf[FL_[1]] || stop("problem @ FL_[1]")
-    0 == buf[FL_[1]+1] || stop("problem @ FL_[1] + 2")
+    FL_ = E_ .+ 6 .+ 2 * metadata["ntypes"]
+    0 == buf[FL_[1]] || error("problem w/ buf[FL_[1]")
+    0 == buf[FL_[1]+1] || error("problem w/ buf[FL_[1+1]")
     # VL_ holds pointers to the starts of variable-length headers
     VL_ = FL_ .+ 59 # (see Figure 8 of [1])
     # D_ holds pointers to the starts of data sections
@@ -283,7 +283,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
     oad(debug, "  Inferring time-series information")
-    data["ensemble"] = buf[VL_.+2] + 245 * buf[VL_.+3]
+    data["ensemble"] = buf[VL_.+2] + 256 * buf[VL_.+3]
     year = 2000 .+ buf[VL_.+4]
     month = Int.(buf[VL_.+5])
     day = Int.(buf[VL_.+6])
@@ -362,61 +362,70 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     ne = metadata["nensembles"]
     nc = metadata["ncells"]
     nb = metadata["nbeams"]
+    data_offsets = metadata["data_offsets"]
+    oad(debug, "data_offsets: $data_offsets")
     oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams")
     missed_status = 0
     missed_bottom_track = 0
     missed_ambient_sound = 0
     missed_ISM = 0
     for e in 1:ne
-        p = D_[e] # pointer used thoughout the loop
-        if buf[p] == 0 && buf[p+1] == 1
-            p = p + 2 # skip the two-byte type indicator
-            for c in 1:nc
-                for b in 1:nb
-                    velocity[e, c, b] = 0.001 * two_byte_signed(p)
-                    p = p + 2
-                end
+        println("E_: $(E_)")
+        println("FL_: $(FL_)")
+        println("VL_: $(VL_)")
+        println("D_: $(D_)")
+        p0 = E_[e] # pointer to start of ensemble
+        for o in data_offsets
+            p = p0 + o
+            println("DAN ", repr(buf[p]), "  ", repr(buf[p+1]))
+            println("BOY", buf[p.+0:1])
+            println("Examine at p0=$p0, o=$o therefore p=$p. Five before and after are:")
+            for iii in range(-5, 5)
+                println("  buf[", p + iii, "]: $(repr(buf[p+iii]))")
             end
-        end
-        if buf[p] == 0 && buf[p+1] == 2
-            p = p + 2 # skip the two-byte type indicator
-            for c in 1:nc
+            if buf[p] == 0x00 && buf[p+1] == 0x00
+                println("ignoring 0x00 0x00 chunk")
+            elseif buf[p] == 0x080 && buf[p+1] == 0x00
+                println("ignoring 0x80 0x00 chunk")
+            elseif buf[p] == 0x00 && buf[p+1] == 0x01
+                println("At e=$e, o=$o, p=$p try to read 'velocity'")
                 for b in 1:nb
-                    correlation_magnitude[e, c, b] = buf[p]
-                    p = p + 1
+                    for c in 1:nc
+                        velocity[e, c, b] = 0.001 * two_byte_signed(2 + p + (c - 1) * nb + b)
+                    end
                 end
-            end
-        end
-        if buf[p] == 0 && buf[p+1] == 3
-            p = p + 2 # skip the two-byte type indicator
-            for c in 1:nc
+            elseif buf[p] == 0x00 && buf[p+1] == 0x02
+                println("At e=$e, o=$o, p=$p try to read 'correlation_magnitude'")
                 for b in 1:nb
-                    echo_intensity[e, c, b] = buf[p]
-                    p = p + 1
+                    for c in 1:nc
+                        correlation_magnitude[e, c, b] = buf[2+p+(c-1)*nb+b]
+                    end
                 end
-            end
-        end
-        #if buf[p] == 0 && buf[p+1] == 4
-        if buf[p+0:1] == [0 4]
-            p = p + 2 # skip the two-byte type indicator
-            for c in 1:nc
+            elseif buf[p] == 0x00 && buf[p+1] == 0x03
+                println("At e=$e, o=$o, p=$p try to read 'echo_intensity'")
                 for b in 1:nb
-                    percent_good[e, c, b] = buf[p]
-                    p = p + 1
+                    for c in 1:nc
+                        echo_intensity[e, c, b] = buf[2+p+(c-1)*nb+b]
+                    end
                 end
+            elseif buf[p] == 0x00 && buf[p+1] == 0x04
+                println("At e=$e, o=$o, p=$p try to read 'percent_good'")
+                for b in 1:nb
+                    for c in 1:nc
+                        percent_good[e, c, b] = buf[2+p+(c-1)*nb+b]
+                    end
+                end
+            elseif buf[p] == 0x00 && buf[p+1] == 0x05
+                missed_status += 1
+            elseif buf[p] == 0x00 && buf[p+1] == 0x06
+                missed_bottom_track += 1
+            elseif buf[p] == 0x01 && buf[p+1] == 0x59
+                missed_ISM += 1
+            elseif buf[p] == 0x0C && buf[p+1] == 0x02
+                missed_ambient_sound += 1
+            else
+                @warn "At e=$e, o=$o, p=$p, code $(repr(buf[p])), $(repr(buf[p+1])) not recognized"
             end
-        end
-        if buf[p+0:1] == [0x00 0x05]
-            missed_status += 1
-        end
-        if buf[p+0:1] == [0x00 0x06]
-            missed_bottom_track += 1
-        end
-        if buf[p+0:1] == [0x01, 0x59]
-            missed_ISM += 1
-        end
-        if buf[p+0:1] == [0x0C, 0x02]
-            missed_ambient_sound += 1
         end
         # FIXME: add other array-assignment here
     end
