@@ -388,31 +388,39 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
             elseif buf[p] == 0x080 && buf[p+1] == 0x00
                 println("ignoring 0x80 0x00 chunk")
             elseif buf[p] == 0x00 && buf[p+1] == 0x01
+                pp = p + 2
                 println("At e=$e, o=$o, p=$p try to read 'velocity'")
-                for b in 1:nb
-                    for c in 1:nc
-                        velocity[e, c, b] = 0.001 * two_byte_signed(2 + p + (c - 1) * nb + b)
+                for c in 1:nc
+                    for b in 1:nb
+                        velocity[e, c, b] = 0.001 * two_byte_signed(pp)
+                        pp = pp + 2
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x02
                 println("At e=$e, o=$o, p=$p try to read 'correlation_magnitude'")
-                for b in 1:nb
-                    for c in 1:nc
-                        correlation_magnitude[e, c, b] = buf[2+p+(c-1)*nb+b]
+                pp = p + 2
+                for c in 1:nc
+                    for b in 1:nb
+                        correlation_magnitude[e, c, b] = buf[pp]
+                        pp = pp + 1
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x03
                 println("At e=$e, o=$o, p=$p try to read 'echo_intensity'")
-                for b in 1:nb
-                    for c in 1:nc
-                        echo_intensity[e, c, b] = buf[2+p+(c-1)*nb+b]
+                pp = p + 2
+                for c in 1:nc
+                    for b in 1:nb
+                        echo_intensity[e, c, b] = buf[pp]
+                        pp = pp + 1
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x04
                 println("At e=$e, o=$o, p=$p try to read 'percent_good'")
-                for b in 1:nb
-                    for c in 1:nc
-                        percent_good[e, c, b] = buf[2+p+(c-1)*nb+b]
+                pp = p + 2
+                for c in 1:nc
+                    for b in 1:nb
+                        percent_good[e, c, b] = buf[pp]
+                        pp = pp + 1
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
