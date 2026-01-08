@@ -2,28 +2,28 @@ library(oce)
 file <- "adp_rdi.000"
 adp <- read.adp.rdi(file, debug = 1)
 cat("v\n")
-print(adp[["v"]][1,1,])
-print(adp[["v"]][1,2,])
-print(adp[["v"]][2,1,])
-print(adp[["v"]][3,2,])
+print(adp[["v"]][1, 1, ])
+print(adp[["v"]][1, 2, ])
+print(adp[["v"]][2, 1, ])
+print(adp[["v"]][3, 2, ])
 
 cat("q\n")
-print(adp[["q"]][1,1,])
-print(adp[["q"]][1,2,])
-print(adp[["q"]][2,1,])
-print(adp[["q"]][3,2,])
+print(adp[["q"]][1, 1, ])
+print(adp[["q"]][1, 2, ])
+print(adp[["q"]][2, 1, ])
+print(adp[["q"]][3, 2, ])
 
 cat("a\n")
-print(adp[["a"]][1,1,])
-print(adp[["a"]][1,2,])
-print(adp[["a"]][2,1,])
-print(adp[["a"]][3,2,])
+print(adp[["a"]][1, 1, ])
+print(adp[["a"]][1, 2, ])
+print(adp[["a"]][2, 1, ])
+print(adp[["a"]][3, 2, ])
 
 cat("g\n")
-print(adp[["g"]][1,1,])
-print(adp[["g"]][1,2,])
-print(adp[["g"]][2,1,])
-print(adp[["g"]][3,2,])
+print(adp[["g"]][1, 1, ])
+print(adp[["g"]][1, 2, ])
+print(adp[["g"]][2, 1, ])
+print(adp[["g"]][3, 2, ])
 
 
 
@@ -39,9 +39,9 @@ print(adp[["g"]][3,2,])
 #<> print(adp[["pitch"]])
 #<> cat("roll\n")
 #<> print(adp[["roll"]])
-#<> 
+#<>
 #<> print(names(adp[["data"]]))
-#<> 
+#<>
 #<> for (ensemble in 1:2) {
 #<>     cat("ensemble = ", ensemble, "\n")
 #<>     for (cell in 1:2) {
@@ -59,4 +59,4 @@ print(adp[["g"]][3,2,])
 #<> dev.off()
 #<> print(adp[["distance"]])
 #<> print(adp[["transformationMatrix"]])
-#<> 
+#<>

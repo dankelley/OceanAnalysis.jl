@@ -1,5 +1,12 @@
 using Dates, Plots
 
+function key_insert(dict, key)
+    if key in keys(dict)
+        dict[key] += 1
+    else
+        dict[key] = 1
+    end
+end
 
 function find_adp_rdi_ensembles(buf; debug::Int64=0)
     nbuf = length(buf)
@@ -261,14 +268,13 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
         #println("ensembles $ensembles")
         E_ = E_[ensembles]
         oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file")
-        nE_ = length(E_)
     end
     #println("H_ $H_")
     nE_ = length(E_)
     oad(debug, "  About to read header information in first ensemble")
     metadata = read_adp_rdi_header(buf, E_[1])
     data_offsets = metadata["data_offsets"]
-    println(data_offsets)
+    #<>println(data_offsets)
     metadata["filename"] = filename
     data = Dict()
     metadata["nensembles"] = length(E_)
@@ -279,7 +285,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     # VL_ holds pointers to the starts of variable-length headers
     VL_ = FL_ .+ 59 # (see Figure 8 of [1])
     # D_ holds pointers to the starts of data sections
-    D_ = VL_ .+ 65 # (see Figure 8 of [1])
+    #<> D_ = VL_ .+ 65 # (see Figure 8 of [1])
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
     oad(debug, "  Inferring time-series information")
@@ -336,15 +342,19 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     # Set up arrays
     # FIXME: add other array-allocation here
     if :velocity in data_types
+        oad(debug, "  Setting up velocity storage as a vector of length $nE_")
         velocity = Array{Float64,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
     if :correlation_magnitude in data_types
+        oad(debug, "  Setting up correlation_magnitude storage as a vector of length $nE_")
         correlation_magnitude = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
     if :echo_intensity in data_types
+        oad(debug, "  Setting up echo_intensity storage as a vector of length $nE_")
         echo_intensity = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
     if :percent_good in data_types
+        oad(debug, "  Setting up percent_good storage as a vector of length $nE_")
         percent_good = Array{UInt8,3}(undef, metadata["nensembles"], metadata["ncells"], metadata["nbeams"])
     end
     if :status in data_types
@@ -357,39 +367,45 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
         @warn "FIXME: set up storage for 'ambient_sound'"
     end
     if :ISM in data_types
-        @warn "FIXME: set up storage for 'ISM'"
+        # Set up storage for 'ISM'
+        oad(debug, "  Setting up ISM storage as vectors of length $nE_")
+        ISM_valid = Vector{UInt8}(undef, nE_)
+        ISM_acc_x1 = Vector{Float32}(undef, nE_)
+        ISM_acc_y1 = Vector{Float32}(undef, nE_)
+        ISM_acc_z1 = Vector{Float32}(undef, nE_)
+        ISM_mag_x1 = Vector{Int16}(undef, nE_)
+        ISM_mag_y1 = Vector{Int16}(undef, nE_)
+        ISM_mag_z1 = Vector{Int16}(undef, nE_)
     end
     ne = metadata["nensembles"]
     nc = metadata["ncells"]
     nb = metadata["nbeams"]
     data_offsets = metadata["data_offsets"]
-    oad(debug, "data_offsets: $data_offsets")
+    #<> oad(debug, "    data_offsets: $data_offsets")
     oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams")
     missed_status = 0
     missed_bottom_track = 0
     missed_ambient_sound = 0
-    missed_ISM = 0
+    unknown_byte_sequences = Dict()
     for e in 1:ne
-        println("E_: $(E_)")
-        println("FL_: $(FL_)")
-        println("VL_: $(VL_)")
-        println("D_: $(D_)")
+        #<> println("E_: $(E_)")
+        #<> println("FL_: $(FL_)")
+        #<> println("VL_: $(VL_)")
+        #<> println("D_: $(D_)")
         p0 = E_[e] # pointer to start of ensemble
         for o in data_offsets
             p = p0 + o
-            println("DAN ", repr(buf[p]), "  ", repr(buf[p+1]))
-            println("BOY", buf[p.+0:1])
-            println("Examine at p0=$p0, o=$o therefore p=$p. Five before and after are:")
-            for iii in range(-5, 5)
-                println("  buf[", p + iii, "]: $(repr(buf[p+iii]))")
-            end
+            #<>println("Examine at p0=$p0, o=$o therefore p=$p. Five before and after are:")
+            #<>for iii in range(-5, 5)
+            #<>    println("  buf[", p + iii, "]: $(repr(buf[p+iii]))")
+            #<>end
             if buf[p] == 0x00 && buf[p+1] == 0x00
-                println("ignoring 0x00 0x00 chunk")
+                #println("ignoring 0x00 0x00 chunk")
             elseif buf[p] == 0x080 && buf[p+1] == 0x00
-                println("ignoring 0x80 0x00 chunk")
+                #println("ignoring 0x80 0x00 chunk")
             elseif buf[p] == 0x00 && buf[p+1] == 0x01
                 pp = p + 2
-                println("At e=$e, o=$o, p=$p try to read 'velocity'")
+                #<> println("At e=$e, o=$o, p=$p try to read 'velocity'")
                 for c in 1:nc
                     for b in 1:nb
                         velocity[e, c, b] = 0.001 * two_byte_signed(pp)
@@ -397,7 +413,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x02
-                println("At e=$e, o=$o, p=$p try to read 'correlation_magnitude'")
+                #<> println("At e=$e, o=$o, p=$p try to read 'correlation_magnitude'")
                 pp = p + 2
                 for c in 1:nc
                     for b in 1:nb
@@ -406,7 +422,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x03
-                println("At e=$e, o=$o, p=$p try to read 'echo_intensity'")
+                #<> println("At e=$e, o=$o, p=$p try to read 'echo_intensity'")
                 pp = p + 2
                 for c in 1:nc
                     for b in 1:nb
@@ -415,7 +431,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                     end
                 end
             elseif buf[p] == 0x00 && buf[p+1] == 0x04
-                println("At e=$e, o=$o, p=$p try to read 'percent_good'")
+                #<> println("At e=$e, o=$o, p=$p try to read 'percent_good'")
                 pp = p + 2
                 for c in 1:nc
                     for b in 1:nb
@@ -423,19 +439,41 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                         pp = pp + 1
                     end
                 end
+            elseif buf[p] == 0x01 && buf[p+1] == 0x59
+                # ISM See Table 41 on page 144 of Reference 1.
+                # NOTE: the columns in the table say the 'mag' items are 2 bytes
+                # each, but the text below says they are 4 bytes. I asked CR
+                # to check with Teledyn-RDI on this.
+                ISM_valid[e] = buf[p+2]
+                #dan = [buf[p+3]; buf[p+4]; buf[p+5]; buf[p+6]]
+                #println(dan)
+                #println(reinterpret(Float32, dan))
+                #println("is above generating an error? (NB e=$e)")
+                ###ISM_acc_x1[e] = ltoh(reinterpret(Float32, [buf[p+3]; buf[p+4]; buf[p+5]; buf[p+6]])[1])
+                ###ISM_acc_y1[e] = ltoh(reinterpret(Float32, [buf[p+7]; buf[p+9]; buf[p+9]; buf[p+10]])[1])
+                ###ISM_acc_z1[e] = ltoh(reinterpret(Float32, [buf[p+11]; buf[p+12]; buf[p+13]; buf[p+14]])[1])
+                ISM_acc_x1[e] = ltoh(reinterpret(Float32, buf[(p).+(3:6)])[1])
+                ISM_acc_y1[e] = ltoh(reinterpret(Float32, buf[(p).+(7:10)])[1])
+                ISM_acc_z1[e] = ltoh(reinterpret(Float32, buf[(p).+(11:14)])[1])
+                ISM_mag_x1[e] = ltoh(two_byte_signed(p + 15))
+                ISM_mag_y1[e] = ltoh(two_byte_signed(p + 17))
+                ISM_mag_z1[e] = ltoh(two_byte_signed(p + 19))
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
                 missed_status += 1
             elseif buf[p] == 0x00 && buf[p+1] == 0x06
                 missed_bottom_track += 1
-            elseif buf[p] == 0x01 && buf[p+1] == 0x59
-                missed_ISM += 1
             elseif buf[p] == 0x0C && buf[p+1] == 0x02
                 missed_ambient_sound += 1
             else
-                @warn "At e=$e, o=$o, p=$p, code $(repr(buf[p])), $(repr(buf[p+1])) not recognized"
+                #<> @warn "At e=$e, o=$o, p=$p, code $(repr(buf[p])), $(repr(buf[p+1])) not recognized"
+                key_insert(unknown_byte_sequences, repr(buf[p]) * "," * repr(buf[p+1]))
             end
         end
         # FIXME: add other array-assignment here
+    end
+    if length(unknown_byte_sequences) > 0
+        println("Table of unhandled byte sequences")
+        display(unknown_byte_sequences)
     end
     if missed_status > 0
         @warn "FIXME: skipped $missed_status 'status' entries"
@@ -445,9 +483,6 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     end
     if missed_ambient_sound > 0
         @warn "FIXME: skipped $missed_ambient_sound 'ambient_sound' entries"
-    end
-    if missed_ISM > 0
-        @warn "FIXME: skipped $missed_ISM 'ISM' entries"
     end
     if :velocity in metadata["data_types"]
         data["velocity"] = velocity
@@ -460,6 +495,15 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     end
     if :percent_good in metadata["data_types"]
         data["percent_good"] = percent_good
+    end
+    if :ISM in metadata["data_types"]
+        data["ISM_valid"] = ISM_valid
+        data["ISM_acc_x1"] = ISM_acc_x1
+        data["ISM_acc_y1"] = ISM_acc_y1
+        data["ISM_acc_z1"] = ISM_acc_z1
+        data["ISM_mag_x1"] = ISM_mag_x1
+        data["ISM_mag_y1"] = ISM_mag_y1
+        data["ISM_mag_z1"] = ISM_mag_z1
     end
     rval = Adp(metadata, data)
     oad(debug, "END read_adp_rdi()")
