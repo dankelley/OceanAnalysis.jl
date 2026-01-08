@@ -11,7 +11,7 @@ adp = read_adp_rdi(file); # takes 0.7s the first call, 0.001s afterwards (9-ense
 @test adp["depth_cell_length"] == 0.5
 @test adp["direction"] == "up"
 @test adp["frequency"] == 300
-@test adp["have_data"] == [:velocity, :correlation_magnitude, :echo_intensity, :percent_good]
+@test adp["data_types"] == [:velocity, :correlation_magnitude, :echo_intensity, :percent_good]
 @test adp["nbeams"] == 4
 @test adp["ncells"] == 84
 @test adp["nensembles"] == 9
