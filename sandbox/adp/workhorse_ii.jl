@@ -24,5 +24,5 @@ p5 = plot(hour, adp["ISM_acc_y1"], xlab="Hour since power-on", ylab="acc_y1 [mil
 p6 = plot(hour, adp["ISM_acc_z1"], xlab="Hour since power-on", ylab="acc_z1 [milli-gravity]",
     legend=false, seriestype=:scatter, ms=1, guidefontsize=fs, tickfontsize=fs);
 l = @layout[p1 p4; p2 p5; p3 p6]
-plot(p1, p4, p2, p5, p3, p6, layout=l, size=(1000, 800), dpi=300)
-savefig("workhorse_II.png")
+plot(p1, p4, p2, p5, p3, p6, layout=l, size=(1000, 800), dpi=300);
+savefig("workhorse_II.png");
