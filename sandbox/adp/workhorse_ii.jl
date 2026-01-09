@@ -1,7 +1,7 @@
 using OceanAnalysis, Plots, Dates
 file = "/Users/kelley/Downloads/rdi_whii600_sample.000"
 # 10Mb file (4063 ensembles) took 1.8s for first run, 0.96s for second run
-adp = read_adp_rdi(file; debug=0);
+adp = read_adp_rdi(file; debug=1);
 
 t = datetime2unix.(adp["time"]); # seconds
 hour = (t .- t[1]) / 3600.0;

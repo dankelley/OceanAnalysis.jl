@@ -227,7 +227,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     oad(debug, "read_adp_rdi() START")
     buf = read(filename)
     # H_ holds pointers to the starts of ensembles.
-    oad(debug, "  About to determine the ensemble indices")
+    oad(debug, "  About to determine the ensemble indices.")
     E_ = find_adp_rdi_ensembles(buf)
     nE_ = length(E_)
     # interpret ensembles, possibly subsetting H_
@@ -236,19 +236,16 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
         if ensembles != 0
             E_ = E_[1:min(nE_, ensembles)]
         end
-        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file")
+        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file.")
     else
         ensembles = ensembles[1 .< ensembles .< nE_]
         E_ = E_[ensembles]
-        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file")
+        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file.")
     end
     nE_ = length(E_)
-    oad(debug, "  About to read header information in first ensemble")
+    oad(debug, "  About to read header information in first ensemble.")
     metadata = read_adp_rdi_header(buf, E_[1])
     data_offsets = metadata["data_offsets"]
-    if debug > 0
-        println("data_offsets: $data_offsets")
-    end
     metadata["filename"] = filename
     data = Dict()
     metadata["nensembles"] = length(E_)
@@ -260,7 +257,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     VL_ = FL_ .+ 59 # (see Figure 8 of [1])
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
-    oad(debug, "  Inferring time-series information")
+    oad(debug, "  Inferring time-series information.")
     data["ensemble"] = buf[VL_.+2] + 256 * buf[VL_.+3]
     year = 2000 .+ buf[VL_.+4]
     month = Int.(buf[VL_.+5])
@@ -278,7 +275,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
     data["roll"] = 0.01 * two_byte_signed.(VL_ .+ 22)
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
-    oad(debug, "  Determining data types")
+    oad(debug, "  Determining data types (using data_offsets=$data_offsets).")
     data_types = Symbol[]
     for t in 1:metadata["ntypes"]
         codes[t, 1] = buf[metadata["data_offsets"][t].+1]
@@ -317,19 +314,19 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     # Set up storage that we fill as we read through the ensembles
     # FIXME: add other array-allocation here
     if :velocity in data_types
-        oad(debug, "  Setting up velocity storage as a vector of length $nE_")
+        oad(debug, "  Setting up storage for 'velocity' (a $(ne)x$(nc)x$(nb) array).")
         velocity = Array{Float64,3}(undef, ne, nc, nb)
     end
     if :correlation_magnitude in data_types
-        oad(debug, "  Setting up correlation_magnitude storage as a vector of length $nE_")
+        oad(debug, "  Setting up storage for 'correlation_magnitude' (a $(ne)x$(nc)x$(nb) array).")
         correlation_magnitude = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :echo_intensity in data_types
-        oad(debug, "  Setting up echo_intensity storage as a vector of length $nE_")
+        oad(debug, "  Setting up storage for 'echo_intensity' (a $(ne)x$(nc)x$(nb) array).")
         echo_intensity = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :percent_good in data_types
-        oad(debug, "  Setting up percent_good storage as a vector of length $nE_")
+        oad(debug, "  Setting up storage for 'percent_good' (a $(ne)x$(nc)x$(nb) array).")
         percent_good = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :status in data_types
@@ -342,19 +339,14 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
         @warn "FIXME: get storage for 'ambient_sound'"
     end
     if :ISM in data_types
-        oad(debug, "  Setting up ISM storage as vectors of length $nE_")
+        oad(debug, "  Setting up ISM storage for 'ISM_acc' and 'ISM_mag' (both $(ne)x3 arrays).")
         ISM_valid = Vector{UInt8}(undef, ne)
-        # Note: assemble x,y,z into 3 columns of an array in rval.data
-        ISM_acc_x1 = Vector{Int32}(undef, ne)
-        ISM_acc_y1 = Vector{Int32}(undef, ne)
-        ISM_acc_z1 = Vector{Int32}(undef, ne)
-        ISM_mag_x1 = Vector{Int16}(undef, ne)
-        ISM_mag_y1 = Vector{Int16}(undef, ne)
-        ISM_mag_z1 = Vector{Int16}(undef, ne)
+        ISM_acc = Array{Int32,2}(undef, ne, 3)
+        ISM_mag = Array{Int16,2}(undef, ne, 3)
     end
     data_offsets = metadata["data_offsets"]
     #<> oad(debug, "    data_offsets: $data_offsets")
-    oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams")
+    oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams.")
     unhandled_data_types = Dict()
     #missed_status = 0
     #missed_bottom_track = 0
@@ -417,12 +409,12 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                 # description there is quite confusing.)
                 ISM_valid[e] = buf[p+2]
                 # Examination of a file suggests acc is in milli-gravity units
-                ISM_acc_x1[e] = ltoh(reinterpret(Int32, buf[(p).+(3:6)])[1])
-                ISM_acc_y1[e] = ltoh(reinterpret(Int32, buf[(p).+(7:10)])[1])
-                ISM_acc_z1[e] = ltoh(reinterpret(Int32, buf[(p).+(11:14)])[1])
-                ISM_mag_x1[e] = ltoh(two_byte_signed(p + 15))
-                ISM_mag_y1[e] = ltoh(two_byte_signed(p + 17))
-                ISM_mag_z1[e] = ltoh(two_byte_signed(p + 19))
+                ISM_acc[e, 1] = ltoh(reinterpret(Int32, buf[(p).+(3:6)])[1])
+                ISM_acc[e, 2] = ltoh(reinterpret(Int32, buf[(p).+(7:10)])[1])
+                ISM_acc[e, 3] = ltoh(reinterpret(Int32, buf[(p).+(11:14)])[1])
+                ISM_mag[e, 1] = ltoh(two_byte_signed(p + 15))
+                ISM_mag[e, 2] = ltoh(two_byte_signed(p + 17))
+                ISM_mag[e, 3] = ltoh(two_byte_signed(p + 19))
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
                 key_insert(unhandled_data_types, "status")
             elseif buf[p] == 0x00 && buf[p+1] == 0x06
@@ -459,13 +451,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     end
     if :ISM in metadata["data_types"]
         data["ISM_valid"] = ISM_valid
-        data["ISM_acc"] = [ISM_acc_x1 ISM_acc_y1 ISM_acc_z1]
-        #data["ISM_acc_y1"] = ISM_acc_y1
-        #data["ISM_acc_z1"] = ISM_acc_z1
-        data["ISM_mag"] = [ISM_mag_x1 ISM_mag_y1 ISM_mag_z1]
-        #data["ISM_mag_x1"] = ISM_mag_x1
-        #data["ISM_mag_y1"] = ISM_mag_y1
-        #data["ISM_mag_z1"] = ISM_mag_z1
+        data["ISM_acc"] = ISM_acc
+        data["ISM_mag"] = ISM_mag
     end
     rval = Adp(metadata, data)
     oad(debug, "END read_adp_rdi()")
