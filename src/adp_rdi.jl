@@ -333,17 +333,18 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
         percent_good = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :status in data_types
-        @warn "FIXME: set up storage for 'status'"
+        @warn "FIXME: get storage for 'status'"
     end
     if :bottom_track in data_types
-        @warn "FIXME: set up storage for 'bottom_track'"
+        @warn "FIXME: get storage for 'bottom_track' (Table 39, page 140+ of Reference 1)"
     end
     if :ambient_sound in data_types
-        @warn "FIXME: set up storage for 'ambient_sound'"
+        @warn "FIXME: get storage for 'ambient_sound'"
     end
     if :ISM in data_types
         oad(debug, "  Setting up ISM storage as vectors of length $nE_")
         ISM_valid = Vector{UInt8}(undef, ne)
+        # Note: assemble x,y,z into 3 columns of an array in rval.data
         ISM_acc_x1 = Vector{Int32}(undef, ne)
         ISM_acc_y1 = Vector{Int32}(undef, ne)
         ISM_acc_z1 = Vector{Int32}(undef, ne)
@@ -354,9 +355,10 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     data_offsets = metadata["data_offsets"]
     #<> oad(debug, "    data_offsets: $data_offsets")
     oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams")
-    missed_status = 0
-    missed_bottom_track = 0
-    missed_ambient_sound = 0
+    unhandled_data_types = Dict()
+    #missed_status = 0
+    #missed_bottom_track = 0
+    #missed_ambient_sound = 0
     unknown_byte_sequences = Dict()
     for e in 1:ne
         #<> println("E_: $(E_)")
@@ -422,29 +424,25 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                 ISM_mag_y1[e] = ltoh(two_byte_signed(p + 17))
                 ISM_mag_z1[e] = ltoh(two_byte_signed(p + 19))
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
-                missed_status += 1
+                key_insert(unhandled_data_types, "status")
             elseif buf[p] == 0x00 && buf[p+1] == 0x06
-                missed_bottom_track += 1
+                key_insert(unhandled_data_types, "bottom_track")
             elseif buf[p] == 0x0C && buf[p+1] == 0x02
-                missed_ambient_sound += 1
+                key_insert(unhandled_data_types, "ambient_sound")
             else
                 key_insert(unknown_byte_sequences, repr(buf[p]) * "," * repr(buf[p+1]))
             end
+            # FIXME: add other array-assignment here
+            # FIXME (bottom_track): see Table 39, page 140+ of Reference 1 and oce/R/adp.rdi.R
         end
-        # FIXME: add other array-assignment here
     end
     if length(unknown_byte_sequences) > 0
-        println("Table of unhandled byte sequences")
+        println("Table of unrecognized byte sequences")
         display(unknown_byte_sequences)
     end
-    if missed_status > 0
-        @warn "FIXME: skipped $missed_status 'status' entries -- please write more code!"
-    end
-    if missed_bottom_track > 0
-        @warn "FIXME: skipped $missed_status 'status' entries -- please write more code!"
-    end
-    if missed_ambient_sound > 0
-        @warn "FIXME: skipped $missed_ambient_sound 'ambient_sound' entries -- please write more code!"
+    if length(unhandled_data_types) > 0
+        println("Table of unhandled data types (FIXME: code for them as cases arise)")
+        display(unhandled_data_types)
     end
     # Insert elements into what will become rval.data
     if :velocity in metadata["data_types"]
@@ -461,12 +459,13 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     end
     if :ISM in metadata["data_types"]
         data["ISM_valid"] = ISM_valid
-        data["ISM_acc_x1"] = ISM_acc_x1
-        data["ISM_acc_y1"] = ISM_acc_y1
-        data["ISM_acc_z1"] = ISM_acc_z1
-        data["ISM_mag_x1"] = ISM_mag_x1
-        data["ISM_mag_y1"] = ISM_mag_y1
-        data["ISM_mag_z1"] = ISM_mag_z1
+        data["ISM_acc"] = [ISM_acc_x1 ISM_acc_y1 ISM_acc_z1]
+        #data["ISM_acc_y1"] = ISM_acc_y1
+        #data["ISM_acc_z1"] = ISM_acc_z1
+        data["ISM_mag"] = [ISM_mag_x1 ISM_mag_y1 ISM_mag_z1]
+        #data["ISM_mag_x1"] = ISM_mag_x1
+        #data["ISM_mag_y1"] = ISM_mag_y1
+        #data["ISM_mag_z1"] = ISM_mag_z1
     end
     rval = Adp(metadata, data)
     oad(debug, "END read_adp_rdi()")
