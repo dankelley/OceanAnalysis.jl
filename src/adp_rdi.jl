@@ -1,4 +1,6 @@
 using Dates, Plots
+test_array = false
+#test_array = true
 
 function key_insert(dict, key)
     if key in keys(dict)
@@ -17,7 +19,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
         end
         start += 1
         if start >= nbuf - 1
-            error("no 0x7f 0x74 in file $file")
+            error("This file does not have any 0x7f 0x74 byte pairs")
         end
     end
     starts = Vector{Int64}()
@@ -30,9 +32,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
             end
             break
         end
-        # Do byte shifts manually to be indepdent of machine endianness. (I know, Julia
-        # has a way to do thati but I prefer having the code look like C.)
-        local bytes_to_check = UInt16(buf[start+3]) << 8 | UInt16(buf[start+2])
+        local bytes_to_check = ltoh.(reinterpret(Int16, buf[start.+(2:3)])[1])
         ntypes = buf[start+5]
         if ntypes < 1 | ntypes > 200
             error("something is wrong with ntypes (=$ntypes)")
@@ -47,7 +47,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
         for i in range(start, length=bytes_to_check)
             checksum += buf[i] # relies on overflow wrapping around zero
         end
-        local desired_checksum = UInt16(buf[start+bytes_to_check+1]) << 8 | UInt16(buf[start+bytes_to_check])
+        local desired_checksum = ltoh.(reinterpret(UInt16, buf[(bytes_to_check+start).+(0:1)])[1])
         if checksum == desired_checksum
             push!(starts, start)
         else
@@ -70,7 +70,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
     # FIXME: is it ok to read this just once per file?
     for i in 1:ntypes
         tmp = start + 4 + 2 * i
-        data_offsets[i] = UInt16(buf[tmp+1]) << 8 | UInt16(buf[tmp])
+        data_offsets[i] = ltoh.(reinterpret(UInt16, buf[(tmp).+(0:1)])[1])
     end
     metadata["data_offsets"] = data_offsets
     # Now look past 'header' to 'fixed leader', but just for things that will
@@ -131,7 +131,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
     metadata["nbeams"] = nbeams
     ncells = Int(buf[start_fl+10])
     metadata["ncells"] = ncells
-    depth_cell_length = 0.01 * (UInt16(buf[start_fl+14]) << 8 | UInt16(buf[start_fl+13]))
+    depth_cell_length = 0.01 * ltoh.(reinterpret(Int16, buf[(start_fl).+(13:14)])[1])
     metadata["depth_cell_length"] = depth_cell_length
     # Coordinate system
     cs_bits = reverse(digits(buf[start_fl+26], base=2, pad=8))
@@ -147,7 +147,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
     end
     metadata["coordinate_system"] = coordinate_system
     # cell geometry
-    bin1_distance = 0.01 * (UInt16(buf[start_fl+34]) << 8 | UInt16(buf[start_fl+33]))
+    bin1_distance = 0.01 * ltoh(reinterpret(UInt16, buf[(start_fl).+(33:34)])[1])
     metadata["bin1_distance"] = bin1_distance
     metadata["distance"] = range(bin1_distance, step=depth_cell_length, length=ncells)
     metadata
@@ -368,15 +368,28 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                 #println("ignoring 0x00 0x00 chunk")
             elseif buf[p] == 0x080 && buf[p+1] == 0x00
                 #println("ignoring 0x80 0x00 chunk")
-            elseif buf[p] == 0x00 && buf[p+1] == 0x01
+            elseif buf[p] == 0x00 && buf[p+1] == 0x01 && !test_array
                 pp = p + 2
-                #<> println("At e=$e, o=$o, p=$p try to read 'velocity'")
+                #if e == 1
+                #    println("old method: e=$e, o=$o, p=$p try to read 'velocity' buf starts $(repr(buf[pp])), $(repr(buf[pp+1])); first number $(0.001*two_byte_signed(pp)); pp=$pp)")
+                #end
                 for c in 1:nc
                     for b in 1:nb
                         velocity[e, c, b] = 0.001 * two_byte_signed(pp)
                         pp = pp + 2
                     end
                 end
+            elseif buf[p] == 0x00 && buf[p+1] == 0x01 && test_array
+                #if e == 1
+                #    println("new method: e=$e, o=$o, p=$p try to read 'velocity' buf starts $(repr(buf[p+2])), $(repr(buf[p+3]))")
+                #    display(range(p + 2, length=2 * nb * nc))
+                #    display(buf[range(p + 2, length=2 * nb * nc)])
+                #end
+                tmp = 0.001 * ltoh.(reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)]))
+                #if e == 1
+                #    println("first number $(tmp[1])")
+                #end
+                velocity[e, :, :] = transpose(reshape(tmp, nb, nc))
             elseif buf[p] == 0x00 && buf[p+1] == 0x02
                 #<> println("At e=$e, o=$o, p=$p try to read 'correlation_magnitude'")
                 pp = p + 2
