@@ -1,6 +1,4 @@
 using Dates, Plots
-test_array = false
-#test_array = true
 
 function key_insert(dict, key)
     if key in keys(dict)
@@ -158,10 +156,10 @@ end
 
 Read acoustic-Doppler profiler data in RDI "Workhorse-II' format
 
-This function is designed to read the PD0 format, as described in Chapter
-4 of Reference 1.  (During development, the results were compared with
+This function is designed to read the Workhorse-II PD0 format, as described in
+Chapter 4 of Reference 1.  (During development, the results were compared with
 those from the `read.adp.rdi()` function of the R `oce` package, which was
-based on Reference 2.)
+based on the older workhorse-I format described in Reference 2.)
 
 At present, only 4 data items can be read: `:velocity`
 (with byte code 0x00 0x01), `:correlation_magnitude` (0x00 0x02),
@@ -218,12 +216,6 @@ adp["frequency"]
 3. Teledyne RD Instruments. “Acoustic Doppler Current Profiler Principles of Operation: A Practical Primer.” January 2011. https://www.comm-tec.com/Docs/Manuali/RDI/BBPRIME.pdf.
 """
 function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int},Vector{Int64}}=0; debug::Int64=0)
-    function two_byte_unsigned(i) # could also use built-in (as for Int32 for ISM)
-        UInt16(buf[i+1]) << 8 | UInt16(buf[i])
-    end
-    function two_byte_signed(i)
-        signed(UInt16(buf[i+1]) << 8 | UInt16(buf[i]))
-    end
     oad(debug, "read_adp_rdi() START")
     buf = read(filename)
     # H_ holds pointers to the starts of ensembles.
@@ -267,13 +259,13 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     second = Int.(buf[VL_.+9])
     data["time"] = DateTime.(year, month, day, hour, minute, second)
     # sound_speed (RDI p139 says bytes 15,16 so use 14,15 here);
-    data["sound_speed"] = Float64.(two_byte_signed.(VL_ .+ 14))
+    data["sound_speed"] = Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 14; VL_ .+ 15])])))
     # heading RDI p139 says bytes 19,20 -- use 18,19 here
-    data["heading"] = 0.01 * two_byte_signed.(VL_ .+ 18)
+    data["heading"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 18; VL_ .+ 19])]))
     # pitch RDI p139 says bytes 21,22 -- use 20,21 here
-    data["pitch"] = 0.01 * two_byte_signed.(VL_ .+ 20)
+    data["pitch"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 20; VL_ .+ 21])]))
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
-    data["roll"] = 0.01 * two_byte_signed.(VL_ .+ 22)
+    data["roll"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])]))
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
     oad(debug, "  Determining data types (using data_offsets=$data_offsets).")
     data_types = Symbol[]
@@ -314,19 +306,19 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     # Set up storage that we fill as we read through the ensembles
     # FIXME: add other array-allocation here
     if :velocity in data_types
-        oad(debug, "  Setting up storage for 'velocity' (a $(ne)x$(nc)x$(nb) array).")
+        oad(debug, "  Setting up storage for 'velocity' (a $(ne)×$(nc)×$(nb) Float64 array).")
         velocity = Array{Float64,3}(undef, ne, nc, nb)
     end
     if :correlation_magnitude in data_types
-        oad(debug, "  Setting up storage for 'correlation_magnitude' (a $(ne)x$(nc)x$(nb) array).")
+        oad(debug, "  Setting up storage for 'correlation_magnitude' (a $(ne)×$(nc)×$(nb) UInt8 array).")
         correlation_magnitude = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :echo_intensity in data_types
-        oad(debug, "  Setting up storage for 'echo_intensity' (a $(ne)x$(nc)x$(nb) array).")
+        oad(debug, "  Setting up storage for 'echo_intensity' (a $(ne)×$(nc)×$(nb) UInt8 array).")
         echo_intensity = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :percent_good in data_types
-        oad(debug, "  Setting up storage for 'percent_good' (a $(ne)x$(nc)x$(nb) array).")
+        oad(debug, "  Setting up storage for 'percent_good' (a $(ne)×$(nc)×$(nb) UInt8 array).")
         percent_good = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :status in data_types
@@ -339,98 +331,50 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
         @warn "FIXME: get storage for 'ambient_sound'"
     end
     if :ISM in data_types
-        oad(debug, "  Setting up ISM storage for 'ISM_acc' and 'ISM_mag' (both $(ne)x3 arrays).")
+        oad(debug, "  Setting up ISM storage for 'ISM_acc' and 'ISM_mag' (both $(ne)×3 Int32 arrays).")
         ISM_valid = Vector{UInt8}(undef, ne)
         ISM_acc = Array{Int32,2}(undef, ne, 3)
         ISM_mag = Array{Int16,2}(undef, ne, 3)
     end
     data_offsets = metadata["data_offsets"]
-    #<> oad(debug, "    data_offsets: $data_offsets")
     oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams.")
     unhandled_data_types = Dict()
-    #missed_status = 0
-    #missed_bottom_track = 0
-    #missed_ambient_sound = 0
     unknown_byte_sequences = Dict()
     for e in 1:ne
-        #<> println("E_: $(E_)")
-        #<> println("FL_: $(FL_)")
-        #<> println("VL_: $(VL_)")
-        #<> println("D_: $(D_)")
         p0 = E_[e] # pointer to start of ensemble
         for o in data_offsets
             p = p0 + o
-            #<>println("Examine at p0=$p0, o=$o therefore p=$p. Five before and after are:")
-            #<>for iii in range(-5, 5)
-            #<>    println("  buf[", p + iii, "]: $(repr(buf[p+iii]))")
-            #<>end
+            # Skip 0x00,0x00 and 0x080,0x00 because both handled as time-series
             if buf[p] == 0x00 && buf[p+1] == 0x00
-                #println("ignoring 0x00 0x00 chunk")
-            elseif buf[p] == 0x080 && buf[p+1] == 0x00
-                #println("ignoring 0x80 0x00 chunk")
-            elseif buf[p] == 0x00 && buf[p+1] == 0x01 && !test_array
-                pp = p + 2
-                #if e == 1
-                #    println("old method: e=$e, o=$o, p=$p try to read 'velocity' buf starts $(repr(buf[pp])), $(repr(buf[pp+1])); first number $(0.001*two_byte_signed(pp)); pp=$pp)")
-                #end
-                for c in 1:nc
-                    for b in 1:nb
-                        velocity[e, c, b] = 0.001 * two_byte_signed(pp)
-                        pp = pp + 2
-                    end
-                end
-            elseif buf[p] == 0x00 && buf[p+1] == 0x01 && test_array
-                #if e == 1
-                #    println("new method: e=$e, o=$o, p=$p try to read 'velocity' buf starts $(repr(buf[p+2])), $(repr(buf[p+3]))")
-                #    display(range(p + 2, length=2 * nb * nc))
-                #    display(buf[range(p + 2, length=2 * nb * nc)])
-                #end
-                tmp = 0.001 * ltoh.(reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)]))
-                #if e == 1
-                #    println("first number $(tmp[1])")
-                #end
+                # handled elsewhere
+            elseif buf[p] == 0x80 && buf[p+1] == 0x00
+                # handled elsewhere
+            elseif buf[p] == 0x00 && buf[p+1] == 0x01
+                # bad velocities are set to –32768 (page 155 of Reference 1)
+                tmp = ltoh.(reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)]))
+                bad = tmp .== -32768
+                tmp = 0.001 * tmp
+                tmp[bad] .= NaN
                 velocity[e, :, :] = transpose(reshape(tmp, nb, nc))
             elseif buf[p] == 0x00 && buf[p+1] == 0x02
-                #<> println("At e=$e, o=$o, p=$p try to read 'correlation_magnitude'")
-                pp = p + 2
-                for c in 1:nc
-                    for b in 1:nb
-                        correlation_magnitude[e, c, b] = buf[pp]
-                        pp = pp + 1
-                    end
-                end
+                correlation_magnitude[e, :, :] = transpose(reshape(buf[range(p + 2, length=nb * nc)], nb, nc))
             elseif buf[p] == 0x00 && buf[p+1] == 0x03
-                #<> println("At e=$e, o=$o, p=$p try to read 'echo_intensity'")
-                pp = p + 2
-                for c in 1:nc
-                    for b in 1:nb
-                        echo_intensity[e, c, b] = buf[pp]
-                        pp = pp + 1
-                    end
-                end
+                echo_intensity[e, :, :] = transpose(reshape(buf[range(p + 2, length=nb * nc)], nb, nc))
             elseif buf[p] == 0x00 && buf[p+1] == 0x04
-                #<> println("At e=$e, o=$o, p=$p try to read 'percent_good'")
-                pp = p + 2
-                for c in 1:nc
-                    for b in 1:nb
-                        percent_good[e, c, b] = buf[pp]
-                        pp = pp + 1
-                    end
-                end
+                percent_good[e, :, :] = transpose(reshape(buf[range(p + 2, length=nb * nc)], nb, nc))
             elseif buf[p] == 0x01 && buf[p+1] == 0x59
-                # ISM See Table 41 on page 144 of Reference 1. (Note that the
-                # description there is quite confusing.)
+                # ISM See (the confusing) Table 41 on page 144 of Reference 1.
                 ISM_valid[e] = buf[p+2]
-                # Examination of a file suggests acc is in milli-gravity units
                 ISM_acc[e, 1] = ltoh(reinterpret(Int32, buf[(p).+(3:6)])[1])
                 ISM_acc[e, 2] = ltoh(reinterpret(Int32, buf[(p).+(7:10)])[1])
                 ISM_acc[e, 3] = ltoh(reinterpret(Int32, buf[(p).+(11:14)])[1])
-                ISM_mag[e, 1] = ltoh(two_byte_signed(p + 15))
-                ISM_mag[e, 2] = ltoh(two_byte_signed(p + 17))
-                ISM_mag[e, 3] = ltoh(two_byte_signed(p + 19))
+                ISM_mag[e, 1] = ltoh(reinterpret(Int16, buf[(p).+(15:16)])[1])
+                ISM_mag[e, 2] = ltoh(reinterpret(Int16, buf[(p).+(17:18)])[1])
+                ISM_mag[e, 3] = ltoh(reinterpret(Int16, buf[(p).+(19:20)])[1])
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
                 key_insert(unhandled_data_types, "status")
             elseif buf[p] == 0x00 && buf[p+1] == 0x06
+                # FIXME (bottom_track): see Table 39, page 140+ of Reference 1 and oce/R/adp.rdi.R
                 key_insert(unhandled_data_types, "bottom_track")
             elseif buf[p] == 0x0C && buf[p+1] == 0x02
                 key_insert(unhandled_data_types, "ambient_sound")
@@ -438,7 +382,6 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                 key_insert(unknown_byte_sequences, repr(buf[p]) * "," * repr(buf[p+1]))
             end
             # FIXME: add other array-assignment here
-            # FIXME (bottom_track): see Table 39, page 140+ of Reference 1 and oce/R/adp.rdi.R
         end
     end
     if length(unknown_byte_sequences) > 0

@@ -1,14 +1,11 @@
 using OceanAnalysis, Plots, Dates
-#file = "/Users/kelley/Downloads/rdi_whii600_sample.000"
-file = "/Users/kelley/adp_rdi.000"
+file = "/Users/kelley/Downloads/rdi_whii600_sample.000"
+#file = "/Users/kelley/adp_rdi.000"
 # 10Mb file (4063 ensembles) took 1.8s for first run, 0.96s for second run
-#>>oad(debug, msg) = println(msg)
-#>>include("/Users/kelley/git/OceanAnalysis.jl/src/adp_rdi.jl")
-@time adp = read_adp_rdi(file); # 0.3449 (new)
-@time adp = read_adp_rdi(file); # 0.0017 (new) 0.0026 (old)
-#display(adp["velocity"][1, 1:3, :])
-#@time adp = read_adp_rdi(file; debug=1);
-#@time adp = read_adp_rdi(file; debug=1);
+@time adp = read_adp_rdi(file); # 0.878s 10K file
+@time adp = read_adp_rdi(file; debug=1); # 0.000861 10K file
+@time adp = read_adp_rdi(file); # 0.000861 10K file
+@time adp = read_adp_rdi(file); # 0.000861 10K file
 
 t = datetime2unix.(adp["time"]); # seconds
 hour = (t .- t[1]) / 3600.0;
