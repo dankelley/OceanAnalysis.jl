@@ -156,20 +156,21 @@ end
 
 Read acoustic-Doppler profiler data in RDI "Workhorse-II' format
 
-This function is designed to read the Workhorse-II PD0 format, as described in
-Chapter 4 of Reference 1.  (During development, the results were compared with
-those from the `read.adp.rdi()` function of the R `oce` package, which was
-based on the older workhorse-I format described in Reference 2.)
+This function, still in an early phase of development, is designed to
+read the Teledyne-RDI Workhorse-II PD0 format, as described in Chapter
+4 of Reference 1. This format replaces the Workhorse-I PD0 format of
+Reference 2, which was used as the basis for the `read.adp.rdi()`
+function of the R `oce` package. 
 
-At present, only 4 data items can be read: `:velocity`
-(with byte code 0x00 0x01), `:correlation_magnitude` (0x00 0x02),
-`:echo_intensity`  (0x00 0x03) and `:percent_good` (0x00 0x04). More
-types may be added later, as needs arise. (NB. the R code in
-`oce::read.adp.rdi()` handles 18 types.)
+It is worth noting that the `oce` code handles other Teledyne-RDI formats
+in addition to the Workhorse variety, and it has been tested
+well with a variety of datasets. It is possible to call R from Julia,
+so users ought to consider doing so on files that the present
+function cannot handle.
 
 # Arguments
 
-- `filename` an ADCP file in the 'PD0' format as described in the Teledyne RD Instruments documentation (references 1 and 2).
+- `filename` an ADCP file in the 'PD0' format as described in the Teledyne RD Instruments documentation (Reference 1).
 
 - `ensembles` an indication of which ensembles (data profiles) to read.  This may be an singe integer or a vector of integers. In the first case, if `ensembles=0` then the whole file is read, otherwise the stated number of ensembles is read (provided that the file holds that number). In the second case, the value of `ensembles` dictates the indices of ensembles that are to be read. In both cases, the indices are trimmed to be from 1 to the number of ensembles in the file. The default is to read the whole file. and e.g. `ensembles=1:10:101` would read ensemble 1, ensemble 11, and so on, up to ensemble 101.
 
