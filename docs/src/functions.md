@@ -4,6 +4,7 @@ Data types:
 
 ```@docs
 OceanAnalysis.OA
+OceanAnalysis.Adp
 OceanAnalysis.Amsr
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
@@ -17,6 +18,7 @@ Functions:
 OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
 OceanAnalysis.as_section
+OceanAnalysis.beam_to_xyz
 OceanAnalysis.coastline
 OceanAnalysis.coriolis
 OceanAnalysis.coordinate_from_string

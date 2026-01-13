@@ -12,14 +12,15 @@ Release notes:
 ### Added
 
 - [`as_section`](@ref) for assembling 'ctd' data into a section.
+- [`beam_to_xyz`](@ref) for converting RDI acoustic-Doppler data from beam coordinates to xyz coordinates.
 - [`get_section`](@ref) for downloading oceanographic section data.
-- [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.
-- [`read_section`](@ref) for reading Section data.
+- [`grid_ctd`](@ref) for gridding Ctd data.
 - [`grid_section`](@ref) for gridding Section data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.
 - [`plot_stations`](@ref) for plotting sampling locations.
+- [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.
 - [`read_ctd_exchange`](@ref) for reading CTD data in 'exchange' format (used by many data servers)
-- [`grid_ctd`](@ref) for gridding Ctd data.
+- [`read_section`](@ref) for reading Section data.
 
 ## Changelog from version 0.2.0 to version 0.2.1
 
