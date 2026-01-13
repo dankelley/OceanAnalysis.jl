@@ -41,26 +41,35 @@ function plot_adp(adp::Adp; which=:velocity, debug::Int64=0, kwargs...)
     y = adp["distance"]
     v = adp["velocity"]
     c = cgrad(:RdBu, rev=true)
-    p1 = heatmap(x, y, transpose(v[:, :, 1]),
+    z = transpose(v[:, :, 1])
+    # Centre colourbar on 0
+    clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
+    p1 = heatmap(x, y, z,
         title=titles[1], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
-        framestyle=:box, c=c; kwargs...)
-    p2 = heatmap(x, y, transpose(v[:, :, 2]),
+        framestyle=:box, c=c, clim=clim; kwargs...)
+    z = transpose(v[:, :, 2])
+    clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
+    p2 = heatmap(x, y, z,
         title=titles[2], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
-        framestyle=:box, c=c; kwargs...)
-    p3 = heatmap(x, y, transpose(v[:, :, 3]),
+        framestyle=:box, c=c, clim=clim; kwargs...)
+    z = transpose(v[:, :, 3])
+    clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
+    p3 = heatmap(x, y, z,
         title=titles[3], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
-        framestyle=:box, c=c; kwargs...)
-    p4 = heatmap(x, y, transpose(v[:, :, 4]),
+        framestyle=:box, c=c, clim=clim; kwargs...)
+    z = transpose(v[:, :, 4])
+    clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
+    p4 = heatmap(x, y, z,
         title=titles[4], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
-        framestyle=:box, c=c; kwargs...)
+        framestyle=:box, c=c, clim=clim; kwargs...)
     rval = plot(p1, p2, p3, p4, layout=@layout[a; b; c; d])
     oad(debug, "END plot_adp()")
     rval
