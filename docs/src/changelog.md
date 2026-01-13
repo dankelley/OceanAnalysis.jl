@@ -16,6 +16,7 @@ Release notes:
 - [`get_section`](@ref) for downloading oceanographic section data.
 - [`grid_ctd`](@ref) for gridding Ctd data.
 - [`grid_section`](@ref) for gridding Section data.
+- [`plot_adp`](@ref) for plotting acoustic-Doppler profiler data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.
 - [`plot_stations`](@ref) for plotting sampling locations.
 - [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.

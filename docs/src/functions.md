@@ -40,6 +40,7 @@ OceanAnalysis.grid_ctd
 OceanAnalysis.grid_section
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
+OceanAnalysis.plot_adp
 OceanAnalysis.plot_amsr
 OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
