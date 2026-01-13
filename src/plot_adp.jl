@@ -48,6 +48,7 @@ function plot_adp(adp::Adp; which=:velocity, debug::Int64=0, kwargs...)
         title=titles[1], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
+        background_color_inside=:gray70,
         framestyle=:box, c=c, clim=clim; kwargs...)
     z = transpose(v[:, :, 2])
     clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
@@ -55,6 +56,7 @@ function plot_adp(adp::Adp; which=:velocity, debug::Int64=0, kwargs...)
         title=titles[2], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
+        background_color_inside=:gray70,
         framestyle=:box, c=c, clim=clim; kwargs...)
     z = transpose(v[:, :, 3])
     clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
@@ -62,6 +64,7 @@ function plot_adp(adp::Adp; which=:velocity, debug::Int64=0, kwargs...)
         title=titles[3], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
+        background_color_inside=:gray70,
         framestyle=:box, c=c, clim=clim; kwargs...)
     z = transpose(v[:, :, 4])
     clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)]))
@@ -69,6 +72,7 @@ function plot_adp(adp::Adp; which=:velocity, debug::Int64=0, kwargs...)
         title=titles[4], titlelocation=:right,
         guidefontsize=8, tickfontsize=8, titlefontsize=8,
         size=(800, 600), ylab="Distance [m]",
+        background_color_inside=:gray70,
         framestyle=:box, c=c, clim=clim; kwargs...)
     rval = plot(p1, p2, p3, p4, layout=@layout[a; b; c; d])
     oad(debug, "END plot_adp()")
