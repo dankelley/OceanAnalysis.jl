@@ -1,5 +1,24 @@
 # Examples
 
+## Acoustic-Doppler Profile
+
+A built-in file (sub-sampled to just one sample per hour, and
+only a single day) is provided with the package. Since it
+is in beam coordinates, we translate to xyz coordinates
+for the plot.
+
+```julia
+using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    "data", "adp_rdi.000")
+adp = read_adp_rdi(file);
+adp_xyz = beam_to_xyz(adp);
+plot_adp(adp_xyz; size=(800, 700), dpi=150)
+#savefig("adp_rdi.png")
+```
+
+![Acoustic-Doppler Profiler plot](adp_rdi.png)
+
 ## Satellite SST
 
 The AMSR satellite provides several data streams, including sea-surface
