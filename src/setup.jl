@@ -45,6 +45,7 @@ export gravity
 export grid_ctd
 export grid_section
 export N2
+export plot_adp
 export plot_amsr
 export plot_coastline
 export plot_coastline!
