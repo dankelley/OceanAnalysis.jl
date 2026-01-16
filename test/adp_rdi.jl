@@ -1,8 +1,7 @@
 using Dates, Plots, OceanAnalysis, Test
-
-#file = "/Users/kelley/data/archive/sleiwex/2008/moorings/m09/adp/rdi_2615/raw/adp_rdi_2615.000"
+# The tests are against values from R/oce.
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
-adp = read_adp_rdi(file); # takes 0.7s the first call, 0.001s afterwards (9-ensemble file)
+adp = read_adp_rdi(file);
 # Test some metadata
 @test adp["beam_angle"] == 20.0
 @test adp["beam_configuration"] == :four_beam_janus
@@ -14,45 +13,33 @@ adp = read_adp_rdi(file); # takes 0.7s the first call, 0.001s afterwards (9-ense
 @test adp["data_types"] == [:velocity, :correlation_magnitude, :echo_intensity, :percent_good]
 @test adp["nbeams"] == 4
 @test adp["ncells"] == 84
-@test adp["nensembles"] == 9
+@test adp["nensembles"] == 25
 @test adp["version"] == "16.28"
-# Test some time-series
-@test adp.data["time"] == DateTime.(
-    ["2008-06-25 10:00:00", "2008-06-25 10:00:10", "2008-06-25 10:00:20",
-        "2008-06-25 10:00:30", "2008-06-25 10:00:40", "2008-06-25 10:00:50",
-        "2008-06-25 10:01:00", "2008-06-25 10:01:10", "2008-06-25 10:01:20"],
-    "y-m-d H:M:S")
-@test adp.data["sound_speed"] == [1497, 1497, 1497, 1497, 1497, 1497, 1497, 1497, 1497]
-@test adp.data["heading"] ≈ [278.14, 277.31, 276.78, 276.39, 276.56, 277.07, 277.56, 277.47, 276.98] atol = 0.01
-@test adp.data["pitch"] ≈ [1.421236, 1.241172, 1.201080, 1.140976, 1.161010, 1.171018, 1.211098, 1.161001, 1.120942] atol = 0.01
-@test adp.data["roll"] ≈ [-2.39, -2.49, -2.43, -2.37, -2.39, -2.39, -2.44, -2.38, -2.35] atol = 0.01
-
-# Test array sizes
-@test size(adp.data["velocity"]) == (9, 84, 4)
-@test size(adp.data["correlation_magnitude"]) == (9, 84, 4)
-@test size(adp.data["echo_intensity"]) == (9, 84, 4)
-@test size(adp.data["percent_good"]) == (9, 84, 4)
-# Test first 2 cells of first 2 ensembles
-@test adp.data["velocity"][1, 1, :] ≈ [0.034; 0.035; 0.005; -0.018] atol = 0.001
-@test adp.data["velocity"][1, 2, :] ≈ [0.049, 0.013, 0.081, -0.009] atol = 0.001
-@test adp.data["velocity"][2, 1, :] ≈ [0.073, 0.126, 0.07, -0.068] atol = 0.001
-@test adp.data["velocity"][2, 2, :] ≈ [-0.012, 0.045, 0.027, -0.027] atol = 0.001
-@test adp.data["correlation_magnitude"][1, 1, :] == [0x19, 0x16, 0x19, 0x18]
-@test adp.data["correlation_magnitude"][1, 2, :] == [0x17, 0x1e, 0x19, 0x17]
-@test adp.data["correlation_magnitude"][2, 1, :] == [0x19, 0x1b, 0x1b, 0x14]
-@test adp.data["correlation_magnitude"][2, 2, :] == [0x17, 0x19, 0x19, 0x19]
-@test adp.data["echo_intensity"][1, 1, :] == [0x34, 0x2e, 0x30, 0x2d]
-@test adp.data["echo_intensity"][1, 2, :] == [0x37, 0x30, 0x33, 0x2f]
-@test adp.data["echo_intensity"][2, 1, :] == [0x34, 0x2e, 0x30, 0x2d]
-@test adp.data["echo_intensity"][2, 2, :] == [0x36, 0x30, 0x33, 0x2f]
-@test adp.data["percent_good"][1, 1, :] == [0x64, 0x64, 0x64, 0x64]
-@test adp.data["percent_good"][1, 2, :] == [0x64, 0x64, 0x64, 0x64]
-@test adp.data["percent_good"][2, 1, :] == [0x64, 0x64, 0x64, 0x64]
-@test adp["distance"] == range(2.23, step=0.5, length=84)
+# Test some data
+@test size(adp["velocity"]) == (25, 84, 4)
+@test size(adp["correlation_magnitude"]) == (25, 84, 4)
+@test size(adp["echo_intensity"]) == (25, 84, 4)
+@test size(adp["percent_good"]) == (25, 84, 4)
+@test adp["time"][1:3] == DateTime.(["2008-06-26T00:00:00", "2008-06-26T01:00:00", "2008-06-26T02:00:00"], "y-m-dTH:M:S")
+@test adp["sound_speed"][1:3] == [1467; 1466; 1466]
+@test adp["heading"][1:3] ≈ [294.98; 294.90; 294.87] atol = 0.01
+@test adp["pitch"][1:3] ≈ [-2.932802; -2.932802; -2.932802] atol = 0.000001
+@test adp["roll"][1:3] ≈ [5.36; 5.36; 5.36]
+@test adp["velocity"][1, 1, :] ≈ [0.112; -0.094; -0.018; 0.039] atol = 0.001
+@test adp["velocity"][2, 1, :] ≈ [0.053; -0.055; -0.034; 0.021] atol = 0.001
+@test adp["correlation_magnitude"][1, 1, :] == [0x6c; 0x6e; 0x72; 0x7a]
+@test adp["correlation_magnitude"][2, 1, :] == [0x6a; 0x70; 0x70; 0x71]
+@test adp["echo_intensity"][1, 1, :] == [0x99; 0xa0; 0xa0; 0xa0]
+@test adp.data["percent_good"][1, 1, :] == [0x64; 0x64; 0x64; 0x64]
+@test adp["distance"] == range(2.21, step=0.5, length=84)
+# Transformation matrix
 tm_expected = [1.4619022 -1.4619022 0.0000000 0.0000000;
     0.0000000 0.0000000 -1.4619022 1.4619022;
     0.2660444 0.2660444 0.2660444 0.2660444;
     1.0337210 1.0337210 -1.0337210 -1.0337210]
 @test adp["transformation_matrix"] ≈ tm_expected atol = 1e-5
-
-
+# Coordinate transformation
+adp_xyz = beam_to_xyz(adp);
+@test adp_xyz["velocity"][1, 1, :] ≈ [0.301151853; 0.083328425; 0.010375733; -0.003101163] atol = 1e-8
+@test adp_xyz["velocity"][2, 1, :] ≈ [0.157885438; 0.080404621; -0.003990667; 0.011370931] atol = 1e-8
+@test adp_xyz["velocity"][1, 2, :] ≈ [0.308461364; 0.078942719; 0.009843644; 0.009303489] atol = 1e-8

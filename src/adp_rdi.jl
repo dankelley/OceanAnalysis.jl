@@ -263,10 +263,13 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     data["sound_speed"] = Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 14; VL_ .+ 15])])))
     # heading RDI p139 says bytes 19,20 -- use 18,19 here
     data["heading"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 18; VL_ .+ 19])]))
-    # pitch RDI p139 says bytes 21,22 -- use 20,21 here
-    data["pitch"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 20; VL_ .+ 21])]))
+    # pitch RDI p139 says bytes 21,22 -- use 20,21 here NOTE: corrected in a few lines
+    pitch = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 20; VL_ .+ 21])]))
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
+    roll = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])]))
     data["roll"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])]))
+    # Pitch correction. See page 14 of 'adcp coordinate transformation.pdf
+    data["pitch"] = 180.0 / pi * atan.(tan.(pitch * pi / 180.0) ./ cos.(roll * pi / 180.0))
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
     oad(debug, "  Determining data types (using data_offsets=$data_offsets).")
     data_types = Symbol[]
