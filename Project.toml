@@ -3,6 +3,7 @@ uuid = "935d77d6-d85b-49cc-a465-c336e8287d34"
 version = "0.2.2"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -25,6 +26,7 @@ TiffImages = "731e570b-9d59-4bfa-96dc-6df516fadf69"
 ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
 
 [compat]
+BenchmarkTools = "1.6.3"
 CSV = "0.10.15"
 ColorSchemes = "3.31.0"
 DataFrames = "1.8.0"

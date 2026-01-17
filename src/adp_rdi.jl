@@ -94,7 +94,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
         frequency = NaN
     end
     metadata["frequency"] = frequency
-    metadata["direction"] = sys_config_LSB[1] == 0 ? "down" : "up"
+    metadata["direction"] = sys_config_LSB[1] == 0 ? :down : :up
     metadata["convex"] = sys_config_LSB[5] == 1
     if sys_config_MSB[7:8] == [0; 0]
         beam_angle = 15.0
@@ -263,12 +263,12 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     # sound_speed (RDI p139 says bytes 15,16 so use 14,15 here);
     data["sound_speed"] = Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 14; VL_ .+ 15])])))
     # heading RDI p139 says bytes 19,20 -- use 18,19 here
-    data["heading"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 18; VL_ .+ 19])]))
+    data["heading"] = 0.01 * Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 18; VL_ .+ 19])])))
     # pitch RDI p139 says bytes 21,22 -- use 20,21 here NOTE: corrected in a few lines
-    pitch = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 20; VL_ .+ 21])]))
+    pitch = 0.01 * Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 20; VL_ .+ 21])])))
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
-    roll = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])]))
-    data["roll"] = 0.01 * ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])]))
+    roll = 0.01 * Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])])))
+    data["roll"] = roll
     # Pitch correction. See page 14 of 'adcp coordinate transformation.pdf
     data["pitch"] = 180.0 / pi * atan.(tan.(pitch * pi / 180.0) ./ cos.(roll * pi / 180.0))
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
@@ -456,7 +456,7 @@ plot(pu, pv, pw, pe, layout=(4, 1), size=(1000, 700))
 """
 function beam_to_xyz(adp::Adp; debug::Int64=0)
     oad(debug, "beam_to_xyz() BEGIN")
-    adp["coordinate_system"] == :beam || error("adp[\"coordinate_system\"] is not :beam")
+    :beam == adp["coordinate_system"] || error("coordinate_system must be :beam, but it is :", adp["coordinate_system"])
     T = adp["transformation_matrix"]
     v = adp.data["velocity"]
     dim = size(v)
@@ -487,7 +487,7 @@ end
 """
     xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
 
-    Change velocity in an RDI Adp object from xyz to enu coordinates
+    Change velocity in an RDI Workhorse Adp object from xyz to enu coordinates
 
 This is done by using the `heading`, `pitch` and `roll` vectors that are stored
 within `adp`.  Note that `declination` is added to `heading`, to allow
@@ -507,35 +507,50 @@ v = enu["velocity"];
 """
 function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
     oad(debug, "xyz_to_enu() BEGIN")
-    :xyz == adp["coordinate_system"] || error("coordinate_system must be :xyz, but it is ", adp["coordinate_system"])
+    :xyz == adp["coordinate_system"] || error("coordinate_system must be :xyz, but it is :", adp["coordinate_system"])
     v = adp.data["velocity"]
     dim = size(v)
     dim[3] == 4 || error("xyz_to_enu only works for 4-beam Workhorse data")
     ṽ = Array{Float64}(undef, dim)
     # FIXME: orientation
     h = declination .+ adp["heading"]
-    p = adp["pitch"]
-    r = adp["roll"]
-    ch = cosd.(h)
-    sh = sind.(h)
-    cp = cosd.(p)
-    sp = sind.(p)
-    cr = cosd.(r)
-    sr = sind.(r)
+    p = Float64.(adp["pitch"])
+    r = Float64.(adp["roll"])
+    ch = Float64.(cosd.(h))
+    sh = Float64.(sind.(h))
+    cp = Float64.(cosd.(p))
+    sp = Float64.(sind.(p))
+    cr = Float64.(cosd.(r))
+    sr = Float64.(sind.(r))
+    # We need factors to handle instrument direction.  This is explained
+    # in RDI documents referred to in oce/R/adp.R near line 3674
+    direction = adp["direction"]
+    if direction == :up
+        fac = [-1.0; 1.0; -1.0]
+    elseif direction == :down
+        fac = [-1.0; 1.0; 1.0]
+    else
+        error("adp[\"direction\"] is :", direction, " but it needs to be :up or :down")
+    end
+    #@warn "Assuming upward-pointing RDI (see p11 of RDI Coordinate Transformation manual (July 1998)"
+    # in oce:
+    #    starboard <- -res@data$v[, , 1] # p11 "RDI Coordinate Transformation Manual" (July 1998)
+    #    forward <- res@data$v[, , 2] # p11 "RDI Coordinate Transformation Manual" (July 1998)
+    #    mast <- -res@data$v[, , 3] # p11 "RDI Coordinate Transformation Manual" (July 1998)
     for i in 1:dim[1]
         ṽ[i, :, 1] .=
-            v[i, :, 1] .* (ch[i] * cr[i] + sh[i] * sp[i] * sr[i]) .+
-            v[i, :, 2] .* (sh[i] * cp[i]) .+
-            v[i, :, 3] .* (ch[i] * sr[i] - sh[i] * sp[i] * cr[i])
+            fac[1] * v[i, :, 1] .* (ch[i] * cr[i] + sh[i] * sp[i] * sr[i]) .+
+            fac[2] * v[i, :, 2] .* (sh[i] * cp[i]) .+
+            fac[3] * v[i, :, 3] .* (ch[i] * sr[i] - sh[i] * sp[i] * cr[i])
         ṽ[i, :, 2] .=
-            v[i, :, 1] .* (-sh[i] * cr[i] + ch[i] * sp[i] * sr[i]) .+
-            v[i, :, 2] .* (ch[i] * cp[i]) .+
-            v[i, :, 3] .* (-sh[i] * sr[i] - ch[i] * sp[i] * cr[i])
+            fac[1] * v[i, :, 1] .* (-sh[i] * cr[i] + ch[i] * sp[i] * sr[i]) .+
+            fac[2] * v[i, :, 2] .* (ch[i] * cp[i]) .+
+            fac[3] * v[i, :, 3] .* (-sh[i] * sr[i] - ch[i] * sp[i] * cr[i])
         ṽ[i, :, 3] .=
-            v[i, :, 1] .* (-cp[i] * sr[i]) .+
-            v[i, :, 2] .* sp[i] .+
-            v[i, :, 3] .* (cp[i] * cr[i])
-        ṽ[i, :, 3] .= v[i, :, 3] # copy error field directly
+            fac[1] * v[i, :, 1] .* (-cp[i] * sr[i]) .+
+            fac[2] * v[i, :, 2] .* sp[i] .+
+            fac[3] * v[i, :, 3] .* (cp[i] * cr[i])
+        ṽ[i, :, 4] .= v[i, :, 4] # copy error field directly
     end
     #        east[i] =
     #            starboard[i] * ( CH * CR + SH * SP * SR ) +
