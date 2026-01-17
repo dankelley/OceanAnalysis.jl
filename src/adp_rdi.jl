@@ -427,7 +427,8 @@ end
     Change velocity in an RDI Adp object from beam to xyz coordinates
 
 This is done by using the `transformation_matrix` that is stored within `adp`.  See
-[`read_adp_rdi`](@ref) for how to read an RDI [`Adp`](@ref) object.
+[`read_adp_rdi`](@ref) for how to read an RDI [`Adp`](@ref) object, and
+[`xyz_to_enu`](@ref) for how to convert it from xyz to enu coordinates.
 
 # Examples
 
@@ -457,15 +458,14 @@ function beam_to_xyz(adp::Adp; debug::Int64=0)
     oad(debug, "beam_to_xyz() BEGIN")
     adp["coordinate_system"] == :beam || error("adp[\"coordinate_system\"] is not :beam")
     T = adp["transformation_matrix"]
-    #display(T)
-    #<OLD>tmt = transpose(T)
     v = adp.data["velocity"]
     dim = size(v)
     dim[3] == 4 || error("beam_to_xyz only works for 4-beam Workhorse data")
+    :beam == adp["coordinate_system"] || error("coordinate_system must be :beam, but it is ", adp["coordinate_system"])
     ṽ = Array{Float64}(undef, dim)
     # Method 1 (see notes.md for why this was used)
-    ne = dim[1]
     TT = transpose(T)
+    ne = dim[1]
     for i in 1:ne
         ṽ[i, :, :] = v[i, :, :] * TT
     end
@@ -476,11 +476,84 @@ function beam_to_xyz(adp::Adp; debug::Int64=0)
     #  ṽ[:, :, 4] .= T[4, 1] * v[:, :, 1] .+ T[4, 2] * v[:, :, 2] .+ T[4, 3] * v[:, :, 3] .+ T[4, 4] * v[:, :, 4]
     data = copy(adp.data)
     data["velocity"] = ṽ
-    #println("output: ", data["velocity"][1, 1, :])
     metadata = copy(adp.metadata)
     metadata["coordinate_system"] = :xyz
     rval = Adp(metadata, data)
-    #println("output: ", rval["velocity"][1, 1, :])
     oad(debug, "END beam_to_xyz()")
+    rval
+end
+
+
+"""
+    xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
+
+    Change velocity in an RDI Adp object from xyz to enu coordinates
+
+This is done by using the `heading`, `pitch` and `roll` vectors that are stored
+within `adp`.  Note that `declination` is added to `heading`, to allow
+for compass correction. See [`read_adp_rdi`](@ref) for how to read an RDI [`Adp`](@ref)
+object, and [`beam_to_xyz`](@ref) for how to convert it from beam to xyz coordinates.
+
+# Examples
+
+```juliadoc
+using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    "data", "adp_rdi.000")
+beam = read_adp_rdi(file);
+xyz = beam_to_xyz(beam);
+enu = xyz_to_enu(xyz);
+v = enu["velocity"];
+"""
+function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
+    oad(debug, "xyz_to_enu() BEGIN")
+    :xyz == adp["coordinate_system"] || error("coordinate_system must be :xyz, but it is ", adp["coordinate_system"])
+    v = adp.data["velocity"]
+    dim = size(v)
+    dim[3] == 4 || error("xyz_to_enu only works for 4-beam Workhorse data")
+    ṽ = Array{Float64}(undef, dim)
+    # FIXME: orientation
+    h = declination .+ adp["heading"]
+    p = adp["pitch"]
+    r = adp["roll"]
+    ch = cosd.(h)
+    sh = sind.(h)
+    cp = cosd.(p)
+    sp = sind.(p)
+    cr = cosd.(r)
+    sr = sind.(r)
+    for i in 1:dim[1]
+        ṽ[i, :, 1] .=
+            v[i, :, 1] .* (ch[i] * cr[i] + sh[i] * sp[i] * sr[i]) .+
+            v[i, :, 2] .* (sh[i] * cp[i]) .+
+            v[i, :, 3] .* (ch[i] * sr[i] - sh[i] * sp[i] * cr[i])
+        ṽ[i, :, 2] .=
+            v[i, :, 1] .* (-sh[i] * cr[i] + ch[i] * sp[i] * sr[i]) .+
+            v[i, :, 2] .* (ch[i] * cp[i]) .+
+            v[i, :, 3] .* (-sh[i] * sr[i] - ch[i] * sp[i] * cr[i])
+        ṽ[i, :, 3] .=
+            v[i, :, 1] .* (-cp[i] * sr[i]) .+
+            v[i, :, 2] .* sp[i] .+
+            v[i, :, 3] .* (cp[i] * cr[i])
+        ṽ[i, :, 3] .= v[i, :, 3] # copy error field directly
+    end
+    #        east[i] =
+    #            starboard[i] * ( CH * CR + SH * SP * SR ) +
+    #            forward[i]   * ( SH * CP                ) +
+    #            mast[i]      * ( CH * SR - SH * SP * CR );
+    #        north[i] =
+    #            starboard[i] * (-SH * CR + CH * SP * SR ) +
+    #            forward[i]   * ( CH * CP                ) +
+    #            mast[i]      * (-SH * SR - CH * SP * CR );
+    #        up[i] =
+    #            starboard[i] * (               -CP * SR ) +
+    #            forward[i]   * ( SP                     ) +
+    #            mast[i]      * (                CP * CR );
+    data = copy(adp.data)
+    data["velocity"] = ṽ
+    metadata = copy(adp.metadata)
+    metadata["coordinate_system"] = :enu
+    rval = Adp(metadata, data)
+    oad(debug, "END bxyz_to_enu()")
     rval
 end

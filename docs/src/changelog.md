@@ -7,6 +7,7 @@ Release notes:
 ### Changed
 
 - none
+
 - BREAKING: none
 
 ### Added
@@ -22,6 +23,7 @@ Release notes:
 - [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.
 - [`read_ctd_exchange`](@ref) for reading CTD data in 'exchange' format (used by many data servers)
 - [`read_section`](@ref) for reading Section data.
+- [`xyz_to_enu`](@ref) for converting RDI acoustic-Doppler data from xyz coordinates to enu coordinates.
 
 ## Changelog from version 0.2.0 to version 0.2.1
 

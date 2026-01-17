@@ -70,5 +70,6 @@ OceanAnalysis.subset_amsr
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
 OceanAnalysis.toc
+OceanAnalysis.xyz_to_enu
 OceanAnalysis.z_from_pressure
 ```
