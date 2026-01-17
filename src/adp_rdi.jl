@@ -218,6 +218,7 @@ adp["frequency"]
 """
 function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int},Vector{Int64}}=0; debug::Int64=0)
     oad(debug, "read_adp_rdi() START")
+    filename = expanduser(filename)
     buf = read(filename)
     # H_ holds pointers to the starts of ensembles.
     oad(debug, "  About to determine the ensemble indices.")
@@ -421,7 +422,7 @@ end
 
 
 """
-    beam_to_xyz(adp::Adp; debug=0)
+    beam_to_xyz(adp::Adp; debug::Int64=0)
 
     Change velocity in an RDI Adp object from beam to xyz coordinates
 
@@ -452,22 +453,34 @@ plot(pu, pv, pw, pe, layout=(4, 1), size=(1000, 700))
 ```
 
 """
-function beam_to_xyz(adp::Adp; debug=0)
+function beam_to_xyz(adp::Adp; debug::Int64=0)
     oad(debug, "beam_to_xyz() BEGIN")
     adp["coordinate_system"] == :beam || error("adp[\"coordinate_system\"] is not :beam")
-    tmt = transpose(adp["transformation_matrix"])
-    vbeam = adp.data["velocity"]
-    dim = size(vbeam)
-    vxyz = Array{Float64}(undef, dim)
+    T = adp["transformation_matrix"]
+    #display(T)
+    #<OLD>tmt = transpose(T)
+    v = adp.data["velocity"]
+    dim = size(v)
+    dim[3] == 4 || error("beam_to_xyz only works for 4-beam Workhorse data")
+    ṽ = Array{Float64}(undef, dim)
+    # Method 1 (see notes.md for why this was used)
     ne = dim[1]
+    TT = transpose(T)
     for i in 1:ne
-        vxyz[i, :, :] = vbeam[i, :, :] * tmt
+        ṽ[i, :, :] = v[i, :, :] * TT
     end
+    # Method 2 (see notes.md for why this was not used)
+    #  ṽ[:, :, 1] .= T[1, 1] * v[:, :, 1] .+ T[1, 2] * v[:, :, 2] .+ T[1, 3] * v[:, :, 3] .+ T[1, 4] * v[:, :, 4]
+    #  ṽ[:, :, 2] .= T[2, 1] * v[:, :, 1] .+ T[2, 2] * v[:, :, 2] .+ T[2, 3] * v[:, :, 3] .+ T[2, 4] * v[:, :, 4]
+    #  ṽ[:, :, 3] .= T[3, 1] * v[:, :, 1] .+ T[3, 2] * v[:, :, 2] .+ T[3, 3] * v[:, :, 3] .+ T[3, 4] * v[:, :, 4]
+    #  ṽ[:, :, 4] .= T[4, 1] * v[:, :, 1] .+ T[4, 2] * v[:, :, 2] .+ T[4, 3] * v[:, :, 3] .+ T[4, 4] * v[:, :, 4]
     data = copy(adp.data)
-    data["velocity"] = vxyz
+    data["velocity"] = ṽ
+    #println("output: ", data["velocity"][1, 1, :])
     metadata = copy(adp.metadata)
     metadata["coordinate_system"] = :xyz
     rval = Adp(metadata, data)
+    #println("output: ", rval["velocity"][1, 1, :])
     oad(debug, "END beam_to_xyz()")
     rval
 end
