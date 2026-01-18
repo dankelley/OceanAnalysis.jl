@@ -526,17 +526,18 @@ function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
     v = adp.data["velocity"]
     dim = size(v)
     dim[3] == 4 || error("xyz_to_enu only works for 4-beam Workhorse data")
-    ṽ = Array{Float64}(undef, dim)
+    #ṽ = Array{Float64}(undef, dim)
+    ṽ = copy(v)
     # FIXME: orientation
     h = declination .+ adp["heading"]
-    p = Float64.(adp["pitch"])
-    r = Float64.(adp["roll"])
-    ch = Float64.(cosd.(h))
-    sh = Float64.(sind.(h))
-    cp = Float64.(cosd.(p))
-    sp = Float64.(sind.(p))
-    cr = Float64.(cosd.(r))
-    sr = Float64.(sind.(r))
+    p = adp["pitch"]
+    r = adp["roll"]
+    ch = cosd.(h)
+    sh = sind.(h)
+    cp = cosd.(p)
+    sp = sind.(p)
+    cr = cosd.(r)
+    sr = sind.(r)
     # We need factors to handle instrument direction.  This is explained
     # in RDI documents referred to in oce/R/adp.R near line 3674
     direction = adp["direction"]
@@ -552,20 +553,45 @@ function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
     #    starboard <- -res@data$v[, , 1] # p11 "RDI Coordinate Transformation Manual" (July 1998)
     #    forward <- res@data$v[, , 2] # p11 "RDI Coordinate Transformation Manual" (July 1998)
     #    mast <- -res@data$v[, , 3] # p11 "RDI Coordinate Transformation Manual" (July 1998)
+    # Checking for type instability -- none, though, so why all the allocations?
+    #println("type check")
+    #println("  typeof ṽ: ", typeof(ṽ))
+    #println("  typeof fac: ", typeof(fac))
+    #println("  typeof v: ", typeof(v))
+    #println("  typeof ch: ", typeof(ch))
+    #println("  typeof sh: ", typeof(sh))
+    #println("  typeof cp: ", typeof(cp))
+    #println("  typeof sp: ", typeof(sp))
+    #println("  typeof cr: ", typeof(cr))
+    #println("  typeof sr: ", typeof(sr))
+    # Saving CH, etc and V1, etc. drops time by 10% and also drops alloc by factor 2
+    #println("time for xyz->enu loop. Why so many allocations?")
+    #@time for i in 1:dim[1]
     for i in 1:dim[1]
-        ṽ[i, :, 1] .=
-            fac[1] * v[i, :, 1] .* (ch[i] * cr[i] + sh[i] * sp[i] * sr[i]) .+
-            fac[2] * v[i, :, 2] .* (sh[i] * cp[i]) .+
-            fac[3] * v[i, :, 3] .* (ch[i] * sr[i] - sh[i] * sp[i] * cr[i])
-        ṽ[i, :, 2] .=
-            fac[1] * v[i, :, 1] .* (-sh[i] * cr[i] + ch[i] * sp[i] * sr[i]) .+
-            fac[2] * v[i, :, 2] .* (ch[i] * cp[i]) .+
-            fac[3] * v[i, :, 3] .* (-sh[i] * sr[i] - ch[i] * sp[i] * cr[i])
-        ṽ[i, :, 3] .=
-            fac[1] * v[i, :, 1] .* (-cp[i] * sr[i]) .+
-            fac[2] * v[i, :, 2] .* sp[i] .+
-            fac[3] * v[i, :, 3] .* (cp[i] * cr[i])
-        ṽ[i, :, 4] .= v[i, :, 4] # copy error field directly
+        CH = ch[i]
+        SH = sh[i]
+        CP = cp[i]
+        SP = sp[i]
+        CR = cr[i]
+        SR = sr[i]
+        for j in 1:dim[2]
+            V1 = fac[1] * v[i, j, 1]
+            V2 = fac[2] * v[i, j, 2]
+            V3 = fac[3] * v[i, j, 3]
+            ṽ[i, j, 1] =
+                V1 * (CH * CR + SH * SP * SR) +
+                V2 * (SH * CP) +
+                V3 * (CH * SR - SH * SP * CR)
+            ṽ[i, j, 2] =
+                V1 * (-SH * CR + CH * SP * SR) +
+                V2 * (CH * CP) +
+                V3 * (-SH * SR - CH * SP * CR)
+            ṽ[i, j, 3] =
+                V1 * (-CP * SR) +
+                V2 * SP +
+                V3 * (CP * CR)
+            #ṽ[i, j, 4] = v[i, j, 4] # copy error field directly
+        end
     end
     #        east[i] =
     #            starboard[i] * ( CH * CR + SH * SP * SR ) +
@@ -584,6 +610,6 @@ function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
     metadata = copy(adp.metadata)
     metadata["coordinate_system"] = :enu
     rval = Adp(metadata, data)
-    oad(debug, "END bxyz_to_enu()")
+    oad(debug, "END xyz_to_enu()")
     rval
 end
