@@ -1,7 +1,16 @@
 using Dates, Plots, OceanAnalysis, Test
 # The tests are against values from R/oce.
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
-beam = read_adp_rdi(file);
+@time beam = read_adp_rdi(file);
+println(first(beam["ensemble"], 6))
+# 6.72M alloc
+#
+#  println(typeof(buf))
+# With buf not declared in read_adp_rdi_header()
+# 1.109307 seconds (6.72 M allocations: 329.074 MiB, 16.15% gc time, 100.85% compilation time)
+# with buf declared in read_adp_rdi_header()
+
+
 # Test some metadata
 @test beam["beam_angle"] == 20.0
 @test beam["beam_configuration"] == :four_beam_janus

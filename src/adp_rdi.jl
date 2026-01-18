@@ -8,7 +8,7 @@ function key_insert(dict, key)
     end
 end
 
-function find_adp_rdi_ensembles(buf; debug::Int64=0)
+function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Int64=0)
     nbuf = length(buf)
     start = 1
     while true # Find first 7f 7f byte pair, in case file starts mid-ensemble
@@ -30,7 +30,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
             end
             break
         end
-        local bytes_to_check = ltoh.(reinterpret(Int16, buf[start.+(2:3)])[1])
+        local bytes_to_check = reinterpret(Int16, buf[start.+(2:3)])[1]
         ntypes = buf[start+5]
         if ntypes < 1 | ntypes > 200
             error("something is wrong with ntypes (=$ntypes)")
@@ -45,7 +45,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
         for i in range(start, length=bytes_to_check)
             checksum += buf[i] # relies on overflow wrapping around zero
         end
-        local desired_checksum = ltoh.(reinterpret(UInt16, buf[(bytes_to_check+start).+(0:1)])[1])
+        local desired_checksum = reinterpret(UInt16, buf[(bytes_to_check+start).+(0:1)])[1]
         if checksum == desired_checksum
             push!(starts, start)
         else
@@ -57,7 +57,7 @@ function find_adp_rdi_ensembles(buf; debug::Int64=0)
 end
 
 # read the header, and compute a few things, for the setup of 'metadata'
-function read_adp_rdi_header(buf, start::Int64=1)
+function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     metadata = Dict()
     ntypes = Int(buf[start+5])
     metadata["ntypes"] = ntypes
@@ -68,7 +68,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
     # FIXME: is it ok to read this just once per file?
     for i in 1:ntypes
         tmp = start + 4 + 2 * i
-        data_offsets[i] = ltoh.(reinterpret(UInt16, buf[(tmp).+(0:1)])[1])
+        data_offsets[i] = reinterpret(UInt16, buf[(tmp).+(0:1)])[1]
     end
     metadata["data_offsets"] = data_offsets
     # Now look past 'header' to 'fixed leader', but just for things that will
@@ -129,7 +129,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
     metadata["nbeams"] = nbeams
     ncells = Int(buf[start_fl+10])
     metadata["ncells"] = ncells
-    depth_cell_length = 0.01 * ltoh.(reinterpret(Int16, buf[(start_fl).+(13:14)])[1])
+    depth_cell_length = 0.01 * reinterpret(Int16, buf[(start_fl).+(13:14)])[1]
     metadata["depth_cell_length"] = depth_cell_length
     # Coordinate system
     cs_bits = reverse(digits(buf[start_fl+26], base=2, pad=8))
@@ -145,7 +145,7 @@ function read_adp_rdi_header(buf, start::Int64=1)
     end
     metadata["coordinate_system"] = coordinate_system
     # cell geometry
-    bin1_distance = 0.01 * ltoh(reinterpret(UInt16, buf[(start_fl).+(33:34)])[1])
+    bin1_distance = 0.01 * reinterpret(UInt16, buf[(start_fl).+(33:34)])[1]
     metadata["bin1_distance"] = bin1_distance
     metadata["distance"] = range(bin1_distance, step=depth_cell_length, length=ncells)
     metadata
@@ -252,25 +252,39 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
     oad(debug, "  Inferring time-series information.")
-    data["ensemble"] = buf[VL_.+2] + 256 * buf[VL_.+3]
-    year = 2000 .+ buf[VL_.+4]
-    month = Int.(buf[VL_.+5])
-    day = Int.(buf[VL_.+6])
-    hour = Int.(buf[VL_.+7])
-    minute = Int.(buf[VL_.+8])
-    second = Int.(buf[VL_.+9])
-    data["time"] = DateTime.(year, month, day, hour, minute, second)
-    # sound_speed (RDI p139 says bytes 15,16 so use 14,15 here);
-    data["sound_speed"] = Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 14; VL_ .+ 15])])))
-    # heading RDI p139 says bytes 19,20 -- use 18,19 here
-    data["heading"] = 0.01 * Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 18; VL_ .+ 19])])))
-    # pitch RDI p139 says bytes 21,22 -- use 20,21 here NOTE: corrected in a few lines
-    pitch = 0.01 * Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 20; VL_ .+ 21])])))
+    println("time of ensemble creation step 1")
+    buf2 = Vector{UInt8}(undef, nE_)
+    int16_2 = Vector{UInt16}(undef, nE_)
+    @time buf2 = buf[sort([VL_ .+ 2; VL_ .+ 3])]
+    println("time of ensemble creation step 2")
+    #?@time int16_2 = ltoh.(reinterpret(Int16, buf2)) #[sort([VL_ .+ 2; VL_ .+ 3])]))
+    @time int16_2 = reinterpret(Int16, buf2) #[sort([VL_ .+ 2; VL_ .+ 3])]))
+    println("time of ensemble creation step 3")
+    @time data["ensemble"] = copy(int16_2)
+    year = 2000 .+ reinterpret(UInt8, buf[VL_.+4])
+    month = reinterpret(UInt8, buf[VL_.+5])
+    day = reinterpret(UInt8, buf[VL_.+6])
+    hour = reinterpret(UInt8, buf[VL_.+7])
+    minute = reinterpret(UInt8, buf[VL_.+8])
+    second = reinterpret(UInt8, buf[VL_.+9])
+    println("time creation FIXME: why so slow")
+    @time data["time"] = DateTime.(year, month, day, hour, minute, second)
+    comb = sort([VL_; VL_ .+ 1])
+    # sound_speed: RDI p139 says bytes 15,16 so use 14,15 here, i.e. comb.+14
+    data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb.+14]))
+    # heading: RDI p139 says bytes 19,20 -- use 18,19 here, i.e. comb.+18
+    # Using convert() takes 14 allocations and 1.3 KiB.
+    # Using Float64.() takes 174.38 k allocations and 8.772 MiB
+    data["heading"] = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb.+18]))
+    # pitch RDI p139 says bytes 21,22 -- use 20,21 here
+    # NOTE: pitch is 'corrected' in a few lines
+    pitch = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb.+20]))
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
-    roll = 0.01 * Float64.(ltoh.(reinterpret(Int16, buf[sort([VL_ .+ 22; VL_ .+ 23])])))
+    roll = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb.+22]))
     data["roll"] = roll
     # Pitch correction. See page 14 of 'adcp coordinate transformation.pdf
-    data["pitch"] = 180.0 / pi * atan.(tan.(pitch * pi / 180.0) ./ cos.(roll * pi / 180.0))
+    println("save new pitch")
+    @time data["pitch"] = atand.(tand.(pitch) ./ cosd.(roll))
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
     oad(debug, "  Determining data types (using data_offsets=$data_offsets).")
     data_types = Symbol[]
@@ -356,7 +370,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                 # handled elsewhere
             elseif buf[p] == 0x00 && buf[p+1] == 0x01
                 # bad velocities are set to –32768 (page 155 of Reference 1)
-                tmp = ltoh.(reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)]))
+                #<<>> tmp = ltoh.(reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)]))
+                tmp = reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)])
                 bad = tmp .== -32768
                 tmp = 0.001 * tmp
                 tmp[bad] .= NaN
@@ -370,12 +385,12 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
             elseif buf[p] == 0x01 && buf[p+1] == 0x59
                 # ISM See (the confusing) Table 41 on page 144 of Reference 1.
                 ISM_valid[e] = buf[p+2]
-                ISM_acc[e, 1] = ltoh(reinterpret(Int32, buf[(p).+(3:6)])[1])
-                ISM_acc[e, 2] = ltoh(reinterpret(Int32, buf[(p).+(7:10)])[1])
-                ISM_acc[e, 3] = ltoh(reinterpret(Int32, buf[(p).+(11:14)])[1])
-                ISM_mag[e, 1] = ltoh(reinterpret(Int16, buf[(p).+(15:16)])[1])
-                ISM_mag[e, 2] = ltoh(reinterpret(Int16, buf[(p).+(17:18)])[1])
-                ISM_mag[e, 3] = ltoh(reinterpret(Int16, buf[(p).+(19:20)])[1])
+                ISM_acc[e, 1] = reinterpret(Int32, buf[(p).+(3:6)])[1]
+                ISM_acc[e, 2] = reinterpret(Int32, buf[(p).+(7:10)])[1]
+                ISM_acc[e, 3] = reinterpret(Int32, buf[(p).+(11:14)])[1]
+                ISM_mag[e, 1] = reinterpret(Int16, buf[(p).+(15:16)])[1]
+                ISM_mag[e, 2] = reinterpret(Int16, buf[(p).+(17:18)])[1]
+                ISM_mag[e, 3] = reinterpret(Int16, buf[(p).+(19:20)])[1]
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
                 key_insert(unhandled_data_types, "status")
             elseif buf[p] == 0x00 && buf[p+1] == 0x06
