@@ -152,7 +152,7 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
 end
 
 """
-    read_adp_rdi(filename::String, ensembles::Union{Int64,Vector{Int64}}=0; debug::Int64=0)
+    read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Int64=0)
 
 Read acoustic-Doppler profiler data in RDI "Workhorse-II' format
 
@@ -216,7 +216,7 @@ adp["frequency"]
 2. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
 3. Teledyne RD Instruments. “Acoustic Doppler Current Profiler Principles of Operation: A Practical Primer.” January 2011. https://www.comm-tec.com/Docs/Manuali/RDI/BBPRIME.pdf.
 """
-function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int},Vector{Int64}}=0; debug::Int64=0)
+function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Int64=0)
     oad(debug, "read_adp_rdi() START")
     filename = expanduser(filename)
     buf = read(filename)
@@ -251,16 +251,17 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     VL_ = FL_ .+ 59 # (see Figure 8 of [1])
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
-    oad(debug, "  Inferring time-series information.")
-    println("time of ensemble creation step 1")
-    buf2 = Vector{UInt8}(undef, nE_)
-    int16_2 = Vector{UInt16}(undef, nE_)
-    @time buf2 = buf[sort([VL_ .+ 2; VL_ .+ 3])]
-    println("time of ensemble creation step 2")
+    # comb is used for getting two-byte entries
+    comb2 = sort([VL_; VL_ .+ 1])
+    #println("time of ensemble creation step 1")
+    #@time buf2 = buf[comb2.+2] # sort([VL_ .+ 2; VL_ .+ 3])]
+    #println("time of ensemble creation step 2")
     #?@time int16_2 = ltoh.(reinterpret(Int16, buf2)) #[sort([VL_ .+ 2; VL_ .+ 3])]))
-    @time int16_2 = reinterpret(Int16, buf2) #[sort([VL_ .+ 2; VL_ .+ 3])]))
-    println("time of ensemble creation step 3")
-    @time data["ensemble"] = copy(int16_2)
+    oad(debug + 1, "  Inferring ensemble.")
+    @time data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2.+2]))
+    #println("time of ensemble creation step 3")
+    #@time data["ensemble"] = copy(int16_2)
+    oad(debug, "  Inferring time-series information.")
     year = 2000 .+ reinterpret(UInt8, buf[VL_.+4])
     month = reinterpret(UInt8, buf[VL_.+5])
     day = reinterpret(UInt8, buf[VL_.+6])
@@ -269,18 +270,17 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     second = reinterpret(UInt8, buf[VL_.+9])
     println("time creation FIXME: why so slow")
     @time data["time"] = DateTime.(year, month, day, hour, minute, second)
-    comb = sort([VL_; VL_ .+ 1])
-    # sound_speed: RDI p139 says bytes 15,16 so use 14,15 here, i.e. comb.+14
-    data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb.+14]))
+    # sound_speed: RDI p139 says bytes 15,16 so use 14,15 here, i.e. comb2.+14
+    data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb2.+14]))
     # heading: RDI p139 says bytes 19,20 -- use 18,19 here, i.e. comb.+18
     # Using convert() takes 14 allocations and 1.3 KiB.
     # Using Float64.() takes 174.38 k allocations and 8.772 MiB
-    data["heading"] = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb.+18]))
+    data["heading"] = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+18]))
     # pitch RDI p139 says bytes 21,22 -- use 20,21 here
     # NOTE: pitch is 'corrected' in a few lines
-    pitch = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb.+20]))
+    pitch = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+20]))
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
-    roll = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb.+22]))
+    roll = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+22]))
     data["roll"] = roll
     # Pitch correction. See page 14 of 'adcp coordinate transformation.pdf
     println("save new pitch")
@@ -359,7 +359,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
     oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams.")
     unhandled_data_types = Dict()
     unknown_byte_sequences = Dict()
-    for e in 1:ne
+    println("fill in arrays")
+    @time for e in 1:ne
         p0 = E_[e] # pointer to start of ensemble
         for o in data_offsets
             p = p0 + o
@@ -375,7 +376,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int,Int
                 bad = tmp .== -32768
                 tmp = 0.001 * tmp
                 tmp[bad] .= NaN
-                velocity[e, :, :] = transpose(reshape(tmp, nb, nc))
+                velocity[e, :, :] = transpose(reshape(convert(Array{Float64}, tmp), nb, nc))
             elseif buf[p] == 0x00 && buf[p+1] == 0x02
                 correlation_magnitude[e, :, :] = transpose(reshape(buf[range(p + 2, length=nb * nc)], nb, nc))
             elseif buf[p] == 0x00 && buf[p+1] == 0x03
