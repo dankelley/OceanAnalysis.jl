@@ -91,7 +91,7 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     elseif sys_config_LSB[6:8] == [1; 0; 1]
         frequency = 2400
     else
-        frequency = NaN
+        frequency = 0 # FIXME: handle other cases
     end
     metadata["frequency"] = frequency
     metadata["direction"] = sys_config_LSB[1] == 0 ? :down : :up
@@ -117,8 +117,8 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     end
     # compute transformation matrix (formula borrowed from R/oce)
     C = metadata["convex"] ? 1.0 : -1.0
-    A = 1.0 / (2.0 * sin(metadata["beam_angle"] * pi / 180.0))
-    B = 1.0 / (4.0 * cos(metadata["beam_angle"] * pi / 180.0))
+    A = 1.0 / (2.0 * sind(metadata["beam_angle"]))
+    B = 1.0 / (4.0 * cosd(metadata["beam_angle"]))
     D = A / sqrt(2.0)
     metadata["transformation_matrix"] = [
         C*A -C*A 0.0 0.0;
@@ -151,6 +151,8 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     metadata
 end
 
+
+
 """
     read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Int64=0)
 
@@ -172,7 +174,7 @@ function cannot handle.
 
 - `filename` an ADCP file in the 'PD0' format as described in the Teledyne RD Instruments documentation (Reference 1).
 
-- `ensembles` an indication of which ensembles (data profiles) to read.  This may be an singe integer or a vector of integers. In the first case, if `ensembles=0` then the whole file is read, otherwise the stated number of ensembles is read (provided that the file holds that number). In the second case, the value of `ensembles` dictates the indices of ensembles that are to be read. In both cases, the indices are trimmed to be from 1 to the number of ensembles in the file. The default is to read the whole file. and e.g. `ensembles=1:10:101` would read ensemble 1, ensemble 11, and so on, up to ensemble 101.
+- `ensembles` an indication of which ensembles (data profiles) to read.  This may be an single integer or a vector of integers. In the first case, if `ensembles=0` then the whole file is read, otherwise the stated number of ensembles is read (provided that the file holds that number). In the second case, the value of `ensembles` dictates the indices of ensembles that are to be read. In both cases, the indices are trimmed to be from 1 to the number of ensembles in the file. The default is to read the whole file. and e.g. `ensembles=1:10:101` would read ensemble 1, ensemble 11, and so on, up to ensemble 101.
 
 # Keywords
 
@@ -257,8 +259,9 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     #@time buf2 = buf[comb2.+2] # sort([VL_ .+ 2; VL_ .+ 3])]
     #println("time of ensemble creation step 2")
     #?@time int16_2 = ltoh.(reinterpret(Int16, buf2)) #[sort([VL_ .+ 2; VL_ .+ 3])]))
-    oad(debug + 1, "  Inferring ensemble.")
-    @time data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2.+2]))
+    oad(debug, "  Inferring ensemble.")
+    #@time data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2.+2]))
+    data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2.+2]))
     #println("time of ensemble creation step 3")
     #@time data["ensemble"] = copy(int16_2)
     oad(debug, "  Inferring time-series information.")
@@ -268,8 +271,9 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     hour = reinterpret(UInt8, buf[VL_.+7])
     minute = reinterpret(UInt8, buf[VL_.+8])
     second = reinterpret(UInt8, buf[VL_.+9])
-    println("time creation FIXME: why so slow")
-    @time data["time"] = DateTime.(year, month, day, hour, minute, second)
+    # println("time creation FIXME: why so slow")
+    # @time data["time"] = DateTime.(year, month, day, hour, minute, second)
+    data["time"] = DateTime.(year, month, day, hour, minute, second)
     # sound_speed: RDI p139 says bytes 15,16 so use 14,15 here, i.e. comb2.+14
     data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb2.+14]))
     # heading: RDI p139 says bytes 19,20 -- use 18,19 here, i.e. comb.+18
@@ -283,8 +287,9 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     roll = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+22]))
     data["roll"] = roll
     # Pitch correction. See page 14 of 'adcp coordinate transformation.pdf
-    println("save new pitch")
-    @time data["pitch"] = atand.(tand.(pitch) ./ cosd.(roll))
+    #println("save new pitch")
+    #@time data["pitch"] = atand.(tand.(pitch) ./ cosd.(roll))
+    data["pitch"] = atand.(tand.(pitch) ./ cosd.(roll))
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
     oad(debug, "  Determining data types (using data_offsets=$data_offsets).")
     data_types = Symbol[]
@@ -293,26 +298,19 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
         codes[t, 2] = buf[metadata["data_offsets"][t].+2]
         if codes[t, :] == [0x00, 0x01]
             push!(data_types, :velocity)
-        end
-        if codes[t, :] == [0x00, 0x02]
+        elseif codes[t, :] == [0x00, 0x02]
             push!(data_types, :correlation_magnitude)
-        end
-        if codes[t, :] == [0x00, 0x03]
+        elseif codes[t, :] == [0x00, 0x03]
             push!(data_types, :echo_intensity)
-        end
-        if codes[t, :] == [0x00, 0x04]
+        elseif codes[t, :] == [0x00, 0x04]
             push!(data_types, :percent_good)
-        end
-        if codes[t, :] == [0x00, 0x05]
+        elseif codes[t, :] == [0x00, 0x05]
             push!(data_types, :status)
-        end
-        if codes[t, :] == [0x00, 0x06]
+        elseif codes[t, :] == [0x00, 0x06]
             push!(data_types, :bottom_track)
-        end
-        if codes[t, :] == [0x01, 0x59]
+        elseif codes[t, :] == [0x01, 0x59]
             push!(data_types, :ISM)
-        end
-        if codes[t, :] == [0x0C, 0x02]
+        elseif codes[t, :] == [0x0C, 0x02]
             push!(data_types, :ambient_sound)
         end
         # FIXME: add other code-recognition here
@@ -359,8 +357,9 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams.")
     unhandled_data_types = Dict()
     unknown_byte_sequences = Dict()
-    println("fill in arrays")
-    @time for e in 1:ne
+    #println("fill in arrays")
+    #@time for e in 1:ne
+    for e in 1:ne
         p0 = E_[e] # pointer to start of ensemble
         for o in data_offsets
             p = p0 + o
@@ -370,10 +369,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
             elseif buf[p] == 0x80 && buf[p+1] == 0x00
                 # handled elsewhere
             elseif buf[p] == 0x00 && buf[p+1] == 0x01
-                # bad velocities are set to –32768 (page 155 of Reference 1)
-                #<<>> tmp = ltoh.(reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)]))
                 tmp = reinterpret(Int16, buf[range(p + 2, length=2 * nb * nc)])
-                bad = tmp .== -32768
+                bad = tmp .== -32768 # bad velocities are set to –32768 (page 155 of Reference 1)
                 tmp = 0.001 * tmp
                 tmp[bad] .= NaN
                 velocity[e, :, :] = transpose(reshape(convert(Array{Float64}, tmp), nb, nc))
@@ -614,3 +611,4 @@ function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
     oad(debug, "END xyz_to_enu()")
     rval
 end
+

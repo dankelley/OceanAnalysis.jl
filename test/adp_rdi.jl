@@ -1,22 +1,10 @@
 using Dates, Plots, OceanAnalysis, Test
 # The tests are against values from R/oce.
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
-read_adp_rdi(file);
-
-println("time for read_adp_rdi FIRST TIME")
+println("time results for reading beam, beam->xyz, and xyz->enu")
 @time beam = read_adp_rdi(file);
-
-
-println("\ntime for read_adp_rdi SECOND TIME")
-@time beam = read_adp_rdi(file);
-println("\n")
-# 6.72M alloc
-#
-#  println(typeof(buf))
-# With buf not declared in read_adp_rdi_header()
-# 1.109307 seconds (6.72 M allocations: 329.074 MiB, 16.15% gc time, 100.85% compilation time)
-# with buf declared in read_adp_rdi_header()
-
+@time xyz = beam_to_xyz(beam);
+@time enu = xyz_to_enu(xyz);
 
 # Test some metadata
 @test beam["beam_angle"] == 20.0
@@ -55,16 +43,10 @@ tm_expected = [1.4619022 -1.4619022 0.0000000 0.0000000;
     1.0337210 1.0337210 -1.0337210 -1.0337210]
 @test beam["transformation_matrix"] ≈ tm_expected atol = 1e-5
 # Coordinate transformation (tested against R, on data in ../data/adp_rdi.000)
-println("time for beam_to_xyz (done twice)")
-@time xyz = beam_to_xyz(beam);
-@time xyz = beam_to_xyz(beam);
 @test xyz["velocity"][1, 1, :] ≈ [0.301151853; 0.083328425; 0.010375733; -0.003101163] atol = 1e-8
 @test xyz["velocity"][2, 1, :] ≈ [0.157885438; 0.080404621; -0.003990667; 0.011370931] atol = 1e-8
 @test xyz["velocity"][1, 2, :] ≈ [0.308461364; 0.078942719; 0.009843644; 0.009303489] atol = 1e-8
 
-println("time for xyz_to_enu (done twice)")
-@time enu = xyz_to_enu(xyz);
-@time enu = xyz_to_enu(xyz);
 @test enu["velocity"][1, 1, :] ≈ [-0.203290360; -0.237137325; 0.013514422; -0.003101163] atol = 1e-8
 @test enu["velocity"][1, 2, :] ≈ [-0.202428690; -0.245512510; 0.014949795; 0.009303489] atol = 1e-8
 @test enu["velocity"][2, 1, :] ≈ [-0.13973166; -0.10803253; 0.01458341; 0.01137093] atol = 1e-8
