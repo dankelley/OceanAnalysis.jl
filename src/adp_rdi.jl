@@ -1,4 +1,4 @@
-using Dates, Plots
+using Dates, Plots, BenchmarkTools
 
 function key_insert(dict, key)
     if key in keys(dict)
@@ -240,7 +240,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     end
     nE_ = length(E_)
     oad(debug, "  About to read header information in first ensemble.")
-    metadata = read_adp_rdi_header(buf, E_[1])
+    println("about to read header")
+    @time metadata = read_adp_rdi_header(buf, E_[1])
     data_offsets = metadata["data_offsets"]
     metadata["filename"] = filename
     data = Dict()
@@ -254,7 +255,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
     # comb is used for getting two-byte entries
-    comb2 = sort([VL_; VL_ .+ 1])
+    println("creating comb")
+    @time comb2 = sort([VL_; VL_ .+ 1])
     #println("time of ensemble creation step 1")
     #@time buf2 = buf[comb2.+2] # sort([VL_ .+ 2; VL_ .+ 3])]
     #println("time of ensemble creation step 2")
@@ -265,14 +267,27 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     #println("time of ensemble creation step 3")
     #@time data["ensemble"] = copy(int16_2)
     oad(debug, "  Inferring time-series information.")
-    year = 2000 .+ reinterpret(UInt8, buf[VL_.+4])
+    #<testing timing> year = 2000 .+ convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+4]))
+    #<testing timing> month = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+5]))
+    #<testing timing> day = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+6]))
+    #<testing timing> hour = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+7]))
+    #<testing timing> minute = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+8]))
+    #<testing timing> second = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+9]))
+    #<testing timing> println("infer time (almost 1M allocations for $(length(year)) values.)")
+    #<testing timing> println("typeof(year):   $(typeof(year))")
+    #<testing timing> println("typeof(month):  $(typeof(month))")
+    #<testing timing> println("typeof(day):    $(typeof(day))")
+    #<testing timing> println("typeof(hour):   $(typeof(hour))")
+    #<testing timing> println("typeof(minute): $(typeof(minute))")
+    #<testing timing> println("typeof(second): $(typeof(second))")
+    #<testing timing> println("inferring time:")
+    #<testing timing> @time data["time"] = DateTime.(year, month, day, hour, minute, second + 0.01 * second100)
+    year = 2000.0 .+ reinterpret(UInt8, buf[VL_.+4])
     month = reinterpret(UInt8, buf[VL_.+5])
     day = reinterpret(UInt8, buf[VL_.+6])
     hour = reinterpret(UInt8, buf[VL_.+7])
     minute = reinterpret(UInt8, buf[VL_.+8])
-    second = reinterpret(UInt8, buf[VL_.+9])
-    # println("time creation FIXME: why so slow")
-    # @time data["time"] = DateTime.(year, month, day, hour, minute, second)
+    second = reinterpret(UInt8, buf[VL_.+9]) .+ 0.01 * reinterpret(UInt8, buf[VL_.+10])
     data["time"] = DateTime.(year, month, day, hour, minute, second)
     # sound_speed: RDI p139 says bytes 15,16 so use 14,15 here, i.e. comb2.+14
     data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb2.+14]))
