@@ -2,10 +2,11 @@
 
 ## Acoustic-Doppler Profile
 
-A built-in file (sub-sampled to just one sample per hour, and
-only a single day) is provided with the package. Since it
-is in beam coordinates, we translate to xyz coordinates
-for the plot.
+A built-in file (sub-sampled to just one sample per hour, and only a single
+day) is provided with the package. Below, you can see how to plot (1) images of
+velocity components as a function of time and distance and (2) covariation of
+eastward and northward components, with a red line indicating local coastal
+orientation.
 
 ```julia
 using OceanAnalysis, Plots
