@@ -22,6 +22,7 @@ Release notes:
 - [`plot_stations`](@ref) for plotting sampling locations.
 - [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.
 - [`read_ctd_exchange`](@ref) for reading CTD data in 'exchange' format (used by many data servers)
+- [`read_echosounder`](@ref) for reading Biosonics echosounder data.
 - [`read_section`](@ref) for reading Section data.
 - [`xyz_to_enu`](@ref) for converting RDI acoustic-Doppler data from xyz coordinates to enu coordinates.
 

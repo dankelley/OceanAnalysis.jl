@@ -8,6 +8,7 @@ OceanAnalysis.Adp
 OceanAnalysis.Amsr
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
+OceanAnalysis.Echosounder
 OceanAnalysis.Section
 OceanAnalysis.Topography
 ```
@@ -59,6 +60,7 @@ OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv
 OceanAnalysis.read_ctd_exchange
 OceanAnalysis.read_ctd_rsk
+OceanAnalysis.read_echosounder
 OceanAnalysis.read_section
 OceanAnalysis.read_topography
 OceanAnalysis.SA

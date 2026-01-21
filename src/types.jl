@@ -24,17 +24,34 @@ mutable struct Adp <: OA
     data::Dict{String,Any}
 end
 
+"""
+    A type to hold AMSR satellite data
+
+This holds AMSR satellite data as read by [`read_amsr`](@ref).
+
+The `metadata` element is a Dict that holds the source `filename`, the
+`sensor`, the `name` of the stored variable, the observation interval
+(`"time_coverage_start"` and `time_coverage_end`) and the vectors (`longitude`
+and `latitude`) that define the grid.
+
+The `data` element is a matrix holding the gridded data.
+"""
+mutable struct Amsr <: OA
+    metadata::Dict{String,Any}
+    data::Matrix{Float64}
+end
+
+
 
 """
     A type to hold CTD data
 
-Ctd is a type used to store data from CTD instruments and Argo floats. It takes
-the form of a Struct that derives from the base `OA` type, and holds two items:
-(1) a DataFrame named `data` that holds the actual data, including `pressure`,
-`salinity`, and `temperature`, perhaps along with other data and (2) a
-a Dict named `metadata` that stores information about the data, such as the
-`time` of observation and the `latitude` and `longitude` at which
-the observation was made.
+Ctd is a type used to store data from CTD instruments and Argo floats. It holds
+two items: (1) a DataFrame named `data` that holds the actual data, including
+`pressure`, `salinity`, and `temperature`, perhaps along with other data and
+(2) a a Dict named `metadata` that stores information about the data, such as
+the `time` of observation and the `latitude` and `longitude` at which the
+observation was made.
 
 Objects of type `Ctd` are returned by [`as_ctd`](@ref), [`read_ctd_cnv`](@ref),
 [`read_ctd_rsk`](@ref) and [`read_argo`](@ref).  Such objects can be passed to
@@ -63,24 +80,19 @@ mutable struct Coastline <: OA
 end
 
 """
-    A type to hold AMSR data (SUBJECT TO CHANGE)
+    A type to hold echosounder data
 
-This holds AMSR satellite data as read by [`read_amsr`](@ref).
-
-The `metadata` element is a Dict that holds the source `filename`, the
-`sensor`, the `name` of the stored variable, the observation interval
-(`"time_coverage_start"` and `time_coverage_end`) and the vectors (`longitude`
-and `latitude`) that define the grid.
-
-The `data` element is a matrix holding the gridded data.
+Echosounder is a type to hold data from a Biosonics scientific echosounder, as
+read with [`read_echosounder`](@ref). Its `metadata` and `data` are both Dict
+objects.
 """
-mutable struct Amsr <: OA
+mutable struct Echosounder <: OA
     metadata::Dict{String,Any}
-    data::Matrix{Float64}
+    data::Dict{String,Any}
 end
 
 """
-    A type to hold topography data (SUBJECT TO CHANGE)
+    A type to hold topography data
 
 This holds topography data as read by [`read_topography`](@ref).
 
