@@ -6,7 +6,7 @@ function oad(debug, msg...)
     end
 end
 
-function read_echosounder(filename::String; tuples::Int64=0, debug=0)
+function read_echosounder_TEST(filename::String; tuples::Int64=0, debug=0)
     oad(debug, "read_echosounder() START")
     filename = expanduser(filename)
     @time buf = read(filename)

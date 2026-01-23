@@ -1,7 +1,22 @@
 """
-    read_echosounder(filename::String; tuples::Int64=0, debug=0)
+    read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, debug=0)
 
-Read data from a Biosonics scientific echosounder
+    Read data from a Biosonics scientific echosounder.
+
+    This is a very provisional version of the function, which locates what Biosonics calls data tuples, and examines only some of them, and only in shallow ways. At the moment, 'Time' tuples (code 0x000F or 0x0020) are recognized and parsed (although the times are not used yet). The next goal is to handle "Single-Beam Ping" tuples (code 0x0015) first, before (perhaps) considering moving on to others. The R/oce function `read.echosounder()` will be used to check on whether the present function is working.
+
+# Arguments
+
+- `filename` string naming the file to be read.  It must be in Biosonics DT4 format (reference 1).
+
+# Keywords
+
+- `channel` an Int64 giving the channel number to read. The default is 1. In the file named in the Examples section, there are two channels, numbered 1 and 2.
+
+- `tuples` (*temporary keyword*) an Int64 giving the number of tuples to read.  The default value of 0 means to read the whole file. This keyword is mainly to help in development and is likely to be removed when the function is in later stages of development.
+
+- `debug` an Int64 value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
+
 
 # Examples
 ```julia
@@ -12,10 +27,18 @@ if isfile(filename)
     e = read_echosounder(filename; debug=1);
 end
 ```
+
+# References
+
+1.BioSonics Advanced Digital Hydroacoustics. “DT4 Data File Format
+  Specification.” BioSonics, May 2017. This is available (after
+  registratration) online at
+  https://www.biosonicsinc.com/support/customer-downloads/
 """
-function read_echosounder(filename::String; tuples::Int64=0, debug=0)
+function read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, debug=0)
     oad(debug, "read_echosounder() START")
     filename = expanduser(filename)
+    first = true # DEBUGGING DAN
     channels = DataFrame(channel_number=Int64[], np=Int64[], spp=Int64[])
     last_time = unix2datetime(0.0) # overwritten later
     @time buf = read(filename)
@@ -80,8 +103,25 @@ function read_echosounder(filename::String; tuples::Int64=0, debug=0)
             oad(debug, "      channel_number: $channel_number")
             ping_number = reinterpret(UInt32, buf[(offset).+(7:10)])[1]
             oad(debug, "      ping_number: $ping_number")
+            ptm = reinterpret(UInt32, buf[(offset).+(11:14)])[1]
+            oad(debug, "      ptm: $ptm (msec since start)")
             ns = reinterpret(UInt16, buf[(offset).+(15:16)])[1]
+            #oad(debug, "      ns: $ns (recall spp: $(channels[!,channel].spp))")
             oad(debug, "      ns: $ns")
+            if channel_number == channel
+                spp = channels[firstindex(channels.channel_number == channel), :spp]
+                println("*** spp=$spp")
+                if first
+                    look = range(offset + 17, length=2 * ns)
+                    println("FIXME DAN rle @ $(extrema(look)) inclusive")
+                    #look = range(offset + 17, length=2 * ns)
+                    #println(extrema(look))
+                    #println(buf[range(offset + 17, length=2 * ns)])
+                    first = false
+                end
+            else
+                oad(debug, "      ignored, since user specified channel=$channel")
+            end
         elseif code == 0x001C
             oad(debug, "    Dual-Beam Ping")
         elseif code == 0x0010
