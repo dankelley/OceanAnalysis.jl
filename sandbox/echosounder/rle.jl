@@ -1,3 +1,5 @@
+using Plots
+
 """
     dt4_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
 
@@ -113,11 +115,39 @@ function dt4_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sampl
     end
 end
 
+function biosonic_float(buf::Vector{UInt8})
+    nbuf = length(buf)
+    println("nbuf: $nbuf")
+    i = 1
+    k = 1
+    nrval = Int64(floor(nbuf / 2))
+    println("nrval: $nrval")
+    rval = Vector{UInt16}(undef, nrval)
+    while i < nbuf
+        b = reinterpret(UInt16, buf[(i).+(0:1)])[1]
+        mantissa = b & 0x0FFF
+        exponent = (b & 0xF000) >> 12
+        if exponent == 0
+            rval[k] = mantissa
+        else
+            rval[k] = (mantissa + 0x1000) << (exponent - 1)
+        end
+        k += 1
+        i += 2
+    end
+    reverse(convert(Vector{Float64}, rval))
+end
+
 f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4"
 buf = read(f)
 println("read file with $(length(buf)) bytes")
 buf = buf[range(7527, length=2 * 3398)];
 println("created buf of length $(length(buf))")
+println(" buf starts")
+println("  ", first(buf, 5))
+println(" buf ends")
+println("  ", last(buf, 5))
+
 spp = 3399
 rval = Array{UInt8}(undef, 2 * spp);
 dt4_expand_rle!(buf, rval);
@@ -132,3 +162,12 @@ println("buf (of length $(length(buf)) )ends")
 println("  ", last(buf, N))
 println("rval (of length $(length(rval))) ends")
 println("  ", last(rval, N))
+
+f = biosonic_float(rval);
+println("final starts")
+println("  ", first(f, N))
+println("final ends")
+println("  ", last(f, N))
+plot(log10.(f))
+savefig("rle.png")
+println("final length(f): $(length(f))")
