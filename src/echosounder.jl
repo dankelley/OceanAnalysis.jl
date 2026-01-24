@@ -115,11 +115,11 @@ end
 
 function biosonic_float(buf::Vector{UInt8})
     nbuf = length(buf)
-    println("        in biosonic_float(), nbuf: $nbuf")
+    #println("        in biosonic_float(), nbuf: $nbuf")
     i = 1
     k = 1
     nrval = Int64(floor(nbuf / 2))
-    println("           nrval: $nrval")
+    #println("           nrval: $nrval")
     rval = Vector{UInt16}(undef, nrval)
     while i < nbuf
         b = reinterpret(UInt16, buf[(i).+(0:1)])[1]
@@ -137,11 +137,14 @@ function biosonic_float(buf::Vector{UInt8})
 end
 
 """
-    read_echosounder(filename::String; channel::Int64=1, beam=:single, debug::Int=0)
+    read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:single_beam, sound_speed::Float64=1490.3, debug::Int=0)
 
     Read data from a Biosonics scientific echosounder.
 
-This is a very provisional version of the function, which locates what Biosonics calls data tuples, and examines only some of them, and only in shallow ways. At the moment, 'Time' tuples (code 0x000F or 0x0020) are recognized and parsed (although the times are not used yet). The next goal is to handle "Single-Beam Ping" tuples (code 0x0015) first, before (perhaps) considering moving on to others. The R/oce function `read.echosounder()` will be used to check on whether the present function is working.
+This function is still in development. The `read.echosounder()` function of the
+`oce` R package is being used as a guide, along with the Biosonics
+document (Reference 1) that describes the file format. FIXME: when code
+is stabilized, write more here.
 
 # Arguments
 
@@ -151,7 +154,9 @@ This is a very provisional version of the function, which locates what Biosonics
 
 - `channel` an Int64 giving the channel number to read. The default is 1. In the file named in the Examples section, there are two channels, numbered 1 and 2.
 
-- `beam` a Symbol indicating which type of beam is sought. In the present version, only `:single` is permitted. In a later version, `:dual` and `:split` may also be permitted.
+- `beam` a Symbol indicating which type of beam is sought. In the present version, only `:single_beam` is permitted. In a later version, `:dual_beam` and `:split_beam` may also be permitted.
+
+- `sound_speed` a Float64 value indicating the sound speed. The default is to use the sound speed at practical salinity 35, in-situ temperature 10 °C and pressure 30 dbar.  (Sound speed is also stored in the files, but Reference 1 says that they ought not to be used.)
 
 - `debug` an Int64 value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
 
@@ -162,7 +167,7 @@ This is a very provisional version of the function, which locates what Biosonics
 using OceanAnalysis
 filename = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4"
 if isfile(filename)
-    e = read_echosounder(filename; debug=1);
+    e = read_echosounder(filename);
 end
 ```
 
@@ -173,11 +178,11 @@ end
   registratration) online at
   https://www.biosonicsinc.com/support/customer-downloads/
 """
-function read_echosounder(filename::String; channel::Int64=1, beam=:single, debug::Int=0)
+function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:single_beam, sound_speed::Float64=1490.3, debug::Int=0)
     oad(debug, "read_echosounder() START")
     a = nothing # we do this to prevent a matrix being defined twice, later
-    if beam != :single
-        error("only beam=:single is permitted")
+    if beam != :single_beam
+        error("only beam=:single_beam is permitted")
     end
     filename = expanduser(filename)
     channels = DataFrame(channel_number=Int64[], np=Int64[], spp=Int64[])
@@ -228,6 +233,10 @@ function read_echosounder(filename::String; channel::Int64=1, beam=:single, debu
             oad(debug, "      np_overall $np_overall")
             spp_overall = convert(Int64, reinterpret(UInt16, buf[(offset).+(11:12)])[1])
             oad(debug, "      spp_overall $spp_overall")
+            global sp = 1e-9 * convert(Int64, reinterpret(UInt16, buf[(offset).+(13:14)])[1])
+            oad(debug, "      sp: $sp (sample delta-t, used for range: Sec 4.5,5.2 of Ref 1)")
+            global ib = convert(Int64, reinterpret(UInt16, buf[(offset).+(21:22)])[1])
+            oad(debug, "      ib: $ib (initial blanking, used for range: Sec 4.4,5.2 of Ref 1)")
             push!(channels, (channel_number=channel_number, np=np_overall, spp=spp_overall))
             if nrow(channels) > 2
                 @warn "Have more than 2 Channel Descriptor entries"
@@ -235,40 +244,40 @@ function read_echosounder(filename::String; channel::Int64=1, beam=:single, debu
             # Several other things here can be decoded if required
             # FIXME: set aside space for 3 arrays (???) of size np x spp
             if a == nothing
-                a = Matrix{Float64}(undef, np_overall, spp_overall)
-                oad(debug, "      Created a[] ($np_overall x $spp_overall) to hold results")
+                a = Matrix{Float64}(undef, spp_overall, np_overall)
+                oad(debug, "      Created a[] ($spp_overall x $np_overall) to hold results")
             end
         elseif code == 0x0036
             oad(debug, "    Extended Channel Descriptor: ignored in this version")
         elseif code == 0x0015
             oad(debug, "    Single-Beam Ping")
             channel_number = reinterpret(UInt8, buf[offset+5])[1]
-            oad(debug, "      channel_number: $channel_number")
-            ping_number = reinterpret(UInt32, buf[(offset).+(7:10)])[1]
-            oad(debug, "      ping_number: $ping_number")
-            ptm = reinterpret(UInt32, buf[(offset).+(11:14)])[1]
-            oad(debug, "      ptm: $ptm (msec since start)")
-            ns = reinterpret(UInt16, buf[(offset).+(15:16)])[1]
-            #oad(debug, "      ns: $ns (recall spp: $(channels[!,channel].spp))")
-            oad(debug, "      ns: $ns")
             if channel_number == channel
+                oad(debug, "      channel_number: $channel_number")
+                ping_number = reinterpret(UInt32, buf[(offset).+(7:10)])[1]
+                oad(debug, "      ping_number: $ping_number")
+                ptm = reinterpret(UInt32, buf[(offset).+(11:14)])[1]
+                oad(debug, "      ptm: $ptm (msec since start)")
+                ns = reinterpret(UInt16, buf[(offset).+(15:16)])[1]
+                #oad(debug, "      ns: $ns (recall spp: $(channels[!,channel].spp))")
+                oad(debug, "      ns: $ns")
                 spp = channels[firstindex(channels.channel_number == channel), :spp]
-                println("      spp: $spp")
-                println("      offset: $offset")
+                #println("      spp: $spp")
+                #println("      offset: $offset")
                 ping_buf = buf[(offset+16).+(1:(2*ns))]
-                println("      length ping_buf $(length(ping_buf))")
-                println("        first ping_buf $(repr(first(ping_buf, 4)))")
-                println("        last ping_buf  $(repr(last(ping_buf, 4)))")
+                #println("      length ping_buf $(length(ping_buf))")
+                #println("        first ping_buf $(repr(first(ping_buf, 4)))")
+                #println("        last ping_buf  $(repr(last(ping_buf, 4)))")
                 tmp = Array{UInt8}(undef, 2 * spp) # FIXME: should do just once
-                println("      length tmp $(length(tmp))")
-                println("        first tmp: $(first(tmp, 3))")
-                println("        last tmp: $(last(tmp, 3))")
+                #println("      length tmp $(length(tmp))")
+                #println("        first tmp: $(first(tmp, 3))")
+                #println("        last tmp: $(last(tmp, 3))")
                 biosonic_expand_rle!(ping_buf, tmp)
                 val = biosonic_float(tmp)
-                println("      length val $(length(val))")
-                println("        first val: $(first(val, 3))")
-                println("        last val: $(last(val, 3))")
-                a[ping_number, :] = val
+                #println("      length val $(length(val))")
+                #println("        first val: $(first(val, 3))")
+                #println("        last val: $(last(val, 3))")
+                a[:, ping_number] = reverse(val)
             else
                 oad(debug, "      ignored, since user specified channel=$channel")
             end
@@ -313,7 +322,22 @@ function read_echosounder(filename::String; channel::Int64=1, beam=:single, debu
     metadata = Dict()
     data = Dict()
     metadata["filename"] = filename
-    data["a"] = transpose(a)
+    metadata["beam"] = beam
+    metadata["sound_speed"] = sound_speed
+    #FIXME metadata["sp"] = sp
+
+    # R/oce depth <- rev(blankedSamples + seq(1, dim(a)[2])) * res@metadata$soundSpeed * res@metadata$samplingDeltat / 2
+    # For distance, see Section 5.2 of Reference 1.
+    # FIXME: start at 0 or 1?
+    # FIXME: get blankedDistance
+    # Compute range. Ref. 1 is not clear on this, referring to information (e.g. 'smpr')
+    # that seems to be in the EPROM but not in the file.  And it's not clear what they
+    # mean by 'ib' -- is it an index?
+    delta_r = sound_speed * sp / 2.0
+    # I think next should start at ib
+    oad(debug, "  sp: $sp, ib: $ib, delta_r: $delta_r (used to compute range)")
+    metadata["range"] = delta_r * range(ib, length=size(a)[1])
+    data["a"] = a
     rval = Echosounder(metadata, data)
     oad(debug, "END read_echosounder()")
     return rval
