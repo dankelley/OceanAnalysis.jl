@@ -119,7 +119,7 @@ function biosonic_float(buf::Vector{UInt8})
     i = 1
     k = 1
     nrval = Int64(floor(nbuf / 2))
-    println("nrval: $nrval")
+    println("           nrval: $nrval")
     rval = Vector{UInt16}(undef, nrval)
     while i < nbuf
         b = reinterpret(UInt16, buf[(i).+(0:1)])[1]
@@ -133,7 +133,7 @@ function biosonic_float(buf::Vector{UInt8})
         k += 1
         i += 2
     end
-    reverse(convert(Vector{Float64}, rval))
+    reverse(convert(Vector{Float64}, rval)) # FIXME do not reverse; it's only for plots in oce
 end
 
 """
@@ -175,6 +175,7 @@ end
 """
 function read_echosounder(filename::String; channel::Int64=1, beam=:single, debug::Int=0)
     oad(debug, "read_echosounder() START")
+    a = nothing # we do this to prevent a matrix being defined twice, later
     if beam != :single
         error("only beam=:single is permitted")
     end
@@ -223,18 +224,20 @@ function read_echosounder(filename::String; channel::Int64=1, beam=:single, debu
             channel_number = convert(Int64, reinterpret(UInt16, buf[(offset).+(5:6)])[1])
             oad(debug, "      channel $channel")
             # number of pings
-            np = convert(Int64, reinterpret(UInt32, buf[(offset).+(7:10)])[1])
-            oad(debug, "      np $np")
-            spp = convert(Int64, reinterpret(UInt16, buf[(offset).+(11:12)])[1])
-            oad(debug, "      spp $spp")
-            push!(channels, (channel_number=channel_number, np=np, spp=spp))
+            np_overall = convert(Int64, reinterpret(UInt32, buf[(offset).+(7:10)])[1])
+            oad(debug, "      np_overall $np_overall")
+            spp_overall = convert(Int64, reinterpret(UInt16, buf[(offset).+(11:12)])[1])
+            oad(debug, "      spp_overall $spp_overall")
+            push!(channels, (channel_number=channel_number, np=np_overall, spp=spp_overall))
             if nrow(channels) > 2
                 @warn "Have more than 2 Channel Descriptor entries"
             end
             # Several other things here can be decoded if required
             # FIXME: set aside space for 3 arrays (???) of size np x spp
-            a = Matrix{Float64}(undef, np, spp)
-            println("a dim: $(size(a))")
+            if a == nothing
+                a = Matrix{Float64}(undef, np_overall, spp_overall)
+                oad(debug, "      Created a[] ($np_overall x $spp_overall) to hold results")
+            end
         elseif code == 0x0036
             oad(debug, "    Extended Channel Descriptor: ignored in this version")
         elseif code == 0x0015
@@ -265,6 +268,7 @@ function read_echosounder(filename::String; channel::Int64=1, beam=:single, debu
                 println("      length val $(length(val))")
                 println("        first val: $(first(val, 3))")
                 println("        last val: $(last(val, 3))")
+                a[ping_number, :] = val
             else
                 oad(debug, "      ignored, since user specified channel=$channel")
             end
@@ -305,11 +309,13 @@ function read_echosounder(filename::String; channel::Int64=1, beam=:single, debu
         offset += 6 + N
         tuple += 1
     end
-    rval = 1
     oad(debug, "channels: $channels")
+    metadata = Dict()
+    data = Dict()
+    metadata["filename"] = filename
+    data["a"] = transpose(a)
+    rval = Echosounder(metadata, data)
     oad(debug, "END read_echosounder()")
-    rval
+    return rval
 end
-#buf = read(expanduser(filename));
-#reinterpret(UInt16, buf[3:4])[1] == 0xffff
 
