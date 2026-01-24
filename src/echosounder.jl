@@ -1,9 +1,147 @@
 """
+    dt4_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
+
+Expand a byte sequence according to the scheme explained in Section 5.3.1 of
+Reference 1.
+
+# Arguments
+
+- `buf::Vector{UInt8}` input buffer, allocated in the calling code to hold `2*ns` bytes, where `ns` is as defined as in Reference 1.
+
+- `rval::Vector{UInt8}` output buffer, allocated in the calling code to hold `2*spp` bytes, where `spp` is defined as in Reference 1.
+
+- `byte_per_sample` either 2 (for single-beam pings) or 4.  The latter case has not been checked with sample data.
+
+- `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
+
+# References
+
+1. C code in section 5.3.1 of BioSonics Advanced Digital Hydroacoustics. “DT4 Data File Format Specification.” BioSonics, May 2017.
+
+"""
+function dt4_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
+    if byte_per_sample != 2
+        @warn "dt4_expand_rle!() not tested on 4-byte samples"
+    end
+    nbuf = length(buf)
+    nrval = length(rval)
+    if debug > 0
+        println("nbuf: $nbuf, nrval: $nrval")
+    end
+    i = 1 # pointer to buf
+    k = 1 # pointer to rval
+    # We need to look at buf_in[i] and also buf_in[i+1]
+    while i < nbuf # FIXME: 4-byte case needs to end earlier
+        if debug > 0 && (i < 5 || i > (nbuf - 5))
+            println("TOP OF WHILE LOOP -- i: $i (nb nbuf: $nbuf)")
+        end
+        #println("  i: $i")
+        b1 = buf[i]
+        i += 1
+        b2 = buf[i]
+        i += 1
+        if byte_per_sample == 4
+            b3 = buf[i]
+            i += 1
+            b4 = buf[i]
+            i += 1
+        end
+        if b2 == 0xff
+            # insert repeated zeros
+            n = b1 + 2
+            while n > 0
+                if debug > 0
+                    println("  repeating for n>0 with current n=$n")
+                end
+                if k < nrval
+                    rval[k] = 0x00
+                    k += 1
+                    rval[k] = 0x00
+                    k += 1
+                    if byte_per_sample == 4
+                        rval[k] = 0x00
+                        k += 1
+                        rval[k] = 0x00
+                        k += 1
+                    end
+                    n -= 1
+                else
+                    if debug > 0
+                        println("FIXME break to prevent overfill (will this ever happen?)")
+                    end
+                    break # prevent overfill (probably will never happen)
+                end
+            end
+        else
+            if k < nrval
+                rval[k] = b1
+                k += 1
+                rval[k] = b2
+                k += 1
+                if byte_per_sample == 4
+                    rval[k] = b3
+                    k += 1
+                    rval[k] = b4
+                    k += 1
+                end
+            else
+                if debug > 0
+                    println("break at line 78")
+                end
+                break
+            end
+        end
+        if debug > 0 && (i < 5 || i > (nbuf - 5))
+            println("BOTTOM OF WHILE LOOP -- i: $i (nb nbuf: $nbuf)")
+        end
+    end
+    # zero-fill to the end of rval
+    while k < nrval
+        if debug > 0
+            println("zero-filling at end (k=$k, nrval=$nrval)")
+        end
+        rval[k] = 0x00
+        k += 1
+        rval[k] = 0x00
+        k += 1
+        if byte_per_sample == 4
+            rval[k] = 0x00
+            k += 1
+            rval[k] = 0x00
+            k += 1
+        end
+    end
+end
+
+function biosonic_float(buf::Vector{UInt8})
+    nbuf = length(buf)
+    println("nbuf: $nbuf")
+    i = 1
+    k = 1
+    nrval = Int64(floor(nbuf / 2))
+    println("nrval: $nrval")
+    rval = Vector{UInt16}(undef, nrval)
+    while i < nbuf
+        b = reinterpret(UInt16, buf[(i).+(0:1)])[1]
+        mantissa = b & 0x0FFF
+        exponent = (b & 0xF000) >> 12
+        if exponent == 0
+            rval[k] = mantissa
+        else
+            rval[k] = (mantissa + 0x1000) << (exponent - 1)
+        end
+        k += 1
+        i += 2
+    end
+    reverse(convert(Vector{Float64}, rval))
+end
+
+"""
     read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, debug=0)
 
     Read data from a Biosonics scientific echosounder.
 
-    This is a very provisional version of the function, which locates what Biosonics calls data tuples, and examines only some of them, and only in shallow ways. At the moment, 'Time' tuples (code 0x000F or 0x0020) are recognized and parsed (although the times are not used yet). The next goal is to handle "Single-Beam Ping" tuples (code 0x0015) first, before (perhaps) considering moving on to others. The R/oce function `read.echosounder()` will be used to check on whether the present function is working.
+This is a very provisional version of the function, which locates what Biosonics calls data tuples, and examines only some of them, and only in shallow ways. At the moment, 'Time' tuples (code 0x000F or 0x0020) are recognized and parsed (although the times are not used yet). The next goal is to handle "Single-Beam Ping" tuples (code 0x0015) first, before (perhaps) considering moving on to others. The R/oce function `read.echosounder()` will be used to check on whether the present function is working.
 
 # Arguments
 
@@ -111,14 +249,6 @@ function read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, d
             if channel_number == channel
                 spp = channels[firstindex(channels.channel_number == channel), :spp]
                 println("*** spp=$spp")
-                if first
-                    look = range(offset + 17, length=2 * ns)
-                    println("FIXME DAN rle @ $(extrema(look)) inclusive")
-                    #look = range(offset + 17, length=2 * ns)
-                    #println(extrema(look))
-                    #println(buf[range(offset + 17, length=2 * ns)])
-                    first = false
-                end
             else
                 oad(debug, "      ignored, since user specified channel=$channel")
             end
