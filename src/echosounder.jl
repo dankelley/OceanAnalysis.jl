@@ -1,5 +1,5 @@
 """
-    dt4_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
+    biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
 
 Expand a byte sequence according to the scheme explained in Section 5.3.1 of
 Reference 1.
@@ -19,14 +19,14 @@ Reference 1.
 1. C code in section 5.3.1 of BioSonics Advanced Digital Hydroacoustics. “DT4 Data File Format Specification.” BioSonics, May 2017.
 
 """
-function dt4_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
+function biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
     if byte_per_sample != 2
-        @warn "dt4_expand_rle!() not tested on 4-byte samples"
+        @warn "biosonic_expand_rle!() not tested on 4-byte samples"
     end
     nbuf = length(buf)
     nrval = length(rval)
     if debug > 0
-        println("nbuf: $nbuf, nrval: $nrval")
+        println("        in biosonic_expand_rle!(), nbuf: $nbuf, nrval: $nrval")
     end
     i = 1 # pointer to buf
     k = 1 # pointer to rval
@@ -115,7 +115,7 @@ end
 
 function biosonic_float(buf::Vector{UInt8})
     nbuf = length(buf)
-    println("nbuf: $nbuf")
+    println("        in biosonic_float(), nbuf: $nbuf")
     i = 1
     k = 1
     nrval = Int64(floor(nbuf / 2))
@@ -137,7 +137,7 @@ function biosonic_float(buf::Vector{UInt8})
 end
 
 """
-    read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, debug=0)
+    read_echosounder(filename::String; channel::Int64=1, beam=:single, debug::Int=0)
 
     Read data from a Biosonics scientific echosounder.
 
@@ -151,7 +151,7 @@ This is a very provisional version of the function, which locates what Biosonics
 
 - `channel` an Int64 giving the channel number to read. The default is 1. In the file named in the Examples section, there are two channels, numbered 1 and 2.
 
-- `tuples` (*temporary keyword*) an Int64 giving the number of tuples to read.  The default value of 0 means to read the whole file. This keyword is mainly to help in development and is likely to be removed when the function is in later stages of development.
+- `beam` a Symbol indicating which type of beam is sought. In the present version, only `:single` is permitted. In a later version, `:dual` and `:split` may also be permitted.
 
 - `debug` an Int64 value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
 
@@ -173,10 +173,12 @@ end
   registratration) online at
   https://www.biosonicsinc.com/support/customer-downloads/
 """
-function read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, debug=0)
+function read_echosounder(filename::String; channel::Int64=1, beam=:single, debug::Int=0)
     oad(debug, "read_echosounder() START")
+    if beam != :single
+        error("only beam=:single is permitted")
+    end
     filename = expanduser(filename)
-    first = true # DEBUGGING DAN
     channels = DataFrame(channel_number=Int64[], np=Int64[], spp=Int64[])
     last_time = unix2datetime(0.0) # overwritten later
     @time buf = read(filename)
@@ -208,11 +210,11 @@ function read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, d
             vmnr = reinterpret(UInt8, buf[offset+20])[1]
             oad(debug, "      File is in DT4 format version $vmjr.$vmnr")
         elseif code == 0x001e
-            oad(debug, "    V3 file header")
+            oad(debug, "    V3 file header: ignored in this version")
         elseif code == 0x0018
-            oad(debug, "    V2 file header")
+            oad(debug, "    V2 file header: ignored in this version")
         elseif code == 0x0001
-            oad(debug, "    V1 file header")
+            oad(debug, "    V1 file header: ignored in this version")
         elseif code == 0x0012
             oad(debug, "    Channel Descriptor")
             # From the sample file:
@@ -234,7 +236,7 @@ function read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, d
             a = Matrix{Float64}(undef, np, spp)
             println("a dim: $(size(a))")
         elseif code == 0x0036
-            oad(debug, "    Extended Channel Descriptor")
+            oad(debug, "    Extended Channel Descriptor: ignored in this version")
         elseif code == 0x0015
             oad(debug, "    Single-Beam Ping")
             channel_number = reinterpret(UInt8, buf[offset+5])[1]
@@ -248,49 +250,60 @@ function read_echosounder(filename::String; channel::Int64=1, tuples::Int64=0, d
             oad(debug, "      ns: $ns")
             if channel_number == channel
                 spp = channels[firstindex(channels.channel_number == channel), :spp]
-                println("*** spp=$spp")
+                println("      spp: $spp")
+                println("      offset: $offset")
+                ping_buf = buf[(offset+16).+(1:(2*ns))]
+                println("      length ping_buf $(length(ping_buf))")
+                println("        first ping_buf $(repr(first(ping_buf, 4)))")
+                println("        last ping_buf  $(repr(last(ping_buf, 4)))")
+                tmp = Array{UInt8}(undef, 2 * spp) # FIXME: should do just once
+                println("      length tmp $(length(tmp))")
+                println("        first tmp: $(first(tmp, 3))")
+                println("        last tmp: $(last(tmp, 3))")
+                biosonic_expand_rle!(ping_buf, tmp)
+                val = biosonic_float(tmp)
+                println("      length val $(length(val))")
+                println("        first val: $(first(val, 3))")
+                println("        last val: $(last(val, 3))")
             else
                 oad(debug, "      ignored, since user specified channel=$channel")
             end
         elseif code == 0x001C
-            oad(debug, "    Dual-Beam Ping")
+            oad(debug, "    Dual-Beam Ping: ignored in this version")
         elseif code == 0x0010
-            oad(debug, "    Split-Beam Ping")
+            oad(debug, "    Split-Beam Ping: ignored in this version")
         elseif code == 0x000F || code == 0x0020
+            oad(debug, "    Time (type 0x000f or 0x0020)")
             # For reference, oce/create_data/echosounder/test_for_julia.R gives:
             # [1] "2008-07-01 16:39:40.900 UTC" "2008-07-01 16:39:41.140 UTC"
             # [3] "2008-07-01 16:39:41.389 UTC" "2008-07-01 16:39:41.630 UTC"
             # [5] "2008-07-01 16:39:41.880 UTC" "2008-07-01 16:39:42.119 UTC"
-            oad(debug, "    Time (type 0x000f or 0x0020)")
             seconds = reinterpret(UInt32, buf[(offset).+(5:8)])[1]
             subseconds = 0.01 * reinterpret(UInt8, buf[offset+9])[1]
             last_time = unix2datetime(seconds + subseconds)
             oad(debug, "      last_time: $last_time")
         elseif code == 0x0011
-            oad(debug, "    Navigation String")
+            oad(debug, "    Navigation String: ignored in this version")
         elseif code == 0x0030
-            oad(debug, "    Timestamped Navigation String")
+            oad(debug, "    Timestamped Navigation String: ignored in this version")
         elseif code == 0x0031
-            oad(debug, "    Transducer Orientation")
+            oad(debug, "    Transducer Orientation: ignored in this version")
         elseif code == 0x0032
-            oad(debug, "    Bottom Pick")
+            oad(debug, "    Bottom Pick: ignored in this version")
         elseif code == 0x0033
-            oad(debug, "    Single Echoes")
+            oad(debug, "    Single Echoes: ignored in this version")
         elseif code == 0x0034
-            oad(debug, "    Comment")
+            oad(debug, "    Comment: ignored in this version")
         elseif code == 0xFFFE
             oad(debug, "    End of File")
         else
             oad(debug, "    UNRECOGNIZED CODE $(repr(code))")
         end
-        data = buf[range(offset + 4, length=N)]
+        #data = buf[range(offset + 4, length=N)]
         N6 = convert(Int64, reinterpret(UInt16, buf[(offset+4+N).+(1:2)])[1])
         N6 == N + 6 || error("tuple does not end correctly")
         offset += 6 + N
         tuple += 1
-        if tuples > 0 && tuple > tuples
-            break
-        end
     end
     rval = 1
     oad(debug, "channels: $channels")
