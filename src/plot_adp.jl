@@ -47,7 +47,8 @@ function plot_adp(adp::Adp; which=:velocities, debug::Int64=0, kwargs...)
         clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)])) # centre colours on z=0
         rval = heatmap(t, y, z,
             title=titles[beam], titlelocation=:right,
-            framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
+            framestyle=:box, tickdirection=:out,
+            guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
             ylab="Distance [m]", background_color_inside=:gray70, c=c, clim=clim; kwargs...)
         oad(debug, "END plot_adp()")
         return (rval)

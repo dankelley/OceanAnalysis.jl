@@ -37,6 +37,21 @@ plot!([-1; 1], [-a; a], color=:red, label=false, dpi=150)
 ![Acoustic-Doppler Profiler plot](adp_rdi_heatmap.png)
 ![Acoustic-Doppler Profiler plot](adp_rdi_uv.png)
 
+## Echosounder heatmap
+
+This uses a private data file acquired using a Biosonics scientific echosounder.
+
+```julia
+using OceanAnalysis, Plots
+f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4"
+if isfile(f)
+    e = read_echosounder(f)
+    plot_echosounder(e)
+    #savefig("echosounder.png")
+end
+```
+![Echosounder plot](echosounder.png)
+
 ## Satellite SST
 
 The AMSR satellite provides several data streams, including sea-surface
@@ -79,18 +94,16 @@ diagrams.
 
 ```julia
 # Read and plot a built-in CTD file
-using OceanAnalysis, Plots, Measures, Dates
+using OceanAnalysis, Dates, Measures, Plots, Printf
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "ctd.cnv")
-ctd = read_ctd_cnv(filename)
+ctd = read_ctd_cnv(filename);
 p1 = plot_profile(ctd, which="CT");
 p2 = plot_profile(ctd, which="SA");
 p3 = plot_profile(ctd, which="sigma0");
 p4 = plot_TS(ctd);
-title = "CTD observations at " *
-        "$(round(ctd.metadata["latitude"],digits=3))N and " *
-        "$(round(ctd.metadata["longitude"],digits=3))E" *
-        " on $(Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))"
+title = @sprintf("CTD observations at %.3fN and %.3fE on %s",
+    ctd["latitude"], ctd["longitude"], ctd["time"])
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
 #savefig("ctd_diagram.png")
@@ -101,11 +114,11 @@ plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
 ## Argo search
 
 The following shows how to map Argo profile locations made within 200 km of
-Sable Island, during the past year. It also prints the IDs of those floats.
+Sable Island, during the past year.
 
 ```julia
 # Show Argo profiles within 200 km of Sable Island in last year
-using OceanAnalysis, CSV, Dates, DataFrames, Plots
+using OceanAnalysis, CSV, Dates, DataFrames, Plots, Printf
 # Get the index
 index_file = get_argo_index("~/data/argo")
 index_all = read_argo_index(index_file) # 3.2e6 profiles
@@ -128,10 +141,10 @@ aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
 scale = radius / 111.0
 plot_stations(index.longitude, index.latitude,
     xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
-    ylims=SI_lat .+ scale .* (-1.2, 1.2),
-    tickdirection=:out, framestyle=:box, legend=false)
+    ylims=SI_lat .+ scale .* (-1.2, 1.2))
 float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
-title!("$(length(index.file)) profiles of $(length(float_IDs)) floats", titlefontsize=9)
+t = @sprintf("%d profiles of %d floats", length(index.file), length(float_IDs))
+title!(t, titlefontsize=9)
 scale_bar(100, :right, :top)
 #savefig("argo_search.png")
 ```
@@ -145,7 +158,7 @@ float.
 
 ```julia
 # Plot a float trajectory with colour for sequence number
-using OceanAnalysis, Plots, Statistics
+using OceanAnalysis, Plots, Printf, Statistics
 ID = r"D4902911" # focus on this ID
 index_file = get_argo_index("~/data/argo");
 index_all = read_argo_index(index_file) # 3.2e6 profiles
@@ -155,13 +168,14 @@ lon, lat = index.longitude, index.latitude
 plot(lon, lat,
     aspect_ratio=1.0 / cos(mean(lat) * pi / 180),
     framestyle=:box, color=:gray, dpi=200,
-    title="Argo float $(ID.pattern) coloured by cycle index", titlefontsize=9)
+    title=@sprintf("Argo float %s coloured by cycle index", ID.pattern),
+    titlefontsize=9)
 colors = cgrad(:turbo)
 scatter!(lon, lat, marker_z=1:length(lon),
     markersize=3, markerstyle=:circle, color=colors)
 # Add land and 1km isobath
 plot_coastline!(coastline())
-topo_file = get_topography(-110., -30, 20, 60, resolution=30,
+topo_file = get_topography(-110.0, -30, 20, 60, resolution=30,
     destdir="~/data/topo")
 topo = read_topography(topo_file)
 contour!(topo.metadata["longitude"], topo.metadata["latitude"],

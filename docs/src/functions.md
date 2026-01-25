@@ -45,6 +45,7 @@ OceanAnalysis.plot_adp
 OceanAnalysis.plot_amsr
 OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
+OceanAnalysis.plot_echosounder
 OceanAnalysis.plot_profile
 OceanAnalysis.plot_section
 OceanAnalysis.plot_stations

@@ -18,6 +18,7 @@ Release notes:
 - [`grid_ctd`](@ref) for gridding Ctd data.
 - [`grid_section`](@ref) for gridding Section data.
 - [`plot_adp`](@ref) for plotting acoustic-Doppler profiler data.
+- [`plot_echosounder`](@ref) for plotting Biosonics echosounder data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.
 - [`plot_stations`](@ref) for plotting sampling locations.
 - [`read_adp_rdi`](@ref) for reading RDI acoustic-Doppler profiler data.

@@ -49,6 +49,7 @@ export plot_adp
 export plot_amsr
 export plot_coastline
 export plot_coastline!
+export plot_echosounder
 export plot_profile
 export plot_section
 export plot_stations
