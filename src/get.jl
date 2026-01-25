@@ -151,7 +151,7 @@ function get_element(x::OA, element::String; debug::Int64=0)
         if element == "spiciness0"
             return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
         end
-    elseif x isa Adp
+    elseif x isa Adp || x isa Echosounder
         if element in keys(x.metadata)
             return x.metadata[element]
         elseif element in keys(x.data)

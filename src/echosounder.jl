@@ -186,11 +186,12 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
     end
     filename = expanduser(filename)
     channels = DataFrame(channel_number=Int64[], np=Int64[], spp=Int64[])
-    last_time = unix2datetime(0.0) # overwritten later
-    @time buf = read(filename)
+    #first_time::DateTime = unix2datetime(0.0) # overwritten later
+    buf = read(filename)
     file_size = length(buf)
     offset = 0
     tuple = 1
+    elapsed_time_ms = Vector{UInt64}() # I assume it's unsigned
     while offset < file_size
         N = convert(Int64, reinterpret(UInt16, buf[(offset).+(1:2)])[1])
         code = reinterpret(UInt16, buf[(offset).+(3:4)])[1]
@@ -257,6 +258,7 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
                 ping_number = reinterpret(UInt32, buf[(offset).+(7:10)])[1]
                 oad(debug, "      ping_number: $ping_number")
                 ptm = reinterpret(UInt32, buf[(offset).+(11:14)])[1]
+                push!(elapsed_time_ms, ptm)
                 oad(debug, "      ptm: $ptm (msec since start)")
                 ns = reinterpret(UInt16, buf[(offset).+(15:16)])[1]
                 #oad(debug, "      ns: $ns (recall spp: $(channels[!,channel].spp))")
@@ -291,10 +293,12 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
             # [1] "2008-07-01 16:39:40.900 UTC" "2008-07-01 16:39:41.140 UTC"
             # [3] "2008-07-01 16:39:41.389 UTC" "2008-07-01 16:39:41.630 UTC"
             # [5] "2008-07-01 16:39:41.880 UTC" "2008-07-01 16:39:42.119 UTC"
-            seconds = reinterpret(UInt32, buf[(offset).+(5:8)])[1]
-            subseconds = 0.01 * reinterpret(UInt8, buf[offset+9])[1]
-            last_time = unix2datetime(seconds + subseconds)
-            oad(debug, "      last_time: $last_time")
+            if !@isdefined first_time
+                seconds = reinterpret(UInt32, buf[(offset).+(5:8)])[1]
+                subseconds = 0.01 * reinterpret(UInt8, buf[offset+9])[1]
+                global first_time = unix2datetime(seconds + subseconds)
+                oad(debug, "      first_time: $first_time")
+            end
         elseif code == 0x0011
             oad(debug, "    Navigation String: ignored in this version")
         elseif code == 0x0030
@@ -337,6 +341,7 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
     # I think next should start at ib
     oad(debug, "  sp: $sp, ib: $ib, delta_r: $delta_r (used to compute range)")
     metadata["range"] = delta_r * range(ib, length=size(a)[1])
+    metadata["time"] = first_time .+ Millisecond.(elapsed_time_ms)
     data["a"] = a
     rval = Echosounder(metadata, data)
     oad(debug, "END read_echosounder()")

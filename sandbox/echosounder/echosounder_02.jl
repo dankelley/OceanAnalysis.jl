@@ -4,6 +4,9 @@ e = read_echosounder(f);#; debug=1);
 
 nrow, ncol = size(e.data["a"])
 # FIXME: define metadata["time"], then use it in next plot line
-heatmap(1:ncol, e.metadata["range"], log10.(e.data["a"]), c=:turbo, yflip=true)
+heatmap(e["time"], e["range"], log10.(e.data["a"]), yflip=true)
 savefig("echosounder_02.png")
 
+time = emetadata["time"]
+println(first(time, 6))
+println(last(time, 6))
