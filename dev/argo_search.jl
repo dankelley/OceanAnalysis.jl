@@ -1,5 +1,5 @@
 # Show Argo profiles within 200 km of Sable Island in last year
-using OceanAnalysis, CSV, Dates, DataFrames, Plots
+using OceanAnalysis, CSV, Dates, DataFrames, Plots, Printf
 # Get the index
 index_file = get_argo_index("~/data/argo")
 index_all = read_argo_index(index_file) # 3.2e6 profiles
@@ -22,9 +22,9 @@ aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
 scale = radius / 111.0
 plot_stations(index.longitude, index.latitude,
     xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
-    ylims=SI_lat .+ scale .* (-1.2, 1.2),
-    tickdirection=:out, framestyle=:box, legend=false)
+    ylims=SI_lat .+ scale .* (-1.2, 1.2))
 float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
-title!("$(length(index.file)) profiles of $(length(float_IDs)) floats", titlefontsize=9)
+t = @sprintf("%d profiles of %d floats", length(index.file), length(float_IDs))
+title!(t, titlefontsize=9)
 scale_bar(100, :right, :top)
 savefig("argo_search.png")
