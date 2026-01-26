@@ -44,11 +44,8 @@ julia> names(d.data)
  "temperature"
  "pressure"
  "scan"
- "timeS"
- "pr"
+ "time_seconds"
  "depS"
- "t090"
- "sal00"
  "flag"
 ```
 """
