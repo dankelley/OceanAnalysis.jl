@@ -240,8 +240,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     end
     nE_ = length(E_)
     oad(debug, "  About to read header information in first ensemble.")
-    println("about to read header")
-    @time metadata = read_adp_rdi_header(buf, E_[1])
+    metadata = read_adp_rdi_header(buf, E_[1])
     data_offsets = metadata["data_offsets"]
     metadata["filename"] = filename
     data = Dict()
@@ -255,8 +254,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
     0x00 == buf[VL_[1]+1]
     # comb is used for getting two-byte entries
-    println("creating comb")
-    @time comb2 = sort([VL_; VL_ .+ 1])
+    comb2 = sort([VL_; VL_ .+ 1])
     #println("time of ensemble creation step 1")
     #@time buf2 = buf[comb2.+2] # sort([VL_ .+ 2; VL_ .+ 3])]
     #println("time of ensemble creation step 2")

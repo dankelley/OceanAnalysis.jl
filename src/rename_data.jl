@@ -15,31 +15,46 @@ A String or vector of String items, holding new names.  If any of the converted 
 
 # Examples
 
-```julia
-using OceanAnalysis
-rename_data("CTDPRS")
-rename_data(["CTDPRS", "CTDTMP"])
-rename_data(["CTDPRS", "CTDTMP", "CTDTMP_FLAG"])
+```juliadoc
+julia> using OceanAnalysis
+julia> rename_data("CTDPRS")
+"pressure"
+
+julia> rename_data(["CTDPRS", "CTDTMP"])
+2-element Vector{String}:
+ "pressure"
+ "temperature"
+
+julia> rename_data(["CTDPRS", "CTDTMP", "CTDTMP_FLAG"])
+3-element Vector{String}:
+ "pressure"
+ "temperature"
+ "temperature_flag"
 ```
 
 """
 function rename_data(names::Union{String,Vector{String}}; number_replicates::Bool=true)
-    # Make names a vector, to simplify things. This is undone at the end.
-    if !(names isa Vector)
-        names = [names]
-    end
+    # FIXME: add new items to the following
     rval = replace.(names,
         "CTDPRS" => "pressure",
         "CTDTMP" => "temperature",
         "CTDSAL" => "salinity",
         "CTDOXY" => "oxygen",
-        "PSAL" => "salinity",
+        "JULD" => "time",
+        "DOXY" => "oxygen",
+        "LATITUDE" => "latitude",
+        "LONGITUDE" => "longitude",
         "PRES" => "pressure",
+        "PSAL" => "salinity",
         "TEMP" => "temperature",
+        "_ADJUSTED" => "_adjusted",
+        "_ERROR" => "_error",
         "_FLAG_W" => "_flag",
-        "_FLAG" => "_flag")
+        "_FLAG" => "_flag",
+        "_QC" => "_qc"
+    )
     # Optionally, handle replicates
-    if number_replicates && length(rval) > 1
+    if number_replicates && (rval isa Vector)
         tally = Dict{String,Int}()
         RVAL = String[]
         for s in rval
@@ -52,10 +67,6 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
             end
         end
         rval = RVAL
-    end
-    # return a String, if a String given (i.e. remove vectorization, if done here)
-    if length(rval) == 1
-        rval = rval[1]
     end
     rval
 end

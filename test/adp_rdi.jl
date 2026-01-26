@@ -1,10 +1,9 @@
 using Dates, Plots, OceanAnalysis, Test
 # The tests are against values from R/oce.
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
-println("time results for reading beam, beam->xyz, and xyz->enu")
-@time beam = read_adp_rdi(file);
-@time xyz = beam_to_xyz(beam);
-@time enu = xyz_to_enu(xyz);
+beam = read_adp_rdi(file);
+xyz = beam_to_xyz(beam);
+enu = xyz_to_enu(xyz);
 
 # Test some metadata
 @test beam["beam_angle"] == 20.0
