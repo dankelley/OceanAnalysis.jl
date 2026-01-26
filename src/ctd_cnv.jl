@@ -192,10 +192,9 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
         data_names_new = rename_data(data_names)
         changed = data_names_new .!== data_names
         if sum(changed) > 0
-            oad(debug, "    renamed $(sum(changed)) data columns")
-            oad(debug, "      OLD names: $data_names")
-            oad(debug, "      NEW names: $data_names_new")
             data_names = data_names_new
+            oad(debug, "    renamed $(sum(changed)) data columns, as follows")
+            oad(debug, "      $(data_names_orig .=> data_names)")
         else
             oad(debug, "    no columns were renamed")
         end

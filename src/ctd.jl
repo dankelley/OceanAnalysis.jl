@@ -89,7 +89,7 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     rval = Ctd(metadata, data)
     if add_teos
         oad(debug, "    inserting TEOS-10 values into data")
-        rval = set_teos(rval, debug=debug)
+        rval = set_teos(rval, debug=increment_debug(debug))
     end
     oad(debug, "END as_ctd()")
     rval
@@ -112,7 +112,7 @@ An error is reported if the `x.data` lacks `salinity`, `temperature` or
 `pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
 """
 function set_teos(x::OA; debug::Int64=0)
-    oad(debug, "insert_teos10 START")
+    oad(debug, "set_teos10 START")
     metadata = copy(x.metadata)
     data = copy(x.data)
     metadata_names = keys(metadata)
