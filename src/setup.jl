@@ -68,6 +68,7 @@ export read_ctd_rsk
 export read_echosounder
 export read_section
 export read_topography
+export rename_data
 export salinity_from_conductivity
 export SA
 export scale_bar

@@ -64,6 +64,7 @@ OceanAnalysis.read_ctd_rsk
 OceanAnalysis.read_echosounder
 OceanAnalysis.read_section
 OceanAnalysis.read_topography
+OceanAnalysis.rename_data
 OceanAnalysis.SA
 OceanAnalysis.scale_bar
 OceanAnalysis.set_teos

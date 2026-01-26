@@ -25,6 +25,7 @@ Release notes:
 - [`read_ctd_exchange`](@ref) for reading CTD data in 'exchange' format (used by many data servers)
 - [`read_echosounder`](@ref) for reading Biosonics echosounder data.
 - [`read_section`](@ref) for reading Section data.
+- [`rename_data`](@ref) for converting data names to standardized names.
 - [`xyz_to_enu`](@ref) for converting RDI acoustic-Doppler data from xyz coordinates to enu coordinates.
 
 ## Changelog from version 0.2.0 to version 0.2.1

@@ -89,9 +89,13 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
     if ismissing(filename)
         error("must give 'filename'")
     end
-    oad(debug, "read_argo(<filename>, column=$column, require_valid=$require_valid, debug=$debug) START")
+    oad(debug, "read_argo(<filename>; column=$column, require_valid=$require_valid, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d
+        # Find names of the data columns (see https://github.com/dankelley/OceanAnalysis.jl/issues/60)
+        data_vars = [v for v in keys(d) if "N_LEVELS" in dimnames(d[v])]
+        oad(debug, "    this file has the following data columns: $(data_vars)")
+        # FIXME: can likely remove several of the next few lines
         oad(debug, "    about to read salinity, temperature and pressure data.")
         salinity = get_nc_value(d, "PSAL", require_valid)
         oad(debug, "    read ", length(salinity), " salinity values, starting with ",
