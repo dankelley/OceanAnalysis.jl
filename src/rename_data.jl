@@ -51,7 +51,17 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
         "_ERROR" => "_error",
         "_FLAG_W" => "_flag",
         "_FLAG" => "_flag",
-        "_QC" => "_qc"
+        "_QC" => "_qc",
+        "c0mS/cm" => "conductivty",
+        "c1mS/cm" => "conductivity",
+        "pr" => "pressure",
+        "sal00" => "salinity",
+        "timeS" => "time_seconds",
+        "t090" => "temperature",
+        "t090" => "temperature",
+        "t090C" => "temperature",
+        "t190C" => "temperature",
+        "tv290C" => "temperature"
     )
     # Optionally, handle replicates
     if number_replicates && (rval isa Vector)

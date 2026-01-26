@@ -1,16 +1,17 @@
 """
-    read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
+    read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)
 
 Read a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 
 Returns a [`Ctd`](@ref) object that holds `metadata` (a Dict) and `data` (a
-DataFrame). `metadata` item holds `header` (a vector of strings, one per line
-from the start down to a line containing `#END`), plus some particular items
-scanned from that header. `data` holds the columnar data read from the file,
-along with renamed values in standard nomenclature. At present, the only
-renamed items are salinity, temperature, and pressure. Note that if the data
-file indicates temperature is on the T68 scale, then this is converted
-to the standard modern scale, T90, before saving as `temperature`. 
+DataFrame). `metadata` is a Dict holding `header` (a vector of strings, one per
+line from the start down to a line containing `#END`), plus some particular
+items scanned from that header. `data` is a DataFrame holding the columnar data
+read from the file. If `rename=true`, then [`rename_data`](@ref) is used to
+rename some of the columns in `data` to better match oceanographic conventions
+(e.g. `"pr"` becomes `"pressure"`). If the data file indicates temperature is
+on the T68 scale, then this is converted to the standard modern scale, T90,
+before saving as `temperature`. 
 
 A message is printed if no data in the file are labelled with names that are
 recognized as salinity, temperature, or pressure, because these quantities are
@@ -51,16 +52,16 @@ julia> names(d.data)
  "flag"
 ```
 """
-function read_ctd_cnv(filename::String; add_teos=true, debug::Int64=0)
+function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)
     #!ismissing(filename) || error("please supply 'filename'")
     filename = expanduser(filename)
     open(filename) do file
-        read_ctd_cnv(file, filename; add_teos=add_teos, debug=increment_debug(debug))
+        read_ctd_cnv(file, filename; rename=rename, add_teos=add_teos, debug=increment_debug(debug))
     end
 end
 
 # Internal function used byRead a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
-function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debug::Int64=0)
+function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)
     oad(debug, "read_ctd_cnv(\"", filename, "\", ...) START")
     lines = readlines(stream)
     #oad(debug, "    $(length(lines)) lines in file")
@@ -174,7 +175,6 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debu
         error("ncols=$ncols does not match length(data_names)=$(length(data_names))")
     end
     nrows = length(lines) - data_start + 1
-    oad(debug, "    datanames: $data_names")
     oad(debug, "    reading nrows=$(nrows), ncols=$(ncols)")
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
@@ -187,50 +187,69 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; add_teos=true, debu
     oad(debug, "    assembling data (a DataFrame)")
     data = DataFrame(data, data_names, makeunique=true)
     data_names = names(data)
-    oad(debug, "    data names: ", data_names)
-    # Add standard columns
-    if "pr" in data_names
-        data.pressure = data.pr
-    elseif "prdM" in data_names
-        data.pressure = data.prdM
-    elseif "prDM" in data_names
-        data.pressure = data.prDM
-    elseif "prSM" in data_names
-        data.pressure = data.prSM
-    elseif "depSM" in data_names
-        data.pressure = pressure_from_depth.(data.depSM)
-    else
-        error("No 'pr', 'prdM', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
-    end
-    if "c0mS/cm" in data_names # FIXME: allow S/m etc; convert here to store mS/cm for gsw
-        data.conductivity = data[:, "c0mS/cm"]
-    elseif "c1mS/cm" in data_names
-        data.conductivity = data[:, "c1mS/cm"]
-    end
-    if "t068" in data_names
-        data.temperature = T90_from_T68.(data.t068)
-    elseif "t090" in data_names
-        data.temperature = data.t090
-    elseif "t090C" in data_names
-        data.temperature = data.t090C
-    elseif "t190C" in data_names
-        data.temperature = data.t190C
-    elseif "tv290C" in data_names
-        data.temperature = data.tv290C
-    elseif "tv268C" in data_names
-        data.temperature = data.tv268C
-    else
-        error("No 't068', 't090', 't090C', 't190C', 't290C', 'tv268C' in CNV file; found ", names(data))
-    end
-    if "sal00" in data_names
-        data.salinity = data.sal00
-    else
-        if "conductivity" in names(data)
-            data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
+    data_names_orig = data_names
+    if rename
+        data_names_new = rename_data(data_names)
+        changed = data_names_new .!== data_names
+        if sum(changed) > 0
+            oad(debug, "    renamed $(sum(changed)) data columns")
+            oad(debug, "      OLD names: $data_names")
+            oad(debug, "      NEW names: $data_names_new")
+            data_names = data_names_new
         else
-            error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
+            oad(debug, "    no columns were renamed")
         end
     end
+    # FIXME: rename also prdM prDM prSM depSM
+    # if "pr" in data_names
+    #     data.pressure = data.pr
+    # elseif "prdM" in data_names
+    #     data.pressure = data.prdM
+    # elseif "prDM" in data_names
+    #     data.pressure = data.prDM
+    # elseif "prSM" in data_names
+    #     data.pressure = data.prSM
+    # elseif "depSM" in data_names
+    #     data.pressure = pressure_from_depth.(data.depSM)
+    # else
+    #     error("No 'pr', 'prdM', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
+    # end
+    #if "c0mS/cm" in data_names # FIXME: allow S/m etc; convert here to store mS/cm for gsw
+    #    data.conductivity = data[:, "c0mS/cm"]
+    #elseif "c1mS/cm" in data_names
+    #    data.conductivity = data[:, "c1mS/cm"]
+    #end
+    #if "t068" in data_names
+    #    data.temperature = T90_from_T68.(data.t068)
+    #elseif "t090" in data_names
+    #    data.temperature = data.t090
+    #elseif "t090C" in data_names
+    #    data.temperature = data.t090C
+    #elseif "t190C" in data_names
+    #    data.temperature = data.t190C
+    #elseif "tv290C" in data_names
+    #    data.temperature = data.tv290C
+    #elseif "tv268C" in data_names
+    #    data.temperature = data.tv268C
+    #else
+    #    error("No 't068', 't090', 't090C', 't190C', 't290C', 'tv268C' in CNV file; found ", names(data))
+    #end
+    #println(first(data, 3))
+    rename!(data, data_names_orig .=> data_names)
+    #println(first(data, 3))
+    if !("salinity" in data_names) && (("conductivity" in data_names) && ("temperature" in data_names) && ("pressure" in data_names))
+        println("DAN DAN ")
+        data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
+    end
+    #if "sal00" in data_names
+    #    data.salinity = data.sal00
+    #else
+    #    if "conductivity" in names(data)
+    #        data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
+    #    else
+    #        error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
+    #    end
+    #end
     oad(debug, "    calling as_ctd() to create a Ctd object, as the skeleton of the return value")
     if isnan(latitude) || isnan(longitude)
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
