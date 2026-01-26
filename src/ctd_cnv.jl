@@ -39,7 +39,7 @@ julia> d.metadata["longitude"]
 -63.643883333333335
 
 julia> names(d.data)
-10-element Vector{String}:
+7-element Vector{String}:
  "salinity"
  "temperature"
  "pressure"
