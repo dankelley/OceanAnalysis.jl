@@ -99,56 +99,11 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
         name_list = Dict(data_names .=> data_names_original)
         data = DataFrame()
         for key in keys(name_list)
-            println(key)
             if contains(key, r"_qc$")
                 data[!, key] = parse.(Int, Char.(get_nc_value(d, name_list[key])))
             else
                 data[!, key] = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_list[key]))
             end
-        end
-        if debug > 0
-            println("FIXME DAN check on _qc:")
-            println(first(data, 10))
-        end
-        # FIXME: the _QC items are stored as strings in these NetCDF files, and the strings are like '1',
-        # '2', etc., so we convert them to integers
-        if false
-            println(name_list)
-            # FIXME: can likely remove several of the next few lines
-            println("FIXME: rewrite the S,T,p code to instead read everything")
-            oad(debug, "    about to read salinity, temperature and pressure data.")
-            salinity = get_nc_value(d, "PSAL")
-            oad(debug, "    read ", length(salinity), " salinity values, starting with ",
-                first(salinity, 2))
-            column_length = length(salinity)
-            temperature = get_nc_value(d, "TEMP")
-            if length(temperature) != column_length
-                error("salinity and temperature have different lengths (",
-                    column_length, " and ", length(temperature), ")")
-            end
-            oad(debug, "    read ", length(temperature), " temperature values, starting with ",
-                first(temperature, 2))
-            pressure = get_nc_value(d, "PRES")
-            if length(pressure) != column_length
-                error("salinity and pressure have different lengths (",
-                    column_length, " and ", length(pressure), ")")
-            end
-            oad(debug, "    read ", length(pressure), " pressure values, starting with ",
-                first(pressure, 2))
-            longitude = get_nc_value(d, "LONGITUDE")
-            if ismissing(longitude)
-                println("read_argo() found missing longitude")
-            end
-            oad(debug, "    read longitude: $longitude")
-            latitude = get_nc_value(d, "LATITUDE")
-            if ismissing(latitude)
-                println("read_argo() found missing latitude")
-            end
-            oad(debug, "    read latitude: $latitude")
-            # Non-numeric items cannot be retrieved with get_nc_value(), so we get
-            # them directly.
-            time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
-            oad(debug, "    read time: $time")
         end
         longitude = get_nc_value(d, "LONGITUDE")
         if ismissing(longitude)
