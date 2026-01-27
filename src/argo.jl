@@ -103,7 +103,7 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
             if contains(key, r"_qc$")
                 data[!, key] = parse.(Int, Char.(get_nc_value(d, name_list[key])))
             else
-                data[!, key] = get_nc_value(d, name_list[key])
+                data[!, key] = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_list[key]))
             end
         end
         if debug > 0
