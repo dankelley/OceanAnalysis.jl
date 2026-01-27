@@ -1,5 +1,7 @@
 """
-    Transform an item from a NetCDF file into a more useable object
+    get_nc_value(nc, name; require_valid=false)
+
+Transform an item from a NetCDF file into a more useable object.
 
 Any missing values are converted to NaN.  This function is designed only for
 numerical values, not strings or other types.
@@ -10,9 +12,11 @@ numerical values, not strings or other types.
 
 - `name` the name of an object contained in `nc`.
 
+# Keywords
+
 - `require_value` boolean value indicating whether to report an error if the desired element consists entirely of bad values.
 """
-function get_nc_value(nc, name, require_valid=true)
+function get_nc_value(nc, name; require_valid=false)
     if !(name in keys(nc))
         error("this NetCDF file does not contain a data element named ", name)
     end

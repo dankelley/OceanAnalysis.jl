@@ -21,8 +21,7 @@ end
 
 
 """
-    read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
-        require_valid::Bool=true, debug::Int64=0)
+    read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug::Int64=0)
 
 Read an Argo file and return a [`Ctd`](@ref) object that holds salinity,
 temperature, pressure (and derived columns) but no other columns from the file.
@@ -32,14 +31,6 @@ This function is in an early stage of development; please report problems as
 The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
 whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
 to the `data` portion of the return value.
-
-If `require_valid` is true (the default) then an error is reported if the file
-lacks one of three required data columns, or either longitude or latitude.  An
-error is also reported if any of these items consists entirely of missing
-values. This is because such files are unlikely to be of much use. In some
-cases, setting `require_valid` to false may permit the file to be read, but
-this has not been tested, since the results in such cases are not likely to be
-of practical use.
 
 Set `debug` to a positive integer to cause `read_argo()` to print messages
 during processing. This can be handy if problems arise.
@@ -84,52 +75,85 @@ julia> first(d.data,3)
    3 │   34.912       19.524      2.0   35.0776  19.5187  24.8237     3.31669
 ```
 """
-function read_argo(filename::String; column::Int64=1, add_teos::Bool=true,
-    require_valid::Bool=true, debug::Int64=0)
+function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug::Int64=0)
     if ismissing(filename)
         error("must give 'filename'")
     end
-    oad(debug, "read_argo(<filename>; column=$column, require_valid=$require_valid, debug=$debug) START")
+    oad(debug, "read_argo(<filename>; column=$column, debug=$debug) START")
     local rval = nothing
     NCDataset(filename, "r") do d
         # Find names of the data columns (see https://github.com/dankelley/OceanAnalysis.jl/issues/60)
-        data_vars = [v for v in keys(d) if "N_LEVELS" in dimnames(d[v])]
-        oad(debug, "    this file has the following data columns: $(data_vars)")
-        # FIXME: can likely remove several of the next few lines
-        oad(debug, "    about to read salinity, temperature and pressure data.")
-        salinity = get_nc_value(d, "PSAL", require_valid)
-        oad(debug, "    read ", length(salinity), " salinity values, starting with ",
-            first(salinity, 2))
-        column_length = length(salinity)
-        temperature = get_nc_value(d, "TEMP", require_valid)
-        if length(temperature) != column_length
-            error("salinity and temperature have different lengths (",
-                column_length, " and ", length(temperature), ")")
+        data_names_original = [v for v in keys(d) if "N_LEVELS" in dimnames(d[v])]
+        oad(debug, "    column names in file: $(data_names_original)")
+        data_names = rename_data(data_names_original)
+        oad(debug, "    after renaming, have data_names: $(data_names)")
+        # Insist that salinity, temperature and pressure are found.
+        found = sum(in.(data_names, (Set(["salinity", "temperature", "pressure"]),)))
+        if found != 3
+            if debug == 0
+                error("Cannot find salinity, temperature or pressure in $(filename); try rerunning with debug=1 to learn more")
+            else
+                error("Cannot find salinity, temperature or pressure in $(filename)")
+            end
         end
-        oad(debug, "    read ", length(temperature), " temperature values, starting with ",
-            first(temperature, 2))
-        pressure = get_nc_value(d, "PRES", require_valid)
-        if length(pressure) != column_length
-            error("salinity and pressure have different lengths (",
-                column_length, " and ", length(pressure), ")")
+        name_list = Dict(data_names .=> data_names_original)
+        data = DataFrame()
+        for key in keys(name_list)
+            data[!, key] = get_nc_value(d, name_list[key])
         end
-        oad(debug, "    read ", length(pressure), " pressure values, starting with ",
-            first(pressure, 2))
-        longitude = get_nc_value(d, "LONGITUDE", require_valid)
+        # FIXME: the _QC items are stored as strings in these NetCDF files, and the strings are like '1',
+        # '2', etc., so we convert them to integers
+        if false
+            println(name_list)
+            # FIXME: can likely remove several of the next few lines
+            println("FIXME: rewrite the S,T,p code to instead read everything")
+            oad(debug, "    about to read salinity, temperature and pressure data.")
+            salinity = get_nc_value(d, "PSAL")
+            oad(debug, "    read ", length(salinity), " salinity values, starting with ",
+                first(salinity, 2))
+            column_length = length(salinity)
+            temperature = get_nc_value(d, "TEMP")
+            if length(temperature) != column_length
+                error("salinity and temperature have different lengths (",
+                    column_length, " and ", length(temperature), ")")
+            end
+            oad(debug, "    read ", length(temperature), " temperature values, starting with ",
+                first(temperature, 2))
+            pressure = get_nc_value(d, "PRES")
+            if length(pressure) != column_length
+                error("salinity and pressure have different lengths (",
+                    column_length, " and ", length(pressure), ")")
+            end
+            oad(debug, "    read ", length(pressure), " pressure values, starting with ",
+                first(pressure, 2))
+            longitude = get_nc_value(d, "LONGITUDE")
+            if ismissing(longitude)
+                println("read_argo() found missing longitude")
+            end
+            oad(debug, "    read longitude: $longitude")
+            latitude = get_nc_value(d, "LATITUDE")
+            if ismissing(latitude)
+                println("read_argo() found missing latitude")
+            end
+            oad(debug, "    read latitude: $latitude")
+            # Non-numeric items cannot be retrieved with get_nc_value(), so we get
+            # them directly.
+            time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
+            oad(debug, "    read time: $time")
+        end
+        longitude = get_nc_value(d, "LONGITUDE")
         if ismissing(longitude)
             println("read_argo() found missing longitude")
         end
         oad(debug, "    read longitude: $longitude")
-        latitude = get_nc_value(d, "LATITUDE", require_valid)
+        latitude = get_nc_value(d, "LATITUDE")
         if ismissing(latitude)
             println("read_argo() found missing latitude")
         end
         oad(debug, "    read latitude: $latitude")
-        # Non-numeric items cannot be retrieved with get_nc_value(), so we get
-        # them directly.
         time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         oad(debug, "    read time: $time")
-        rval = as_ctd(salinity, temperature, pressure, longitude=longitude, latitude=latitude,
+        rval = as_ctd(data.salinity, data.temperature, data.pressure, longitude=longitude, latitude=latitude,
             time=time, add_teos=add_teos, debug=increment_debug(debug))
         oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         # Do some things directly, because get_nc_value() is designed for numeric items
