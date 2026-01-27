@@ -99,7 +99,16 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
         name_list = Dict(data_names .=> data_names_original)
         data = DataFrame()
         for key in keys(name_list)
-            data[!, key] = get_nc_value(d, name_list[key])
+            println(key)
+            if contains(key, r"_qc$")
+                data[!, key] = parse.(Int, Char.(get_nc_value(d, name_list[key])))
+            else
+                data[!, key] = get_nc_value(d, name_list[key])
+            end
+        end
+        if debug > 0
+            println("FIXME DAN check on _qc:")
+            println(first(data, 10))
         end
         # FIXME: the _QC items are stored as strings in these NetCDF files, and the strings are like '1',
         # '2', etc., so we convert them to integers
