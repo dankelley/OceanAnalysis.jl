@@ -15,6 +15,7 @@ using TiffImages
 export OA
 export Adp
 export Amsr
+export Argo
 export Ctd
 export Coastline
 export Section

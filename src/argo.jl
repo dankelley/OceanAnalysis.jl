@@ -65,14 +65,8 @@ julia> d.metadata["latitude"]
 julia> d.metadata["longitude"]
 -66.38298
 
-julia> first(d.data,3)
-3×7 DataFrame
- Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
-     │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
-─────┼────────────────────────────────────────────────────────────────────────
-   1 │   34.913       19.513      0.48  35.0786  19.5079  24.8272     3.31464
-   2 │   34.91        19.527      1.0   35.0756  19.5219  24.8213     3.31603
-   3 │   34.912       19.524      2.0   35.0776  19.5187  24.8237     3.31669
+julia> size(d.data)
+(1014, 15)
 ```
 """
 function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug::Int64=0)
@@ -80,13 +74,13 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
         error("must give 'filename'")
     end
     oad(debug, "read_argo(<filename>; column=$column, debug=$debug) START")
-    local rval = nothing
+    metadata = Dict()
+    data = DataFrame()
     NCDataset(filename, "r") do d
+        metadata = Dict()
         # Find names of the data columns (see https://github.com/dankelley/OceanAnalysis.jl/issues/60)
         data_names_original = [v for v in keys(d) if "N_LEVELS" in dimnames(d[v])]
-        oad(debug, "    column names in file: $(data_names_original)")
         data_names = rename_data(data_names_original)
-        oad(debug, "    after renaming, have data_names: $(data_names)")
         # Insist that salinity, temperature and pressure are found.
         found = sum(in.(data_names, (Set(["salinity", "temperature", "pressure"]),)))
         if found != 3
@@ -96,52 +90,55 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
                 error("Cannot find salinity, temperature or pressure in $(filename)")
             end
         end
-        name_list = Dict(data_names .=> data_names_original)
-        data = DataFrame()
-        for key in keys(name_list)
+        name_changes = Dict(data_names .=> data_names_original)
+        for key in keys(name_changes)
             if contains(key, r"_qc$")
-                data[!, key] = parse.(Int, Char.(get_nc_value(d, name_list[key])))
+                data[!, key] = parse.(Int, Char.(get_nc_value(d, name_changes[key])))
             else
-                data[!, key] = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_list[key]))
+                data[!, key] = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_changes[key]))
             end
         end
-        longitude = get_nc_value(d, "LONGITUDE")
-        if ismissing(longitude)
-            println("read_argo() found missing longitude")
-        end
-        oad(debug, "    read longitude: $longitude")
-        latitude = get_nc_value(d, "LATITUDE")
-        if ismissing(latitude)
-            println("read_argo() found missing latitude")
-        end
-        oad(debug, "    read latitude: $latitude")
-        time = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
-        oad(debug, "    read time: $time")
-        rval = as_ctd(data.salinity, data.temperature, data.pressure, longitude=longitude, latitude=latitude,
-            time=time, add_teos=add_teos, debug=increment_debug(debug))
-        oad(debug, "    extending ctd object .metadata by adding argo-specific items")
+        oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
+        metadata["name_changes"] = name_changes
+        metadata["longitude"] = get_nc_value(d, "LONGITUDE")
+        #if ismissing(metadata["longitude"])
+        #    println("read_argo() found missing longitude")
+        #end
+        #oad(debug, "    read longitude: $longitude")
+        metadata["latitude"] = get_nc_value(d, "LATITUDE")
+        #if ismissing(latitude)
+        #    println("read_argo() found missing latitude")
+        #end
+        #oad(debug, "    read latitude: $latitude")
+        metadata["time"] = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
+        #oad(debug, "    read time: $time")
+        #rval.data = data
+        #rval = as_ctd(data.salinity, data.temperature, data.pressure, longitude=longitude, latitude=latitude,
+        #    time=time, add_teos=add_teos, debug=increment_debug(debug))
+        #oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
-            rval.metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
+            metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
         else
-            rval.metadata["date_creation"] = missing
+            metadata["date_creation"] = missing
         end
         # Some files don't have a DATA_MODE entry, so we set it to blank in that case
         #print(sort(keys(d)))
         if haskey(d, "DATA_MODE")
             #print("ok? ", d["DATA_MODE"][1])
-            rval.metadata["data_mode"] = d["DATA_MODE"][1]
+            metadata["data_mode"] = d["DATA_MODE"][1]
         else
-            rval.metadata["data_mode"] = "?"
+            metadata["data_mode"] = "?"
         end
-        rval.metadata["filename"] = filename
+        metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
-        rval.metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
+        metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
         # I think one cycle can hold may profiles, so we only examine the first CYCLE_NUMBER value
-        rval.metadata["cycle"] = d["CYCLE_NUMBER"][1]
+        metadata["cycle"] = d["CYCLE_NUMBER"][1]
+        oad(debug, "  finished reading metadata, a Dict holding $(length(metadata)) items)")
     end
     oad(debug, "END read_argo()")
-    return rval
+    Argo(metadata, data)
 end # read_argo()
 
 

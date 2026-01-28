@@ -1,6 +1,6 @@
 # Examples
 
-## Acoustic-Doppler Profile
+## Acoustic-Doppler Profiler Data
 
 A built-in file (sub-sampled to just one sample per hour, and only a single
 day) is provided with the package. Below, you can see how to plot (1) images of
@@ -37,7 +37,7 @@ plot!([-1; 1], [-a; a], color=:red, label=false, dpi=150)
 ![Acoustic-Doppler Profiler plot](adp_rdi_heatmap.png)
 ![Acoustic-Doppler Profiler plot](adp_rdi_uv.png)
 
-## Echosounder heatmap
+## Echosounder Data
 
 This uses a private data file acquired using a Biosonics scientific echosounder.
 
@@ -52,7 +52,7 @@ end
 ```
 ![Echosounder plot](echosounder.png)
 
-## Satellite SST
+## Satellite Data
 
 The AMSR satellite provides several data streams, including sea-surface
 temperature, which may be plotted as follows.
@@ -69,7 +69,7 @@ plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
 
 ![AMSR-derived sea-surface temperature](amsr.png)
 
-## Topography
+## Topographic Data
 
 The following downloads topographic data for a domain including southern
 Nova Scotia, and plots in three plot styles.
@@ -87,7 +87,7 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
 
 ![Topography diagram](topography.png)
 
-## CTD hydrography
+## CTD Data
 
 The following shows how to read a built-in CTD file, and plot some hydrographic
 diagrams.
@@ -111,7 +111,35 @@ plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
 
 ![CTD diagram](ctd_diagram.png)
 
-## Argo search
+## Argo Data
+
+### Argo Profile
+
+The following shows how to read an Argo NetCDF file, convert to a Ctd object, and then make a summary plot.
+
+```julia
+# Read and plot a built-in Argo file
+using OceanAnalysis, Dates, Measures, Plots, Printf
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
+    "D4902911_095.nc")
+argo = read_argo(filename)
+ctd = as_ctd(argo)
+p1 = plot_profile(ctd, which="CT");
+p2 = plot_profile(ctd, which="SA");
+p3 = plot_profile(ctd, which="sigma0");
+p4 = plot_TS(ctd);
+title = @sprintf("CTD observations at %.3fN and %.3fE, on %s",
+    ctd.metadata["latitude"], ctd.metadata["longitude"],
+    Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))
+plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
+    dpi=200, plot_title=title, plot_titlefontsize=9)
+#savefig("argo_profile.png")
+```
+
+![Argo profile](argo_profile.png)
+
+
+### Argo Search
 
 The following shows how to map Argo profile locations made within 200 km of
 Sable Island, during the past year.
@@ -151,7 +179,7 @@ scale_bar(100, :right, :top)
 
 ![Argo search results](argo_search.png)
 
-## Argo trajectory
+### Argo Trajectory
 
 The following shows how to display a trace of the positions of a single Argo
 float.
@@ -187,7 +215,7 @@ scale_bar(500, :right, :top)
 
 ![Argo trajectory](argo_trajectory.png)
 
-## Oceanographic section
+## Oceanographic Section Data
 
 The following code downloads data from a section survey in the North Atlantic
 ocean. (See [https://cchdo.ucsd.edu](https://cchdo.ucsd.edu) for paths to other

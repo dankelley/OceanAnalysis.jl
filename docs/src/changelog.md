@@ -8,10 +8,11 @@ Release notes:
 
 - none
 
-- BREAKING: none
+- BREAKING: [`read_argo`](@ref) returns an Argo object, so a call to [`as_ctd`](@ref) is required before using e.g. [`plot_TS`](@ref).
 
 ### Added
 
+- [`as_ctd`](@ref) can convert Argo objects to Ctd objects
 - [`as_section`](@ref) for assembling 'ctd' data into a section.
 - [`beam_to_xyz`](@ref) for converting RDI acoustic-Doppler data from beam coordinates to xyz coordinates.
 - [`get_section`](@ref) for downloading oceanographic section data.

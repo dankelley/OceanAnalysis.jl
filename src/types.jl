@@ -42,14 +42,33 @@ mutable struct Amsr <: OA
 end
 
 
+"""
+    A type to hold Argo data
+
+Argo is a type used to store data from Argo floats.
+
+Argo objects hold two components: a DataFrame named `data` that holds the
+actual data, and a Dict named `metadata` that stores information about the
+data, e.g. the sampling time, the location, etc. Objects of type `Argo` are
+returned by [`read_argo`](@ref), which reads the NetCDF files in which
+Argo data are distributed.
+
+For many purposes, it may be useful to convert Argo objects
+into Ctd objects, using [`as_ctd`](@ref). This is useful for
+plotting, etc.
+"""
+mutable struct Argo <: OA
+    metadata::Dict{String,Any}
+    data::DataFrames.DataFrame
+end
 
 """
     A type to hold CTD data
 
-Ctd is a type used to store data from CTD instruments and Argo floats. It holds
+Ctd is a type used to store data from CTD instruments. It holds
 two items: (1) a DataFrame named `data` that holds the actual data, including
 `pressure`, `salinity`, and `temperature`, perhaps along with other data and
-(2) a a Dict named `metadata` that stores information about the data, such as
+(2) a Dict named `metadata` that stores information about the data, such as
 the `time` of observation and the `latitude` and `longitude` at which the
 observation was made.
 

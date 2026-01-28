@@ -78,10 +78,10 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
-    SA = "SA" in data_names ? ctd.data.SA : SA(ctd)
-    CT = "CT" in data_names ? ctd.data.CT : CT(ctd)
-    sigma0 = "sigma0" in data_names ? ctd.data.sigma0 : sigma0(ctd)
-    spiciness0 = "spiciness0" in data_names ? ctd.data.spiciness0 : spiciness0(ctd)
+    SA = ctd["SA"]
+    CT = ctd["CT"]
+    sigma0 = ctd["sigma0"]
+    spiciness0 = ctd["spiciness0"]
     oad(debug, "    setting up coordinate system for vertical axis")
     if seriestype == :line
         @warn "plot_profile() switching seriestype from :line to :path"

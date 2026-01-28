@@ -1,4 +1,13 @@
 """
+    as_ctd(a::Argo)
+
+Convert an Argo object into a Ctd object.
+"""
+function as_ctd(a::Argo)
+    Ctd(a.metadata, a.data)
+end
+
+"""
     as_ctd(salinity::Union{AbstractVector,AbstractRange},
         temperature::Union{AbstractVector,AbstractRange},
         pressure::Union{AbstractVector,AbstractRange};
