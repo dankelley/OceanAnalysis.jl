@@ -1,9 +1,6 @@
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-        draw_freezing=true, abbreviate=false,
-        framestyle=:box, color=:black, seriestype=:scatter, markersize=2.0, linewidth=1.0,
-        legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
-        guidefontsize=8, debug::Int64=0, kwargs...)
+        draw_freezing=true, abbreviate=false, debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -27,11 +24,10 @@ Apart from that, the other parameters have the usual meanings for Julia plots.
 For example, `color` is set to black, to override the Julia default, etc.
 In addition to those parameters, the `kwargs...` argument represents
 any other argument that is accepted by `plot`.  This is illustrated
-in the example, which a title is added to the plot for a built-in
-CNV-formatted CTD file.
+in the Examples.
 
-Note that specifying `seriestype=:line` will yield a warning, and the
-value will be changed to `:path` for the plot.
+Note that specifying `seriestype=:line` will yield a warning suggesting
+to use `:path` instead.
 
 
 ```julia
@@ -39,16 +35,18 @@ using OceanAnalysis, Plots, Dates
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "ctd.cnv")
 ctd = read_ctd_cnv(f);
-plot_TS(ctd, title="Built-in CTD file", titlefontsize=9)
+# Example 1: set title
+plot_TS(ctd, title="Built-in CTD file")
+# Example 2: just symbols, with no line
+plot_TS(ctd, seriestype=:scatter)
+# Example 3: just a line, with no symbols
+plot_TS(ctd, marker=:none)
 ```
 
 See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-    draw_freezing=true, abbreviate=false,
-    framestyle=:box, color=:black, seriestype=:scatter, markersize=2.0, linewidth=1.0,
-    legend=false, gridstyle=:dash, tickfontsize=8, tickdirection=:out,
-    guidefontsize=8, debug::Int64=0, kwargs...)
+    draw_freezing=true, abbreviate=false, debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     local S = ctd.data.salinity
     local T = ctd.data.temperature
@@ -58,20 +56,22 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     # We start with the measurements ... 
-    oad(debug, "    drawing data")
-    oad(debug, "    kwargs... ", kwargs...)
-    if seriestype == :line
-        @warn "plot_TS() switching seriestype from :line to :path"
-        seriestype = :path
+    oad(debug, "    drawing data points")
+    #oad(debug, "    kwargs... ", kwargs...)
+    if haskey(kwargs, :seriestype)
+        if kwargs[:seriestype] == :line
+            @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
+        end
     end
-    rval = plot(SA, CT, legend=legend,
+    rval = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        yrot=90, framestyle=framestyle,
-        seriestype=seriestype, linewidth=linewidth, markersize=markersize,
-        gridstyle=gridstyle, color=color,
-        tickfontsize=tickfontsize, tickdirection=tickdirection,
-        guidefontsize=guidefontsize; kwargs...)
+        yrot=90, framestyle=:box, legend=false,
+        seriestype=:path, linewidth=1.0,
+        marker=:circle, markersize=2,
+        gridstyle=:dash, color=:black, tickdirection=:out,
+        tickfontsize=8, guidefontsize=8; titlefontsize=8,
+        kwargs...)
     # ... then add density contours ...
     xlim = xlims()
     ylim = ylims()
@@ -84,10 +84,11 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c) # returns [] if min=max
     elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
-        oad(debug, "        case 2: sigma0_levels is a single integer")
         if sigma0_levels > 0
+            oad(debug, "        case 2a: auto-selecting $sigma0_levels sigma0 levels to contour")
             levels = pretty(sigma0c, sigma0_levels)
         else
+            oad(debug, "        case 2b: will not contour sigma0 levels")
             levels = []
         end
     else
@@ -95,8 +96,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     end
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        contour!(SAc, CTc, sigma0c, color=:gray50, levels=levels,
-            cbar=false, clabels=true, linewidth=linewidth)
+        contour!(SAc, CTc, sigma0c, color=:gray50, levels=levels, cbar=false, clabels=true)
     else
         oad(debug, "        not drawing sigma0 contours")
     end
@@ -108,7 +108,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
         levels = pretty(spiciness0c)
     elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
-        oad(debug, "        case 2: spiciness0_levels is a single integer")
+        oad(debug, "        case 2: spiciness0_levels is a single integer ($spiciness0_levels)")
         if spiciness0_levels > 0
             levels = pretty(spiciness0c, spiciness0_levels)
         else
