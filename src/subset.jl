@@ -1,10 +1,11 @@
 """
     subset_ctd(ctd::Ctd, keep_levels)
 
-Subset a CTD object by levels. (PROVISIONAL)
+Subset a CTD object by levels.
 
-This returns a copy of `Ctd`, but retaining only rows specified
-by the logical vector `keep_levels`.
+This returns a copy of `Ctd` that has the same `metadata`,
+but for which the `data` holds only rows specified by
+the logical vector `keep_levels`.
 
 # Examples
 
@@ -15,7 +16,7 @@ f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
 argo = read_argo(f)
 ctd = as_ctd(argo)
 a = plot_TS(ctd, title="Original")
-ctd_top = subset(ctd, ctd["pressure"] .< 300)
+ctd_top = subset_ctd(ctd, ctd["pressure"] .< 300)
 b = plot_TS(ctd)
 plot(a, b, title="Top 300m")
 ```
@@ -32,9 +33,9 @@ function subset_ctd(ctd::Ctd, keep_levels; debug::Int64=0)
 end
 
 """
-    subset!(ctd::Ctd, keep_levels)
+    subset_ctd!(ctd::Ctd, keep_levels)
 
-This works in the same way as subset(<Ctd>), except that
+This works in the same way as subset_ctd(<Ctd>), except that
 the original Ctd is altered in-place.
 
 # Examples
