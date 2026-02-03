@@ -71,6 +71,8 @@ OceanAnalysis.set_teos
 OceanAnalysis.section_is_gridded
 OceanAnalysis.station_map
 OceanAnalysis.subset_amsr
+OceanAnalysis.subset
+OceanAnalysis.subset!
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
 OceanAnalysis.toc

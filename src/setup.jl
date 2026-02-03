@@ -77,6 +77,8 @@ export section_is_gridded
 export set_teos
 export station_map
 export subset_amsr
+export subset_ctd
+export subset_ctd!
 export T90_from_T48
 export T90_from_T68
 export toc
