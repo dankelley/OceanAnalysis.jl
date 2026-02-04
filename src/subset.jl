@@ -1,5 +1,5 @@
 """
-    subset_ctd(ctd::Ctd, keep_levels)
+    subset_ctd(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Int64=0)
 
 Subset a CTD object by levels.
 
@@ -21,7 +21,7 @@ b = plot_TS(ctd)
 plot(a, b, title="Top 300m")
 ```
 """
-function subset_ctd(ctd::Ctd, keep_levels; debug::Int64=0)
+function subset_ctd(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Int64=0)
     oad(debug, "subset_ctd() START")
     length(keep_levels) == nrow(ctd.data) || error("length(keep_levels) does not agree with nrows(ctd.data)")
     oad(debug, "  retaining $(sum(keep_levels)) of $(length(keep_levels)) levels")
@@ -33,7 +33,7 @@ function subset_ctd(ctd::Ctd, keep_levels; debug::Int64=0)
 end
 
 """
-    subset_ctd!(ctd::Ctd, keep_levels)
+    subset_ctd!(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Int64=0)
 
 This works in the same way as subset_ctd(<Ctd>), except that
 the original Ctd is altered in-place.
@@ -53,7 +53,7 @@ plot(a, b)
 ```
 
 """
-function subset_ctd!(ctd::Ctd, keep_levels; debug::Int64=0)
+function subset_ctd!(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Int64=0)
     oad(debug, "subset_ctd() START")
     length(keep_levels) == nrow(ctd.data) || error("length(keep_levels) does not agree with nrows(ctd.data)")
     oad(debug, "  retaining $(sum(keep_levels)) of $(length(keep_levels)) levels")
