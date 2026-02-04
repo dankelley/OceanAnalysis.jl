@@ -69,7 +69,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         yrot=90, framestyle=:box, legend=false,
         seriestype=:path, linewidth=1.0,
         marker=:circle, markersize=2,
-        gridstyle=:dash, color=:black, tickdirection=:out,
+        color=:black, tickdirection=:out,
         tickfontsize=8, guidefontsize=8; titlefontsize=8,
         kwargs...)
     # ... then add density contours ...
