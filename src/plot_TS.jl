@@ -55,6 +55,10 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     local lat = ctd.metadata["latitude"]
     SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
+    ok = isfinite.(SA) .& isfinite.(CT)
+    if 0 == sum(ok)
+        @warn "plot_TS(): no good SA,CT pairs, so plotting an aphysical default"
+    end
     # We start with the measurements ... 
     oad(debug, "    drawing data points")
     #oad(debug, "    kwargs... ", kwargs...)
@@ -133,6 +137,9 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         CTf = gsw_ct_freezing.(SAf, pf, saturation_fraction)
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, linewidth=0.75, color=:black, linestyle=:dash)
+    end
+    if 0 == sum(ok)
+        annotate!(0.5, 0.5, text("NO GOOD DATA", :red, 14))
     end
     oad(debug, "END plot_TS()")
     rval

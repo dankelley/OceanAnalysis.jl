@@ -38,9 +38,10 @@ function get_nc_value(nc, name; require_valid=false)
         error("the ", name, " field contains no non-missing values")
     end
     if any(bad)
-        if all(ismissing.(item))
-            return item
-        end
+        #if all(ismissing.(item))
+        #    println("returning early -- all data are missing (WTF DAN FIXME)")
+        #    return item
+        #end
         item[ismissing.(item)] .= NaN
     end
     # FIXME: is this right?

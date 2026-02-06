@@ -70,12 +70,10 @@ julia> size(d.data)
 ```
 """
 function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug::Int64=0)
-    if ismissing(filename)
-        error("must give 'filename'")
-    end
     oad(debug, "read_argo(<filename>; column=$column, debug=$debug) START")
     metadata = Dict()
     data = DataFrame()
+    oad(debug, "  filename: $filename")
     NCDataset(filename, "r") do d
         metadata = Dict()
         # Find names of the data columns (see https://github.com/dankelley/OceanAnalysis.jl/issues/60)
@@ -93,9 +91,37 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
         name_changes = Dict(data_names .=> data_names_original)
         for key in keys(name_changes)
             if contains(key, r"_qc$")
-                data[!, key] = parse.(Int, Char.(get_nc_value(d, name_changes[key])))
+                #oad(debug, "  QC item $key")
+                #println(d[name_changes[key]])
+                tmp1 = d[name_changes[key]][:, column]
+                #n = length(tmp1)
+                #tmp2 = repeat([0], n)
+                #ok = .!ismissing.(tmp1)
+                #tmp2[ok] .= parse.(Int, Char.(tmp1[ok]))
+                TMP2 = map(x -> ismissing(x) ? NaN : Int64(x), tmp1)
+                data[!, key] = TMP2
+                #data[!, key] = tmp2
+                #oad(debug, "  QC item $key has $(sum(ismissing(TMP2))) missing data out of $(length(TMP2)) data")
             else
-                data[!, key] = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_changes[key]))
+                #oad(debug, "  non-QC item $key")
+                tmp1 = d[name_changes[key]][:, column]
+                #tmp2 = convert(Vector{Union{Missing,Float64}}, tmp1)
+                #tmp2[ismissing.(tmp2)] .= NaN
+                TMP2 = map(x -> ismissing(x) ? NaN : Float64(x), tmp1)
+                #n = length(tmp1)
+                #tmp2 = repeat([0.0], n)
+                #bad = ismissing.(tmp1)
+                #tmp2[bad] .= NaN
+                #println("DAN tmp1 starts $(first(tmp1,6))")
+                #println("DAN tmp1 ends$(last(tmp1,6))")
+                #println("DAN tmp1 # missing: ", sum(ismissing.(tmp1)))
+                #println("DAN tmp1 has ", sum(ismissing.(tmp1)), " missing data out of ", length(tmp1), " data")
+                #tmp = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_changes[key]))
+                #tmp2[!bad] .= tmp1[.!bad]
+                #oad(debug, "  steppingstone")
+                data[!, key] = TMP2
+                #data[!, key] = tmp2
+                #oad(debug, "  non-QC item $key has $(sum(ismissing(TMP2))) missing data out of $(length(TMP2)) data")
             end
         end
         oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
@@ -135,7 +161,7 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
         metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
         # I think one cycle can hold may profiles, so we only examine the first CYCLE_NUMBER value
         metadata["cycle"] = d["CYCLE_NUMBER"][1]
-        oad(debug, "  finished reading metadata, a Dict holding $(length(metadata)) items)")
+        oad(debug, "  finished reading metadata, a Dict holding $(length(metadata)) items")
     end
     oad(debug, "END read_argo()")
     Argo(metadata, data)
@@ -218,13 +244,12 @@ function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, serv
     oad(debug, "get_argo() START")
     file_original = filename
     oad(debug, "    filename: ", filename, " (original)")
-    file = replace.(file, r".*/" => "")
-    oad(debug, "    filename: ", filename, " (after trimming)")
+    file = replace.(filename, r".*/" => "")
     file = joinpath(destdir, filename)
     oad(debug, "    filename: ", filename, " (after prefixing with destdir)")
     url = joinpath(server, "dac", file_original)
     oad(debug, "    url: ", url)
-    rval = get_file(url, filename, age, debug=increment_debug(debug))
+    rval = get_file(url; destdir=destdir, age=age, debug=increment_debug(debug))
     oad(debug, "END get_argo()")
     rval
 end
