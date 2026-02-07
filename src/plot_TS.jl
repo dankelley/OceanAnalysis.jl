@@ -62,10 +62,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     # We start with the measurements ... 
     oad(debug, "    drawing data points")
     #oad(debug, "    kwargs... ", kwargs...)
-    if haskey(kwargs, :seriestype)
-        if kwargs[:seriestype] == :line
-            @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
-        end
+    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
+        @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
     end
     rval = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",

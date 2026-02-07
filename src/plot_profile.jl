@@ -1,40 +1,25 @@
 """
     plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
-        abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
-        guidefontsize=8, debug::Int64=0, kwargs...)
+        abbreviate::Bool=false, debug::Int64=0, kwargs...)
 
-Plot an oceanographic profile for data contained in `ctd`, showing how the
-variable named by `which` depends on pressure.  The variable is drawn on the x
-axis and pressure on the y axis. Following oceanographic convention, pressure
-increases downwards on the page and the "x" axis is drawn at the top. The
-permitted values of `which` are
-`"CT"` for the Gibbs Seawater formulation of Conservative Temperature,
-`"N2"` for N², the square of the buoyancy frequency,
-`"SA"` for the Gibbs Seawater formulation of Absolute Salinity,
-`"salinity"` for Practical Salinity,
-`"sigma0"` for the Gibbs Seawater formulation of density anomaly referenced to the surface,
-`"spiciness0"` for the Gibbs Seawater seawater spiciness referenced to the surface,
-and
-`"temperature"` for in-situ temperature.
+Plot an oceanographic profile for data contained in `ctd`, showing how the variable named by `which` depends on either pressure or density.  The variable is drawn on the x axis and pressure on the y axis. Following oceanographic convention, the y axis is set up so that waters nearer the air-sea interface are nearer the top of the plot.
 
-The default Julia font sizes on axes are overridden in this function, with
-8-point being used for both the numbers on axes (`tickfontize`) and the names
-of axes (`guidefontsize`).  (The `tickfontsize` matches the Julia default,
-but the `guidefontsize` is smaller than the Julia default. The idea is to
-not waste space by using fonts that are larger than what journals require.)
+# Arguments
 
-The `kwargs...` argument is used for arguments to be sent to `plot()`.  For
-example, the default way to display the profile diagram is constructed with a
-blue line connecting points, but using e.g.
-```julia
-plot_profile(ctd, which="SA", seriestype=:scatter, seriescolor=:red)
-```
-yields red-filled circles, instead; see https://docs.juliaplots.org/stable/ for
-more on the many plotting controls available in Julia. Note that
-specifying `seriestype=:line` will yield a warning, and the
-value will be changed to `:path` for the plot.
+- `ctd` a Ctd object to be plotted.
 
-See also the [`plot_TS`](@ref) function.
+# Keywords
+
+- `which` an indication of what to plot on the x axis. The default value, `"CT"`, indicates to plot Conservative Temperature. Anything stored in the object's `data` can be plotted, along with some things that can be calculated from these values. Common choices include: `"N2"` for N², the square of the buoyancy frequency; `"SA"` for the Gibbs Seawater formulation of Absolute Salinity; `"salinity"` for Practical Salinity; `"sigma0"` for the Gibbs Seawater formulation of density anomaly referenced to the surface; `"spiciness0"` for the Gibbs Seawater seawater spiciness referenced to the surface; and `"temperature"` for in-situ temperature.
+
+- `vertical` a String specifying what to plot on the y axis. The default is `"pressure"`, but `"density"` is also permitted.
+
+- `abbreviate` a Bool value indicating whether to abbreviate axis names,.
+
+- `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
+
+- `kwargs...` is passed to `plot()`, to permit further customization; see https://docs.juliaplots.org/stable/ for more information on possibilities.
+
 
 # Examples
 ```julia
@@ -42,18 +27,17 @@ using OceanAnalysis, Plots
 # Read an Argo file
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = read_argo(f);
+d = read_argo(f) |> as_ctd;
 # Plot profiles of Conservative Temperature, Absolute Salinity, and potential
 # density anomaly with respect to surface pressure.
-p1 = plot_profile(d, which="CT")
-p2 = plot_profile(d, which="SA")
-p3 = plot_profile(d, which="sigma0")
+p1 = plot_profile(d; which="CT")
+p2 = plot_profile(d; which="SA")
+p3 = plot_profile(d; which="sigma0")
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
-    seriestype=:path, abbreviate::Bool=false, legend::Bool=false, tickfontsize=8, tickdirection=:out,
-    guidefontsize=8, debug::Int64=0, kwargs...)
+    abbreviate::Bool=false, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
     # We can plot proviles of whatever is in the file, plus some others. Of course,
@@ -83,9 +67,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     sigma0 = ctd["sigma0"]
     spiciness0 = ctd["spiciness0"]
     oad(debug, "    setting up coordinate system for vertical axis")
-    if seriestype == :line
-        @warn "plot_profile() switching seriestype from :line to :path"
-        seriestype = :path
+    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
+        @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
     end
     y = vertical == "pressure" ? p : sigma0
     if vertical == "pressure"
@@ -101,9 +84,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash,
-            tickfontsize=tickfontsize, tickdirection=tickdirection,
-            guidefontsize=guidefontsize,
+            legend=false, color=:black, tickdirection=:out,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
             else
@@ -114,9 +96,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash,
-            tickfontsize=tickfontsize, tickdirection=tickdirection,
-            guidefontsize=guidefontsize,
+            legend=false, color=:black, tickdirection=:out,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
             else
@@ -127,9 +108,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash,
-            tickfontsize=tickfontsize, tickdirection=tickdirection,
-            guidefontsize=guidefontsize,
+            legend=false, color=:black, tickdirection=:out,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
             else
@@ -141,9 +121,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         rval = plot(spiciness0,
             y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash,
-            tickfontsize=tickfontsize, tickdirection=tickdirection,
-            guidefontsize=guidefontsize,
+            legend=false, color=:black, tickdirection=:out,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if abbreviate
                 "π [kg/m³]"
             else
@@ -155,9 +134,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         x = N2(ctd)
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash,
-            tickfontsize=tickfontsize, tickdirection=tickdirection,
-            guidefontsize=guidefontsize,
+            legend=false, color=:black, tickdirection=:out,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
             else
@@ -169,9 +147,8 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         oad(debug, "    drawing $which")
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=legend, color=:black, gridstyle=:dash,
-            tickfontsize=tickfontsize, tickdirection=tickdirection,
-            guidefontsize=guidefontsize,
+            legend=false, color=:black, tickdirection=:out,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=which,
             yrot=90; kwargs...)
     else
