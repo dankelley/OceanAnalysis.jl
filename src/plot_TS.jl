@@ -29,6 +29,23 @@ in the Examples.
 Note that specifying `seriestype=:line` will yield a warning suggesting
 to use `:path` instead.
 
+# Arguments
+
+- `ctd` a Ctd value for which a temperature-salinity diagram will be plotted.
+
+# Keywords
+
+- `sigma0_levels` a specification of sigma0 values to be contour. If this is an empty vector (which is the default) then the levels are selected automatically by providing [`pretty`](@ref) with values inferred from `ctd`. If `sigma0_levels` equals 0 then no contours are drawn.  If it is a positive integer, then it is taken as a suggestion for the number of levels.  And, finally, if it is a vector, then it is taken as a specification of the levels to be contoured.
+
+- `sigma0_levels` as `sigma0_levels`, but for spiciness0 contours.
+
+- `draw_freezing` a Bool indicating whether to draw a freezing-point curve.
+
+- `abbreviate` a Bool indicating whether to abbreviate the axis labels,.
+
+- `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
+
+- `kwargs...` is passed to `plot()`, to permit further customization; see https://docs.juliaplots.org/stable/ for more information on possibilities.
 
 ```julia
 using OceanAnalysis, Plots, Dates
