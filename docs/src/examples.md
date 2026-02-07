@@ -98,9 +98,9 @@ using OceanAnalysis, Dates, Measures, Plots, Printf
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
-p1 = plot_profile(ctd, which="CT");
-p2 = plot_profile(ctd, which="SA");
-p3 = plot_profile(ctd, which="sigma0");
+p1 = plot_profile(ctd; which="CT");
+p2 = plot_profile(ctd; which="SA");
+p3 = plot_profile(ctd; which="sigma0");
 p4 = plot_TS(ctd);
 title = @sprintf("CTD observations at %.3fN and %.3fE on %s",
     ctd["latitude"], ctd["longitude"], ctd["time"])
@@ -124,9 +124,9 @@ filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
     "D4902911_095.nc")
 argo = read_argo(filename)
 ctd = as_ctd(argo)
-p1 = plot_profile(ctd, which="CT");
-p2 = plot_profile(ctd, which="SA");
-p3 = plot_profile(ctd, which="sigma0");
+p1 = plot_profile(ctd; which="CT");
+p2 = plot_profile(ctd; which="SA");
+p3 = plot_profile(ctd; which="sigma0");
 p4 = plot_TS(ctd);
 title = @sprintf("CTD observations at %.3fN and %.3fE, on %s",
     ctd.metadata["latitude"], ctd.metadata["longitude"],
