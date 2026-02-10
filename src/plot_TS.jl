@@ -85,10 +85,9 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     rval = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
-        yrot=90, framestyle=:box, legend=false,
-        seriestype=:path, linewidth=1.0,
-        marker=:circle, markersize=2,
-        color=:black, tickdirection=:out,
+        yrot=90,
+        framestyle=:box, legend=false, color=:black, tickdirection=:out,
+        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
         tickfontsize=8, guidefontsize=8; titlefontsize=8,
         kwargs...)
     # ... then add density contours ...

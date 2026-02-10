@@ -1,5 +1,5 @@
 """
-    plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
+    plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
         abbreviate::Bool=false, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the variable named by `which` depends on either pressure or density.  The variable is drawn on the x axis and pressure on the y axis. Following oceanographic convention, the y axis is set up so that waters nearer the air-sea interface are nearer the top of the plot.
@@ -12,7 +12,7 @@ Plot an oceanographic profile for data contained in `ctd`, showing how the varia
 
 - `which` an indication of what to plot on the x axis. The default value, `"CT"`, indicates to plot Conservative Temperature. Anything stored in the object's `data` can be plotted, along with some things that can be calculated from these values. Common choices include: `"N2"` for N², the square of the buoyancy frequency; `"SA"` for the Gibbs Seawater formulation of Absolute Salinity; `"salinity"` for Practical Salinity; `"sigma0"` for the Gibbs Seawater formulation of density anomaly referenced to the surface; `"spiciness0"` for the Gibbs Seawater seawater spiciness referenced to the surface; and `"temperature"` for in-situ temperature.
 
-- `vertical` a String specifying what to plot on the y axis. The default is `"pressure"`, but `"density"` is also permitted.
+- `vertical` a Symbol specifying what to plot on the y axis. The default is `:pressure`, but `:density` is also permitted.
 
 - `abbreviate` a Bool value indicating whether to abbreviate axis names,.
 
@@ -36,7 +36,7 @@ p3 = plot_profile(d; which="sigma0")
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 ```
 """
-function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
+function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
     abbreviate::Bool=false, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
@@ -70,21 +70,21 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
         @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
     end
-    y = vertical == "pressure" ? p : sigma0
-    if vertical == "pressure"
+    if vertical == :pressure
         y = p
         ylabel = abbreviate ? "p [dbar]" : "Pressure [dbar]"
-    elseif vertical == "density"
+    elseif vertical == :density
         y = sigma0
         ylabel = abbreviate ? "σ₀ [kg/m³]" : "Potential Density Anomaly [kg/m³]"
     else
-        error("vertical must be either \"pressure\" or \"density\"")
+        error("vertical must be either :pressure or :density")
     end
     if which == "temperature" || which == "CT"
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=false, color=:black, tickdirection=:out,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if (abbreviate)
                 which == "CT" ? "CT[°C]" : "T [°C]"
@@ -95,8 +95,9 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     elseif which == "salinity" || which == "SA"
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=false, color=:black, tickdirection=:out,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if (abbreviate)
                 which == "SA" ? "SA [g/kg]" : "S"
@@ -107,8 +108,9 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
     elseif which == "sigma0" # gsw formulation
         oad(debug, "    drawing '", which, "'")
         rval = plot(sigma0, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=false, color=:black, tickdirection=:out,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if abbreviate
                 "σ₀ [kg/m³]"
@@ -120,8 +122,9 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         rval = plot(spiciness0,
             y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=false, color=:black, tickdirection=:out,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if abbreviate
                 "π [kg/m³]"
@@ -133,8 +136,9 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         oad(debug, "    drawing '", which, "'")
         x = N2(ctd)
         rval = plot(x, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=false, color=:black, tickdirection=:out,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=if abbreviate
                 "N²" # N2" #"N²"
@@ -146,8 +150,9 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::String="pressure",
         x = ctd.data[:, which]
         oad(debug, "    drawing $which")
         rval = plot(x, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true, framestyle=:box,
-            legend=false, color=:black, tickdirection=:out,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
             xlabel=which,
             yrot=90; kwargs...)
