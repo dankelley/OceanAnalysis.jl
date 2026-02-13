@@ -93,13 +93,13 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
             if contains(key, r"_qc$")
                 #oad(debug, "  QC item $key")
                 #println(d[name_changes[key]])
-                tmp1 = d[name_changes[key]][:, column]
+                #tmp1 = d[name_changes[key]][:, column]
                 #n = length(tmp1)
                 #tmp2 = repeat([0], n)
                 #ok = .!ismissing.(tmp1)
                 #tmp2[ok] .= parse.(Int, Char.(tmp1[ok]))
-                TMP2 = map(x -> ismissing(x) ? NaN : Int64(x), tmp1)
-                data[!, key] = TMP2
+                #TMP2 = map(x -> ismissing(x) ? NaN : Int64(x), tmp1)
+                data[!, key] = d[name_changes[key]][:, column]
                 #data[!, key] = tmp2
                 #oad(debug, "  QC item $key has $(sum(ismissing(TMP2))) missing data out of $(length(TMP2)) data")
             else
