@@ -79,6 +79,7 @@ export station_map
 export subset_amsr
 export subset_ctd
 export subset_ctd!
+export summarize
 export T90_from_T48
 export T90_from_T68
 export toc

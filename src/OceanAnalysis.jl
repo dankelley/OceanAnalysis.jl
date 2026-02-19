@@ -55,6 +55,7 @@ include("rename_data.jl")
 include("seawater_properties.jl")
 include("section.jl")
 include("subset.jl")
+include("summarize.jl")
 include("topography.jl")
 include("utilities.jl")
 
