@@ -28,7 +28,7 @@ Release notes:
 - [`read_section`](@ref) for reading Section data.
 - [`rename_data`](@ref) for converting data names to standardized names.
 - [`subset_ctd`](@ref) for subsetting Ctd objects.
-- [`summarize`](@ref) for summarizing OA objects.
+- `summarize` for summarizing OA objects.
 - [`xyz_to_enu`](@ref) for converting RDI acoustic-Doppler data from xyz coordinates to enu coordinates.
 
 ## Changelog from version 0.2.0 to version 0.2.1
