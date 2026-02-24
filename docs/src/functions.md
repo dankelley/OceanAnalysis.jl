@@ -39,6 +39,7 @@ OceanAnalysis.get_topography
 OceanAnalysis.gravity
 OceanAnalysis.grid_ctd
 OceanAnalysis.grid_section
+OceanAnalysis.interpolate_barnes
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp

@@ -18,6 +18,7 @@ Release notes:
 - [`get_section`](@ref) for downloading oceanographic section data.
 - [`grid_ctd`](@ref) for gridding Ctd data.
 - [`grid_section`](@ref) for gridding Section data.
+- [`interpolate_barnes`](@ref) for gridding with Barnes' method.
 - [`plot_adp`](@ref) for plotting acoustic-Doppler profiler data.
 - [`plot_echosounder`](@ref) for plotting Biosonics echosounder data.
 - [`plot_section`](@ref) for plotting oceanographic 'section' data.

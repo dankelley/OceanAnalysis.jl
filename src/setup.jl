@@ -45,6 +45,7 @@ export get_topography
 export gravity
 export grid_ctd
 export grid_section
+export interpolate_barnes
 export N2
 export plot_adp
 export plot_amsr
