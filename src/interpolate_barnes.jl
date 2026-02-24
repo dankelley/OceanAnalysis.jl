@@ -41,7 +41,6 @@ function weight_barnes(xx::Float64, yy::Float64,
             dx = (xx - x[k]) / xr
             dy = (yy - y[k]) / yr
             sum_w += w[k] * exp(-(dx^2 + dy^2))
-            #println("k:$k, sum_w:$sum_w")
         end
     end
     (sum_w > 0.0) ? sum_w : NaN
@@ -63,6 +62,7 @@ Interpolate a two-dimensional field to a grid, using the Barnes method as
 described by Barnes (1994a, 1994b, 1994c). The methodology follows
 that of the `interp_barnes` function in the R `oce` package.
 
+
 # Arguments
 
 - `x` Vector of Float64 values for the x coordinate of data points.
@@ -80,20 +80,23 @@ that of the `interp_barnes` function in the R `oce` package.
 - `iterations` integer telling how many iterations to perform (2 by default).
 - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
+# Value
+
+A Dict with elements named `xg`, `yg` and `zg` that hold the grid coordinates and values, along with `wg` (the final weights) and `zd` (the values interpolated at the data coordinates).
 
 # Examples
 
 ```julia
 using OceanAnalysis, CSV, DataFrames, Statistics, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "wind.csv")
-d = CSV.read(file, DataFrame);
+data = CSV.read(file, DataFrame);
 w = repeat([1.0], nrow(d));
 xg = range(0.0, 11.0, step=0.2);
 yg = range(0.0, 9.0, step=0.2);
-res = interpolate_barnes(d.x, d.y, d.z, w; xg=xg, yg=yg, xr=2.0, yr=2.0)
-scatter(d.x, d.y, framestyle=:box, label=false, ms=2, tickdirection=:out,
+res = interpolate_barnes(data.x, data.y, data.z)
+scatter(data.x, data.y, framestyle=:box, label=false, ms=2, tickdirection=:out,
     xlab="x", ylab="y", xlim=(0, 11), ylim=(0, 9))
-annotate!(d.x, d.y .+ 0.2, text.(d.z, 7))
+annotate!(data.x, data.y .+ 0.2, text.(d.z, 7))
 contour!(res["xg"], res["yg"], res["zg"],
     levels=10:5:30, cbar=false, clabels=true, c=:black)
 ```
@@ -158,6 +161,8 @@ function interpolate_barnes(
     end
     xr > 0.0 || error("xr is not a positive value")
     yr > 0.0 || error("xr is not a positive value")
+    xr0 = xr # keep for computing weight matrix at end
+    yr0 = yr # keep for computing weight matrix at end
     gamma > 0.0 || error("gamma is not a positive number")
     iterations > 0 || error("iteration is not a positive integer")
     # Set up storage
@@ -191,7 +196,7 @@ function interpolate_barnes(
     end
     for i in 1:nyg
         for j in 1:nxg
-            wg[i,] = weight_barnes(xg[j], yg[i], 0, x, y, z, xr, yr)
+            wg[i, j] = weight_barnes(xg[j], yg[i], 0, x, y, w, xr, yr)
         end
     end
     oad(debug, "END interpolate_barnes()")

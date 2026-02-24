@@ -102,3 +102,7 @@ end
 @testset "adp_rdi agrees with oce/R" begin
     include("adp_rdi.jl")
 end
+
+@testset "interpolate_barnes oce/R" begin
+    include("interpolate_barnes.jl")
+end
