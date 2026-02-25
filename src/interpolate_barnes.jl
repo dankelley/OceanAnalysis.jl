@@ -90,13 +90,13 @@ A Dict with elements named `xg`, `yg` and `zg` that hold the grid coordinates an
 using OceanAnalysis, CSV, DataFrames, Statistics, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "wind.csv")
 data = CSV.read(file, DataFrame);
-w = repeat([1.0], nrow(d));
+w = repeat([1.0], nrow(data));
 xg = range(0.0, 11.0, step=0.2);
 yg = range(0.0, 9.0, step=0.2);
 res = interpolate_barnes(data.x, data.y, data.z)
 scatter(data.x, data.y, framestyle=:box, label=false, ms=2, tickdirection=:out,
     xlab="x", ylab="y", xlim=(0, 11), ylim=(0, 9))
-annotate!(data.x, data.y .+ 0.2, text.(d.z, 7))
+annotate!(data.x, data.y .+ 0.2, text.(data.z, 8, :blue))
 contour!(res["xg"], res["yg"], res["zg"],
     levels=10:5:30, cbar=false, clabels=true, c=:black)
 ```
