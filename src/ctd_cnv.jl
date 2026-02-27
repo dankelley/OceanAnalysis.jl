@@ -29,8 +29,8 @@ julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
 
 julia> d = read_ctd_cnv(f, add_teos=false);
 
-julia> d.metadata["time"]
-2003-10-15T11:38:38
+julia> d.metadata["time"] # note the erroneous year
+1903-10-15T11:38:38
 
 julia> d.metadata["latitude"]
 44.684266666666666
@@ -39,13 +39,14 @@ julia> d.metadata["longitude"]
 -63.643883333333335
 
 julia> names(d.data)
-7-element Vector{String}:
+8-element Vector{String}:
  "salinity"
  "temperature"
  "pressure"
  "scan"
  "time_seconds"
  "depS"
+ "t068"
  "flag"
 ```
 """
