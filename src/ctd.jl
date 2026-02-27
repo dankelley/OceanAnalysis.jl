@@ -79,25 +79,25 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
     add_teos::Bool=true, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
-    #oad(debug, "    given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
-    oad(debug, "    given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
-    oad(debug, "    given temperature of length ", length(temperature), ", which starts: ", first(temperature, 2))
-    oad(debug, "    given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
-    oad(debug, "    given longitude:  ", longitude)
-    oad(debug, "    given latitude:   ", latitude)
-    oad(debug, "    assembling data (a DataFrame)")
+    #oad(debug, "  given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
+    oad(debug, "  given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
+    oad(debug, "  given temperature of length ", length(temperature), ", which starts: ", first(temperature, 2))
+    oad(debug, "  given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
+    oad(debug, "  given longitude:  ", longitude)
+    oad(debug, "  given latitude:   ", latitude)
+    oad(debug, "  assembling data (a DataFrame)")
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
-    oad(debug, "    assembling metadata (a Dict)")
+    oad(debug, "  assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
     if !ismissing(time)
         metadata["time"] = time
     end
-    oad(debug, "    passing metadata and data to Ctd()")
+    oad(debug, "  passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
     if add_teos
-        oad(debug, "    inserting TEOS-10 values into data")
+        oad(debug, "  inserting TEOS-10 values into data")
         rval = set_teos(rval, debug=increment_debug(debug))
     end
     oad(debug, "END as_ctd()")
@@ -125,26 +125,26 @@ function set_teos(x::OA; debug::Int64=0)
     metadata = copy(x.metadata)
     data = copy(x.data)
     metadata_names = keys(metadata)
-    oad(debug, "    metadata_names: ", metadata_names)
+    oad(debug, "  metadata_names: ", metadata_names)
     data_names = names(data)
-    oad(debug, "    data_names: ", data_names)
+    oad(debug, "  data_names: ", data_names)
     data_needed = ("salinity", "temperature", "pressure")
     has_needed_data = [x in data_names for x in data_needed]
     sum(has_needed_data) == 3 || error("lacking 'salinity', 'temperature' or 'pressure' in data ")
     metadata_needed = ("longitude", "latitude")
     has_needed_metadata = [x in metadata_names for x in metadata_needed]
     sum(has_needed_metadata) == 2 || error("lacking 'longitude' or 'latitude' in metadata ")
-    oad(debug, "    have requisite hydrographic and location data, so can set TEOS-10 variables")
+    oad(debug, "  have requisite hydrographic and location data, so can set TEOS-10 variables")
     S, T, p = data.salinity, data.temperature, data.pressure
     lon, lat = metadata["longitude"], metadata["latitude"]
     data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
-    oad(debug, "        SA completed, starting with ", first(data.SA, 2))
+    oad(debug, "  SA completed, starting with ", first(data.SA, 2))
     data.CT = gsw_ct_from_t.(data.SA, T, p) |> fix_gsw_bad_code!
-    oad(debug, "        CT completed, stating with : ", first(data.CT, 2))
+    oad(debug, "  CT completed, stating with : ", first(data.CT, 2))
     data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
-    oad(debug, "        sigma0 completed, starting with ", first(data.sigma0, 2))
+    oad(debug, "  sigma0 completed, starting with ", first(data.sigma0, 2))
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
-    oad(debug, "        spiciness0 completed, starting with ", first(data.spiciness0, 2))
+    oad(debug, "  spiciness0 completed, starting with ", first(data.spiciness0, 2))
     rval = Ctd(metadata, data)
     oad(debug, "END set_teos")
     rval

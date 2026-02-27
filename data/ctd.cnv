@@ -18,7 +18,7 @@
 # name 1 = timeS: time [s]
 # name 2 = pr: pressure [db]
 # name 3 = depS: depth, salt water [m]
-# name 4 = t090: temperature
+# name 4 = t068: temperature, IPTS-68 [deg C]
 # name 5 = sal00: salinity, PSS-78 [PSU]
 # name 6 = flag:  0.000e+00
 # span 0 = 1, 773                       
@@ -29,7 +29,7 @@
 # span 5 = 0.3276, 99.0000              
 # span 6 = 0.000e+00, 0.000e+00         
 # interval = seconds: 1                           
-# start_time = Oct 15 2003 11:38:38
+# start_time = Oct 15 1903 11:38:38
 # bad_flag = -9.990e-29
 # sensor 0 = Frequency 0  temperature, 1140, 13 Mar 03
 # sensor 1 = Frequency 1  conductivity, 832, 13 Mar 03, cpcor = -9.5700e-08
