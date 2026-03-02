@@ -1,13 +1,21 @@
 function four_num(x, name)
-    skip_missing = ismissing.(x)
-    skip_nan = isnan.(x)
-    X = filter(!isnan, x)
-    X = skipmissing(X)
-    Min, Max = extrema(X)
-    Mean = mean(X)
-    number_missing = sum(skip_missing)
-    number_nan = sum(skip_nan)
-    (name, Min, Mean, Max, number_missing, number_nan)
+    if !(x[1] isa Char)
+        skip_missing = ismissing.(x)
+        skip_nan = isnan.(x)
+        X = filter(!isnan, x)
+        if count(!ismissing, X) > 0
+            X = skipmissing(X)
+            Min, Max = extrema(X)
+            Mean = mean(X)
+        else
+            Min, Max, Mean = NaN, NaN, NaN
+        end
+        number_missing = sum(skip_missing)
+        number_nan = sum(skip_nan)
+        (name, Min, Mean, Max, number_missing, number_nan)
+    else
+        (name, NaN, NaN, NaN, 0, 0)
+    end
 end
 
 function summarize_data(x)
