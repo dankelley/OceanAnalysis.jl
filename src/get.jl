@@ -114,23 +114,37 @@ objects that are stored in `x.data`.
 function get_element(x::OA, element::String; debug::Int64=0)
     oad(debug, "get_element([OA object], name=$element) START")
     # If element is in metadata, return that
+    oad(debug, "  check whether it is in metadata")
     if element in keys(x.metadata)
+        oad(debug, "  return value from metadata")
+        oad(debug, "END get_element()")
         return x.metadata[element]
     end
+    oad(debug, "  not in metadata, so check whether it is in data")
     # If element is in data (and if data is a DataFrame), return that
     if isa(x.data, DataFrame) && element in names(x.data)
+        oad(debug, "  return value from data")
+        oad(debug, "END get_element()")
         return copy(x.data[:, element])
     end
     # If this is a Ctd object, we can return certain computed things
-    if typeof(x) == Ctd
+    oad(debug, "  not metadata or in data, so check whether it is computable")
+    if typeof(x) == Ctd || typeof(x) == Argo
+        oad(debug, "  the object is either of Ctd or Argo type, so check for some known things like N2, z, depth, SA, C, sigma0 and spiciness0")
         if element == "N2"
+            oad(debug, "  calculating N2 using N2()")
+            oad(debug, "END get_element()")
             return copy(N2(x))
         end
         p = x.data.pressure
         if element == "z"
+            oad(debug, "  calculating z using gsw_z_from_p()")
+            oad(debug, "END get_element()")
             return gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
         end
         if element == "depth"
+            oad(debug, "  calculating depth using -gsw_z_from_p()")
+            oad(debug, "END get_element()")
             return -gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
         end
         SP = x.data.salinity
@@ -139,27 +153,43 @@ function get_element(x::OA, element::String; debug::Int64=0)
         latitude = x.metadata["latitude"]
         local SA = gsw_sa_from_sp.(SP, p, longitude, latitude) |> fix_gsw_bad_code!
         if element == "SA"
+            oad(debug, "  calculating SA using gsw_sa_from_sp.(SP,p,longitude,latitude)")
+            oad(debug, "END get_element()")
             return copy(SA)
         end
         local CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
         if element == "CT"
+            oad(debug, "  calculating CT using gsw_ct_from_t.(SA,T,p)")
+            oad(debug, "END get_element()")
             return copy(CT)
         end
         if element == "sigma0"
+            oad(debug, "  calculating sigma0 using gsw_sigma0.(SA,CT)")
+            oad(debug, "END get_element()")
             return copy(gsw_sigma0.(SA, CT)) |> fix_gsw_bad_code!
         end
         if element == "spiciness0"
+            oad(debug, "  calculating spiciness using gsw_spiciness.(SA,CT)")
+            oad(debug, "END get_element()")
             return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
         end
     elseif x isa Adp || x isa Echosounder
+        oad(debug, "  object is an Adp or Echosounder ... FIXME: this is a placeholder; nothing special is done")
         if element in keys(x.metadata)
+            oad(debug, "  found element in metadata")
+            oad(debug, "END get_element()")
             return x.metadata[element]
         elseif element in keys(x.data)
+            oad(debug, "  found element in data")
+            oad(debug, "END get_element()")
             return x.data[element]
         end
     elseif typeof(x) == Section
+        oad(debug, "  object is a Section ... FIXME: not checked")
         # assume all CTDs have same metadata names
         if element in keys(x.data[1].metadata)
+            oad(debug, "  found element in metadata")
+            oad(debug, "END get_element()")
             return copy(map(ctd -> get_element(ctd, element), x.data))
         end
     end
