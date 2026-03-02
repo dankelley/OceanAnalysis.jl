@@ -1,3 +1,5 @@
+import StatsBase
+
 function four_num(x, name)
     if !(x[1] isa Char)
         skip_missing = ismissing.(x)
@@ -20,14 +22,33 @@ end
 
 function summarize_data(x)
     if x.data isa DataFrame
+        data_names = names(x.data)
         println("\nData: a DataFrame with contents as follows")
         df = DataFrame(name=String[], Min=Float64[], Max=Float64[], Mean=Float64[],
             num_missing=Int64[], num_nan=Int64[])
-        for name in names(x.data)
+        for name in data_names[.!occursin.(r"_qc$", data_names)]
             push!(df, four_num(x[name], name))
         end
         indent = "  "
         println(indent, replace(string(df), "\n" => "\n" * indent))
+        # Summarize QC flags (if they exist)
+        QC_names = data_names[occursin.("_qc", data_names)]
+        if length(QC_names) > 0
+            println("\nData-Processing Flags:")
+            for name in QC_names
+                local tmp = StatsBase.countmap(x[name])
+                print(@sprintf "  %-25s " name * ":")
+                local i = length(keys(tmp))
+                for key in keys(tmp)
+                    print("\"$key\" $(tmp[key])")
+                    i = i - 1
+                    if i >= 1
+                        print(", ")
+                    end
+                end
+                print("\n")
+            end
+        end
     elseif x.data isa Matrix
         fn = four_num(x.data, "")
         nrow, ncol = size(x.data)

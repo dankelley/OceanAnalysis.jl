@@ -9,6 +9,7 @@ using Printf
 using CSV
 using Dierckx
 using Statistics
+using StatsBase
 using TiffImages
 
 # Types
