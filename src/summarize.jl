@@ -74,6 +74,33 @@ function summarize(x::OA)
 end
 
 """
+    summary(x::Argo)
+
+Print a summary of some of the contents of an Argo object.
+
+# Examples
+
+```juliadoc
+using OceanAnalysis
+f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc");
+a = read_argo(f);
+summarize(a)
+```
+"""
+function summarize(x::Argo)
+    println("Argo Summary\n------------\n")
+    println("Metadata: a Dict with ", length(x.metadata), " keys, including the following")
+    println("  filename:  \"", x.metadata["filename"], "\"")
+    println("  time:      ", x.metadata["time"])
+    println("  latitude:  ", @sprintf "%.3fN" x.metadata["latitude"])
+    println("  longitude: ", @sprintf "%.3fE" x.metadata["longitude"])
+    println("  data_mode: ", x.metadata["data_mode"])
+    summarize_data(x)
+end
+
+
+
+"""
     summary(x::Ctd)
 
 Print a summary of some of the contents of a Ctd object.
