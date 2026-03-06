@@ -79,6 +79,23 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
     else
         error("vertical must be either :pressure or :density")
     end
+    if which in names(ctd.data)
+        println("FIXME: dan, code for internal lookup")
+        x = ctd.data[:, which]
+        rval = plot(x, y, ylabel=ylabel,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
+            xlabel="FIXME: DAN use label_from_varname() here",
+            #xlabel=if (abbreviate)
+            #    which == "CT" ? "CT[°C]" : "T [°C]"
+            #else
+            #    which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
+            #end,
+            yrot=90; kwargs...)
+        return (rval)
+    end
     if which == "temperature" || which == "CT"
         oad(debug, "    drawing '", which, "'")
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,

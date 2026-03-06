@@ -47,6 +47,7 @@ export gravity
 export grid_ctd
 export grid_section
 export interpolate_barnes
+export label_from_varname
 export N2
 export plot_adp
 export plot_amsr

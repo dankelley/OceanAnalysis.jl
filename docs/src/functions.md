@@ -40,6 +40,7 @@ OceanAnalysis.gravity
 OceanAnalysis.grid_ctd
 OceanAnalysis.grid_section
 OceanAnalysis.interpolate_barnes
+OceanAnalysis.label_from_varname
 OceanAnalysis.N2
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp

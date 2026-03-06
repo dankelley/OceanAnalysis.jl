@@ -122,7 +122,9 @@ function summarize(x::Ctd)
     println("  filename:  \"", x.metadata["filename"], "\"")
     println("  latitude:  ", @sprintf "%.3fN" x.metadata["latitude"])
     println("  longitude: ", @sprintf "%.3fE" x.metadata["longitude"])
-    println("  header:    String vector with ", length(x.metadata["header"]), " entries")
+    if "header" in keys(x.metadata)
+        println("  header:    String vector with ", length(x.metadata["header"]), " entries")
+    end
     summarize_data(x)
 end
 
