@@ -1,6 +1,6 @@
 """
     plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-        abbreviate::Bool=false, debug::Int64=0, kwargs...)
+        abbreviate::Symbol=:long, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the variable named by `which` depends on either pressure or density.  The variable is drawn on the x axis and pressure on the y axis. Following oceanographic convention, the y axis is set up so that waters nearer the air-sea interface are nearer the top of the plot.
 
@@ -14,7 +14,7 @@ Plot an oceanographic profile for data contained in `ctd`, showing how the varia
 
 - `vertical` a Symbol specifying what to plot on the y axis. The default is `:pressure`, but `:density` is also permitted.
 
-- `abbreviate` a Bool value indicating whether to abbreviate axis names,.
+- `abbreviate` a Symbol indicating a category for axis length, used in determining how to label the axes. The valid choices are `:short`, `:medium`, and `:long`.
 
 - `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
 
@@ -24,41 +24,73 @@ Plot an oceanographic profile for data contained in `ctd`, showing how the varia
 # Examples
 ```julia
 using OceanAnalysis, Plots
-# Read an Argo file
+
+# Example 1: show overview of an Argo profile
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
-d = read_argo(f) |> as_ctd;
+ctd = read_argo(f) |> as_ctd;
 # Plot profiles of Conservative Temperature, Absolute Salinity, and potential
 # density anomaly with respect to surface pressure.
-p1 = plot_profile(d; which="CT")
-p2 = plot_profile(d; which="SA")
-p3 = plot_profile(d; which="sigma0")
+p1 = plot_profile(ctd; which="CT")
+p2 = plot_profile(ctd; which="SA")
+p3 = plot_profile(ctd; which="sigma0")
 plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
+
+# Example 2: add a new variable to the profile, then plot it
+using GibbsSeaWater
+ctd.data.conductivity = gsw_c_from_sp.(ctd["salinity"], ctd["temperature"], ctd["pressure"]);
+plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
 ```
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-    abbreviate::Bool=false, debug::Int64=0, kwargs...)
+    abbreviate::Symbol=:long, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
-    # We can plot proviles of whatever is in the file, plus some others. Of course,
-    # we don't allow plotting a profile of pressure, since that's just a silly 1:1
-    # line.
+    # For all cases, we need to set up the vertical axis, so do that first
+    oad(debug, "  setting up coordinate system for vertical axis")
+    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
+        @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
+    end
+    if vertical == :pressure
+        y = ctd["pressure"]
+        ylabel = label_from_varname("p", abbreviate)
+    elseif vertical == :density
+        y = ctd["sigma0"]
+        ylabel = label_from_varname("sigma0", abbreviate)
+    else
+        error("vertical must be either :pressure or :density")
+    end
+    # Handle cases in which the item is stored in ctd.data
+    if which in names(ctd.data)
+        oad(debug, "  drawing '", which, "', taking values directly from ctd.data")
+        x = ctd.data[:, which]
+        rval = plot(x, y, ylabel=ylabel,
+            yaxis=:flip, xmirror=true,
+            framestyle=:box, legend=false, color=:black, tickdirection=:out,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+            tickfontsize=8, guidefontsize=8, titlefontsize=8,
+            xlabel=label_from_varname(which),
+            yrot=90; kwargs...)
+        oad(debug, "END plot_profile()")
+        return (rval)
+    end
+    # The item is not stored, so we will need to extract it. FIXME: won't [] handle this?
     plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
-    oad(debug, "    plotnames before adding derived variables: ", plot_names)
+    oad(debug, "  plotnames before adding derived variables: ", plot_names)
     derived_variables = ["SA", "CT", "sigma0", "spiciness0", "N2"]
     for item in derived_variables
         if !(item in plot_names)
             plot_names = [plot_names; item]
         end
     end
-    oad(debug, "    plotnames after adding derived variables: ", plot_names)
+    oad(debug, "  plotnames after adding derived variables: ", plot_names)
     if !(which in plot_names)
         error("plot_profile() cannot handle which='", which, "'; try one of: ", plot_names)
     end
-    oad(debug, "    extracting data")
+    oad(debug, "  extracting data")
     S = ctd.data.salinity
     T = ctd.data.temperature
-    p = ctd.data.pressure
+    #> p = ctd.data.pressure
     # Computing things as below is fast in Julia, so we do it even if the user
     # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
     # many cases, the user *will* want those TEOS-10 things.
@@ -66,112 +98,62 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
     CT = ctd["CT"]
     sigma0 = ctd["sigma0"]
     spiciness0 = ctd["spiciness0"]
-    oad(debug, "    setting up coordinate system for vertical axis")
-    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-        @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
-    end
-    if vertical == :pressure
-        y = p
-        ylabel = abbreviate ? "p [dbar]" : "Pressure [dbar]"
-    elseif vertical == :density
-        y = sigma0
-        ylabel = abbreviate ? "σ₀ [kg/m³]" : "Potential Density Anomaly [kg/m³]"
-    else
-        error("vertical must be either :pressure or :density")
-    end
-    if which in names(ctd.data)
-        println("FIXME: dan, code for internal lookup")
-        x = ctd.data[:, which]
-        rval = plot(x, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel="FIXME: DAN use label_from_varname() here",
-            #xlabel=if (abbreviate)
-            #    which == "CT" ? "CT[°C]" : "T [°C]"
-            #else
-            #    which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
-            #end,
-            yrot=90; kwargs...)
-        return (rval)
-    end
     if which == "temperature" || which == "CT"
-        oad(debug, "    drawing '", which, "'")
+        oad(debug, "  drawing '", which, "'")
         rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true,
             framestyle=:box, legend=false, color=:black, tickdirection=:out,
             seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=if (abbreviate)
-                which == "CT" ? "CT[°C]" : "T [°C]"
-            else
-                which == "CT" ? "Conservative Temperature [°C]" : "Temperature [°C]"
-            end,
+            xlabel=label_from_varname("which"),
             yrot=90; kwargs...)
     elseif which == "salinity" || which == "SA"
-        oad(debug, "    drawing '", which, "'")
+        oad(debug, "  drawing '", which, "'")
         rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true,
             framestyle=:box, legend=false, color=:black, tickdirection=:out,
             seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=if (abbreviate)
-                which == "SA" ? "SA [g/kg]" : "S"
-            else
-                which == "SA" ? "Absolute Salinity [g/kg]" : "Practical Salinity"
-            end,
+            xlabel=label_from_varname(which),
             yrot=90; kwargs...)
     elseif which == "sigma0" # gsw formulation
-        oad(debug, "    drawing '", which, "'")
+        oad(debug, "  drawing '", which, "'")
         rval = plot(sigma0, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true,
             framestyle=:box, legend=false, color=:black, tickdirection=:out,
             seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=if abbreviate
-                "σ₀ [kg/m³]"
-            else
-                "Potential Density Anomaly, σ₀ [kg/m³]"
-            end,
+            xlabel=label_from_varname(which),
             yrot=90; kwargs...)
     elseif which == "spiciness0" # gsw formulation
-        oad(debug, "    drawing '", which, "'")
+        oad(debug, "  drawing '", which, "'")
         rval = plot(spiciness0,
             y, ylabel=ylabel,
             yaxis=:flip, xmirror=true,
             framestyle=:box, legend=false, color=:black, tickdirection=:out,
             seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=if abbreviate
-                "π [kg/m³]"
-            else
-                "Spiciness [kg/m³]"
-            end,
+            xlabel=label_from_varname(which),
             yrot=90; kwargs...)
     elseif which == "N2"
-        oad(debug, "    drawing '", which, "'")
+        oad(debug, "  drawing '", which, "'")
         x = N2(ctd)
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true,
             framestyle=:box, legend=false, color=:black, tickdirection=:out,
             seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=if abbreviate
-                "N²" # N2" #"N²"
-            else
-                "N² [s⁻²]" # "N2 [1/s^2]"
-            end,
+            xlabel=label_from_varname(which),
             yrot=90; kwargs...)
     elseif which in plot_names
         x = ctd.data[:, which]
-        oad(debug, "    drawing $which")
+        oad(debug, "  drawing $which")
         rval = plot(x, y, ylabel=ylabel,
             yaxis=:flip, xmirror=true,
             framestyle=:box, legend=false, color=:black, tickdirection=:out,
             seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
             tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=which,
+            xlabel=label_from_varname(which),
             yrot=90; kwargs...)
     else
         error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
