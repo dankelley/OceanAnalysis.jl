@@ -60,105 +60,106 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
     else
         error("vertical must be either :pressure or :density")
     end
-    # Handle cases in which the item is stored in ctd.data
-    if which in names(ctd.data)
-        oad(debug, "  drawing '", which, "', taking values directly from ctd.data")
-        x = ctd.data[:, which]
-        rval = plot(x, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname(which),
-            yrot=90; kwargs...)
-        oad(debug, "END plot_profile()")
-        return (rval)
+    x = ctd[which]
+    if x == Nothing
+        error("Cannot find \"$which\" in this object, and cannot compute it either")
     end
-    # The item is not stored, so we will need to extract it. FIXME: won't [] handle this?
-    plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
-    oad(debug, "  plotnames before adding derived variables: ", plot_names)
-    derived_variables = ["SA", "CT", "sigma0", "spiciness0", "N2"]
-    for item in derived_variables
-        if !(item in plot_names)
-            plot_names = [plot_names; item]
-        end
-    end
-    oad(debug, "  plotnames after adding derived variables: ", plot_names)
-    if !(which in plot_names)
-        error("plot_profile() cannot handle which='", which, "'; try one of: ", plot_names)
-    end
-    oad(debug, "  extracting data")
-    S = ctd.data.salinity
-    T = ctd.data.temperature
-    #> p = ctd.data.pressure
-    # Computing things as below is fast in Julia, so we do it even if the user
-    # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
-    # many cases, the user *will* want those TEOS-10 things.
-    SA = ctd["SA"]
-    CT = ctd["CT"]
-    sigma0 = ctd["sigma0"]
-    spiciness0 = ctd["spiciness0"]
-    if which == "temperature" || which == "CT"
-        oad(debug, "  drawing '", which, "'")
-        rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname("which"),
-            yrot=90; kwargs...)
-    elseif which == "salinity" || which == "SA"
-        oad(debug, "  drawing '", which, "'")
-        rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname(which),
-            yrot=90; kwargs...)
-    elseif which == "sigma0" # gsw formulation
-        oad(debug, "  drawing '", which, "'")
-        rval = plot(sigma0, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname(which),
-            yrot=90; kwargs...)
-    elseif which == "spiciness0" # gsw formulation
-        oad(debug, "  drawing '", which, "'")
-        rval = plot(spiciness0,
-            y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname(which),
-            yrot=90; kwargs...)
-    elseif which == "N2"
-        oad(debug, "  drawing '", which, "'")
-        x = N2(ctd)
-        rval = plot(x, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname(which),
-            yrot=90; kwargs...)
-    elseif which in plot_names
-        x = ctd.data[:, which]
-        oad(debug, "  drawing $which")
-        rval = plot(x, y, ylabel=ylabel,
-            yaxis=:flip, xmirror=true,
-            framestyle=:box, legend=false, color=:black, tickdirection=:out,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-            tickfontsize=8, guidefontsize=8, titlefontsize=8,
-            xlabel=label_from_varname(which),
-            yrot=90; kwargs...)
-    else
-        error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
-    end
+    rval = plot(x, y,
+        xlabel=label_from_varname(which), ylabel=ylabel,
+        yaxis=:flip, xmirror=true, framestyle=:box, legend=false,
+        color=:black, tickdirection=:out,
+        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+        tickfontsize=8, guidefontsize=8, titlefontsize=8,
+        yrot=90; kwargs...)
     oad(debug, "END plot_profile()")
-    rval
+    return (rval)
+    #<OLD> println("DAN 4 -- how can we get here???????")
+    #<OLD> # FIXME: delete here to bottom
+    #<OLD> # The item is not stored, so we will need to extract it. FIXME: won't [] handle this?
+    #<OLD> plot_names = data_names[data_names.!="pr".&&data_names.!="pressure"]
+    #<OLD> oad(debug, "  plotnames before adding derived variables: ", plot_names)
+    #<OLD> derived_variables = ["SA", "CT", "sigma0", "spiciness0", "N2"]
+    #<OLD> for item in derived_variables
+    #<OLD>     if !(item in plot_names)
+    #<OLD>         plot_names = [plot_names; item]
+    #<OLD>     end
+    #<OLD> end
+    #<OLD> oad(debug, "  plotnames after adding derived variables: ", plot_names)
+    #<OLD> if !(which in plot_names)
+    #<OLD>     error("plot_profile() cannot handle which='", which, "'; try one of: ", plot_names)
+    #<OLD> end
+    #<OLD> oad(debug, "  extracting data")
+    #<OLD> S = ctd.data.salinity
+    #<OLD> T = ctd.data.temperature
+    #<OLD> #> p = ctd.data.pressure
+    #<OLD> # Computing things as below is fast in Julia, so we do it even if the user
+    #<OLD> # doesn't actually want SA or the other TEOS-10 variable.  And, I think in
+    #<OLD> # many cases, the user *will* want those TEOS-10 things.
+    #<OLD> SA = ctd["SA"]
+    #<OLD> CT = ctd["CT"]
+    #<OLD> sigma0 = ctd["sigma0"]
+    #<OLD> spiciness0 = ctd["spiciness0"]
+    #<OLD> if which == "temperature" || which == "CT"
+    #<OLD>     oad(debug, "  drawing '", which, "'")
+    #<OLD>     rval = plot(which == "CT" ? CT : T, y, ylabel=ylabel,
+    #<OLD>         yaxis=:flip, xmirror=true,
+    #<OLD>         framestyle=:box, legend=false, color=:black, tickdirection=:out,
+    #<OLD>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<OLD>         tickfontsize=8, guidefontsize=8, titlefontsize=8,
+    #<OLD>         xlabel=label_from_varname("which"),
+    #<OLD>         yrot=90; kwargs...)
+    #<OLD> elseif which == "salinity" || which == "SA"
+    #<OLD>     oad(debug, "  drawing '", which, "'")
+    #<OLD>     rval = plot(which == "SA" ? SA : S, y, ylabel=ylabel,
+    #<OLD>         yaxis=:flip, xmirror=true,
+    #<OLD>         framestyle=:box, legend=false, color=:black, tickdirection=:out,
+    #<OLD>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<OLD>         tickfontsize=8, guidefontsize=8, titlefontsize=8,
+    #<OLD>         xlabel=label_from_varname(which),
+    #<OLD>         yrot=90; kwargs...)
+    #<OLD> elseif which == "sigma0" # gsw formulation
+    #<OLD>     oad(debug, "  drawing '", which, "'")
+    #<OLD>     rval = plot(sigma0, y, ylabel=ylabel,
+    #<OLD>         yaxis=:flip, xmirror=true,
+    #<OLD>         framestyle=:box, legend=false, color=:black, tickdirection=:out,
+    #<OLD>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<OLD>         tickfontsize=8, guidefontsize=8, titlefontsize=8,
+    #<OLD>         xlabel=label_from_varname(which),
+    #<OLD>         yrot=90; kwargs...)
+    #<OLD> elseif which == "spiciness0" # gsw formulation
+    #<OLD>     oad(debug, "  drawing '", which, "'")
+    #<OLD>     rval = plot(spiciness0,
+    #<OLD>         y, ylabel=ylabel,
+    #<OLD>         yaxis=:flip, xmirror=true,
+    #<OLD>         framestyle=:box, legend=false, color=:black, tickdirection=:out,
+    #<OLD>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<OLD>         tickfontsize=8, guidefontsize=8, titlefontsize=8,
+    #<OLD>         xlabel=label_from_varname(which),
+    #<OLD>         yrot=90; kwargs...)
+    #<OLD> elseif which == "N2"
+    #<OLD>     oad(debug, "  drawing '", which, "'")
+    #<OLD>     x = N2(ctd)
+    #<OLD>     rval = plot(x, y, ylabel=ylabel,
+    #<OLD>         yaxis=:flip, xmirror=true,
+    #<OLD>         framestyle=:box, legend=false, color=:black, tickdirection=:out,
+    #<OLD>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<OLD>         tickfontsize=8, guidefontsize=8, titlefontsize=8,
+    #<OLD>         xlabel=label_from_varname(which),
+    #<OLD>         yrot=90; kwargs...)
+    #<OLD> elseif which in plot_names
+    #<OLD>     x = ctd.data[:, which]
+    #<OLD>     oad(debug, "  drawing $which")
+    #<OLD>     rval = plot(x, y, ylabel=ylabel,
+    #<OLD>         yaxis=:flip, xmirror=true,
+    #<OLD>         framestyle=:box, legend=false, color=:black, tickdirection=:out,
+    #<OLD>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<OLD>         tickfontsize=8, guidefontsize=8, titlefontsize=8,
+    #<OLD>         xlabel=label_from_varname(which),
+    #<OLD>         yrot=90; kwargs...)
+    #<OLD> else
+    #<OLD>     error("Unrecognized 'which'=\"$(which)\". Try 'CT', 'N2', 'S', 'SA', 'sigma0', 'spiciness0', or 'T'.")
+    #<OLD> end
+    #<OLD> oad(debug, "END plot_profile()")
+    #<OLD> rval
 end
 
