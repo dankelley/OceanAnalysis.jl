@@ -25,6 +25,7 @@ OceanAnalysis.coriolis
 OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
 OceanAnalysis.depth_from_pressure
+OceanAnalysis.despike
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!
 OceanAnalysis.geod_distance
@@ -67,6 +68,8 @@ OceanAnalysis.read_echosounder
 OceanAnalysis.read_section
 OceanAnalysis.read_topography
 OceanAnalysis.rename_data
+OceanAnalysis.running_mean
+OceanAnalysis.running_median
 OceanAnalysis.SA
 OceanAnalysis.scale_bar
 OceanAnalysis.set_teos

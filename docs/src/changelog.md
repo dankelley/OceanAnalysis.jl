@@ -15,6 +15,7 @@ Release notes:
 - [`as_ctd`](@ref) can convert Argo objects to Ctd objects
 - [`as_section`](@ref) for assembling 'ctd' data into a section.
 - [`beam_to_xyz`](@ref) for converting RDI acoustic-Doppler data from beam coordinates to xyz coordinates.
+- [`despike`](@ref) for removing anomalous values in time series data.
 - [`get_section`](@ref) for downloading oceanographic section data.
 - [`grid_ctd`](@ref) for gridding Ctd data.
 - [`grid_section`](@ref) for gridding Section data.
@@ -29,6 +30,8 @@ Release notes:
 - [`read_echosounder`](@ref) for reading Biosonics echosounder data.
 - [`read_section`](@ref) for reading Section data.
 - [`rename_data`](@ref) for converting data names to standardized names.
+- [`running_mean`](@ref) added.
+- [`running_median`](@ref) added.
 - [`subset_ctd`](@ref) for subsetting Ctd objects.
 - `summarize` for summarizing OA objects.
 - [`xyz_to_enu`](@ref) for converting RDI acoustic-Doppler data from xyz coordinates to enu coordinates.
