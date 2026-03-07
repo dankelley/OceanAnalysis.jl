@@ -1,11 +1,11 @@
 using OceanAnalysis, Plots, Statistics
 
 """
-    despike(x::Vector{Float64}; k::Int64=2, n::Int64=3)
+    despike(x::Vector{Float64}; k::Int64=7, n::Int64=4)
 
 Despike a timeseries.
 
-The procedure starts by computing a running median version of the provided time-series. Then, each point is compared with the sliding-median within a sliding window, with the standard deviation of the departure being computing in each window. If any given point departs from the running median by more than `n` time that local standard deviation, then it is considered an outlier, and it is replaced with the running median. Points near the start and end of `x` are left unaltered, to ensure that the window about any given point is centred.
+The procedure starts by computing a running median version (with window length `k`) of the provided time-series. Then the standard deviation of the difference between the two timeseries is computed. Points are considered to be spikes if they have difference exceeding `n` times the overall standard deviation. Any such points are then replaced with the running-median values, and the resultant possibly-altered timeseries is returned. The default values of `k` and `n` may provide a good starting point, but users are advised to explore other values, in the context of the character of data being analyzed.
 
 # Parameters
 
@@ -13,8 +13,8 @@ The procedure starts by computing a running median version of the provided time-
 
 # Keywords
 
-- `k` width of running-median filter. This is passed to [`running_median`](@ref), which computes the running mean.
-- `n` spike criterion.
+- `k` width of running-median filter. This is passed to [`running_median`](@ref), which computes the running mean. Since the computation uses centred windows, `k` will be incremented by 1 if it is an even number.
+- `n` spike criterion. Increasing `n` will usually decrease the number of points considered spikes, unless they are very anomalous.
 
 # Examples
 
@@ -30,7 +30,7 @@ scatter!(i, x, label="base+noise")
 scatter!(i, xd, label="despiked", ms=2)
 ```
 """
-function despike(x; n::Int64=2, k::Int64=3)
+function despike(x; k::Int64=7, n::Int64=4)
     x_smoothed = running_median(x, k)
     distance = abs.(x .- x_smoothed)
     stddev = std(distance)
