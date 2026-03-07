@@ -1,5 +1,6 @@
 # https://github.com/JuliaMath/Dierckx.jl/blob/dd942e4a38b9ab3288d74177aa36f828a91f56d4/src/Dierckx.jl#L151
 # https://www.netlib.org/dierckx/curfit.f
+# https://juliahub.com/ui/Packages/General/Dierckx/0.5.0
 
 """
     N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
