@@ -9,6 +9,7 @@ OceanAnalysis.Amsr
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
 OceanAnalysis.Echosounder
+OceanAnalysis.Nonna
 OceanAnalysis.Section
 OceanAnalysis.Topography
 ```
