@@ -111,6 +111,21 @@ mutable struct Echosounder <: OA
 end
 
 """
+    A type to hold NONNA bathymetry data
+
+This holds bathymetric data as read by [`read_nonna`](@ref).
+
+The `metadata` element is a Dict that holds the source `filename` along with vectors holding the `easting` and `northing` values, in metres, that define the grid.
+
+The `data` element stores a matrix of bathymetry data in terms of height above mean sea level, in metres.
+"""
+mutable struct Nonna <: OA
+    metadata::Dict{String,Any}
+    data::Matrix{Float64}
+end
+
+
+"""
     A type to hold topography data
 
 This holds topography data as read by [`read_topography`](@ref).

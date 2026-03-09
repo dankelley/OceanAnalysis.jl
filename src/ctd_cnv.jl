@@ -3,15 +3,15 @@
 
 Read a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 
-Returns a [`Ctd`](@ref) object that holds `metadata` (a Dict) and `data` (a
-DataFrame). `metadata` is a Dict holding `header` (a vector of strings, one per
-line from the start down to a line containing `#END`), plus some particular
-items scanned from that header. `data` is a DataFrame holding the columnar data
-read from the file. If `rename=true`, then [`rename_data`](@ref) is used to
-rename some of the columns in `data` to better match oceanographic conventions
-(e.g. `"pr"` becomes `"pressure"`). If the data file indicates temperature is
-on the T68 scale, then this is converted to the standard modern scale, T90,
-before saving as `temperature`. 
+Returns a [`Ctd`](@ref) object that holds `metadata` and `data`. The `metadata`
+item is a Dict that holds `header` (a vector of strings, one per line from the
+start down to a line containing `#END`), plus some particular items scanned
+from that header, e.g. `"longitude"` and `"latitude"`. The `data` item is a
+DataFrame holding the columnar data read from the file. If `rename=true`, then
+[`rename_data`](@ref) is used to rename some of the columns in `data` to better
+match oceanographic conventions (e.g. `"pr"` becomes `"pressure"`). If the data
+file indicates temperature is on the T68 scale, then this is converted to the
+standard modern scale, T90, before saving as `temperature`. 
 
 A message is printed if no data in the file are labelled with names that are
 recognized as salinity, temperature, or pressure, because these quantities are
