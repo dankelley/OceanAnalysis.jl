@@ -228,7 +228,7 @@ function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, f
     #println("y0: ", y0)
     Y = [y0, y0]
     #println("Y: ", Y)
-    plot!(X, Y, color=:black, linewidth=linewidth)
+    plot!(X, Y, color=:black, linewidth=linewidth, label=false)
     annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
         Plots.text("$(trunc(Int, distance)) km", fontsize))
 end

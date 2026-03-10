@@ -42,9 +42,8 @@ function read_nonna(filename::String, grid_size::Float64=10.0)
     # Flip the y coordinates so that south is at the bottom of the image
     data = reverse(data, dims=1)
     s = size(data)
-    x = grid_size * (1:s[1])
-    y = grid_size * (1:s[2])
-    # FIXME consider making an object type
+    x = grid_size * range(0.0, length=s[1])
+    y = grid_size * range(0.0, length=s[2])
     metadata["easting"] = x
     metadata["northing"] = y
     Nonna(metadata, data)
