@@ -52,6 +52,22 @@ end
 ```
 ![Echosounder plot](echosounder.png)
 
+## NONNA (bathymetry) Data
+
+NONNA files for Canadian waters can be downloaded via a GUI interface available
+at https://data.chs-shc.ca/dashboard/map.
+
+
+```julia
+using OceanAnalysis, Plots
+filename = expanduser("~/data/nonna/NONNA10_4460N06360W.tiff")
+n = read_nonna(filename);
+heatmap(n["longitude"], n["latitude"], n.data, c=:turbo,
+    size=(400, 400), dpi=300, framestyle=:box, tickdirection=:out)
+#savefig("nonna.png")
+```
+![NONNA_plot](nonna.png)
+
 ## Satellite Data
 
 The AMSR satellite provides several data streams, including sea-surface
