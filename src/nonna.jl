@@ -18,9 +18,8 @@ using OceanAnalysis, Plots
 # Region near East Lawrencetown Beach Provincial Park
 n = read_nonna(expanduser("~/data/nonna/NONNA10_4460N06340W.tiff"));
 heatmap(n["longitude"], n["latitude"], n.data, color=:turbo,
-    framestyle=:box, tickdirection=:out,
+    framestyle=:box, tickdirection=:out, dpi=300,
     aspect_ratio=1.0, size=(800, 800))
-scatter!([], [], label=false, ms=3)
 ```
 """
 function read_nonna(filename::String)
