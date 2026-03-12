@@ -1,10 +1,9 @@
 """
     read_nonna(filename::String)
 
-Read a NONNA bathymetric file.
+Read a NONNA (NON-NAvigational) bathymetric file.
 
-Such files for Canadian waters are available at
-https://data.chs-shc.ca/dashboard/map, through a somewhat confusing interface that requires GUI operations.
+The Canadian Hydrographic Service provides access to high-resolution bathymetric data for some Canadian waters at https://data.chs-shc.ca/dashboard/map. (This is a GUI-oriented site, and it is somewhat challenging to navigate.) Files are available at both 10-m and 100-m resolution and in a variety of formats. The present function handles only the GeoTIFF format.
 
 # Return Value
 

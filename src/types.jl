@@ -115,7 +115,7 @@ end
 
 This holds bathymetric data as read by [`read_nonna`](@ref).
 
-The `metadata` element is a Dict that holds the source `filename` along with vectors holding the `easting` and `northing` values, in metres, that define the grid.
+The `metadata` element is a Dict that holds the source `filename` along with vectors named `longitude` and `latitude` that define the grid.
 
 The `data` element stores a matrix of bathymetry data in terms of height above mean sea level, in metres.
 """
