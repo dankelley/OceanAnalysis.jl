@@ -3,7 +3,7 @@ using Dates
 using DataFrames
 using Downloads
 using GibbsSeaWater
-using GMT
+using GMT: gmtread
 using Interpolations
 using Plots
 using Printf
