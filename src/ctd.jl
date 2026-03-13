@@ -1,10 +1,31 @@
 """
-    as_ctd(a::Argo)
+    as_ctd(a::Argo; add_teos::Bool=false, debug::Int64=0)
 
 Convert an Argo object into a Ctd object.
+
+# Return Value
+
+This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and possibly with new `data` columns holding computed values of some key TEOS-10 values.
+
+# Arguments
+
+- `a` an [Argo] object.
+
+# Keywords
+
+- `add_teos` a logical value indicating whether to add TEOS-10 items (e.g. `SA`) to the `data` portion of the return value.
+
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+
 """
-function as_ctd(a::Argo)
-    Ctd(a.metadata, a.data)
+function as_ctd(a::Argo; add_teos::Bool=false, debug::Int64=0)
+    rval = Ctd(a.metadata, a.data)
+    if add_teos
+        oad(debug, "  inserting TEOS-10 values into data")
+        rval = set_teos(rval, debug=increment_debug(debug))
+    end
+    oad(debug, "END as_ctd()")
+    rval
 end
 
 """
