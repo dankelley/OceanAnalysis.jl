@@ -1,6 +1,6 @@
 # OceanAnalysis Functions
 
-Data types:
+## Data types:
 
 ```@docs
 OceanAnalysis.OA
@@ -15,7 +15,7 @@ OceanAnalysis.Section
 OceanAnalysis.Topography
 ```
 
-Functions:
+## Functions:
 
 ```@docs
 OceanAnalysis.argo_id_cycle
