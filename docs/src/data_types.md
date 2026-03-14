@@ -1,11 +1,15 @@
 # Data types provided by OceanAnalysis
 
-[`OA`](@ref) is the foundational base for all the `OceanAnalysis` data types. In each
-of those derived types, there are two elements: (1) a Dict named `metadata` and (2)
-a DataFrame, Matrix, or some other data-containing object named `data`.
+[`OA`](@ref) is the foundational base for all the `OceanAnalysis` data types.
+In each of those derived types, there are two elements: (1) `metadata`, which
+is a Dict holding information about the data (e.g. a sampling location, for a
+[`Ctd`] object), and (2) `data`, which may be DataFrame, a Matrix, or some
+other data-containing type.
 
 The following outlines the available types and the principle functions relating
-to them.
+to them. See the [online
+documentation](https://dankelley.github.io/OceanAnalysis.jl/dev/examples) for
+graphical examples of many of these types.
 
 - [`Adp`](@ref) holds data from Acoustic-Doppler Profile data, as read by [`read_adp_rdi`](@ref) and plotted with [`plot_adp`](@ref).
 
