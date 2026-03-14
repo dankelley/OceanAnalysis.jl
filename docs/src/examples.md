@@ -141,6 +141,24 @@ scale_bar(500, :right, :top)
 
 ![Argo trajectory](argo_trajectory.png)
 
+## AMSR Satellite Data
+
+The AMSR satellite provides several data streams, including sea-surface
+temperature, which may be plotted as follows.
+
+```julia
+# North Atlantic Sea Surface Temperature
+using OceanAnalysis, Plots
+f = get_amsr("2025-09-07");
+a = read_amsr(f, "SST");
+plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
+    levels=0.0:2.5:30.0, clim=(0, 30))
+#savefig("amsr.png")
+```
+
+![AMSR-derived sea-surface temperature](amsr.png)
+
+
 
 ## Bathymetry Data
 
@@ -219,23 +237,6 @@ end
 ```
 ![Echosounder plot](echosounder.png)
 
-
-## Satellite Data
-
-The AMSR satellite provides several data streams, including sea-surface
-temperature, which may be plotted as follows.
-
-```julia
-# North Atlantic Sea Surface Temperature
-using OceanAnalysis, Plots
-f = get_amsr("2025-09-07");
-a = read_amsr(f, "SST");
-plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
-    levels=0.0:2.5:30.0, clim=(0, 30))
-#savefig("amsr.png")
-```
-
-![AMSR-derived sea-surface temperature](amsr.png)
 
 ## Section Data
 
