@@ -197,6 +197,21 @@ plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
 
 ![Topography diagram](topography.png)
 
+
+## Coastline Data
+
+The following produces a world map in Cartesian coordinates, with aspect ratio set so that shapes and relative sizes are appropriate at the equator.
+
+```julia
+using OceanAnalysis, Plots
+c = coastline()
+plot_coastline(c)
+#savefig("coastline.png")
+```
+
+![Coastline diagram](coastline.png)
+
+
 ## CTD Data
 
 The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.
