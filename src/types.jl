@@ -112,11 +112,13 @@ end
 """
     A type to hold NONNA bathymetry data
 
-This holds bathymetric data as read by [`read_nonna`](@ref).
+This holds bathymetric data as read by [`read_nonna`](@ref). See the [online documentation](https://dankelley.github.io/OceanAnalysis.jl/dev/examples/#High-resolution-bathymetry-data) for an illustration
 
 The `metadata` element is a Dict that holds the source `filename` along with vectors named `longitude` and `latitude` that define the grid.
 
 The `data` element stores a matrix of bathymetry data in terms of height above mean sea level, in metres.
+
+
 """
 mutable struct Nonna <: OA
     metadata::Dict{String,Any}
