@@ -179,7 +179,7 @@ heatmap(n["longitude"], n["latitude"], n.data, c=:turbo,
 ```
 ![NONNA_plot](nonna.png)
 
-### Low-resolution, gridded bathymetry/topography data
+### Low-resolution bathymetry and topography data
 
 The following downloads topographic data for a domain including southern
 Nova Scotia, and displays the data in three plot styles.

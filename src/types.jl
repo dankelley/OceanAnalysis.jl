@@ -164,7 +164,7 @@ vectors holding the `longitude` and `latitude` values that define the grid.
 The `data` element stores a matrix of topography data in terms of height
 above mean sea level, in metres.
 
-See the [online documentation](https://dankelley.github.io/OceanAnalysis.jl/dev/examples/#Low-resolution-bathymetry-data) for an illustration.
+See the [online documentation](https://dankelley.github.io/OceanAnalysis.jl/dev/examples/#Low-resolution-bathymetry-and-topography-data) for an illustration.
 """
 mutable struct Topography <: OA
     metadata::Dict{String,Any}
