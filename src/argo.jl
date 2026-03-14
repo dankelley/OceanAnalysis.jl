@@ -21,30 +21,27 @@ end
 
 
 """
-    read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug::Int64=0)
+    read_argo(filename::String; column::Int64=1, debug::Int64=0)
 
-Read an Argo file and return a [`Ctd`](@ref) object that holds salinity,
-temperature, pressure (and derived columns) but no other columns from the file.
-This function is in an early stage of development; please report problems as
-    issues on <www.github.com/dankelley/OceanAnalysis.jl/issues>.
+    Read an Argo file.
 
-The value of `add_teos` is passed to [`as_ctd`](@ref), where it indicates
-whether to add TEOS-10 variables such as `SA`, `CT`, `sigma0` and `spiciness0`
-to the `data` portion of the return value.
+# Arguments
 
-Set `debug` to a positive integer to cause `read_argo()` to print messages
-during processing. This can be handy if problems arise.
+- `filename` a String holding the name of a NetCDF file that holds Argo data.
+
+# Keywords
+
+- `column` an integer, indicating which profile to read from the file.
+
+- `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
 
 # Return value
 
-The `read_argo()` function returns a [`Ctd`](@ref) object that has two
+The `read_argo()` function returns an [`Argo`](@ref) object that has two
 components, a Dict named `.metadata` and DataFrame named `.data`. The
 `.metadata` entries are named `"cycle"`, `"data_mode"`, `"date_creation"`,
 `"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and `"time"`. The
-`.data` columns are named `"pressure"`, `"salinity"` and `"temperature"`,
-as copied from fields in the NetCDF file named `"PRES"`, `"PSAL"`
-and `"TEMP"`; no other NetCDF fields are copied in this version
-of `read_argo()`.
+`.data` columns are taken from the source file.
 
 # Examples
 ```jldoctest

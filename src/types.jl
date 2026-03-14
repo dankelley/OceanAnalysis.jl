@@ -54,8 +54,7 @@ returned by [`read_argo`](@ref), which reads the NetCDF files in which
 Argo data are distributed.
 
 For many purposes, it may be useful to convert Argo objects
-into Ctd objects, using [`as_ctd`](@ref). This is useful for
-plotting, etc.
+into Ctd objects, using [`as_ctd`](@ref).
 """
 mutable struct Argo <: OA
     metadata::Dict{String,Any}
@@ -126,23 +125,6 @@ end
 
 
 """
-    A type to hold topography data
-
-This holds topography data as read by [`read_topography`](@ref).
-
-The `metadata` element is a Dict that holds the source `filename` along with
-vectors holding the `longitude` and `latitude` values that define the grid.
-
-The `data` element stores a matrix of topography data in terms of height
-above mean sea level, in metres.
-"""
-mutable struct Topography <: OA
-    metadata::Dict{String,Any}
-    data::Matrix{Float64}
-end
-
-
-"""
     Section is a type that holds section data
 
 The `data` portion of a Section object is a Vector of [`Ctd`](@ref)
@@ -157,5 +139,23 @@ read from CTD files with [`read_section`](@ref). They may be gridded with
 mutable struct Section <: OA
     metadata::Dict{String,Any}
     data::Vector{Ctd}
+end
+
+
+
+"""
+    A type to hold topography data
+
+This holds topography data as read by [`read_topography`](@ref).
+
+The `metadata` element is a Dict that holds the source `filename` along with
+vectors holding the `longitude` and `latitude` values that define the grid.
+
+The `data` element stores a matrix of topography data in terms of height
+above mean sea level, in metres.
+"""
+mutable struct Topography <: OA
+    metadata::Dict{String,Any}
+    data::Matrix{Float64}
 end
 

@@ -6,6 +6,7 @@ Data types:
 OceanAnalysis.OA
 OceanAnalysis.Adp
 OceanAnalysis.Amsr
+OceanAnalysis.Argo
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
 OceanAnalysis.Echosounder

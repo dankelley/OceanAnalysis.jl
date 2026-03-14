@@ -14,12 +14,14 @@ using StatsBase
 using TiffImages
 
 # Types
-export OA
+export OA # the base from which the folowing inherit
 export Adp
 export Amsr
 export Argo
 export Ctd
 export Coastline
+export Echosounder
+export Nonna
 export Section
 export Topography
 

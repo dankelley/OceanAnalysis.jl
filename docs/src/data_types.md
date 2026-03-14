@@ -7,10 +7,14 @@ a DataFrame, Matrix, or some other data-containing object named `data`.
 The following outlines the available types and the principle functions relating
 to them.
 
+- [`Adp`](@ref) holds data from Acoustic-Doppler Profile data, as read by [`read_adp_rdi`](@ref) and plotted with [`plot_adp`](@ref).
+
 - [`Amsr`](@ref) holds data from AMSR satellites.  The `metadata` item is a
   Dict that holds information about the data source and sampling time. The
   `data` item is a matrix holding the requested field. See [`read_amsr`](@ref)
   for reading such files and plotting their contents.
+
+- [`Argo`](@ref) holds data from Argo profiling floats, as read by [`read_argo`](@ref).
 
 - [`Ctd`](@ref) holds hydrographic data, either from plain CTD instruments or
   from Argo profilers.  In each case, the `metadata` item holds information
@@ -28,6 +32,10 @@ to them.
   DataFrame with columns named `longitude` and `latitude`. Note that the former
   is in the 0-360 degree range for the built-in datasets. See the documentation
   for [`coastline`](@ref) for reading and plotting such data.
+
+- [`Echosounder`](@ref) holds data from scientific echosounders, as read with [`read_echosounder`](@ref).
+
+- [`Nonna`](@ref) holds high-resolution bathymetry data, as read with [`read_nonna`](@ref).
 
 - [`Section`](@ref) holds a collection of [`Ctd`](@ref) objects constructed
   from hydrographic profiles. Sections may be built up from such profiles with
