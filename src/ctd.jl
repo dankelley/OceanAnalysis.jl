@@ -71,15 +71,7 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 julia> using OceanAnalysis
 
 julia> as_ctd([32.], [15.], [0.], add_teos=false)
-Ctd(Dict{String, Any}("latitude" => 45.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
- Row │ salinity  temperature  pressure
-     │ Float64   Float64      Float64
-─────┼─────────────────────────────────
-   1 │     32.0         15.0       0.0)
-
-
-julia> as_ctd([32.], [15.], [0.], longitude=-63., latitude=40.)
-Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
+Ctd(Dict{String, Any}("filename" => nothing, "latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
  Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
      │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
 ─────┼────────────────────────────────────────────────────────────────────────
