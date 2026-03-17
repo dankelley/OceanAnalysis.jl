@@ -24,10 +24,10 @@ end
 function summarize_data(x)
     if x.data isa DataFrame
         data_names = names(x.data)
-        println("\nData: a DataFrame with contents as follows")
-        df = DataFrame(name=String[],
-            Min=Float64[], Max=Float64[], Mean=Float64[],
-            num=Int64[], num_missing=Int64[], num_nan=Int64[])
+        println("\nData: a DataFrame, summarized as follows")
+        df = DataFrame("name"=>String[],
+            "min"=>Float64[], "max"=>Float64[], "mean"=>Float64[],
+            "#total"=>Int64[], "#missing"=>Int64[], "#NaN"=>Int64[])
         for name in data_names[.!occursin.(r"_qc$", data_names)]
             push!(df, six_num(x[name], name))
         end
@@ -54,7 +54,7 @@ function summarize_data(x)
     elseif x.data isa Matrix
         fn = four_num(x.data, "")
         nrow, ncol = size(x.data)
-        println("\nData: a $(nrow)×$(ncol) Matrix with contents as follows")
+        println("\nData: a $(nrow)×$(ncol) Matrix, summarized as follows")
         println("  minimum: ", fn[2])
         println("  maximum: ", fn[4])
         println("  number of missing values: ", fn[5])
@@ -118,14 +118,33 @@ summarize(d)
 """
 function summarize(x::Ctd)
     println("CTD Summary\n-----------\n")
-    println("Metadata: a Dict with ", length(x.metadata), " keys, including the following")
-    println("  filename:  \"", x.metadata["filename"], "\"")
-    println("  latitude:  ", @sprintf "%.3fN" x.metadata["latitude"])
-    println("  longitude: ", @sprintf "%.3fE" x.metadata["longitude"])
-    if "header" in keys(x.metadata)
-        println("  header:    String vector with ", length(x.metadata["header"]), " entries")
+    k = keys(x.metadata)
+    if length(k) == 0
+        println("Metadata: an empty Dict")
+    else
+        println("Metadata: a Dict with ", length(x.metadata), " keys, including the following")
+        if "filename" in k && !isnothing(x.metadata["filename"])
+            println("  filename:  \"", x.metadata["filename"], "\"")
+        end
+        if "latitude" in k
+            println("  latitude:  ", @sprintf "%8.3f N" x.metadata["latitude"])
+        end
+        if "longitude" in k
+            println("  longitude: ", @sprintf "%8.3f E" x.metadata["longitude"])
+        end
+        if "time" in k && !isnothing(x.metadata["time"])
+            println("  time:      ", x.metadata["time"])
+        end
+        if "header" in keys(x.metadata)
+            println("  header:    String vector with ", length(x.metadata["header"]), " entries")
+        end
     end
-    summarize_data(x)
+    nr = nrow(x.data)
+    if nr == 0
+        println("Data: an empty data frame")
+    else
+        summarize_data(x)
+    end
 end
 
 """

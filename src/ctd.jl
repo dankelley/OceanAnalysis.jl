@@ -84,14 +84,6 @@ Ctd(Dict{String, Any}("latitude" => 40.0, "time" => nothing, "longitude" => -63.
      │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
 ─────┼────────────────────────────────────────────────────────────────────────
    1 │     32.0         15.0       0.0  32.1516  15.0642  23.6653   0.0686905)
-
-
-julia> as_ctd([32.], [15.], [0.], longitude=-63., latitude=30.)
-Ctd(Dict{String, Any}("latitude" => 30.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
- Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
-     │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
-─────┼────────────────────────────────────────────────────────────────────────
-   1 │     32.0         15.0       0.0  32.1511  15.0642  23.6649   0.0683062)
 ```
 """
 function as_ctd(salinity::Union{AbstractVector,AbstractRange},
@@ -110,6 +102,7 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
     oad(debug, "  assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
+    metadata["filename"] = nothing
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
     if !ismissing(time)
