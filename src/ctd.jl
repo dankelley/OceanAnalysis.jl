@@ -67,15 +67,23 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # Examples
-```jldoctest
+```julia
+using OceanAnalysis
 julia> using OceanAnalysis
 
 julia> as_ctd([32.], [15.], [0.], add_teos=false)
-Ctd(Dict{String, Any}("filename" => nothing, "latitude" => 40.0, "time" => nothing, "longitude" => -63.0), 1×7 DataFrame
+Ctd(Dict{String, Any}("filename" => nothing, "latitude" => 45.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
+ Row │ salinity  temperature  pressure
+     │ Float64   Float64      Float64
+─────┼─────────────────────────────────
+   1 │     32.0         15.0       0.0)
+
+julia> as_ctd([32.], [15.], [0.], longitude=40.0, latitude=-63.0)
+Ctd(Dict{String, Any}("filename" => nothing, "latitude" => -63.0, "time" => nothing, "longitude" => 40.0), 1×7 DataFrame
  Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
      │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
 ─────┼────────────────────────────────────────────────────────────────────────
-   1 │     32.0         15.0       0.0  32.1516  15.0642  23.6653   0.0686905)
+   1 │     32.0         15.0       0.0  32.1539  15.0641  23.6671   0.0704222)
 ```
 """
 function as_ctd(salinity::Union{AbstractVector,AbstractRange},
