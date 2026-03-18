@@ -72,33 +72,44 @@ using OceanAnalysis
 julia> using OceanAnalysis
 
 julia> as_ctd([32.], [15.], [0.], add_teos=false)
-Ctd(Dict{String, Any}("filename" => nothing, "latitude" => 45.0, "time" => nothing, "longitude" => -63.0), 1×3 DataFrame
+Ctd(Dict{String, Any}("filename" => nothing, "latitude" => [45.0], "time" => nothing, "longitude" => [-63.0]), 1×3 DataFrame
  Row │ salinity  temperature  pressure
      │ Float64   Float64      Float64
 ─────┼─────────────────────────────────
    1 │     32.0         15.0       0.0)
 
 julia> as_ctd([32.], [15.], [0.], longitude=40.0, latitude=-63.0)
-Ctd(Dict{String, Any}("filename" => nothing, "latitude" => -63.0, "time" => nothing, "longitude" => 40.0), 1×7 DataFrame
+Ctd(Dict{String, Any}("filename" => nothing, "latitude" => [-63.0], "time" => nothing, "longitude" => [40.0]), 1×7 DataFrame
  Row │ salinity  temperature  pressure  SA       CT       sigma0   spiciness0
      │ Float64   Float64      Float64   Float64  Float64  Float64  Float64
 ─────┼────────────────────────────────────────────────────────────────────────
    1 │     32.0         15.0       0.0  32.1539  15.0641  23.6671   0.0704222)
+
 ```
 """
 function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     temperature::Union{AbstractVector,AbstractRange},
     pressure::Union{AbstractVector,AbstractRange};
-    longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
+    longitude::Union{Real,AbstractVector}=-63.0,
+    latitude::Union{Real,AbstractVector}=45.0, time=nothing,
     add_teos::Bool=true, debug::Int64=0)
     oad(debug, "as_ctd(<ctd>, debug=$debug) START")
     #oad(debug, "  given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
+    nsamp = length(salinity)
+    length(temperature) == nsamp || error("salinity and temperature have differing lengths ($nsamp and $(length(temperature)), respectively)")
+    length(pressure) == nsamp || error("salinity and pressure have differing lengths ($nsamp and $(length(pressure)), respectively)")
     oad(debug, "  given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
     oad(debug, "  given temperature of length ", length(temperature), ", which starts: ", first(temperature, 2))
     oad(debug, "  given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
-    oad(debug, "  given longitude:  ", longitude)
-    oad(debug, "  given latitude:   ", latitude)
-    oad(debug, "  assembling data (a DataFrame)")
+    #oad(debug, "  given longitude of length ", length(latitude), ", which starts: ", first(longitude, 2))
+    #oad(debug, "  given latitude of length ", length(latitude), ", which starts: ", first(latitude, 2))
+    #if !isa(latitude, Vector)
+    #    latitude = repeat([latitude], nsamp)
+    #end
+    #if !isa(longitude, Vector)
+    #    longitude = repeat([longitude], nsamp)
+    #end
+    oad(debug, "  assembling data as a DataFrame with $nsamp rows")
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
     oad(debug, "  assembling metadata (a Dict)")
     metadata = Dict{String,Any}()

@@ -67,7 +67,6 @@ end
     get_amsr(date::String)
 """
 function get_amsr(date::String; kwargs...)
-    !ismissing(date) || error("must specify 'date', a string")
     get_amsr(Date(date), kwargs...)
 end
 
