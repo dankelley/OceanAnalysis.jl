@@ -177,13 +177,14 @@ end
 
 """
     grid_ctd(ctd::Ctd;
-        pressure_grid::Vector{Float64}=missing, pressure_step::Float64=2.0;
+        pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Float64=2.0,
         method::Symbol=:interpolate, debug::Int64=0)
 
 Grid a CTD to standardized pressure levels.
 
 The levels are as given by `pressure_grid` or, if that is not provided,
-as the pressure range within `ctd`, incrementing by `pressure_step`.
+as a sequence that starts at 0 dbar and increments by `pressure_step` until
+the value exceeds the maximum pressure in `ctd`.
 
 # Arguments
 
@@ -201,19 +202,19 @@ as the pressure range within `ctd`, incrementing by `pressure_step`.
 using OceanAnalysis, Plots
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
 ctd = read_ctd_cnv(f);
-pressure_grid = 0.0:1.0:100.0;
-ctd2 = grid_ctd(ctd, pressure_grid=pressure_grid);
-plot(ctd["salinity"], -ctd["pressure"], seriestype=:path, legend=false, framestyle=:box)
-plot!(ctd2["salinity"], -ctd2["pressure"], seriestype=:path, color=:red, legend=false, framestyle=:box)
+# Using double the data resolution, given mean Δp 0.237 and median 0.238
+ctd2 = grid_ctd(ctd, pressure_step=0.1);
+plot_profile(ctd, which="salinity")
+plot!(ctd2["salinity"], ctd2["pressure"], color=:red)
 ```
 """
 function grid_ctd(ctd::Ctd;
-    pressure_grid::Union{AbstractVector,AbstractRange}=missing, pressure_step::Float64=2.0,
+    pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Float64=2.0,
     method::Symbol=:interpolate, debug::Int64=0)
     oad(debug, "grid_ctd() START")
     method == :interpolate || error("only method=:interpolate is handled in this version")
-    if ismissing(pressure_grid)
-        pressure_grid = range(0, extremum(ctd.data.pressure)[2], step=pressure_step)
+    if isnothing(pressure_grid)
+        pressure_grid = 0.0:pressure_step:maximum(ctd.data.pressure)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
     end
     pressure = ctd.data.pressure
