@@ -16,6 +16,8 @@ Plot an oceanographic profile for data contained in `ctd`, showing how the varia
 
 - `abbreviate` a Symbol indicating a category for axis length, used in determining how to label the axes. The valid choices are `:short`, `:medium`, and `:long`.
 
+- `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`, `guidefontsize` and `titlefontsize`. Note that any of these values may also be supplied as named arguments within `kwargs...`.
+
 - `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
 
 - `kwargs...` is passed to `plot()`, to permit further customization; see https://docs.juliaplots.org/stable/ for more information on possibilities.
@@ -43,7 +45,7 @@ plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
 ```
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-    abbreviate::Symbol=:long, debug::Int64=0, kwargs...)
+    abbreviate::Symbol=:long, fontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, '$which') START")
     data_names = names(ctd.data)
     # For all cases, we need to set up the vertical axis, so do that first
@@ -69,7 +71,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
         yaxis=:flip, xmirror=true, framestyle=:box, legend=false,
         color=:black, tickdirection=:out,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-        tickfontsize=8, guidefontsize=8, titlefontsize=8,
+        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
         yrot=90; kwargs...)
     oad(debug, "END plot_profile()")
     return (rval)
