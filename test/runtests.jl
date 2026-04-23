@@ -75,6 +75,9 @@ end
     @test first(argo.data.pressure) ≈ 0.48 atol = 0.0001
 end
 
+@testset "drop_qc works" begin
+    include("drop_qc.jl")
+end
 
 @testset "pretty() tests for consistency with R" begin
     e = 0.0:2.0:16

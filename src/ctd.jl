@@ -177,7 +177,7 @@ end
 
 """
     grid_ctd(ctd::Ctd;
-        pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Float64=2.0,
+        pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Real=2.0,
         method::Symbol=:interpolate, debug::Int64=0)
 
 Grid a CTD to standardized pressure levels.
@@ -209,7 +209,7 @@ plot!(ctd2["salinity"], ctd2["pressure"], color=:red)
 ```
 """
 function grid_ctd(ctd::Ctd;
-    pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Float64=2.0,
+    pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Real=2.0,
     method::Symbol=:interpolate, debug::Int64=0)
     oad(debug, "grid_ctd() START")
     method == :interpolate || error("only method=:interpolate is handled in this version")
@@ -227,7 +227,7 @@ function grid_ctd(ctd::Ctd;
         if column_names[i] == "pressure"
             rval[:, i] = pressure_grid
         else
-            itp = linear_interpolation((pressure,), ctd.data[:, i], extrapolation_bc=NaN)
+            itp = linear_interpolation((pressure,), ctd.data[:, i], extrapolation_bc=Flat()) # usually only interpolate at top; this BC mimics ML
             rval[:, i] = itp.(pressure_grid)
         end
     end

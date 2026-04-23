@@ -28,6 +28,7 @@ OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
 OceanAnalysis.depth_from_pressure
 OceanAnalysis.despike
+OceanAnalysis.drop_qc
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!
 OceanAnalysis.geod_distance

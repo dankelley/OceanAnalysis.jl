@@ -36,6 +36,7 @@ export coriolis
 export CT
 export depth_from_pressure
 export despike
+export drop_qc
 export fix_gsw_bad_code
 export fix_gsw_bad_code!
 export geod_distance

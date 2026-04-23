@@ -10,7 +10,7 @@
 
 ### Added
 
-- none yet
+- `drop_qc`
 
 
 ## Changelog from version 0.2.1 to version 0.2.2
