@@ -2,6 +2,7 @@
 # https://www.netlib.org/dierckx/curfit.f
 # https://juliahub.com/ui/Packages/General/Dierckx/0.5.0
 
+using DSP, Statistics
 
 """
     N2(ctd::Ctd, s::Float64=0.15; debug::Int64=0)
@@ -100,3 +101,63 @@ function N2(ctd::Ctd; s::Union{Float64,Symbol}=:auto, bc::String="nearest", debu
     return N2
 end
 
+
+
+"""
+    N2_first_difference(ctd, M::Integer=50; order::Integer=4, debug::Integer=0)
+
+Computation of N^2 based on first-differences of smoothed density.
+
+# Parameters
+
+- `ctd` a [Ctd] object. This must have pressure values increasing at a constant rate; if not, an error is reported, with a hint to first use [grid_ctd()] to grid the Ctd object.
+
+- `M` cutoff length for Butterworth filter. An error is reported if this is less than 3.
+
+# Keywords
+
+- `order` integer giving the order of the Butterworth filter. An error is reported if this is less than 1.
+
+- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+
+# Return
+
+This function returns a vector of N2 values.
+
+# Examples
+
+```julia
+using OceanAnalysis, Plots
+pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+filename = joinpath(pkgdir, "data", "D4902911_095.nc")
+ctd = filename |> read_argo |> drop_qc |> as_ctd;
+ctd_gridded = grid_ctd(ctd, pressure_step=1.0);
+N2 = N2_first_difference(ctd_gridded);
+panel_left = plot_profile(ctd, which="sigma0", ylim=(0, 500), fontsize=7, markersize=1.2)
+panel_right = plot_profile(ctd, which="N2", ylim=(0, 500), fontsize=7, color=:blue, markersize=0,
+    label="Spline method", legend=:bottomright)
+plot!(N2, ctd_gridded["pressure"], label="Smoothing method")
+plot(panel_left, panel_right, layout=(1, 2))
+```
+
+"""
+function N2_first_difference(ctd, M::Integer=50; order::Integer=4, debug::Integer=0)
+    M >= 3 || error("M must be 3 or larger")
+    order >= 1 || error("order must be 1 or larger")
+    p = ctd["pressure"]
+    np = length(p)
+    np > M || error("this Ctd object has ", np, " levels, so M must be reduced to compute N^2")
+    dp = diff(p)
+    all(dp .== dp[1]) || error("you must use grid_ctd() on the Ctd object first")
+    response_type = DSP.Lowpass(1.0 / M)
+    design_method = DSP.Butterworth(order)
+    filter = DSP.digitalfilter(response_type, design_method; fs=dp[1])
+    sigma0 = ctd["sigma0"]
+    sigma0_filtered = DSP.filtfilt(filter, sigma0)
+    # First-difference for derivative (repeat top value to match length)
+    dsigma_dp = diff(sigma0_filtered) ./ dp
+    dsigma_dp = [dsigma_dp[1]; dsigma_dp]
+    g = 9.8
+    rho0 = 1000.0 + Statistics.mean(sigma0)
+    g / rho0 * dsigma_dp
+end

@@ -11,6 +11,7 @@
 ### Added
 
 - `drop_qc`
+- `N2_first_difference`
 
 
 ## Changelog from version 0.2.1 to version 0.2.2
