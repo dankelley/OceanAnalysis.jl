@@ -10,9 +10,9 @@
 
 ### Added
 
-- `drop_qc`
-- `N2_first_difference`
-
+- [`drop_qc`](@ref).
+- [`N2_first_difference`](@ref).
+- [`N2_spline`](@ref).
 
 ## Changelog from version 0.2.1 to version 0.2.2
 
