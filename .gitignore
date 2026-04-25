@@ -19,3 +19,4 @@ Manifest.toml
 ar07_74JC20140606
 *.jld2
 sandbox
+./[0-9]*.jl
