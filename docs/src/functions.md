@@ -46,6 +46,7 @@ OceanAnalysis.grid_section
 OceanAnalysis.interpolate_barnes
 OceanAnalysis.label_from_varname
 OceanAnalysis.N2
+OceanAnalysis.N2_spline
 OceanAnalysis.N2_first_difference
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp

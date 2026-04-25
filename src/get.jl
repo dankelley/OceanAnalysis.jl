@@ -112,7 +112,7 @@ item from the `metadata` of the constituent [`Ctd`](@ref)
 objects that are stored in `x.data`.
 """
 function get_element(x::OA, element::String; debug::Int64=0)
-    oad(debug, "get_element([OA object], name=$element) START")
+    oad(debug, "get_element([OA object], element=\"$element\") START")
     # If element is in metadata, return that
     oad(debug, "  check whether it is in metadata")
     if element in keys(x.metadata)
@@ -134,7 +134,7 @@ function get_element(x::OA, element::String; debug::Int64=0)
         if element == "N2"
             oad(debug, "  calculating N2 using N2()")
             oad(debug, "END get_element()")
-            return copy(N2(x))
+            return copy(N2(x, debug=increment_debug(debug)))
         end
         p = x.data.pressure
         if element == "z"

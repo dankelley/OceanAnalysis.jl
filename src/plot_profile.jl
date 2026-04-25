@@ -46,7 +46,7 @@ plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
     abbreviate::Symbol=:long, fontsize=8, debug::Int64=0, kwargs...)
-    oad(debug, "plot_profile(<ctd>, '$which') START")
+    oad(debug, "plot_profile(<ctd>, which='$which') START")
     data_names = names(ctd.data)
     # For all cases, we need to set up the vertical axis, so do that first
     oad(debug, "  setting up coordinate system for vertical axis")
@@ -62,7 +62,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
     else
         error("vertical must be either :pressure or :density")
     end
-    x = ctd[which]
+    x = get_element(ctd, which, debug=increment_debug(debug))
     if x == Nothing
         error("Cannot find \"$which\" in this object, and cannot compute it either")
     end

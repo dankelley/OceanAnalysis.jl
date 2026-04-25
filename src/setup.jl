@@ -54,6 +54,7 @@ export grid_section
 export interpolate_barnes
 export label_from_varname
 export N2
+export N2_spline
 export N2_first_difference
 export plot_adp
 export plot_amsr
