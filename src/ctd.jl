@@ -19,12 +19,16 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 
 """
 function as_ctd(a::Argo; add_teos::Bool=false, debug::Int64=0)
+    oad(debug, "as_ctd(Argo, ...)")
+    oad(debug, "  add_teos: $(add_teos)")
     rval = Ctd(a.metadata, a.data)
     if add_teos
-        oad(debug, "  inserting TEOS-10 values into data")
+        ncol0 = ncol(rval.data)
         rval = set_teos(rval, debug=increment_debug(debug))
+        ncol1 = ncol(rval.data)
+        oad(debug, "  inserted TEOS-10 values into data, increasing column count from $ncol0 to $ncol1")
     end
-    oad(debug, "END as_ctd()")
+    oad(debug, "END as_ctd(Argo, ...)")
     rval
 end
 
@@ -93,7 +97,7 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     longitude::Union{Real,AbstractVector}=-63.0,
     latitude::Union{Real,AbstractVector}=45.0, time=nothing,
     add_teos::Bool=true, debug::Int64=0)
-    oad(debug, "as_ctd(<ctd>, debug=$debug) START")
+    oad(debug, "as_ctd(salinity, ...) START")
     #oad(debug, "  given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     nsamp = length(salinity)
     length(temperature) == nsamp || error("salinity and temperature have differing lengths ($nsamp and $(length(temperature)), respectively)")
@@ -125,7 +129,7 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
         oad(debug, "  inserting TEOS-10 values into data")
         rval = set_teos(rval, debug=increment_debug(debug))
     end
-    oad(debug, "END as_ctd()")
+    oad(debug, "END as_ctd(salinity, ...)")
     rval
 end # as_ctd()
 
@@ -163,13 +167,13 @@ function set_teos(x::OA; debug::Int64=0)
     S, T, p = data.salinity, data.temperature, data.pressure
     lon, lat = metadata["longitude"], metadata["latitude"]
     data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
-    oad(debug, "  SA completed, starting with ", first(data.SA, 2))
+    oad(debug, "    SA completed, starting with ", first(data.SA, 2))
     data.CT = gsw_ct_from_t.(data.SA, T, p) |> fix_gsw_bad_code!
-    oad(debug, "  CT completed, stating with : ", first(data.CT, 2))
+    oad(debug, "    CT completed, stating with : ", first(data.CT, 2))
     data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
-    oad(debug, "  sigma0 completed, starting with ", first(data.sigma0, 2))
+    oad(debug, "    sigma0 completed, starting with ", first(data.sigma0, 2))
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
-    oad(debug, "  spiciness0 completed, starting with ", first(data.spiciness0, 2))
+    oad(debug, "    spiciness0 completed, starting with ", first(data.spiciness0, 2))
     rval = Ctd(metadata, data)
     oad(debug, "END set_teos")
     rval
