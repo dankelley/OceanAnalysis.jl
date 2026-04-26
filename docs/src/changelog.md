@@ -13,6 +13,7 @@
 - [`drop_qc`](@ref).
 - [`N2_first_difference`](@ref).
 - [`N2_spline`](@ref).
+- [`Glider`](@ref) data type, with [`read_glider`](@ref) to read such data.
 
 ## Changelog from version 0.2.1 to version 0.2.2
 

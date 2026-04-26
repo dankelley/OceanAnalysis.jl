@@ -117,6 +117,24 @@ mutable struct Echosounder <: OA
     data::Dict{String,Any}
 end
 
+
+
+"""
+    A type to hold glider data
+
+Glider is a type used to store data from ocean gliders.
+It holds two items: `data` (a DataFrame that holds data in array form) and
+`metadata` (a Dict with information about the data).
+
+Glider objects may be created with [`read_glider`](@ref).
+"""
+mutable struct Glider <: OA
+    metadata::Dict{String,Any}
+    data::DataFrames.DataFrame
+end
+
+
+
 """
     A type to hold NONNA bathymetry data
 

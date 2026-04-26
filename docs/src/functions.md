@@ -70,6 +70,7 @@ OceanAnalysis.read_ctd_cnv
 OceanAnalysis.read_ctd_exchange
 OceanAnalysis.read_ctd_rsk
 OceanAnalysis.read_echosounder
+OceanAnalysis.read_glider
 OceanAnalysis.read_nonna
 OceanAnalysis.read_section
 OceanAnalysis.read_topography

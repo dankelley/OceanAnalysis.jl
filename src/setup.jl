@@ -77,6 +77,7 @@ export read_ctd_cnv
 export read_ctd_exchange
 export read_ctd_rsk
 export read_echosounder
+export read_glider
 export read_nonna
 export read_section
 export read_topography
