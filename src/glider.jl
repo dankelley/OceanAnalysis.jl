@@ -1,9 +1,28 @@
-using NCDatasets, OceanAnalysis, GibbsSeaWater, Plots, Dates, Printf, DataFrames
+#using NCDatasets, OceanAnalysis, GibbsSeaWater, Plots, Dates, Printf, DataFrames
 
-
-const ARGO_DICT = Dict(:doxy => :oxygen,
-    :profile_index => :profile, :profile_number => :profile,
-    :pres => :pressure, :psal => :salinity, :temp => :temperature);
+# FIXME: add more to this list, as we see them in files
+const ARGO_DICT = Dict(
+    :cdom_quality_control => :cdom_qc,
+    :depth_quality_control => :depth_qc,
+    :density_quality_control => :density_qc,
+    :doxy => :oxygen,
+    :doxy_qc => :oxygen_qc,
+    :doxy_quality_control => :oxygen_qc,
+    :flu2 => :fluorescence,
+    :flu2_qc => :fluorescence_qc,
+    :flu2_quality_control => :fluorescence_qc,
+    :pres => :pressure,
+    :pres_qc => :pressure_qc,
+    :pres_quality_control => :pressure_qc,
+    :profile_index => :profile,
+    :profile_number => :profile,
+    :psal => :salinity,
+    :psal_qc => :salinity_qc,
+    :psal_quality_control => :salinity_qc,
+    :temp => :temperature,
+    :temp_qc => :temperature_qc,
+    :temp_quality_control => :temperature_qc,
+);
 
 """
     read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
@@ -17,7 +36,10 @@ e.g. `"psal"` becomes `"salinity"`. Note that all the names in
 `data` are in lower case, no matter whether they are lower or
 upper case in the NetCDF file.
 """
-function read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
+function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
+    oad(debug, "read_glider() START")
+    oad(debug, "  file: $file")
+    oad(debug, "  skip_qc: $skip_qc")
     metadata = Dict()
     metadata["file"] = file
     metadata["skip_qc"] = skip_qc
@@ -42,6 +64,8 @@ function read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
             rename!(data, old => new)
         end
     end
-    Glider(metadata, data)
+    rval = Glider(metadata, data)
+    oad(debug, "END read_glider()")
+    rval
 end
 
