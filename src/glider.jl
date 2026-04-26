@@ -1,8 +1,9 @@
 using NCDatasets, OceanAnalysis, GibbsSeaWater, Plots, Dates, Printf, DataFrames
 
 
-const ARGO_DICT = Dict("doxy" => "oxygen",
-    "pres" => "pressure", "psal" => "salinity", "temp" => "temperature");
+const ARGO_DICT = Dict(:doxy => :oxygen,
+    :profile_index => :profile, :profile_number => :profile,
+    :pres => :pressure, :psal => :salinity, :temp => :temperature);
 
 """
     read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
@@ -35,25 +36,12 @@ function read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
             end
         end
     end
-    rename!(data, ARGO_DICT)
+    # Rename columns
+    for (old, new) in ARGO_DICT
+        if hasproperty(data, old)
+            rename!(data, old => new)
+        end
+    end
     Glider(metadata, data)
 end
 
-# metadata, data = read_glider("sp028_20230202T1637_R.nc");
-# println(metadata)
-# println(names(data))
-# 
-# const PLOT_DEFAULTS = (color=:blue, legend=false, markersize=1.4, tickfontsize=6, guidefontsize=6, titlefontsize=6, framestyle=:box, tickdirection=:out);
-# 
-# p1 = scatter(data.time, data.pressure, yflip=true, ylab="Pressure [dbar]"; PLOT_DEFAULTS...);
-# p2 = scatter(data.time, data.salinity, ylab="Salinity"; PLOT_DEFAULTS...);
-# p3 = scatter(data.time, data.temperature, ylab="Temperature [°C]"; PLOT_DEFAULTS...);
-# p4 = scatter(data.time, data.profile_index, ylab="Profile Index"; PLOT_DEFAULTS...);
-# plot(p1, p2, p3, p4, layout=(4, 1))
-# savefig("05a.pdf")
-# p5 = scatter(data.salinity, data.pressure, yflip=true, xlab="Salinity", ylab="Pressure [dbar]"; PLOT_DEFAULTS...);
-# p6 = scatter(data.temperature, data.pressure, yflip=true, xlab="Temperature [°C]", ylab="Pressure [dbar]"; PLOT_DEFAULTS...);
-# p7 = scatter(data.salinity, data.temperature, xlab="Salinity", ylab="Temperature [°C]"; PLOT_DEFAULTS...);
-# plot(p5, p6, p7, layout=(1, 3))
-# savefig("05b.pdf")
-# 
