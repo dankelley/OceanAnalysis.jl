@@ -39,6 +39,8 @@ graphical examples of many of these types.
 
 - [`Echosounder`](@ref) holds data from scientific echosounders, as read with [`read_echosounder`](@ref).
 
+- [`Glider`](@ref) holds data from glider platforms, as read with [`read_glider`](@ref).
+
 - [`Nonna`](@ref) holds high-resolution bathymetry data, as read with [`read_nonna`](@ref).
 
 - [`Section`](@ref) holds a collection of [`Ctd`](@ref) objects constructed

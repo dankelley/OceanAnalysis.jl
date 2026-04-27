@@ -10,6 +10,7 @@ OceanAnalysis.Argo
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
 OceanAnalysis.Echosounder
+OceanAnalysis.Glider
 OceanAnalysis.Nonna
 OceanAnalysis.Section
 OceanAnalysis.Topography

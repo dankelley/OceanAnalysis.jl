@@ -21,6 +21,7 @@ export Argo
 export Ctd
 export Coastline
 export Echosounder
+export Glider
 export Nonna
 export Section
 export Topography
