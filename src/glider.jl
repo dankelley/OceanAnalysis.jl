@@ -45,6 +45,11 @@ function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
     metadata["skip_qc"] = skip_qc
     data = DataFrame()
     NCDataset(expanduser(file), "r") do d
+        # metadata
+        for item in ("title", "institution", "platform_code", "references")
+            metadata[item] = haskey(d.attrib, item) ? d.attrib[item] : ""
+        end
+        # data
         qc_regexp = r"_qc$"
         for key in keys(d)
             var = d[key]
