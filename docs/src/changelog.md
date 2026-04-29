@@ -10,6 +10,7 @@
 
 ### Added
 
+- [`bin_mean`](@ref).
 - [`drop_qc`](@ref).
 - [`N2_first_difference`](@ref).
 - [`N2_spline`](@ref).

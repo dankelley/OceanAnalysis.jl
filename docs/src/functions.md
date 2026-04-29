@@ -23,6 +23,7 @@ OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
 OceanAnalysis.as_section
 OceanAnalysis.beam_to_xyz
+OceanAnalysis.bin_mean
 OceanAnalysis.coastline
 OceanAnalysis.coriolis
 OceanAnalysis.coordinate_from_string

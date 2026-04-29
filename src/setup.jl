@@ -31,6 +31,7 @@ export argo_id_cycle
 export as_ctd
 export as_section
 export beam_to_xyz
+export bin_mean
 export coastline
 export coordinate_from_string
 export coriolis
