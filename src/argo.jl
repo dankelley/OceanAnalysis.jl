@@ -1,11 +1,14 @@
 """
-    Split Argo "id_cycle" into components id and cycle
+    argo_id_cycle(idcycle::String="")
+
+Split Argo "id_cycle" into components `id` and `cycle`.
 
 # Examples
 ```jldoctest
-julia> using OceanAnalysis
+using OceanAnalysis
+argo_id_cycle("4902911_095")
 
-julia> argo_id_cycle("4902911_095")
+# output
 2-element Vector{SubString{String}}:
  "4902911"
  "095"

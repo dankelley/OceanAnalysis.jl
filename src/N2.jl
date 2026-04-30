@@ -11,7 +11,7 @@ General function to compute the square of the buoyancy frequency, N², for a
 
 # Parameters
 
-- `ctd` a [Ctd] object. If `method` is `:first_difference`, then `ctd` must have a uniformly incrementing pressure; see [N2_first_difference()] for details.
+- `ctd` a [`Ctd`](@ref) object. If `method` is `:first_difference`, then `ctd` must have a uniformly incrementing pressure; see [N2_first_difference()] for details.
 
 - `method` either `:spline` or `:first_difference`.
 
@@ -77,7 +77,7 @@ control smoothness.
 
 # Parameters
 
-- `ctd` a [Ctd] object
+- `ctd` a [`Ctd`](@ref) object
 
 # Keywords
 
@@ -171,7 +171,7 @@ Computation of N^2 based on first-differences of smoothed density.
 
 # Parameters
 
-- `ctd` a [Ctd] object. This must have pressure values increasing at a constant rate; if not, an error is reported, with a hint to first use [grid_ctd()] to grid the Ctd object.
+- `ctd` a [`Ctd`](@ref) object. This must have pressure values increasing at a constant rate; if not, an error is reported, with a hint to first use [grid_ctd()] to grid the Ctd object.
 
 - `M` cutoff length for Butterworth filter. An error is reported if this is less than 3.
 

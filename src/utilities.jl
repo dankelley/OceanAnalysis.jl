@@ -195,10 +195,10 @@ function oad(debug::Int64=0, args...)
 end
 
 """
-    Change GSW 'missing' values (9.e15) to NaN
+    fix_gsw_bad_code(x)
 
-A copy is returned, with x unaltered.  See [`fix_gsw_bad_code!`](@ref) for an
-in-place version.
+Change GSW 'missing' values (9.e15) to NaN A copy is returned, with x
+unaltered.  See [`fix_gsw_bad_code!`](@ref) for an in-place version.
 """
 function fix_gsw_bad_code(x)
     rval = copy(x)
@@ -210,10 +210,10 @@ function fix_gsw_bad_code(x)
 end
 
 """
-    In-place change GSW 'missing' values (9.e15) to NaN
+    fix_gsw_bad_code!(x)
 
-This alters x.  See [`fix_gsw_bad_code`](@ref) for a version that does
-not alter x.
+In-place change GSW 'missing' values (9.e15) to NaN This alters x.  See
+[`fix_gsw_bad_code`](@ref) for a version that does not alter x.
 """
 function fix_gsw_bad_code!(x)
     bad = x .> 1e15

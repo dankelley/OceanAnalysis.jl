@@ -9,7 +9,7 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 
 # Arguments
 
-- `a` an [Argo] object.
+- `a` an [`Argo`](@ref) object.
 
 # Keywords
 

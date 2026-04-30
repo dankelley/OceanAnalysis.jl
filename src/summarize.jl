@@ -25,9 +25,9 @@ function summarize_data(x)
     if x.data isa DataFrame
         data_names = names(x.data)
         println("\nData: a DataFrame, summarized as follows")
-        df = DataFrame("name"=>String[],
-            "min"=>Float64[], "max"=>Float64[], "mean"=>Float64[],
-            "#total"=>Int64[], "#missing"=>Int64[], "#NaN"=>Int64[])
+        df = DataFrame("name" => String[],
+            "min" => Float64[], "mean" => Float64[], "max" => Float64[],
+            "#total" => Int64[], "#missing" => Int64[], "#NaN" => Int64[])
         for name in data_names[.!occursin.(r"_qc$", data_names)]
             push!(df, six_num(x[name], name))
         end
@@ -65,7 +65,7 @@ function summarize_data(x)
 end
 
 """
-    summary(x::OA)
+    summarize(x::OA)
 
 Print a summary of some of the contents of an OA object.
 """
@@ -76,7 +76,7 @@ function summarize(x::OA)
 end
 
 """
-    summary(x::Argo)
+    summarize(x::Argo)
 
 Print a summary of some of the contents of an Argo object.
 
@@ -103,7 +103,7 @@ end
 
 
 """
-    summary(x::Ctd)
+    summarize(x::Ctd)
 
 Print a summary of some of the contents of a Ctd object.
 
@@ -148,7 +148,7 @@ function summarize(x::Ctd)
 end
 
 """
-    summary(x::Topo)
+    summarize(x::Topo)
 
 Print a summary of some of the contents of a Topography object.
 """
