@@ -22,12 +22,12 @@ names that are a regular-expression match to `pattern` are omitted.
 
 # Examples
 ```jldoctest
-using OceanAnalysis, DataFrames
+using OceanAnalysis
 pkgdir = dirname(dirname(pathof(OceanAnalysis)));
 f = joinpath(pkgdir, "data", "D4902911_095.nc");
 a = read_argo(f);
 a2 = drop_qc(a);
-ncol(a.data), ncol(a2.data)
+size(a.data)[2], size(a2.data)[2]
 
 # output
 (15, 9)
