@@ -53,6 +53,7 @@ export get_topography
 export gravity
 export grid_ctd
 export grid_section
+export handle_qc
 export interpolate_barnes
 export label_from_varname
 export N2

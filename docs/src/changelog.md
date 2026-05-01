@@ -12,6 +12,7 @@
 
 - [`bin_mean`](@ref).
 - [`drop_qc`](@ref).
+- [`handle_qc`](@ref).
 - [`N2_first_difference`](@ref).
 - [`N2_spline`](@ref).
 - [`Glider`](@ref) data type, with [`read_glider`](@ref) to read such data.

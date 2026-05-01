@@ -51,4 +51,53 @@ function drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Int64=0)
     rval
 end
 
-#function handle_qc() end
+"""
+    handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", debug::Int64=0)
+
+Handle quality-control flags in [`Argo`](@ref) or [`Ctd`](@ref) object `x`, by setting to NaN any variable entries that have matching qc flag not contained in `retain`.  The flag for a variable named e.g. `salinity` is named `salinity_qc`.  Any variable with no matching qc entries is left unaltered.
+
+This is mainly useful for [`Argo`](@ref) data, but can also be applied in the same way for [`Ctd`](@ref) objects created with [`as_ctd`](@ref).
+
+The Argo coding scheme is described in many online documents (e.g. Section 6.1 of Reference 1). Briefly, `"0"` means that "no QC was performed", `"1"` means "good data", `"2"` means "probably good data", `"3"` means "probably bad data", `"4"` means "bad data", `"5"` means "changed data", `"8"` means "estimated value" and `"9"` means "missing value".
+
+# Arguments
+- x an object of type [`Argo`](@ref) or [`Ctd`](@ref).
+
+# Keywords
+- `retain` a String, or a vector of Strings, holding the quality-control flags that are considered to reflect acceptable data. The default, `"1"` means to retain only data designated "Good" in the Argo system; this is a safe choice.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+
+# References
+
+1. Wong, Annie, Robert Keeley, Thierry Carval, and Argo Data Management Team.
+   Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9.
+   Ifremer, 2025. https://doi.org/10.13155/33951.
+"""
+function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", debug::Int64=0)
+    oad(debug, "handle_qc($(typeof(x)), retain=$retain) START")
+    rval = x
+    retain_set = Set(retain)
+    data_names = names(x.data)
+    for name in data_names
+        #println("name: $name")
+        name_qc = name * "_qc"
+        #println("name_qc: $name_qc")
+        found = name_qc .== data_names
+        #println("found: $found")
+        fa = findall(found)
+        #println("fa: $fa")
+        if length(fa) == 1
+            n = length(x.data[!, name])
+            bad = .!(in.(x.data[!, name_qc], Ref(retain_set)))
+            if sum(bad) > 0
+                oad(debug, "  $name: setting $(sum(bad)) of the $n values to NaN")
+                rval.data[!, name][bad] .= NaN
+                #else
+                #    oad(debug, "  $name: all values considered acceptable")
+            end
+        end
+    end
+    oad(debug, "END handle_qc()")
+    rval
+end
+
