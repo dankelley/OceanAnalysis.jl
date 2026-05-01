@@ -1,5 +1,21 @@
 # Changes
 
+## Changelog from version 0.2.3 to version 0.2.2
+
+Release notes:
+
+### Changed
+
+- none yet
+
+- BREAKING none yet
+
+### Added
+
+- [`handle_qc`](@ref) is now part of the test suite.
+
+
+
 ## Changelog from version 0.2.2 to version 0.2.3
 
 ### Changed
