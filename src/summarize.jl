@@ -92,14 +92,16 @@ summarize(a)
 function summarize(x::Argo)
     println("Argo Summary\n------------\n")
     println("Metadata: a Dict with ", length(x.metadata), " keys, including the following")
-    println("  filename:  \"", x.metadata["filename"], "\"")
+    filename = x.metadata["filename"]
+    println("  filename:  \"", filename, "\"")
     println("  time:      ", x.metadata["time"])
     println("  latitude:  ", @sprintf "%.3fN" x.metadata["latitude"])
     println("  longitude: ", @sprintf "%.3fE" x.metadata["longitude"])
     println("  data_mode: ", x.metadata["data_mode"])
     summarize_data(x)
+    println("Tests applied to the dataset")
+    summarize_argo_data_tests(filename)
 end
-
 
 
 """

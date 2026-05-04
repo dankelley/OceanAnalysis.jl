@@ -1,3 +1,97 @@
+const atm = Dict(
+    1 => "Platform Identification test (ID=2)",
+    2 => "Impossible Date test (ID=4)",
+    3 => "Impossible Location test (ID=8)",
+    4 => "Position on Land test (ID=16)",
+    5 => "Impossible Speed test (ID=32)",
+    6 => "Global Range test (ID=64)",
+    7 => "Regional Global Parameter test (ID=128)",
+    8 => "Pressure Increasing test (ID=256)",
+    9 => "Spike test (ID=512)",
+    10 => "Top and Bottom spike test (ID=1024) DEPRECATED",
+    11 => "Gradient test (ID=2048) DEPRECATED",
+    12 => "Digit Rollover test (ID=4096)",
+    13 => "Stuck Value test (ID=8192)",
+    14 => "Density Inversion test (ID=16384)",
+    15 => "Supplemental sensor exclusion list test (ID=32768)",
+    16 => "Gross Salinity or Temperature Sensor Drift test (ID=65536)",
+    17 => "Visual QC test (ID=131072)",
+    18 => "Frozen profile test (ID=262144) ERRONEOUSLY PRINTED 261144 IN ARGO MANUALS",
+    19 => "Deepest pressure test (ID=524288)",
+    20 => "Questionable Argos position test (ID=1048576)",
+    21 => "Near-surface unpumped CTD salinity test (ID=2097152)",
+    22 => "Near-surface mixed air/water test (ID=4194304)",
+    23 => "Interim rtqc flag scheme for data deeper than 2000 dbar (ID=8388608)",
+    24 => "Interim rtqc flag scheme for data from experimental sensors (ID=16777216)",
+    25 => "MEDD test (ID=33554432)",
+    26 => "TEMP_CNDC test applied to RBRargo32K (ID=67108864)")
+
+"""
+    argo_test_meaning(i)
+
+Return label for Argo data test (if `i` is from 2 to 27) or list of possible labels (if `i<2).
+
+The meanings are from https://vocab.nerc.ac.uk/collection/R11/current/, consulted 2027-05-04.
+"""
+function argo_test_meaning(i)
+    i < 1 ? sort(atm) : atm[i]
+end
+
+function character_vector_to_string(x)
+    x[ismissing.(x)] .= ' '
+    replace(join(x), " " => "")
+end
+
+"""
+    summarize_argo_tests(filename::String)
+
+Summarize tests performed on an Argo dataset. This is used by `summarize()` for
+[`Argo`](@ref) objects, and it may also be called directly.
+"""
+function summarize_argo_data_tests(filename::String)
+    NCDataset(filename, "r") do d
+        ha = d["HISTORY_ACTION"] # 16 x nprofiles x ntests
+        hq = d["HISTORY_QCTEST"] # 16 x nprofiles x ntests
+        dim = size(ha)
+        for j in 1:dim[2]
+            println("  Profile $j")
+            for k in 1:dim[3]
+                test = character_vector_to_string(ha[:, j, k])
+                result = character_vector_to_string(hq[:, j, k])
+                if test == "QCP\$"
+                    #result_bits = reverse(collect(string(parse(Int, result, base=16), base=2)))
+                    result_bits = collect(string(parse(Int, result, base=16), base=2))
+                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, intepreted as $(join(result_bits))):")
+                    i = 1
+                    for bit in result_bits[end-1:-1:1]
+                        #for bit in result_bits
+                        if bit == '1'
+                            println("      test $i: $(argo_test_meaning(i))")
+                        end
+                        i = i + 1
+                    end
+                elseif test == "QCF\$"
+                    result_bits = collect(string(parse(Int, result, base=16), base=2))
+                    println("    Tests failed (based on HISTORY_QCTEST value 0x$result, intepreted as $(join(result_bits))):")
+                    i = 1
+                    some_failed = false
+                    for bit in result_bits[end-1:-1:1]
+                        if bit == '1'
+                            println("      test $(i): $(argo_test_meaning(i))")
+                            some_failed = true
+                        end
+                        i = i + 1
+                    end
+                    if !some_failed
+                        println("      no tests failed")
+                    end
+                end
+            end
+        end
+    end
+end
+
+
 """
     argo_id_cycle(idcycle::String="")
 
@@ -69,7 +163,7 @@ julia> size(d.data)
 (1014, 15)
 ```
 """
-function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug::Int64=0)
+function read_argo(filename::String; column::Int64=1, debug::Int64=0)
     oad(debug, "read_argo(<filename>; column=$column, debug=$debug) START")
     metadata = Dict()
     data = DataFrame()
@@ -138,10 +232,6 @@ function read_argo(filename::String; column::Int64=1, add_teos::Bool=true, debug
         #oad(debug, "    read latitude: $latitude")
         metadata["time"] = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         #oad(debug, "    read time: $time")
-        #rval.data = data
-        #rval = as_ctd(data.salinity, data.temperature, data.pressure, longitude=longitude, latitude=latitude,
-        #    time=time, add_teos=add_teos, debug=increment_debug(debug))
-        #oad(debug, "    extending ctd object .metadata by adding argo-specific items")
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
             metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")

@@ -13,6 +13,7 @@ Release notes:
 ### Added
 
 - [`handle_qc`](@ref) is now part of the test suite.
+- [`summarize_argo_data_tests`](@ref)
 
 
 
