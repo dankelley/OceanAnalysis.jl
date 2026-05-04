@@ -78,7 +78,10 @@ end
 """
     summarize(x::Argo)
 
-Print a summary of some of the contents of an Argo object.
+Print a summary of some of the contents of an Argo object. This includes some
+entries in both `x.metadata` and `x.data`. Additionally,
+[`summarize_argo_data_tests`](@ref) is called, to show the list of tests that
+have been performed on the dataset before inclusion in the archive.
 
 # Examples
 

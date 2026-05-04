@@ -43,10 +43,31 @@ function character_vector_to_string(x)
 end
 
 """
-    summarize_argo_tests(filename::String)
+    summarize_argo_data_tests(filename::String)
 
 Summarize tests performed on an Argo dataset. This is used by `summarize()` for
-[`Argo`](@ref) objects, and it may also be called directly.
+[`Argo`](@ref) objects, and it may also be called directly.  The test names are
+taken from https://vocab.nerc.ac.uk/collection/R11/current/ (accessed on
+2026-05-04). Two things should be noted about the tests.
+
+1. Some of the test descriptions have varied across versions of Argo
+   documentation. For example, test 15, with ID 32768, was called "Grey List
+   test" in Carval et al. (2019 page 84, reference table 11), but it was called
+   "Supplemental sensor exclusion list test" in Wong et al. (2025 page 109,
+   reference table 11).
+2. The two sources just listed describe test 18 as having ID 261144, although
+   it ought to be 262144, since the scheme otherwise uses powers of 2.
+
+**References**
+
+Carval, Thierry, Bob Keeley, Yasushi Takatsuki, et al. _Argo User’s Manual
+V3.3_. Ifremer, 2019. https://doi.org/10.13155/29825.
+
+Wong, Annie, Robert Keeley, Thierry Carval, and Argo Data Management Team.
+_Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9. Ifremer,
+2025. https://doi.org/10.13155/33951.
+
+
 """
 function summarize_argo_data_tests(filename::String)
     NCDataset(filename, "r") do d
