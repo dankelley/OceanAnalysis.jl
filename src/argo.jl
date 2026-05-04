@@ -60,13 +60,9 @@ taken from https://vocab.nerc.ac.uk/collection/R11/current/ (accessed on
 
 **References**
 
-Carval, Thierry, Bob Keeley, Yasushi Takatsuki, et al. _Argo User’s Manual
-V3.3_. Ifremer, 2019. https://doi.org/10.13155/29825.
+Carval, Thierry, Bob Keeley, Yasushi Takatsuki, et al. _Argo User’s Manual V3.3_. Ifremer, 2019. [https://doi.org/10.13155/29825](https://doi.org/10.13155/29825).
 
-Wong, Annie, Robert Keeley, Thierry Carval, and Argo Data Management Team.
-_Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9. Ifremer,
-2025. https://doi.org/10.13155/33951.
-
+Wong, Annie, Robert Keeley, Thierry Carval, and Argo Data Management Team. _Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9. Ifremer, 2025. [https://doi.org/10.13155/33951](https://doi.org/10.13155/33951).
 
 """
 function summarize_argo_data_tests(filename::String)
