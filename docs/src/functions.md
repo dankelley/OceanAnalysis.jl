@@ -88,6 +88,7 @@ OceanAnalysis.station_map
 OceanAnalysis.subset_amsr
 OceanAnalysis.subset_ctd
 OceanAnalysis.subset_ctd!
+OceanAnalysis.summarize_argo_data_tests
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
 OceanAnalysis.toc
