@@ -174,8 +174,8 @@ function plot_coastline!(coastline::Coastline; kwargs...)
 end
 
 """
-    scale_bar(distance::Real=100.0, x=:left, y=:top;
-        linewidth::Real=2.0, fontsize::Real=8)
+    scale_bar(distance::Real=100.0; x=:left, y=:top,
+        linewidth::Real=3.0, fontsize::Real=8)
 
 Add a horizontal scalebar to a plot made with [`plot_coastline`]@ref).
 
@@ -198,7 +198,7 @@ plot_coastline(cl, xlims=(-70, -60), ylims=(42, 48))
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0, x=:left, y=:top; linewidth::Real=3.0, fontsize::Real=8)
+function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, fontsize::Real=8)
     distance > 0.0 || error("'distance' must be a positive number")
     xlim, ylim = xlims(), ylims() # from existing plot_coastline() diagram
     ymid = (ylim[1] + ylim[2]) / 2.0
