@@ -13,7 +13,7 @@ Release notes:
 ### Added
 
 - [`handle_qc`](@ref) is now part of the test suite.
-- [`summarize_argo_data_tests`](@ref)
+- [`summarize_argo_data_tests`](@ref) shows details of the individual tests done in processing an [`Argo`](@ref) object. This is also now called by the `summarize()` function.
 
 
 
