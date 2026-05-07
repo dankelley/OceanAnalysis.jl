@@ -1,6 +1,6 @@
 # Changes
 
-## Changelog from version 0.2.3 to version 0.2.2
+## Changelog from version 0.2.3 to version 0.2.4
 
 Release notes:
 
