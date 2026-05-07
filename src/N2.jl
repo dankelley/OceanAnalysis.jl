@@ -61,17 +61,12 @@ end
 
 
 """
-    N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, bc::String="nearest", debug::Int64=0)
+    N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025,
+        bc::String="nearest", debug::Int64=0)
 
-Compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object.
-The value is inferred from a smoothing cubic spline that models the dependence
-of sigma0 on pressure.
+Compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object. The value is inferred from a smoothing cubic spline that models the pressure-depdence of potential density anomaly, sigma0.
 
-In the present version, the spline is fitted with the `Dierckx::Spline1D()`
-function (Reference 1), which is provided with equal weights, `w`, for all
-points, with `k=3` to set the polynomial order to cubic, and with the
-user-specified `bc` to control behaviour near top and bottom, along with `s` to
-control smoothness.
+In the present version, the spline is fitted with the `Dierckx::Spline1D()` function (Reference 1), which is provided with equal weights, `w`, for all points, with `k=3` to set the polynomial order to cubic, and with the user-specified `bc` to control behaviour near top and bottom, along with `s` (and possibly `delta`) to control smoothness.
 
 # Parameters
 
@@ -79,7 +74,9 @@ control smoothness.
 
 # Keywords
 
-- `s` either a Float64 value or a symbol. In the first case, it is the value of  `s` supplied to `Dierckx::Spline1D()`, which is used to smooth the density curve as a function of pressure.  According to the documentation for the Fortran code behind this function (see [https://www.netlib.org/dierckx/curfit.f](https://www.netlib.org/dierckx/curfit.f)), a reasonable starting point for exploring the dependence of the spline curve on `s` is in the range from ``(N-\\sqrt{2N}) \\delta^2`` to ``(N+\\sqrt{2N}) \\delta^2``, where ``N`` is the number of data points and ``\\delta`` is a measure of the density "wiggles" (anomalies or high-wavenumber signals) to be smoothed across in the spline. The midpoint of this range is used if `s=:auto` (the default) is specified; using `s=:smooth` and `s=:rough` multiplies this value by sqrt(2) and 1/sqrt(2), respectively. The user is also free to specify the value of `s` numerically, if the three preset choices are not judged to be suitable.
+- `s` either a Float64 value or a symbol. In the first case, it is the value of  `s` supplied to `Dierckx::Spline1D()`, which is used to smooth the density curve as a function of pressure.  According to the documentation for the Fortran code behind this function (see [https://www.netlib.org/dierckx/curfit.f](https://www.netlib.org/dierckx/curfit.f)), a reasonable starting point for exploring the dependence of the spline curve on `s` is in the range from ``(N-\\sqrt{2N}) \\delta^2`` to ``(N+\\sqrt{2N}) \\delta^2``, where ``N`` is the number of data points and ``\\delta`` is a measure of the density "wiggles" (anomalies or high-wavenumber signals) to be smoothed across in the spline. The midpoint of this range is used if `s=:auto` (the default) is specified; using `s=:smooth` and `s=:rough` multiplies this value by sqrt(2) and 1/sqrt(2), respectively. Since exploration of the results of using these three preset values can provide a guide for specifying `s` numerically, the function prints the chosen `s` values if `debug` is set to 1.
+
+- `delta` a numeric value used only if `s` has been specified `:auto`, `:smooth` or `:rough`.See the discussion of how this is combined with the number of data points, to inder a numerical value for `s` in the call to `Dierckx::Spline1D()`. The default value of `delta`, 0.025, may be suitable for initial exploration, although detailed work normally involves specifying `s` as a numerical value, in which case `delta` is ignored.
 
 - `bc` a string, passed to `Dierckx::Spline1D()`, that indicates what to do near boundaries. The default is `"nearest"`.
 
@@ -100,7 +97,7 @@ ctd = read_ctd_cnv(filename);
 histogram(N2_spline(ctd), label="N²")
 ```
 """
-function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, bc::String="nearest", debug::Int64=0)
+function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, bc::String="nearest", debug::Int64=0)
     # https://github.com/JuliaMath/Dierckx.jl/blob/dd942e4a38b9ab3288d74177aa36f828a91f56d4/src/Dierckx.jl#L151
     # https://www.netlib.org/dierckx/curfit.f
     # https://juliahub.com/ui/Packages/General/Dierckx/0.5.0
@@ -110,7 +107,6 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, bc::String="nearest
     pressure = ctd.data.pressure
     if isa(s, Symbol)
         sorig = s
-        delta = 0.025 # perhaps reasonable
         new_s = length(pressure) * delta^2
         if s == :auto
             # According to https://www.netlib.org/dierckx/curfit.f the
