@@ -4,22 +4,20 @@ using DSP, Statistics
 """
     N2(ctd::Ctd; method::Symbol=:spline, debug=0, kwargs...)
 
-General function to compute the square of the buoyancy frequency, N², for a
-[`Ctd`](@ref) object. This works by dispatching to [N2_spline()] or to
-[N2_first_difference()], according as to whether `method` is `:spline` or
-`:first_difference`.
+A general function to compute the square of the buoyancy frequency, N², for a
+[`Ctd`](@ref) object. This works by dispatching to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), according as to whether `method` is `:spline` or `:first_difference`. The `kwargs...` arguments are passed to these lower-level functions, to control the details of processing.
 
 # Parameters
 
 - `ctd` a [`Ctd`](@ref) object. If `method` is `:first_difference`, then `ctd` must have a uniformly incrementing pressure; see [N2_first_difference()] for details.
 
-- `method` either `:spline` or `:first_difference`.
+- `method` either `:spline` or `:first_difference`. There are pros and cons to each method, and users are advised to explore the documentation of [`N2_spline`](@ref) and [`N2_first_difference`](@ref) and to experiment with their own data, to learn more about the possibilities.
 
 # Keywords
 
 - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
-- `kwargs` optional items passed by name to either [N2_spline()] or to [N2_first_difference()].
+- `kwargs` optional items passed by name to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), depending on the value of `:method`.
 
 # Return
 
