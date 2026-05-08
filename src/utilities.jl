@@ -4,7 +4,7 @@ function increment_debug(debug::Int64=0)
 end
 
 """
-    getindex(x::OA, name::String)
+    Base.getindex(x::OA, name::Union{String,Symbol})
 
 Retrieve an element from the `metadata` or `data` portion of an [`OA`](@ref)
 object, or something that can be computed from the information in the object.
@@ -21,7 +21,7 @@ scatter(d["timeS"], d["pressure"], xlab="Time [s]", ylab="Pressure [dbar]",
     legend=false, markersize=1)
 ```
 """
-function Base.getindex(x::OA, name::String)
+function Base.getindex(x::OA, name::Union{String,Symbol})
     #println("Getting data element '$name' from an OA object of type $(typeof(x)) using get_element(); call that directly to debug")
     get_element(x, name)
 end

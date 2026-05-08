@@ -97,9 +97,9 @@ function get_section(url::String; destdir=".", debug::Int64=0)
 end
 
 """
-    get_element(x::OA, element::String; debug)
+    get_element(x::OA, element::Union{String,Symbol}; debug::Int64=0)
 
-Get an element from an object.
+Get an element from an object. (This is used by `object[element]`, which calls `getindex`.)
 
 If `x.metadata` holds an item of the given name, return that item. If not,
 and if `x.data` holds such an item, return that item.
@@ -111,8 +111,12 @@ If `x` is a [`Section`](@ref) object, then `get_element` can return any
 item from the `metadata` of the constituent [`Ctd`](@ref)
 objects that are stored in `x.data`.
 """
-function get_element(x::OA, element::String; debug::Int64=0)
-    oad(debug, "get_element([OA object], element=\"$element\") START")
+function get_element(x::OA, element::Union{String,Symbol}; debug::Int64=0)
+    oad(debug, "get_element([OA object], element=\"$(repr(element))\") START dan")
+    if element isa Symbol
+        element = String(element)
+        oad(debug, "  convert element from a symbol to the string \"$element\"")
+    end
     # If element is in metadata, return that
     oad(debug, "  check whether it is in metadata")
     if element in keys(x.metadata)
