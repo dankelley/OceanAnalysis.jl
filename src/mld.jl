@@ -27,9 +27,15 @@ returns a NamedTuple with more information than the single number returned by
 
 # Keywords
 
-- `variable` a String holding the name of the variable to be used in the analysis. The default, `"temperature"`, is traditional and arguably the most sensible in most instances.
+- `variable` a String holding the name of the variable to be used in the
+analysis. The default, `"temperature"`, is traditional and arguably the most
+sensible in most instances.
 
-- `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this, without much more information. However, their Figure 1 suggests the value `n=4`. Here, the default is set at 5, for consistency with Example 5.5 in Kelley (2018). Experimentation with this value is recommended.
+- `n` an Integer indicating how many levels to examine below each putative
+mixed-layer region. Chu and Fan (2010) suggest using a small value for this,
+without much more information. However, their Figure 1 suggests the value
+`n=4`. Here, the default is set at 5, for consistency with Example 5.5 in
+Kelley (2018). Experimentation with this value is recommended.
 
 # Return
 
@@ -58,7 +64,7 @@ Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
 Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
-function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::NamedTuple
+function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::NamedTuple{(:E1, :E2, :E2_over_E1, :MLDindex, :MLD)}
     p = ctd["pressure"]
     v = ctd[variable]
     np = length(p)
@@ -70,11 +76,13 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Na
     E1 = fill(NaN, np) # ks + n)
     E2 = fill(NaN, np) # nks + n)
     E2_over_E1 = fill(0.0, np) # nks + n)
+    df_vp = DataFrame(v=v, p=p)
+    df_p = DataFrame(p=p)
     for k in ks
         above = 1:k
         below = k+1:k+n
-        model = lm(@formula(v ~ p), DataFrame(v=v[above], p=p[above]))
-        vhat = predict(model, DataFrame(p=p))
+        model = lm(@formula(v ~ p), df_vp[above, :])
+        vhat = predict(model, df_p)
         E1[k] = rms(v[above] .- vhat[above])
         E2[k] = abs(mean(vhat[below] .- v[below]))
         E2_over_E1[k] = E2[k] / E1[k]
@@ -97,9 +105,15 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 # Keywords
 
-- `variable` a String holding the name of the variable to be used in the analysis. The default, `"temperature"`, is traditional and arguably the most sensible in most instances.
+- `variable` a String holding the name of the variable to be used in the
+analysis. The default, `"temperature"`, is traditional and arguably the most
+sensible in most instances.
 
-- `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this, without much more information. However, their Figure 1 suggests the value `n=4`. Here, the default is set at 5, for consistency with Example 5.5 in Kelley (2018). Experimentation with this value is recommended.
+- `n` an Integer indicating how many levels to examine below each putative
+mixed-layer region. Chu and Fan (2010) suggest using a small value for this,
+without much more information. However, their Figure 1 suggests the value
+`n=4`. Here, the default is set at 5, for consistency with Example 5.5 in
+Kelley (2018). Experimentation with this value is recommended.
 
 # Return
 
