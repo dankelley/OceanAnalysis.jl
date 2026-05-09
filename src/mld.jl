@@ -109,7 +109,7 @@ Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
 function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int64=5)
-    d = MLD_CF_detailed(ctd; variable=variable, n=n = 5)
+    d = MLD_CF_detailed(ctd; variable=variable, n=n)
     d["MLDindex"]
 end
 
