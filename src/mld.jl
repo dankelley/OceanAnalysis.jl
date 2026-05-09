@@ -1,8 +1,7 @@
 using OceanAnalysis, GLM, DataFrames
 
-function rms(x)
-    replace!(x, NaN => 0.0)
-    sqrt(mean(x .^ 2))
+function rms(x)::Float64
+    sqrt(mean(xx^2 for xx in x if !isnan(xx)))
 end
 
 """
@@ -43,31 +42,31 @@ Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
 Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
-function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int64=5)
+function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int64=5)::NamedTuple
     p = ctd["pressure"]
     v = ctd[variable]
     np = length(p)
     np > 5 || error("MLD_CF() requires ctd to have >5 measurement levels, but it was provided with np=$np")
     kstart = min(3, n)
     ks = kstart:np-n-1
-    nk = length(ks)
-    E1 = fill(NaN, np)
-    E2 = fill(NaN, np)
-    E2_over_E1 = fill(NaN, np)
+    nks = length(ks)
+    E1 = fill(NaN, nks + n)
+    E2 = fill(NaN, nks + n)
+    E2_over_E1 = fill(NaN, nks + n)
     for k in ks
         above = 1:k
-        below = k+1:k+1+n
+        below = k+1:k+n
         model = lm(@formula(v ~ p), DataFrame(v=v[above], p=p[above]))
-        vhat = predict(model, DataFrame(p=p[[above; below]]))
-        E1[k] = rms(v[above] .- vhat[1:length(above)])
-        E2[k] = abs(mean(vhat[length(above)+1:end] .- v[below]))
+        vhat = predict(model, DataFrame(p=p))
+        E1[k] = rms(v[above] .- vhat[above])
+        E2[k] = abs(mean(vhat[below] .- v[below]))
         E2_over_E1[k] = E2[k] / E1[k]
     end
     # replace NaNs for argmax() to work
     replace!(E2_over_E1, NaN => 0.0)
     MLDindex = argmax(E2_over_E1)
     MLD = p[MLDindex]
-    Dict("E1" => E1, "E2" => E2, "E2_over_E1" => E2_over_E1, "MLDindex" => MLDindex, "MLD" => MLD)
+    (E1=E1, E2=E2, E2_over_E1=E2_over_E1, MLDindex=MLDindex, MLD=MLD)
 end
 
 """
@@ -108,8 +107,8 @@ Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
 Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
-function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int64=5)
+function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int64=5)::Int64
     d = MLD_CF_detailed(ctd; variable=variable, n=n)
-    d["MLDindex"]
+    d.MLDindex
 end
 
