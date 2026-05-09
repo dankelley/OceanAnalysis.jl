@@ -49,6 +49,7 @@ OceanAnalysis.handle_qc
 OceanAnalysis.interpolate_barnes
 OceanAnalysis.label_from_varname
 OceanAnalysis.MLD_CF
+OceanAnalysis.MLD_CF_detailed
 OceanAnalysis.N2
 OceanAnalysis.N2_spline
 OceanAnalysis.N2_first_difference

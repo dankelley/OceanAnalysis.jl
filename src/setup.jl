@@ -57,6 +57,7 @@ export handle_qc
 export interpolate_barnes
 export label_from_varname
 export MLD_CF
+export MLD_CF_detailed
 export N2
 export N2_spline
 export N2_first_difference
