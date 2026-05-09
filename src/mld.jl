@@ -27,15 +27,9 @@ returns a NamedTuple with more information than the single number returned by
 
 # Keywords
 
-- `variable` a String holding the name of the variable to be used in the
-analysis. The default, `"temperature"`, is traditional and arguably the most
-sensible in most instances.
+- `variable` a String holding the name of the variable to be used in the analysis. The default, `"temperature"`, is traditional and arguably the most sensible in most instances.
 
-- `n` an Integer indicating how many levels to examine below each putative
-mixed-layer region. Chu and Fan (2010) suggest using a small value for this,
-without much more information. However, their Figure 1 suggests the value
-`n=4`. Here, the default is set at 5, for consistency with Example 5.5 in
-Kelley (2018). Experimentation with this value is recommended.
+- `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
 
 # Return
 
@@ -105,15 +99,9 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 # Keywords
 
-- `variable` a String holding the name of the variable to be used in the
-analysis. The default, `"temperature"`, is traditional and arguably the most
-sensible in most instances.
+- `variable` a String holding the name of the variable to be used in the analysis. The default, `"temperature"`, is traditional and arguably the most sensible in most instances.
 
-- `n` an Integer indicating how many levels to examine below each putative
-mixed-layer region. Chu and Fan (2010) suggest using a small value for this,
-without much more information. However, their Figure 1 suggests the value
-`n=4`. Here, the default is set at 5, for consistency with Example 5.5 in
-Kelley (2018). Experimentation with this value is recommended.
+- `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
 
 # Return
 
