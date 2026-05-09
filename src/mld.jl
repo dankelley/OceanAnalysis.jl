@@ -40,16 +40,12 @@ pressure at that index), along with vector entries named `"E1"` `"E2"`, and
 provided by Chu and Fan (2010).
 
 # Examples
-```jldoctest
+```julia
 using OceanAnalysis
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
 c = read_ctd_cnv(f);
-MLDindex = MLD_CF(c)
-c["pressure"][MLDindex]
-
-# output
-13
-4.292
+MLDindex = MLD_CF(c) # 13
+c["pressure"][MLDindex] # 4.292
 ```
 
 # References

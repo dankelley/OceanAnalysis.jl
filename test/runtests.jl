@@ -55,29 +55,18 @@ end
     @test T90_from_T68.([1.0; 2.0]) ≈ [0.9997600575862; 1.9995201151724] atol = 1e-13
 end
 
-@testset "read_ctd_cnv()" begin
-    filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
-    ctd = read_ctd_cnv(filename)
-    @test ctd.metadata["longitude"] ≈ -63.643883333333335 atol = 1e-13
-    @test ctd.metadata["latitude"] ≈ 44.684266666666666 atol = 1e-13
-    @test 42 == length(ctd.metadata["header"])
+@testset "argo works" begin
+    include("argo.jl")
 end
 
-@testset "read_argo()" begin
-    filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc")
-    argo = read_argo(filename)
-    @test argo.metadata["longitude"] ≈ -66.38298 atol = 1e-13
-    @test argo.metadata["latitude"] ≈ 40.45216 atol = 1e-13
-    @test argo.metadata["time"] == Dates.DateTime("2019-10-14T23:43:44.003")
-    @test 1014 == length(argo.data.pressure)
-    @test first(argo.data.salinity) ≈ 34.913 atol = 0.0001
-    @test first(argo.data.temperature) ≈ 19.513 atol = 0.0001
-    @test first(argo.data.pressure) ≈ 0.48 atol = 0.0001
+@testset "ctd works" begin
+    include("ctd.jl")
 end
 
 @testset "qc works" begin
     include("qc.jl")
 end
+
 
 @testset "pretty() tests for consistency with R" begin
     e = 0.0:2.0:16
