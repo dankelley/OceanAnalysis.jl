@@ -14,7 +14,7 @@ a2 = drop_qc(a)
 # drop_qc()
 
 a = read_argo(f);
-a2 = handle_qc(a, retain="1", debug=1);
+a2 = handle_qc(a, retain="1");
 
 @test !any(isnan.(a2.data.temperature))
 @test !any(isnan.(a2.data.pressure))
