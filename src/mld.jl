@@ -1,13 +1,15 @@
 using OceanAnalysis, GLM, DataFrames
 
 function rms(x)::Float64
-    sqrt(mean(xx^2 for xx in x if !isnan(xx)))
+    filtered = filter(!isnan, x)
+    isempty(filtered) ? NaN : sqrt(mean(xx^2 for xx in filtered))
+
 end
 
 """
     MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)
 
-Compute mixed-layer depth according to the Chu and Fan (2010) method; see also Kelley (2018) for an example. This is a low-level function that is typically used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed` returns a Dict with more information than the single number returned by [`MLD_CF`](@ref).
+Compute mixed-layer depth according to the Chu and Fan (2010) method; see also Kelley (2018) for an example. This is a low-level function that is typically used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed` returns a NamedTuple with more information than the single number returned by [`MLD_CF`](@ref).
 
 # Arguments
 
@@ -21,10 +23,10 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 # Return
 
-`MLD_CF_detailed` returns a Dict that contains scalar entries named `"MLDindex"` (which is the value returned by `MLD_CF`), and `"MLD"` (the pressure at that index), along with vector entries named `"E1"` `"E2"`, and `"E2_over_E1"`, defined as in Kelley (2018), which in turn is based on formulae provided by Chu and Fan (2010).
+`MLD_CF_detailed` returns a NameTuple that contains scalar entries named `"MLDindex"` (which is the value returned by `MLD_CF`), and `"MLD"` (the pressure at that index), along with vector entries named `"E1"` `"E2"`, and `"E2_over_E1"`, defined as in Kelley (2018), which in turn is based on formulae provided by Chu and Fan (2010).
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
 c = read_ctd_cnv(f);
@@ -61,7 +63,7 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Na
         vhat = predict(model, DataFrame(p=p))
         E1[k] = rms(v[above] .- vhat[above])
         E2[k] = abs(mean(vhat[below] .- v[below]))
-        E2_over_E1[k] = ifelse(E1[k] != 0.0, E2[k] / E1[k], NaN)
+        E2_over_E1[k] = E2[k] / E1[k]
     end
     # replace NaNs for argmax() to work
     replace!(E2_over_E1, NaN => 0.0)
