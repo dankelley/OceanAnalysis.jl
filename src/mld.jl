@@ -5,7 +5,7 @@ function rms(x)::Float64
 end
 
 """
-    MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int64=5)
+    MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)
 
 Compute mixed-layer depth according to the Chu and Fan (2010) method; see also Kelley (2018) for an example. This is a low-level function that is typically used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed` returns a Dict with more information than the single number returned by [`MLD_CF`](@ref).
 
@@ -42,11 +42,12 @@ Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
 Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
-function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int64=5)::NamedTuple
+function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::NamedTuple
     p = ctd["pressure"]
     v = ctd[variable]
     np = length(p)
-    np > 5 || error("MLD_CF() requires ctd to have >5 measurement levels, but it was provided with np=$np")
+    np > 5 || error("ctd must have >5 measurement levels, but it has only $np")
+    n >= 3 || error("n must be at least 3, but got n=$n")
     kstart = min(3, n)
     ks = kstart:np-n-1
     nks = length(ks)
@@ -60,7 +61,7 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int64=5)::
         vhat = predict(model, DataFrame(p=p))
         E1[k] = rms(v[above] .- vhat[above])
         E2[k] = abs(mean(vhat[below] .- v[below]))
-        E2_over_E1[k] = E2[k] / E1[k]
+        E2_over_E1[k] = ifelse(E1[k] != 0.0, E2[k] / E1[k], NaN)
     end
     # replace NaNs for argmax() to work
     replace!(E2_over_E1, NaN => 0.0)
@@ -70,7 +71,7 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int64=5)::
 end
 
 """
-    MLD_CF(ctd::Ctd; variable::String="temperature", n::Int64=5)
+    MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)
 
 Compute mixed-layer depth according to the Chu and Fan (2010) method; see also Kelley (2018) for an example. The usual practice is to use `MLD_CF()`, but `MLD_CF_detailed()` may be used to investigate the steps in the analysis.
 
@@ -107,8 +108,7 @@ Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
 Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
-function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int64=5)::Int64
-    d = MLD_CF_detailed(ctd; variable=variable, n=n)
-    d.MLDindex
+function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Int64
+    MLD_CF_detailed(ctd; variable=variable, n=n).MLDindex
 end
 
