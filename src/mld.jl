@@ -1,9 +1,15 @@
-using OceanAnalysis, GLM, DataFrames
+using GLM, DataFrames
 
+"""
+   rms(x)::Float64
+
+Compute the root-mean-square value of vector `x`, after filtering out any NaN values.
+
+"""
 function rms(x)::Float64
     filtered = filter(!isnan, x)
-    isempty(filtered) ? NaN : sqrt(mean(xx^2 for xx in filtered))
-
+    isempty(filtered) && return NaN
+    sqrt(mean(xx^2 for xx in filtered))
 end
 
 """
@@ -92,7 +98,7 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 `MLD_CF()` returns a single number, which is the index of the pressure vector that is closest to the estimated mixed-layer depth.
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
 c = read_ctd_cnv(f);
