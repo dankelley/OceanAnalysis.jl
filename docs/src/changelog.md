@@ -12,7 +12,7 @@ Release notes:
 
 ### Added
 
-- none yet
+- [`MLD_CF`](@ref) for computing mixed-layer depth according to Chu and Fan (2010).
 
 
 ## Changelog from version 0.2.3 to version 0.2.4
