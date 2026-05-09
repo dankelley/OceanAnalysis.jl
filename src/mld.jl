@@ -9,13 +9,17 @@ Compute the root-mean-square value of vector `x`, after filtering out any NaN va
 function rms(x)::Float64
     filtered = filter(!isnan, x)
     isempty(filtered) && return NaN
-    sqrt(mean(xx^2 for xx in filtered))
+    sqrt(mean(abs2, filtered))
 end
 
 """
     MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)
 
-Compute mixed-layer depth according to the Chu and Fan (2010) method; see also Kelley (2018) for an example. This is a low-level function that is typically used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed` returns a NamedTuple with more information than the single number returned by [`MLD_CF`](@ref).
+Compute mixed-layer depth according to the Chu and Fan (2010) method; see also
+Kelley (2018) for an example. This is a low-level function that is typically
+used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed`
+returns a NamedTuple with more information than the single number returned by
+[`MLD_CF`](@ref).
 
 # Arguments
 
@@ -29,7 +33,11 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 # Return
 
-`MLD_CF_detailed` returns a NameTuple that contains scalar entries named `"MLDindex"` (which is the value returned by `MLD_CF`), and `"MLD"` (the pressure at that index), along with vector entries named `"E1"` `"E2"`, and `"E2_over_E1"`, defined as in Kelley (2018), which in turn is based on formulae provided by Chu and Fan (2010).
+`MLD_CF_detailed` returns a NameTuple that contains scalar entries named
+`"MLDindex"` (which is the value returned by `MLD_CF`), and `"MLD"` (the
+pressure at that index), along with vector entries named `"E1"` `"E2"`, and
+`"E2_over_E1"`, defined as in Kelley (2018), which in turn is based on formulae
+provided by Chu and Fan (2010).
 
 # Examples
 ```julia
@@ -59,9 +67,9 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Na
     kstart = min(3, n)
     ks = kstart:np-n-1
     nks = length(ks)
-    E1 = fill(NaN, nks + n)
-    E2 = fill(NaN, nks + n)
-    E2_over_E1 = fill(NaN, nks + n)
+    E1 = fill(NaN, np) # ks + n)
+    E2 = fill(NaN, np) # nks + n)
+    E2_over_E1 = fill(0.0, np) # nks + n)
     for k in ks
         above = 1:k
         below = k+1:k+n
