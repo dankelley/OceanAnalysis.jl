@@ -54,17 +54,28 @@ plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth
 """
 function read_topography(filename::String; debug::Int64=0)
     filename = expanduser(filename)
-    oad(debug, "read_topography(\"", filename, "\", ...) BEGIN")
+    oad(debug, "read_topography(\"", filename, "\", ...) START")
     NCDataset(filename, "r") do nc
-        oad(debug, "    about to read topography data.")
+        oad(debug, "  about to read topography data.")
         metadata = Dict()
         metadata["filename"] = filename
         # FIXME: do we need to copy in a case like this?
         metadata["longitude"] = copy(nc["lon"])
         metadata["latitude"] = copy(nc["lat"])
-        # Transpose because of the file setup.
-        data = copy(Float64.(replace(nc["z"], missing => NaN)))'
-        oad(debug, "    matrix dimension: ", size(data))
+        k = keys(nc)
+        oad(debug, "  keys in NetCDF file: $k")
+        # We transpose the topography matrix.
+        if "Band1" in k
+            data = copy(Float64.(replace(nc["Band1"], missing => NaN)))'
+        elseif "z" in k
+            # This was noticed in the code on 2026-05-10, but I think
+            # it was an error.  For more on this, see the issue at
+            # https://github.com/dankelley/OceanAnalysis.jl/issues/84
+            data = copy(Float64.(replace(nc["z"], missing => NaN)))'
+        else
+            error("neither 'Band1' nor 'z' is present in this NetCDF file")
+        end
+        oad(debug, "  matrix dimension: ", size(data))
         oad(debug, "END read_topography()")
         return Topography(metadata, data)
     end
