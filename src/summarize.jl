@@ -4,7 +4,7 @@ import StatsBase
     six_num(x, name)
 
 Compute six numbers for a vector or matrix `x`, identified by the String `name`. This is
-used by [`summarize`](@ref).
+used by `summarize`.
 
 # Return
 
