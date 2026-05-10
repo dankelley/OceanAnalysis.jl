@@ -1,4 +1,4 @@
-import StatsBase
+import StatsBase, Dates
 
 """
     six_num(x, name)
@@ -14,24 +14,39 @@ in `x`), `number` (the number of values in `x`), `number_missing` (the number
 of missing values in `x`), and `number_NaN` (the number of NaN values in `x`).
 """
 function six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_NaN)}
-    if !(x[1] isa Char)
-        number = length(x)
-        skip_missing = ismissing.(x)
-        skip_nan = isnan.(x)
-        X = filter(!isnan, x)
-        if count(!ismissing, X) > 0
-            X = skipmissing(X)
-            Min, Max = extrema(X)
-            Mean = mean(X)
-        else
-            Min, Max, Mean = NaN, NaN, NaN
-        end
-        number_missing = sum(skip_missing)
-        number_NaN = sum(skip_nan)
-        (name=name, min=Min, mean=Mean, max=Max, number=number, number_missing=number_missing, number_NaN=number_NaN)
-    else
-        (name=name, min=NaN, mean=NaN, max=NaN, number=length(x), number_missing=0, number_NaN=0)
+    xx = vec(copy(x))
+    #println("FIXME: name: $name")
+    number = length(xx)
+    #println("FIXME number: $number")
+    #println("DAN 1 xx: $xx")
+    if xx[1] isa Char
+        #println("FIXME: handling Char????")
+        return (name=name, min=NaN, mean=NaN, max=NaN, number=length(x), number_missing=0, number_NaN=0)
     end
+    if xx[1] isa Dates.DateTime
+        # NOTE: this is used by summary(), which expects columns to be numeric
+        #println("FIXME: handling time????")
+        return (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=0, number_NaN=0)
+    end
+    number_missing = count(ismissing, xx)
+    if number_missing == number
+        return (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=number, number_NaN=0)
+    end
+    # remove missing values (already counted)
+    #println("DAN 1")
+    filter!(!ismissing, xx)
+    #println("DAN 2 xx: $xx")
+    # Similarly, count and then remove NaN values
+    number_NaN = count(isnan, xx)
+    filter!(!isnan, xx)
+    #println("DAN 3 xx: $xx")
+    if length(xx) > 0
+        Min, Max = extrema(xx)
+        Mean = mean(xx)
+    else
+        Min, Max, Mean = NaN, NaN, NaN
+    end
+    return (name=name, min=Min, mean=Mean, max=Max, number=number, number_missing=number_missing, number_NaN=number_NaN)
 end
 
 function summarize_data(x)
