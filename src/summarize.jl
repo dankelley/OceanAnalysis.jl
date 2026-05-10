@@ -1,14 +1,17 @@
 import StatsBase
 
 """
-    six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max,
-        :number, :number_missing, :number_nan)}
+    six_num(x, name)
 
-Compute six numbers for an element `x`, with name `name`. The elements are
-stored in a NamedTuple with entries `name` (a copy of `name`), `min` (the
+Compute six numbers for a vector or matrix `x`, identified by the String `name`. This is
+used by [`summarize`](@ref).
+
+# Return
+
+This returns a NamedTuple with entries `name` (a copy of `name`), `min` (the
 minimum value in `x`), `mean` (the mean value in `x`), `max` (the maximum value
 in `x`), `number` (the number of values in `x`), `number_missing` (the number
-of missing values in `x`), and `number_NaN` (the number of NaN values in `x`)
+of missing values in `x`), and `number_NaN` (the number of NaN values in `x`).
 """
 function six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_NaN)}
     if !(x[1] isa Char)
