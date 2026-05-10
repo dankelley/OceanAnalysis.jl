@@ -1,6 +1,6 @@
 import StatsBase
 
-function six_num(x, name)
+function six_num(x, name)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_nan)}
     if !(x[1] isa Char)
         number = length(x)
         skip_missing = ismissing.(x)
@@ -15,9 +15,9 @@ function six_num(x, name)
         end
         number_missing = sum(skip_missing)
         number_nan = sum(skip_nan)
-        (name, Min, Mean, Max, number, number_missing, number_nan)
+        (name=name, min=Min, mean=Mean, max=Max, number=number, number_missing=number_missing, number_nan=number_nan)
     else
-        (name, NaN, NaN, NaN, number, 0, 0)
+        (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=0, number_nan=0)
     end
 end
 
@@ -52,13 +52,15 @@ function summarize_data(x)
             end
         end
     elseif x.data isa Matrix
-        fn = four_num(x.data, "")
+        sn = six_num(x.data, "")
         nrow, ncol = size(x.data)
         println("\nData: a $(nrow)×$(ncol) Matrix, summarized as follows")
-        println("  minimum: ", fn[2])
-        println("  maximum: ", fn[4])
-        println("  number of missing values: ", fn[5])
-        println("  number of NaN values: ", fn[6])
+        println("  minimum: ", sn.min)
+        println("  mean: ", sn.mean)
+        println("  maximum: ", sn.max)
+        println("  number of values: ", sn.number)
+        println("  number of missing values: ", sn.number_missing)
+        println("  number of NaN values: ", sn.number_nan)
     else
         println("\nData: a $(typeof(x.data)) object")
     end
