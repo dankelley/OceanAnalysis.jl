@@ -284,7 +284,7 @@ Download an Argo profile file, if an existing copy is less than `age` days old.
 - `debug`: integer indicating whether to print information during processing. The default
 value of 0 means to work silently.
 
-# Returns
+# Return value
 
 - `get_argo` returns the full path name of the local file after downloading, or as cached recently.
 
@@ -328,7 +328,7 @@ First, the `date` column is converted to a DateTime column named `time`.  If
 `trim` is true, then the original `date` column is removed, along with the the
 columns named `institution`, `date_update`, `ocean`, and `profiler_type`.
 
-# Return
+# Return value
 
 `read_argo_index` returns a DataFrame with column names `"file"`, `"latitude"`,
 `"longitude"`, and `"time"`. Note that the `"file"` column holds information on

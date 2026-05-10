@@ -6,7 +6,7 @@ import StatsBase
 Compute six numbers for a vector or matrix `x`, identified by the String `name`. This is
 used by `summarize`.
 
-# Return
+# Return value
 
 This returns a NamedTuple with entries `name` (a copy of `name`), `min` (the
 minimum value in `x`), `mean` (the mean value in `x`), `max` (the maximum value

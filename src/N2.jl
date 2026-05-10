@@ -19,7 +19,7 @@ A general function to compute the square of the buoyancy frequency, N², for a
 
 - `kwargs` optional items passed by name to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), depending on the value of `:method`.
 
-# Return
+# Return value
 
 This function returns a vector of N2 values.
 
@@ -175,7 +175,7 @@ Computation of N^2 based on first-differences of smoothed density.
 
 - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
-# Return
+# Return value
 
 This function returns a vector of N2 values.
 

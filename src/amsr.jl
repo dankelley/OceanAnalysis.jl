@@ -104,7 +104,7 @@ by `get_amsr`.
 
 - `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
-# Return
+# Return value
 
 `get_amsr` returns a string that is the full pathname of the downloaded file, which may be supplied as
 the first argument to a call to [`read_amsr`](@ref).

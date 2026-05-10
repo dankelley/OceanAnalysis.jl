@@ -15,7 +15,7 @@ columns in such objects are of a one-byte type.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
-# Return Value
+# Return value
 
 This returns an object that is identical to `x`, except that any columns with
 names that are a regular-expression match to `pattern` are omitted.

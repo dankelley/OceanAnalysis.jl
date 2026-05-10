@@ -31,7 +31,7 @@ returns a NamedTuple with more information than the single number returned by
 
 - `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
 
-# Return
+# Return value
 
 `MLD_CF_detailed` returns a NameTuple that contains scalar entries named
 `"MLDindex"` (which is the value returned by `MLD_CF`), and `"MLD"` (the
@@ -103,7 +103,7 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 - `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
 
-# Return
+# Return value
 
 `MLD_CF()` returns a single number, which is the index of the pressure vector that is closest to the estimated mixed-layer depth.
 

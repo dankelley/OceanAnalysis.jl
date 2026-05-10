@@ -3,7 +3,7 @@
 
 Convert an Argo object into a Ctd object.
 
-# Return Value
+# Return value
 
 This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and possibly with new `data` columns holding computed values of some key TEOS-10 values.
 
