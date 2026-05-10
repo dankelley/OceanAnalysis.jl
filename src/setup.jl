@@ -94,6 +94,7 @@ export SA
 export scale_bar
 export section_is_gridded
 export set_teos
+export six_num
 export station_map
 export subset_amsr
 export subset_ctd

@@ -1,6 +1,16 @@
 import StatsBase
 
-function six_num(x, name)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_nan)}
+"""
+    six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max,
+        :number, :number_missing, :number_nan)}
+
+Compute six numbers for an element `x`, with name `name`. The elements are
+stored in a NamedTuple with entries `name` (a copy of `name`), `min` (the
+minimum value in `x`), `mean` (the mean value in `x`), `max` (the maximum value
+in `x`), `number` (the number of values in `x`), `number_missing` (the number
+of missing values in `x`), and `number_NaN` (the number of NaN values in `x`)
+"""
+function six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_NaN)}
     if !(x[1] isa Char)
         number = length(x)
         skip_missing = ismissing.(x)
@@ -14,10 +24,10 @@ function six_num(x, name)::NamedTuple{(:name, :min, :mean, :max, :number, :numbe
             Min, Max, Mean = NaN, NaN, NaN
         end
         number_missing = sum(skip_missing)
-        number_nan = sum(skip_nan)
-        (name=name, min=Min, mean=Mean, max=Max, number=number, number_missing=number_missing, number_nan=number_nan)
+        number_NaN = sum(skip_nan)
+        (name=name, min=Min, mean=Mean, max=Max, number=number, number_missing=number_missing, number_NaN=number_NaN)
     else
-        (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=0, number_nan=0)
+        (name=name, min=NaN, mean=NaN, max=NaN, number=length(x), number_missing=0, number_NaN=0)
     end
 end
 
@@ -27,8 +37,9 @@ function summarize_data(x)
         println("\nData: a DataFrame, summarized as follows")
         df = DataFrame("name" => String[],
             "min" => Float64[], "mean" => Float64[], "max" => Float64[],
-            "#total" => Int64[], "#missing" => Int64[], "#NaN" => Int64[])
+            "number" => Int64[], "number_missing" => Int64[], "number_NaN" => Int64[])
         for name in data_names[.!occursin.(r"_qc$", data_names)]
+            sn = six_num(x[name], name)
             push!(df, six_num(x[name], name))
         end
         indent = "  "
@@ -60,7 +71,7 @@ function summarize_data(x)
         println("  maximum: ", sn.max)
         println("  number of values: ", sn.number)
         println("  number of missing values: ", sn.number_missing)
-        println("  number of NaN values: ", sn.number_nan)
+        println("  number of NaN values: ", sn.number_NaN)
     else
         println("\nData: a $(typeof(x.data)) object")
     end

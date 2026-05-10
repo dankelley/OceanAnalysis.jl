@@ -160,26 +160,15 @@ components, a Dict named `.metadata` and DataFrame named `.data`. The
 `.data` columns are taken from the source file.
 
 # Examples
-```jldoctest
-julia> using OceanAnalysis, Plots
-
-julia> pkgdir = dirname(dirname(pathof(OceanAnalysis)));
-
-julia> f = joinpath(pkgdir, "data", "D4902911_095.nc");
-
-julia> d = read_argo(f);
-
-julia> d.metadata["time"]
-2019-10-14T23:43:44.003
-
-julia> d.metadata["latitude"]
-40.45216
-
-julia> d.metadata["longitude"]
--66.38298
-
-julia> size(d.data)
-(1014, 15)
+```julia
+using OceanAnalysis
+pkgdir = dirname(dirname(pathof(OceanAnalysis)));
+f = joinpath(pkgdir, "data", "D4902911_095.nc");
+d = read_argo(f);
+d.metadata["time"] # 2019-10-14T23:43:44.003
+d.metadata["latitude"] # 40.45216
+d.metadata["longitude"] # -66.38298
+size(d.data) # (1014, 15)
 ```
 """
 function read_argo(filename::String; column::Int64=1, debug::Int64=0)

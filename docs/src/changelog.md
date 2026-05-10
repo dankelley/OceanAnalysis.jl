@@ -6,13 +6,14 @@ Release notes:
 
 ### Changed
 
-- none yet
+-
 
 - BREAKING none yet
 
 ### Added
 
 - [`MLD_CF`](@ref) and [`MLD_CF_detailed`](@ref) for computing mixed-layer depth according to Chu and Fan (2010).
+- [`six_num`](@ref), which was previously private.
 
 
 ## Changelog from version 0.2.3 to version 0.2.4

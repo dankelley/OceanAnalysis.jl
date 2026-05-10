@@ -86,6 +86,7 @@ OceanAnalysis.SA
 OceanAnalysis.scale_bar
 OceanAnalysis.set_teos
 OceanAnalysis.section_is_gridded
+OceanAnalysis.six_num
 OceanAnalysis.station_map
 OceanAnalysis.subset_amsr
 OceanAnalysis.subset_ctd
