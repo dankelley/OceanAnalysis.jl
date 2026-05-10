@@ -31,10 +31,16 @@ const atm = Dict(
 
 Return label for Argo data test (if `i` is from 2 to 27) or list of possible labels (if `i<2).
 
-The meanings are from https://vocab.nerc.ac.uk/collection/R11/current/, consulted 2027-05-04.
+The meanings are from https://vocab.nerc.ac.uk/collection/R11/current/, consulted 2026-05-04.
 """
 function argo_test_meaning(i)
-    i < 1 ? sort(atm) : atm[i]
+    if i < 1
+        sort(atm)
+    elseif haskey(atm, i)
+        atm[i]
+    else
+        error("Test index $i not found")
+    end
 end
 
 function character_vector_to_string(x)
@@ -76,12 +82,10 @@ function summarize_argo_data_tests(filename::String)
                 test = character_vector_to_string(ha[:, j, k])
                 result = character_vector_to_string(hq[:, j, k])
                 if test == "QCP\$"
-                    #result_bits = reverse(collect(string(parse(Int, result, base=16), base=2)))
                     result_bits = collect(string(parse(Int, result, base=16), base=2))
-                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, intepreted as $(join(result_bits))):")
+                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, inteprepted as $(join(result_bits))):")
                     i = 1
                     for bit in result_bits[end-1:-1:1]
-                        #for bit in result_bits
                         if bit == '1'
                             println("      test $i: $(argo_test_meaning(i))")
                         end
@@ -126,11 +130,9 @@ argo_id_cycle("4902911_095")
 ```
 """
 function argo_id_cycle(idcycle::String="")
-    if 0 == length(idcycle) || !occursin(r"_", idcycle)
-        error("'idcycle', a string containing an underline character, must be supplied")
-    else
-        split(idcycle, "_")
-    end
+    !isempty(idcycle) || error("'idcycle' must be a non-empty string")
+    occursin(r"_", idcycle) || error("'idcycle' must contain an underline character")
+    split(idcycle, "_")
 end
 
 
@@ -202,53 +204,18 @@ function read_argo(filename::String; column::Int64=1, debug::Int64=0)
         name_changes = Dict(data_names .=> data_names_original)
         for key in keys(name_changes)
             if contains(key, r"_qc$")
-                #oad(debug, "  QC item $key")
-                #println(d[name_changes[key]])
-                #tmp1 = d[name_changes[key]][:, column]
-                #n = length(tmp1)
-                #tmp2 = repeat([0], n)
-                #ok = .!ismissing.(tmp1)
-                #tmp2[ok] .= parse.(Int, Char.(tmp1[ok]))
-                #TMP2 = map(x -> ismissing(x) ? NaN : Int64(x), tmp1)
                 data[!, key] = d[name_changes[key]][:, column]
-                #data[!, key] = tmp2
-                #oad(debug, "  QC item $key has $(sum(ismissing(TMP2))) missing data out of $(length(TMP2)) data")
             else
-                #oad(debug, "  non-QC item $key")
                 tmp1 = d[name_changes[key]][:, column]
-                #tmp2 = convert(Vector{Union{Missing,Float64}}, tmp1)
-                #tmp2[ismissing.(tmp2)] .= NaN
                 TMP2 = map(x -> ismissing(x) ? NaN : Float64(x), tmp1)
-                #n = length(tmp1)
-                #tmp2 = repeat([0.0], n)
-                #bad = ismissing.(tmp1)
-                #tmp2[bad] .= NaN
-                #println("DAN tmp1 starts $(first(tmp1,6))")
-                #println("DAN tmp1 ends$(last(tmp1,6))")
-                #println("DAN tmp1 # missing: ", sum(ismissing.(tmp1)))
-                #println("DAN tmp1 has ", sum(ismissing.(tmp1)), " missing data out of ", length(tmp1), " data")
-                #tmp = convert(Vector{Union{Missing,Float64}}, get_nc_value(d, name_changes[key]))
-                #tmp2[!bad] .= tmp1[.!bad]
-                #oad(debug, "  steppingstone")
                 data[!, key] = TMP2
-                #data[!, key] = tmp2
-                #oad(debug, "  non-QC item $key has $(sum(ismissing(TMP2))) missing data out of $(length(TMP2)) data")
             end
         end
         oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
         metadata["name_changes"] = name_changes
         metadata["longitude"] = get_nc_value(d, "LONGITUDE")
-        #if ismissing(metadata["longitude"])
-        #    println("read_argo() found missing longitude")
-        #end
-        #oad(debug, "    read longitude: $longitude")
         metadata["latitude"] = get_nc_value(d, "LATITUDE")
-        #if ismissing(latitude)
-        #    println("read_argo() found missing latitude")
-        #end
-        #oad(debug, "    read latitude: $latitude")
         metadata["time"] = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
-        #oad(debug, "    read time: $time")
         # Do some things directly, because get_nc_value() is designed for numeric items
         if haskey(d, "DATE_CREATION")
             metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
@@ -256,9 +223,7 @@ function read_argo(filename::String; column::Int64=1, debug::Int64=0)
             metadata["date_creation"] = missing
         end
         # Some files don't have a DATA_MODE entry, so we set it to blank in that case
-        #print(sort(keys(d)))
         if haskey(d, "DATA_MODE")
-            #print("ok? ", d["DATA_MODE"][1])
             metadata["data_mode"] = d["DATA_MODE"][1]
         else
             metadata["data_mode"] = "?"
@@ -345,13 +310,12 @@ argo_file = get_argo(index.file[end])
 argo = read_argo(argo_file)
 plot_profile(argo, which="CT")
 ```
-
 """
 function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
     oad(debug, "get_argo() START")
     file_original = filename
     oad(debug, "    filename: ", filename, " (original)")
-    file = replace.(filename, r".*/" => "")
+    filename = replace(filename, r".*/" => "")
     file = joinpath(destdir, filename)
     oad(debug, "    filename: ", filename, " (after prefixing with destdir)")
     url = joinpath(server, "dac", file_original)
@@ -394,12 +358,11 @@ function read_argo_index(filename::String; trim::Bool=true, header::Int64=9, deb
     dropmissing!(df)
     nnew = nrow(df)
     oad(debug, "    dropped ", norig - nnew, " rows (", round(100 * (norig - nnew) / norig, digits=3), "% of total) because of missing data")
-    #<REMOVED 2025-09-09> df.file = replace.(df.file, r".*/" => "")
     # create 'time', then remove 'date'
     ok_to_trim_date = true
     try
         df.time = DateTime.(string.(df.date), dateformat"yyyymmddHHMMSS")
-    catch e
+    catch
         println("ERROR computing df.time from df.date, so leaving the latter for user to deal with")
         ok_to_trim_date = false
     end
