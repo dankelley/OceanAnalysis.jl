@@ -1,6 +1,6 @@
 """
     plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-        abbreviate::Symbol=:long, debug::Int64=0, kwargs...)
+        abbreviate::Symbol=:long, fontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the variable named by `which` depends on either pressure or density.  The variable is drawn on the x axis and pressure on the y axis. Following oceanographic convention, the y axis is set up so that waters nearer the air-sea interface are nearer the top of the plot.
 

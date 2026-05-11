@@ -1,6 +1,6 @@
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-        draw_freezing=true, abbreviate=false, debug::Int64=0, kwargs...)
+        draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -43,6 +43,8 @@ to use `:path` instead.
 
 - `abbreviate` a Bool indicating whether to abbreviate the axis labels,.
 
+- `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`, `guidefontsize` and `titlefontsize`. Note that any of these values may also be supplied as named arguments within `kwargs...`.
+
 - `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
 
 - `kwargs...` is passed to `plot()`, to permit further customization; see https://docs.juliaplots.org/stable/ for more information on possibilities.
@@ -63,7 +65,7 @@ plot_TS(ctd, marker=:none)
 See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-    draw_freezing=true, abbreviate=false, debug::Int64=0, kwargs...)
+    draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     local S = ctd.data.salinity
     local T = ctd.data.temperature
@@ -88,7 +90,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         yrot=90,
         framestyle=:box, legend=false, color=:black, tickdirection=:out,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-        tickfontsize=8, guidefontsize=8; titlefontsize=8,
+        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
     # ... then add density contours ...
     xlim = xlims()
