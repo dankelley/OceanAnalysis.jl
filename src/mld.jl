@@ -18,7 +18,7 @@ end
 Compute mixed-layer depth according to the Chu and Fan (2010) method; see also
 Kelley (2018) for an example. This is a low-level function that is typically
 used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed`
-returns a NamedTuple with more information than the single number returned by
+returns a Dict with more information than the single number returned by
 [`MLD_CF`](@ref).
 
 # Arguments
@@ -33,7 +33,7 @@ returns a NamedTuple with more information than the single number returned by
 
 # Return value
 
-`MLD_CF_detailed` returns a NameTuple that contains scalar entries named
+`MLD_CF_detailed` returns a Dict that contains scalar entries named
 `"MLDindex"` (which is the value returned by `MLD_CF`), and `"MLD"` (the
 pressure at that index), along with vector entries named `"E1"` `"E2"`, and
 `"E2_over_E1"`, defined as in Kelley (2018), which in turn is based on formulae
@@ -58,7 +58,7 @@ Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
 Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
-function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::NamedTuple{(:E1, :E2, :E2_over_E1, :MLDindex, :MLD)}
+function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Dict
     p = ctd["pressure"]
     v = ctd[variable]
     np = length(p)
@@ -85,7 +85,7 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Na
     replace!(E2_over_E1, NaN => 0.0)
     MLDindex = argmax(E2_over_E1)
     MLD = p[MLDindex]
-    (E1=E1, E2=E2, E2_over_E1=E2_over_E1, MLDindex=MLDindex, MLD=MLD)
+    Dict("E1" => E1, "E2" => E2, "E2_over_E1" => E2_over_E1, "MLDindex" => MLDindex, "MLD" => MLD)
 end
 
 """
@@ -127,6 +127,6 @@ Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
 [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 """
 function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Int64
-    MLD_CF_detailed(ctd; variable=variable, n=n).MLDindex
+    MLD_CF_detailed(ctd; variable=variable, n=n)["MLDindex"]
 end
 
