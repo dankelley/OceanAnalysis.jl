@@ -112,7 +112,7 @@ item from the `metadata` of the constituent [`Ctd`](@ref)
 objects that are stored in `x.data`.
 """
 function get_element(x::OA, element::Union{String,Symbol}; debug::Int64=0)
-    oad(debug, "get_element([OA object], element=\"$(repr(element))\") START dan")
+    oad(debug, "get_element([OA object], element=$(repr(element))) START")
     if element isa Symbol
         element = String(element)
         oad(debug, "  convert element from a symbol to the string \"$element\"")
