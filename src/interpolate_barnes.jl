@@ -129,16 +129,19 @@ function interpolate_barnes(
     yg::Union{AbstractVector,AbstractRange,Nothing}=nothing,
     xr::Union{Float64,Nothing}=nothing,
     yr::Union{Float64,Nothing}=nothing,
-    gamma::Float64=0.5, iterations::Int64=2, debug=0)
+    gamma::Float64=0.5, iterations::Int64=2, debug=0)::Dict
     oad(debug, "interpolate_barnes() START")
     # Do some initial checks
-    nx = length(x)
-    nx == length(y) || error("lengths of x and y do not match")
-    nx == length(z) || error("lengths of x and z do not match")
+    n = length(x)
+    ny = length(y)
+    n == ny || error("lengths of x ($n) and y ($ny) do not match")
+    nz = length(z)
+    n == nz || error("lengths of x ($n) and y ($nz) do not match")
     if isnothing(w)
-        w = repeat([1.0], nx)
+        w = repeat([1.0], n)
     end
-    nx == length(w) || error("lengths of x and w do not match")
+    nw = length(w)
+    n == nw || error("lengths of x ($n) and w ($nw) do not match")
     if isnothing(xg)
         xg = pretty(x, 50)
         oad(debug, "  set xg to ", xg)
@@ -151,25 +154,25 @@ function interpolate_barnes(
     nyg = length(yg)
     if isnothing(xr)
         e = extrema(x)
-        xr = (e[2] - e[1]) / sqrt(nx)
+        xr = (e[2] - e[1]) / sqrt(n)
         oad(debug, "  set xr to ", xr)
     end
     if isnothing(yr)
         e = extrema(y)
-        yr = (e[2] - e[1]) / sqrt(nx)
+        yr = (e[2] - e[1]) / sqrt(n)
         oad(debug, "  set yr to ", yr)
     end
-    xr > 0.0 || error("xr is not a positive value")
-    yr > 0.0 || error("xr is not a positive value")
+    xr > 0.0 || error("xr ($xr) is not a positive value")
+    yr > 0.0 || error("xr ($yr) is not a positive value")
     xr0 = xr # keep for computing weight matrix at end
     yr0 = yr # keep for computing weight matrix at end
-    gamma > 0.0 || error("gamma is not a positive number")
-    iterations > 0 || error("iteration is not a positive integer")
+    gamma > 0.0 || error("gamma ($gamma) is not a positive number")
+    iterations > 0 || error("iteration ($iteration)is not a positive integer")
     # Set up storage
     zz = zeros(nyg, nxg)
     wg = zeros(nyg, nxg)
-    zd = zeros(nx)
-    z_last = zeros(nx)
+    zd = zeros(n)
+    z_last = zeros(n)
     for iter in 1:iterations
         oad(debug, "  Iteration $iter: set xr=$xr and yr=$yr")
         # update grid
@@ -182,12 +185,12 @@ function interpolate_barnes(
             end
         end
         # interpolate grid back to data locations
-        for k in 1:nx
+        for k in 1:n
             zd[k] = interpolate_barnes_point(x[k], y[k], z_last[k],
                 0,
                 x, y, z, w, z_last, xr, yr)
         end
-        for k in 1:nx
+        for k in 1:n
             z_last[k] = zd[k]
         end
         # refine search range for next iteration
