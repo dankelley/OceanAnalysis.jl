@@ -26,5 +26,5 @@ plot_stations(index.longitude, index.latitude,
 float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
 t = @sprintf("%d profiles of %d floats", length(index.file), length(float_IDs))
 title!(t, titlefontsize=9)
-scale_bar(100, :right, :top)
+scale_bar(100; x=:right, y=:top)
 savefig("argo_search.png")
