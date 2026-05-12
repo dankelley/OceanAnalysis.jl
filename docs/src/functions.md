@@ -46,6 +46,7 @@ OceanAnalysis.gravity
 OceanAnalysis.grid_ctd
 OceanAnalysis.grid_section
 OceanAnalysis.handle_qc
+OceanAnalysis.handle_qc!
 OceanAnalysis.interpolate_barnes
 OceanAnalysis.label_from_varname
 OceanAnalysis.MLD_CF

@@ -52,19 +52,22 @@ function drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Int64=0)
 end
 
 """
-    handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", debug::Int64=0)
+    handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
+        action::Symbol=:NaN, debug::Int64=0)
 
-Handle quality-control flags in [`Argo`](@ref) or [`Ctd`](@ref) object `x`, by setting to NaN any variable entries that have matching qc flag not contained in `retain`.  The flag for a variable named e.g. `salinity` is named `salinity_qc`.  Any variable with no matching qc entries is left unaltered.
+Handle quality-control flags in [`Argo`](@ref) or [`Ctd`](@ref) object `x`, by setting to NaN any variable entries that have matching qc flag not contained in `retain`.  The flag for a variable named e.g. `salinity` is named `salinity_qc`.  Any variable with no matching qc entries is left unaltered.  All of this is done with a copy of `x`; for an in-place version, use [`handle_qc!`](@ref).
 
-This is mainly useful for [`Argo`](@ref) data, but can also be applied in the same way for [`Ctd`](@ref) objects created with [`as_ctd`](@ref).
-
-The Argo coding scheme is described in many online documents (e.g. Section 6.1 of Reference 1). Briefly, `"0"` means that "no QC was performed", `"1"` means "good data", `"2"` means "probably good data", `"3"` means "probably bad data", `"4"` means "bad data", `"5"` means "changed data", `"8"` means "estimated value" and `"9"` means "missing value".
+Many files use a scheme similar to that used in the Argo program (see e.g. Section 6.1 of Reference 1). Briefly, `"0"` means that "no QC was performed", `"1"` means "good data", `"2"` means "probably good data", `"3"` means "probably bad data", `"4"` means "bad data", `"5"` means "changed data", `"8"` means "estimated value" and `"9"` means "missing value".
 
 # Arguments
 - x an object of type [`Argo`](@ref) or [`Ctd`](@ref).
 
 # Keywords
+
 - `retain` a String, or a vector of Strings, holding the quality-control flags that are considered to reflect acceptable data. The default, `"1"` means to retain only data designated "Good" in the Argo system; this is a safe choice.
+
+- `action`: either `:NaN` (the default), which means to change un-retained items to NaN values or `:delete`, which means to delete all data in any row where either `"salinity"`, `"temperature"` or `"pressure"` is not to be retained.
+
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # References
@@ -73,31 +76,69 @@ The Argo coding scheme is described in many online documents (e.g. Section 6.1 o
    Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9.
    Ifremer, 2025. https://doi.org/10.13155/33951.
 """
-function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", debug::Int64=0)
-    oad(debug, "handle_qc($(typeof(x)), retain=$retain) START")
-    rval = x
+function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", action::Symbol=:NaN, debug::Int64=0)
+    oad(debug, "handle_qc($(typeof(x)), action=$(repr(action)), retain=$retain) START")
+    action == :NaN || action == :delete || error("action is $(repr(action)) but it must be :NaN or :delete")
+    rval_metadata = copy(x.metadata)
+    rval_data = copy(x.data)
+    if x isa Argo
+        rval = Argo(rval_metadata, rval_data)
+    elseif x isa Ctd
+        rval = Ctd(rval_metadata, rval_data)
+    else
+        error("programming error -- should not encounter this line")
+    end
     retain_set = Set(retain)
     data_names = names(x.data)
     for name in data_names
-        #println("name: $name")
         name_qc = name * "_qc"
-        #println("name_qc: $name_qc")
         found = name_qc .== data_names
-        #println("found: $found")
         fa = findall(found)
-        #println("fa: $fa")
         if length(fa) == 1
             n = length(x.data[!, name])
             bad = .!(in.(x.data[!, name_qc], Ref(retain_set)))
             if sum(bad) > 0
                 oad(debug, "  $name: setting $(sum(bad)) of the $n values to NaN")
                 rval.data[!, name][bad] .= NaN
-                #else
-                #    oad(debug, "  $name: all values considered acceptable")
             end
         end
     end
+    if action == :delete
+        nold = nrow(x.data)
+        rval.data = subset(rval.data,
+            [:salinity, :temperature, :pressure] => ByRow((a, b, c) -> !isnan(a) && !isnan(b) && !isnan(c)))
+        oad(debug, "  originally, had $nold rows; after handling QC, had $(nrow(rval.data)) rows")
+    end
     oad(debug, "END handle_qc()")
+    rval
+end
+
+"""
+    handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
+        action::Symbol=:NaN, debug::Int64=0)
+
+In-place version of [`handle_qc`](@ref).
+"""
+function handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
+    action::Symbol=:NaN, debug::Int64=0)
+    oad(debug, "handle_qc!($(typeof(x)), retain=$retain) START")
+    rval = x
+    retain_set = Set(retain)
+    data_names = names(x.data)
+    for name in data_names
+        name_qc = name * "_qc"
+        found = name_qc .== data_names
+        fa = findall(found)
+        if length(fa) == 1
+            n = length(x.data[!, name])
+            bad = .!(in.(x.data[!, name_qc], Ref(retain_set)))
+            if sum(bad) > 0
+                oad(debug, "  $name: setting $(sum(bad)) of the $n values to NaN")
+                rval.data[!, name][bad] .= NaN
+            end
+        end
+    end
+    oad(debug, "END handle_qc()!")
     rval
 end
 
