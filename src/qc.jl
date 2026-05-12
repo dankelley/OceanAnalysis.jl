@@ -103,7 +103,7 @@ function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
             end
         end
     end
-    if action == :delete
+    if action == :delete && "salinity" in data_names && "temperature" in data_names && "pressure" in data_names
         nold = nrow(x.data)
         rval.data = subset(rval.data,
             [:salinity, :temperature, :pressure] => ByRow((a, b, c) -> !isnan(a) && !isnan(b) && !isnan(c)))
@@ -137,6 +137,12 @@ function handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1"
                 rval.data[!, name][bad] .= NaN
             end
         end
+    end
+    if action == :delete && "salinity" in data_names && "temperature" in data_names && "pressure" in data_names
+        nold = nrow(x.data)
+        rval.data = subset(rval.data,
+            [:salinity, :temperature, :pressure] => ByRow((a, b, c) -> !isnan(a) && !isnan(b) && !isnan(c)))
+        oad(debug, "  originally, had $nold rows; after handling QC, had $(nrow(rval.data)) rows")
     end
     oad(debug, "END handle_qc()!")
     rval
