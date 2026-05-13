@@ -18,7 +18,7 @@ enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
 
 # 1. Heatmap of u, v and w
 plot_adp(enu; size=(800, 700), dpi=150)
-#savefig("adp_rdi_heatmap.png")
+savefig("adp_rdi_heatmap.png")
 
 # 2. U-V scattergraph, with local coastline direction shown
 
@@ -31,17 +31,34 @@ plot_adp(enu; size=(800, 700), dpi=150)
 plot_adp(enu, which=:uv)
 a = 1.71 # from the R code shown above (private file)
 plot!([-1; 1], [-a; a], color=:red, label=false, dpi=150)
-#savefig("adp_rdi_uv.png")
+savefig("adp_rdi_uv.png")
 ```
 
 ![Acoustic-Doppler Profiler plot](adp_rdi_heatmap.png)
 ![Acoustic-Doppler Profiler plot](adp_rdi_uv.png)
 
+## AMSR Satellite Data
+
+The AMSR satellite provides several data streams, including sea-surface
+temperature, which may be plotted as follows.
+
+```julia
+# North Atlantic Sea Surface Temperature
+using OceanAnalysis, Plots, Dates
+f = get_amsr("2025-09-07");
+a = read_amsr(f, "SST");
+plot_amsr(a, xlims=(290.0, 340.0), ylims=(30.0, 60.0), color=:turbo,
+    levels=0.0:2.5:30.0, clim=(0, 30))
+savefig("amsr.png")
+```
+
+![AMSR-derived sea-surface temperature](amsr.png)
+
 ## Argo Data
 
 ### Argo Profile
 
-The following shows how to read an Argo NetCDF file, convert to a Ctd object, and then make a summary plot.
+The following shows how to read an Argo NetCDF file, convert to a [`Ctd`](@ref) object, and then make a summary plot.
 
 ```julia
 # Read and plot a built-in Argo file
@@ -59,10 +76,32 @@ title = @sprintf("CTD observations at %.3fN and %.3fE, on %s",
     Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=9)
-#savefig("argo_profile.png")
+savefig("argo_profile.png")
 ```
 
 ![Argo profile](argo_profile.png)
+
+### Argo quality-control handling
+
+The following illustrates the two ways in which [`handle_qc`](@ref) works.
+Left: salinity profile.  Middle: after changing questionable data values to
+NaN.  Right: removing all data from any pressure level in which the salinity,
+temperature or pressure is questionable.
+
+```julia
+using OceanAnalysis, Plots
+f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4901076_139.nc")
+a = read_argo(f);
+b = handle_qc(a);
+c = handle_qc(a, action=:delete);
+pa = plot_profile(as_ctd(a); which="salinity", dpi=200, fontsize=6)
+pb = plot_profile(as_ctd(b); which="salinity", dpi=200, fontsize=6)
+pc = plot_profile(as_ctd(c); which="salinity", dpi=200, fontsize=6)
+plot(pa, pb, pc, layout=(1, 3))
+savefig("argo_qc.png")
+```
+
+![Argo search results](argo_qc.png)
 
 
 ### Argo Search
@@ -99,8 +138,8 @@ plot_stations(index.longitude, index.latitude,
 float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
 t = @sprintf("%d profiles of %d floats", length(index.file), length(float_IDs))
 title!(t, titlefontsize=9)
-scale_bar(100, :right, :top)
-#savefig("argo_search.png")
+scale_bar(100; x=:right, y=:top)
+savefig("argo_search.png")
 ```
 
 ![Argo search results](argo_search.png)
@@ -135,32 +174,15 @@ topo = read_topography(topo_file)
 contour!(topo.metadata["longitude"], topo.metadata["latitude"],
     topo.data, xlim=xlims(), ylim=ylims(),
     color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
-scale_bar(500, :right, :top)
-#savefig("argo_trajectory.png")
+scale_bar(500; x=:right, y=:top)
+savefig("argo_trajectory.png")
 ```
 
 ![Argo trajectory](argo_trajectory.png)
 
-## AMSR Satellite Data
-
-The AMSR satellite provides several data streams, including sea-surface
-temperature, which may be plotted as follows.
-
-```julia
-# North Atlantic Sea Surface Temperature
-using OceanAnalysis, Plots
-f = get_amsr("2025-09-07");
-a = read_amsr(f, "SST");
-plot_amsr(a, xlims=(290.0, 360.0), ylims=(20.0, 60.0), color=:turbo,
-    levels=0.0:2.5:30.0, clim=(0, 30))
-#savefig("amsr.png")
-```
-
-![AMSR-derived sea-surface temperature](amsr.png)
 
 
-
-## Bathymetry Data
+## Bathymetry (high-resolution) Data
 
 ### High-resolution bathymetry data
 
@@ -175,11 +197,12 @@ filename = expanduser("~/data/nonna/NONNA10_4460N06360W.tiff")
 n = read_nonna(filename);
 heatmap(n["longitude"], n["latitude"], n.data, c=:turbo,
     size=(400, 400), dpi=300, framestyle=:box, tickdirection=:out)
-#savefig("nonna.png")
+savefig("nonna.png")
 ```
+
 ![NONNA_plot](nonna.png)
 
-### Low-resolution bathymetry and topography data
+### Bathymetry (low-resolution) and topography data
 
 The following downloads topographic data for a domain including southern
 Nova Scotia, and displays the data in three plot styles.
@@ -192,7 +215,7 @@ p1 = plot_topography(topo, domain=:both);
 p2 = plot_topography(topo, domain=:sea);
 p3 = plot_topography(topo, domain=:land);
 plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
-#savefig("topography.png")
+savefig("topography.png")
 ```
 
 ![Topography diagram](topography.png)
@@ -206,7 +229,7 @@ The following produces a world map in Cartesian coordinates, with aspect ratio s
 using OceanAnalysis, Plots
 c = coastline()
 plot_coastline(c)
-#savefig("coastline.png")
+savefig("coastline.png")
 ```
 
 ![Coastline diagram](coastline.png)
@@ -230,7 +253,7 @@ title = @sprintf("CTD observations at %.3fN and %.3fE on %s",
     ctd["latitude"], ctd["longitude"], ctd["time"])
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-#savefig("ctd_diagram.png")
+savefig("ctd_diagram.png")
 ```
 
 ![CTD diagram](ctd_diagram.png)
@@ -242,14 +265,16 @@ plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
 This uses a private data file acquired using a Biosonics scientific echosounder.
 
 ```julia
+# This uses a private file
 using OceanAnalysis, Plots
 f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4"
 if isfile(f)
     e = read_echosounder(f)
     plot_echosounder(e)
-    #savefig("echosounder.png")
+    savefig("echosounder.png")
 end
 ```
+
 ![Echosounder plot](echosounder.png)
 
 
@@ -277,7 +302,7 @@ p2 = plot_section(sg, "salinity", ylim=(0, 2000));
 p3 = plot_section(sg, "temperature", ylim=(0, 2000));
 l = @layout [a; b c]
 plot(p1, p2, p3, layout=l, dpi=200);
-#savefig("section.png")
+savefig("section.png")
 ```
 
 ![Section diagram](section.png)
