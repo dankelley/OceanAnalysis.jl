@@ -83,22 +83,45 @@ savefig("argo_profile.png")
 
 ### Argo quality-control handling
 
-The following illustrates the two ways in which [`handle_qc`](@ref) works.
-Left: salinity profile.  Middle: after changing questionable data values to
-NaN.  Right: removing all data from any pressure level in which the salinity,
-temperature or pressure is questionable.
+The following illustrates the use of [`handle_qc`](@ref) for Argo data. The top
+row shows salinity and temperature profiles, with red dots for points marked
+with quality-control (QC) values other than `'1'`.  (Note that Argo QC values
+are stored as characters, not as numbers.) The bottom row shows a TS diagrams
+for the raw data and the cleaned-up data. Note that the salinity errors are so
+large as to control the plot scales in the left-hand panels. This is not an
+uncommon situation, and so it is a good idea to handle QC flags early in
+analysis procedures. However, sometimes the flags seem to be in error, and so a
+prudent analyst will start by plotting as in the top row.  *Exercise:* add a
+middle row showing just the cleaned-up profiles.
+
+plotting 
 
 ```julia
+# Illustrate QC processing of hydrographic data
 using OceanAnalysis, Plots
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4901076_139.nc")
-a = read_argo(f);
-b = handle_qc(a);
-c = handle_qc(a, action=:delete);
-pa = plot_profile(as_ctd(a); which="salinity", dpi=200, fontsize=6)
-pb = plot_profile(as_ctd(b); which="salinity", dpi=200, fontsize=6)
-pc = plot_profile(as_ctd(c); which="salinity", dpi=200, fontsize=6)
-plot(pa, pb, pc, layout=(1, 3))
+argo = read_argo(f);
+ctd = as_ctd(argo);
+ctd_clean = handle_qc(ctd);
+
+ul = plot_profile(ctd; which="salinity", dpi=200, fontsize=6)
+badS = ctd["salinity_qc"] .!= '1'
+scatter!(ctd["salinity"][badS], ctd["pressure"][badS], color=:red, markersize=2)
+
+ur = plot_profile(ctd; which="temperature", dpi=200, fontsize=6)
+badT = ctd["temperature_qc"] .!= '1'
+scatter!(ctd["temperature"][badT], ctd["pressure"][badT], color=:red, markersize=2)
+
+ll = plot_TS(ctd, fontsize=6)
+bad = badS .| badT
+scatter!(ctd["SA"][bad], ctd["CT"][bad], color=:red, markersize=2)
+
+lr = plot_TS(ctd_clean, fontsize=6)
+
+plot(ul, ur, ll, lr, layout=(2, 2))
 savefig("argo_qc.png")
+
+
 ```
 
 ![Argo search results](argo_qc.png)
