@@ -14,6 +14,7 @@ Release notes:
 
 - [`MLD_CF`](@ref) and [`MLD_CF_detailed`](@ref) for computing mixed-layer depth according to Chu and Fan (2010).
 - [`six_num`](@ref), which was previously private.
+- `handle_qc` is now part of the examples webpage.
 
 
 ## Changelog from version 0.2.3 to version 0.2.4
