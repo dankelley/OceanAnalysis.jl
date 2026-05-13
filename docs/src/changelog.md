@@ -7,7 +7,7 @@ Release notes:
 
 ### Changed
 
--
+- use slightly thinner contour lines in `plot_TS()` plots
 
 - BREAKING none yet
 

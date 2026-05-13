@@ -114,9 +114,13 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     else
         oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
     end
+    # Set contour linewidth to 2^(1/4) times grid line width. This
+    # corresponds the diameter step between Rapidography technical pens
+    # at number category 0 to 00.
+    contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        contour!(SAc, CTc, sigma0c, color=:gray50, levels=levels, cbar=false, clabels=true)
+        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true)
     else
         oad(debug, "        not drawing sigma0 contours")
     end
@@ -139,7 +143,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     end
     if length(levels) > 0
         oad(debug, "    drawing spiciness0 contours at levels $(levels)")
-        contour!(SAc, CTc, spiciness0c, color=:gray50, linewidth=1.0, levels=levels,
+        contour!(SAc, CTc, spiciness0c, linewidth=contour_linewidth, color=:gray50, levels=levels,
             cbar=false, clabels=true)
     else
         oad(debug, "        not drawing spiciness0 contours")
