@@ -1,5 +1,22 @@
 # Changes
 
+
+## Changelog from version 0.2.5 to version 0.2.6
+
+Release notes:
+
+### Changed
+
+-
+
+- BREAKING none yet
+
+### Added
+
+-
+
+
+
 ## Changelog from version 0.2.4 to version 0.2.5
 
 Release notes:
