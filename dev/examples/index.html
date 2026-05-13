@@ -42,16 +42,31 @@ title = @sprintf(&quot;CTD observations at %.3fN and %.3fE, on %s&quot;,
     Dates.format(ctd.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))
 plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=9)
-savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p><h3 id="Argo-quality-control-handling"><a class="docs-heading-anchor" href="#Argo-quality-control-handling">Argo quality-control handling</a><a id="Argo-quality-control-handling-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-quality-control-handling" title="Permalink"></a></h3><p>The following illustrates the two ways in which <a href="../functions/#OceanAnalysis.handle_qc"><code>handle_qc</code></a> works. Left: salinity profile.  Middle: after changing questionable data values to NaN.  Right: removing all data from any pressure level in which the salinity, temperature or pressure is questionable.</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots
+savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p><h3 id="Argo-quality-control-handling"><a class="docs-heading-anchor" href="#Argo-quality-control-handling">Argo quality-control handling</a><a id="Argo-quality-control-handling-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-quality-control-handling" title="Permalink"></a></h3><p>The following illustrates the use of <a href="../functions/#OceanAnalysis.handle_qc"><code>handle_qc</code></a> for Argo data. The top row shows salinity and temperature profiles, with red dots for points marked with quality-control (QC) values other than <code>&#39;1&#39;</code>.  (Note that Argo QC values are stored as characters, not as numbers.) The bottom row shows a TS diagrams for the raw data and the cleaned-up data. Note that the salinity errors are so large as to control the plot scales in the left-hand panels. This is not an uncommon situation, and so it is a good idea to handle QC flags early in analysis procedures. However, sometimes the flags seem to be in error, and so a prudent analyst will start by plotting as in the top row.  <em>Exercise:</em> add a middle row showing just the cleaned-up profiles.</p><p>plotting </p><pre><code class="language-julia hljs"># Illustrate QC processing of hydrographic data
+using OceanAnalysis, Plots
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), &quot;data&quot;, &quot;D4901076_139.nc&quot;)
-a = read_argo(f);
-b = handle_qc(a);
-c = handle_qc(a, action=:delete);
-pa = plot_profile(as_ctd(a); which=&quot;salinity&quot;, dpi=200, fontsize=6)
-pb = plot_profile(as_ctd(b); which=&quot;salinity&quot;, dpi=200, fontsize=6)
-pc = plot_profile(as_ctd(c); which=&quot;salinity&quot;, dpi=200, fontsize=6)
-plot(pa, pb, pc, layout=(1, 3))
-savefig(&quot;argo_qc.png&quot;)</code></pre><p><img src="../argo_qc.png" alt="Argo search results"/></p><h3 id="Argo-Search"><a class="docs-heading-anchor" href="#Argo-Search">Argo Search</a><a id="Argo-Search-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Search" title="Permalink"></a></h3><p>The following shows how to map Argo profile locations made within 200 km of Sable Island, during the past year.</p><pre><code class="language-julia hljs"># Show Argo profiles within 200 km of Sable Island in last year
+argo = read_argo(f);
+ctd = as_ctd(argo);
+ctd_clean = handle_qc(ctd);
+
+ul = plot_profile(ctd; which=&quot;salinity&quot;, dpi=200, fontsize=6)
+badS = ctd[&quot;salinity_qc&quot;] .!= &#39;1&#39;
+scatter!(ctd[&quot;salinity&quot;][badS], ctd[&quot;pressure&quot;][badS], color=:red, markersize=2)
+
+ur = plot_profile(ctd; which=&quot;temperature&quot;, dpi=200, fontsize=6)
+badT = ctd[&quot;temperature_qc&quot;] .!= &#39;1&#39;
+scatter!(ctd[&quot;temperature&quot;][badT], ctd[&quot;pressure&quot;][badT], color=:red, markersize=2)
+
+ll = plot_TS(ctd, fontsize=6)
+bad = badS .| badT
+scatter!(ctd[&quot;SA&quot;][bad], ctd[&quot;CT&quot;][bad], color=:red, markersize=2)
+
+lr = plot_TS(ctd_clean, fontsize=6)
+
+plot(ul, ur, ll, lr, layout=(2, 2))
+savefig(&quot;argo_qc.png&quot;)
+
+</code></pre><p><img src="../argo_qc.png" alt="Argo search results"/></p><h3 id="Argo-Search"><a class="docs-heading-anchor" href="#Argo-Search">Argo Search</a><a id="Argo-Search-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Search" title="Permalink"></a></h3><p>The following shows how to map Argo profile locations made within 200 km of Sable Island, during the past year.</p><pre><code class="language-julia hljs"># Show Argo profiles within 200 km of Sable Island in last year
 using OceanAnalysis, CSV, Dates, DataFrames, Plots, Printf
 # Get the index
 index_file = get_argo_index(&quot;~/data/argo&quot;)
@@ -153,4 +168,4 @@ p2 = plot_section(sg, &quot;salinity&quot;, ylim=(0, 2000));
 p3 = plot_section(sg, &quot;temperature&quot;, ylim=(0, 2000));
 l = @layout [a; b c]
 plot(p1, p2, p3, layout=l, dpi=200);
-savefig(&quot;section.png&quot;)</code></pre><p><img src="../section.png" alt="Section diagram"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 13 May 2026 09:47">Wednesday 13 May 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+savefig(&quot;section.png&quot;)</code></pre><p><img src="../section.png" alt="Section diagram"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 13 May 2026 12:11">Wednesday 13 May 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
