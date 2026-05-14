@@ -137,9 +137,9 @@ end
 
 
 """
-    read_argo(filename::String; column::Int64=1, debug::Int64=0)
+    read_argo(filename::String; column::Int64=1, debug::Int64=0)::Argo
 
-    Read an Argo file.
+Read a profile within an Argo file. For convenience, such files may be downloaded with [`get_argo`](@ref).
 
 # Arguments
 
@@ -147,17 +147,17 @@ end
 
 # Keywords
 
-- `column` an integer, indicating which profile to read from the file.
+- `profile` an integer, indicating which profile to read from the file.
 
 - `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
 
 # Return value
 
 The `read_argo()` function returns an [`Argo`](@ref) object that has two
-components, a Dict named `.metadata` and DataFrame named `.data`. The
-`.metadata` entries are named `"cycle"`, `"data_mode"`, `"date_creation"`,
-`"filename"`, `"latitude"`, `"longitude"`, `"platform"`, and `"time"`. The
-`.data` columns are taken from the source file.
+components: (1) a Dict named `.metadata` that has entries named `"cycle"`,
+`"data_mode"`, `"date_creation"`, `"filename"`, `"latitude"`, `"longitude"`,
+`"platform"`, and `"time"`, perhaps along with other entries. (2) A DataFrame
+named `data` that has elements stored in the data file.
 
 # Examples
 ```julia
@@ -171,8 +171,8 @@ d.metadata["longitude"] # -66.38298
 size(d.data) # (1014, 15)
 ```
 """
-function read_argo(filename::String; column::Int64=1, debug::Int64=0)
-    oad(debug, "read_argo(<filename>; column=$column, debug=$debug) START")
+function read_argo(filename::String; profile::Int64=1, debug::Int64=0)::Argo
+    oad(debug, "read_argo(<filename>; profile=$profile, debug=$debug) START")
     metadata = Dict()
     data = DataFrame()
     oad(debug, "  filename: $filename")
@@ -193,9 +193,9 @@ function read_argo(filename::String; column::Int64=1, debug::Int64=0)
         name_changes = Dict(data_names .=> data_names_original)
         for key in keys(name_changes)
             if contains(key, r"_qc$")
-                data[!, key] = d[name_changes[key]][:, column]
+                data[!, key] = d[name_changes[key]][:, profile]
             else
-                tmp1 = d[name_changes[key]][:, column]
+                tmp1 = d[name_changes[key]][:, profile]
                 TMP2 = map(x -> ismissing(x) ? NaN : Float64(x), tmp1)
                 data[!, key] = TMP2
             end
