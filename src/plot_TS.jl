@@ -158,9 +158,10 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, linewidth=0.75, color=:black, linestyle=:dash)
     end
-    if 0 == sum(ok)
-        annotate!(0.5, 0.5, text("NO GOOD DATA", :red, 14))
-    end
+    # This is placed oddly, and what's the point of it anyway?
+    #if 0 == sum(ok)
+    #    annotate!(0.5, 0.5, text("NO GOOD DATA", :red, 14))
+    #end
     oad(debug, "END plot_TS()")
     rval
 end # plot_TS()
