@@ -7,7 +7,8 @@ Release notes:
 
 ### Changed
 
-- use slightly thinner contour lines in `plot_TS()` plots
+- `plot_TS`: (1) use slightly thinner contour lines, (2) contour labels are in
+same colour as the lines, and (3) contours go under the data.
 
 - BREAKING none yet
 
