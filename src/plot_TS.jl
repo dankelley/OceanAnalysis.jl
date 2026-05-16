@@ -84,6 +84,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
         @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
     end
+    # Draw the data (will redraw this at the end, if there are density
+    # or spiciness contours on top.
     rval = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
@@ -92,7 +94,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
-    # ... then add density contours ...
+    need_redraw = false # will set to true if we contour the data
+    # Possibly add density contours
     xlim = xlims()
     ylim = ylims()
     SAc = range(xlim[1], xlim[2], length=300)
@@ -121,6 +124,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
         contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_text=:gray50)
+        need_redraw = true
     else
         oad(debug, "        not drawing sigma0 contours")
     end
@@ -145,6 +149,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "    drawing spiciness0 contours at levels $(levels)")
         contour!(SAc, CTc, spiciness0c, linewidth=contour_linewidth, color=:gray50, levels=levels,
             cbar=false, clabels=true, foreground_color_text=:gray50)
+        need_redraw = true
     else
         oad(debug, "        not drawing spiciness0 contours")
     end
@@ -158,10 +163,14 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         plot!(xlim=xlim, ylim=ylim)
         plot!(SAf, CTf, linewidth=0.75, color=:black, linestyle=:dash)
     end
-    # This is placed oddly, and what's the point of it anyway?
-    #if 0 == sum(ok)
-    #    annotate!(0.5, 0.5, text("NO GOOD DATA", :red, 14))
-    #end
+    # Redraw the data, if we contours of density or spiciness have been drawn.
+    # This avoids obscuring the data, and is in keeping with how Julia plots
+    # gridlines under the data.
+    if need_redraw
+        plot!(SA, CT, legend=false, color=:black,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
+            kwargs...)
+    end
     oad(debug, "END plot_TS()")
     rval
 end # plot_TS()
