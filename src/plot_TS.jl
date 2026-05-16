@@ -120,7 +120,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true)
+        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_text=:gray50)
     else
         oad(debug, "        not drawing sigma0 contours")
     end
@@ -144,7 +144,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     if length(levels) > 0
         oad(debug, "    drawing spiciness0 contours at levels $(levels)")
         contour!(SAc, CTc, spiciness0c, linewidth=contour_linewidth, color=:gray50, levels=levels,
-            cbar=false, clabels=true)
+            cbar=false, clabels=true, foreground_color_text=:gray50)
     else
         oad(debug, "        not drawing spiciness0 contours")
     end
