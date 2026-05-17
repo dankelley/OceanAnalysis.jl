@@ -8,7 +8,7 @@ datasets `data/coastline_coarse.csv.gz` and datasets
 
 # Examples
 
-```juliadoc
+```julia
 # Nova Scotia
 using OceanAnalysis, Plots
 cl = coastline(:global_fine);
@@ -45,7 +45,7 @@ segments that trace continents, nations, etc.
 
 # Examples
 
-```juliadoc
+```julia
 # World view
 using OceanAnalysis, Plots
 dir = dirname(dirname(pathof(OceanAnalysis)))
@@ -76,7 +76,7 @@ Use NaN values for both `longitude` and `latitude` to indicate breaks in the
 coastline from continent to continent, nation to nation, etc.
 
 # Examples
-```juliadoc
+```julia
 # Nova Scotia
 using OceanAnalysis, CSV, Plots, DataFrames
 dir = dirname(dirname(pathof(OceanAnalysis)));
@@ -196,7 +196,7 @@ is given by `fontsize`.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 cl = coastline();
 plot_coastline(cl, xlims=(-70, -60), ylims=(42, 48))

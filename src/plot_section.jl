@@ -26,7 +26,7 @@ using FileIO, JLD2
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);

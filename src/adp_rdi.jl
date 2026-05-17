@@ -182,7 +182,7 @@ function cannot handle.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 
 # Load a sample file provided with the package
@@ -458,7 +458,7 @@ This is done by using the `transformation_matrix` that is stored within `adp`.  
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "adp_rdi.000")
@@ -522,7 +522,7 @@ object, and [`beam_to_xyz`](@ref) for how to convert it from beam to xyz coordin
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "adp_rdi.000")

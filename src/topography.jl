@@ -38,7 +38,7 @@ See also [`get_topography`](@ref).
 
 # Examples
 
-```juliadoc
+```julia
 # Plot world view of ocean depth
 using OceanAnalysis, Plots
 topo_file = get_topography(:global_coarse);
@@ -250,7 +250,7 @@ brown color. The `aspect_ratio` argument should not be specified as part of
 `kwargs...`, because this function sets a reasonable default, based on the latitude
 at the centre of the plot.
 
-```juliadoc
+```julia
 # Waters near Prince Edward Island, Canada
 using OceanAnalysis
 topo_file = get_topography(-64.8, -61.5, 45.6, 47.2, resolution=1)

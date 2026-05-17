@@ -202,7 +202,7 @@ the value exceeds the maximum pressure in `ctd`.
 
 # Example
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
 ctd = read_ctd_cnv(f);

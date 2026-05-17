@@ -26,23 +26,20 @@ reports an error if it is provided with a file in 'WOCE' format.)
 
 # Examples
 
-```juliadoctest
-julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ar07_74JC20140606_00234_00001_ct1.csv");
+```julia
+f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ar07_74JC20140606_00234_00001_ct1.csv");
+d = read_ctd_exchange(f);
+println(keys(d.metadata))
+#["latitude", "time", "header", "section", "longitude", "bottom_depth", "station", "expocode", "cast"]
 
-julia> d = read_ctd_exchange(f);
-
-julia> println(keys(d.metadata))
-["latitude", "time", "header", "section", "longitude", "bottom_depth", "station", "expocode", "cast"]
-
-julia> println(first(d.data, 3))
-3×8 DataFrame
- Row │ pressure  pressure_flag  temperature  temperature_flag  salinity  salinity_flag  oxygen   oxygen_flag
-     │ Float64   Int64          Float64      Int64             Float64   Int64          Float64  Int64
-─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────
-   1 │      5.0              2      13.1134                 2   34.1855              2    266.0            2
-   2 │      7.0              2      13.1195                 2   34.1844              2    266.8            2
-   3 │      9.0              2      13.1152                 2   34.1837              2    266.4            2
-```
+println(first(d.data, 3))
+# 3×8 DataFrame
+#  Row │ pressure  pressure_flag  temperature  temperature_flag  salinity  salinity_flag  oxygen   oxygen_flag
+#      │ Float64   Int64          Float64      Int64             Float64   Int64          Float64  Int64
+# ─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────
+#    1 │      5.0              2      13.1134                 2   34.1855              2    266.0            2
+#    2 │      7.0              2      13.1195                 2   34.1844              2    266.8            2
+#    3 │      9.0              2      13.1152                 2   34.1837              2    266.4            2
 ```
 """
 function read_ctd_exchange(filename::String; add_teos=true, debug::Int64=0)

@@ -24,7 +24,7 @@ then [`plot_coastline`](@ref) is called to draw the land.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 # Twenty fake stations between Halifax and Sable Island
 lon = collect(range(-59.91, -63.53, length=20))
@@ -78,7 +78,7 @@ then [`plot_coastline`](@ref) is called to draw the land.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);

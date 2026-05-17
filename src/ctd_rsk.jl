@@ -41,7 +41,7 @@ so some trimming to the downcast portion(s) may be needed.  Such
 features are not yet provided in this package.
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 ctd = read_ctd_rsk("~/git/oce/create_data/rsk/060130_20150904_1159.rsk");
 Sp = plot_profile(ctd, which="salinity");

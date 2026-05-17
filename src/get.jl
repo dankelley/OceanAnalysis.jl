@@ -55,7 +55,7 @@ Setting `debug=1` will cause the printing of some of the processing steps.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis
 # Saves files into a local directory called 'ar07_74JC20140606'.
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"

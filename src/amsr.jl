@@ -20,7 +20,7 @@ that may be given as `name` values.
 
 # Examples
 
-```juliadoc
+```julia
 # North Atlantic view, using turbo colour scheme
 using OceanAnalysis, Plots
 f = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc";

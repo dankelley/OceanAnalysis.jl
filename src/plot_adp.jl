@@ -18,7 +18,7 @@ This function provides some basic plots of the contents of an acoustic-Doppler p
 - `kwargs`: optional items, passed to `heatmap` for velocity fields, or to `scatter` for time-series and other x-y plots.
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "adp_rdi.000")

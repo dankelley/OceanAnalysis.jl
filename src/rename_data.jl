@@ -15,21 +15,13 @@ A String or vector of String items, holding new names.  If any of the converted 
 
 # Examples
 
-```juliadoc
-julia> using OceanAnalysis
-julia> rename_data("CTDPRS")
-"pressure"
+```julia
+using OceanAnalysis
+rename_data("CTDPRS") #"pressure"
 
-julia> rename_data(["CTDPRS", "CTDTMP"])
-2-element Vector{String}:
- "pressure"
- "temperature"
+rename_data(["CTDPRS", "CTDTMP"]) # 2-element Vector{String}: "pressure" "temperature"
 
-julia> rename_data(["CTDPRS", "CTDTMP", "CTDTMP_FLAG"])
-3-element Vector{String}:
- "pressure"
- "temperature"
- "temperature_flag"
+rename_data(["CTDPRS", "CTDTMP", "CTDTMP_FLAG"]) # 3-element Vector{String}: "pressure" "temperature" "temperature_flag"
 ```
 
 """

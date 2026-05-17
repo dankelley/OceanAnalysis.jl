@@ -18,7 +18,7 @@ This function provides some basic plots of the contents of an acoustic-Doppler p
 - `kwargs`: optional items, passed to `heatmap`.
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis
 f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4";
 if isfile(f)

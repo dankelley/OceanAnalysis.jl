@@ -116,7 +116,7 @@ have been performed on the dataset before inclusion in the archive.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc");
 a = read_argo(f);
@@ -145,7 +145,7 @@ Print a summary of some of the contents of a Ctd object.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
 d = read_ctd_cnv(f, add_teos=false);

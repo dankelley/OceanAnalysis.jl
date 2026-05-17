@@ -20,7 +20,7 @@ the `name` of the section and the `source` of the data.
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # Examples
-```juliadoc
+```julia
 julia> using OceanAnalysis
 julia> # Create fake data
 julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
@@ -70,7 +70,7 @@ using [`as_section`](@ref).
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)
@@ -155,7 +155,7 @@ any given CTD.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)

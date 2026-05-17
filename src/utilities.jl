@@ -231,7 +231,7 @@ Print a table of contents for an [`OA`](@ref) object.
 
 # Examples
 
-```juliadoc
+```julia
 julia> using OceanAnalysis
 
 julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
@@ -266,7 +266,7 @@ Compute the value of the Coriolis parameter, given a latitude
 in degrees.
 
 # Examples
-```juliadoctest
+```juliatest
 julia> coriolis(45.0)
 0.00010312607931384281
 ```
@@ -291,10 +291,9 @@ as that in the first form of equation D.3 in reference 1.
    of Thermodynamic Properties. No. 56. UNESCO, 2016.
 
 # Examples
-```juliadoctest
-
-julia> gravity()
-9.806199977310339
+```julia
+using OceanAnalysis
+gravity() # 9.806199977310339
 ```
 """
 function gravity(latitude::Real=45.0, z::Real=0.0)
