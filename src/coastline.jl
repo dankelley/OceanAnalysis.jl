@@ -110,17 +110,15 @@ The `aspect_ratio` of the plot is set as the reciprocal of the mean of the
 
 - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
-- `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
+- `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `fillcolor` (*not* `color`) for the land colour, etc.
 
 # Examples
-```juliadoc
+```julia
 using OceanAnalysis, Plots
-#plot_stations([-59.9], [43.9]; xlim=(-70, -50), ylim=(40, 50), color=:green, markercolor=:red)
 # Default world view
-world = plot_coastline(coastline())
-# Nova Scotia view, with light-gray for land
-ns = plot_coastline(coastline(); color=:gray80, xlim=(-70.0, -55.0), ylim=(43.0, 48.0))
-plot(world, ns)
+plot_coastline(coastline())
+# Nova Scotia view, with land coloured a light gray
+plot_coastline(coastline(); fillcolor=:gray85, xlim=(-70.0, -55.0), ylim=(43.0, 48.0))
 ```
 """
 function plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
@@ -137,17 +135,17 @@ function plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
     aspect_ratio = 1.0 / cos(mid_latitude * pi / 180.0)
     oad(debug, "  aspect_ratio=$aspect_ratio")
     rval = plot(longitude, latitude;
-        xlims=(-180.0, 180.0), ylims=(-90.0, 90.0), aspect_ratio=aspect_ratio,
-        seriestype=:shape, color=:bisque3, linewidth=0.5,
-        legend=false, framestyle=:box, tickdirection=:out,
+        xlim=(-180.0, 180.0), ylim=(-90.0, 90.0),
+        aspect_ratio=aspect_ratio, legend=false, seriestype=:shape,
+        fillcolor=:bisque3, linecolor=:black, linewidth=0.5,
+        framestyle=:box, tickdirection=:out,
         kwargs...)
     oad(debug, "END plot_coastline()")
     rval
 end
 
 """
-    plot_coastline!(coastline::Coastline;
-        seriestype=:shape, color=:bisque3, linewidth::Real=0.5)
+    plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Int64=0, kwargs...)
 
 Add a coastline to an existing plot.
 
@@ -162,15 +160,22 @@ in the `kwargs...` grouping.
 
 # Keywords
 
+- `fillcolor` a color specification, with default being a light brown.
+
 - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
 - `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
 """
-function plot_coastline!(coastline::Coastline; kwargs...)
-    plot!(coastline["longitude"], coastline["latitude"];
+function plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Int64=0, kwargs...)
+    oad(debug, "plot_coastline!() START")
+    oad(debug, "  kwargs...: $(kwargs...)")
+    rval = plot!(coastline["longitude"], coastline["latitude"];
         xlims=xlims(), ylims=ylims(), # inherit from previous plot
-        seriestype=:shape, color=:bisque3, linewidth=0.5, legend=false, tickdirection=:out,
+        legend=false, seriestype=:shape,
+        fillcolor=fillcolor, linecolor=:black, linewidth=0.5,
         kwargs...)
+    oad(debug, "END plot_coastline!()")
+    rval
 end
 
 """
@@ -254,19 +259,20 @@ using the `GMT` package.
 
 # Examples
 
-```juliadoc
+```julia
 using OceanAnalysis, Plots
 # Red circle marks a station south of due east of Fort Louisbourg
 # and due south of Saint Pierre and Miquelon.
 p1 = station_map(-56.33, 45.90)
-# The same, but using a large light-blue diamond
-p2 = station_map(-56.33, 45.90,
-    markercolor=:lightblue, markershape=:diamond, markersize=6)
+# The same, but with different aesthetics
+p2 = station_map(-56.33, 45.90;
+    markercolor=:gray85, markershape=:diamond, markersize=6)
 plot(p1, p2)
 ```
 """
 function station_map(longitude, latitude; scale::Real=5.0, debug::Int64=0, kwargs...)
     oad(debug, "station_map() START")
+    oad(debug, "  kwargs...: $(kwargs...)")
     length(longitude) == length(latitude) || error("lengths of longitude and latitude must match, but they are ",
         length(longitude), " and ", length(latitude), ", respectively")
     cl = coastline()
@@ -274,17 +280,19 @@ function station_map(longitude, latitude; scale::Real=5.0, debug::Int64=0, kwarg
     lat0 = mean(latitude)
     distance_to_land = geod_distance.(lon0, lat0, cl.data.longitude, cl.data.latitude)
     distance_to_nearest_land = minimum(x for x in distance_to_land if !isnan(x))
-    oad(debug, "    distance_to_nearest_land: ", distance_to_nearest_land, " km")
+    oad(debug, "  distance_to_nearest_land: ", distance_to_nearest_land, " km")
     distance_across_stations = maximum(geod_distance.(lon0, lat0, longitude, latitude))
-    oad(debug, "    distance_across_stations: ", distance_across_stations, " km")
+    oad(debug, "  distance_across_stations: ", distance_across_stations, " km")
     # Next approximates 1 degree of latitude as 111 km
-    S = scale * maximum([distance_to_nearest_land, distance_across_stations]) / 111.0
-    oad(debug, "    S: ", S)
+    dlat = scale * maximum([distance_to_nearest_land, distance_across_stations]) / 111.0
+    oad(debug, "  dlat: ", dlat)
     aspect_ratio = 1.0 / cos(lat0 * pi / 180) # aspect ratio
-    oad(debug, "    aspect_ratio: ", aspect_ratio)
-    map = plot_coastline(cl,
-        xlims=lon0 .+ aspect_ratio .* (-S, S), ylims=lat0 .+ (-S, S);
-        debug=increment_debug(debug))
+    oad(debug, "  aspect_ratio: ", aspect_ratio)
+    map = plot_coastline(cl;
+        xlim=lon0 .+ aspect_ratio .* (-dlat, dlat), ylim=lat0 .+ (-dlat, dlat),
+        aspect_ratio=aspect_ratio,
+        color=:black,
+        debug=increment_debug(debug), kwargs...)
     #println("kwargs...:", kwargs...)
     scatter!(map, [longitude], [latitude], label=false; kwargs...)
     oad(debug, "END station_map()")
