@@ -64,9 +64,10 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
 end
 
 """
-    get_amsr(date::String)
+    get_amsr(date::String)::String
+
 """
-function get_amsr(date::String; kwargs...)
+function get_amsr(date::String; kwargs...)::String
     get_amsr(Date(date), kwargs...)
 end
 
@@ -92,7 +93,7 @@ by `get_amsr`.
 
 # Arguments
 
-- `date` a Date object specifying the requested measurement time. This defaults to 4 days prior to the current date.
+- `date` a Date object specifying the requested measurement time. The default value is 4 days prior to the present date.
 
 # Keywords
 
@@ -106,12 +107,13 @@ by `get_amsr`.
 
 # Return value
 
-`get_amsr` returns a string that is the full pathname of the downloaded file, which may be supplied as
-the first argument to a call to [`read_amsr`](@ref).
+`get_amsr` returns a String that is the full pathname of the downloaded file,
+which may be supplied as the first argument to a call to [`read_amsr`](@ref).
 """
-function get_amsr(date::Date=Dates.today() - Day(4); type::String="3day",
+function get_amsr(date::Date=Dates.today() - Dates.Day(4);
+    type::String="3day",
     destdir::String=".", server::String="https://data.remss.com/amsr2/ocean/L3/v08.2",
-    debug::Integer=0)
+    debug::Integer=0)::String
     oad(debug, "get_amsr() START")
     destfile = @sprintf(
         "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
@@ -156,7 +158,7 @@ circular island at the midpoint of the view would be drawn as a circle.
 
 - `color`: The colour scheme for the heatmap.  The default, `:turbo`, is a rainbow-like scheme.  Other popular choices include `:viridis` for a green-hued scheme, and `:auto` for the default yellow-hued Julia scheme.
 
-- `levels`: A vector holding the desired contour levels, a single integer giving the desired number of contours, or `:auto` for automatic selection. The default is useful for world views of sea-surface temperature.
+- `levels`: either (1) a vector holding the desired contour levels (use `[]`, which is the default, to get auto-selected levels), or (2) `:none` to prevent contouring.
 
 - `clim`: A tuple specifying the range of values to be represented by the color scheme. If not provided, this defaults to the range of the data in the chosen view.
 
@@ -182,24 +184,29 @@ function plot_amsr(amsr::Amsr;
     2 == length(xlims) || error("xlims must be of length 2")
     2 == length(ylims) || error("ylims must be of length 2")
     oad(debug, "plot_amsr() START")
-    if 0 == length(levels)
-        oad(debug, "    setting default levels")
-        levels = range(-5.0, 35.0, step=5.0)
+    draw_contours = levels != :none
+    if draw_contours
+        if 0 == length(levels)
+            oad(debug, "  setting default contour levels")
+            levels = range(-5.0, 35.0, step=5.0)
+        else
+            oad(debug, "  using supplied contour levels")
+        end
     else
-        oad(debug, "    using supplied levels")
+        oad(debug, "  no contours will be drawn")
     end
-    oad(debug, "    levels: ", levels)
-    oad(debug, "    xlims: ", xlims)
-    oad(debug, "    ylims: ", ylims)
+    oad(debug, "  levels: ", levels)
+    oad(debug, "  xlims: ", xlims)
+    oad(debug, "  ylims: ", ylims)
     longitude = amsr.metadata["longitude"]
     latitude = amsr.metadata["latitude"]
-    oad(debug, "    plotting a heatmap of ", amsr.metadata["field"])
+    oad(debug, "  plotting a heatmap of ", amsr.metadata["field"])
     p = heatmap(longitude, latitude, amsr.data, framestyle=:box,
         xlims=xlims, ylims=ylims,
         aspect_ratio=1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0),
         color=color, tickdirection=tickdirection, clim=clim,
         size=size, dpi=dpi)
-    oad(debug, "    adding a coastline")
+    oad(debug, "  adding a coastline")
     cl = coastline(:global_fine)
     plot!(p, cl.data.longitude, cl.data.latitude,
         seriestype=:shape, color=:bisque3, linewidth=0.5,
@@ -209,8 +216,8 @@ function plot_amsr(amsr::Amsr;
             seriestype=:shape, color=:bisque3, linewidth=0.5,
             legend=false)
     end
-    if levels != 0
-        oad(debug, "    adding contours")
+    if draw_contours
+        oad(debug, "  adding contours")
         contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
             linewidth=0.75)
     end

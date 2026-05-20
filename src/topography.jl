@@ -85,21 +85,19 @@ end
 """
     get_topography(west::Real, east::Real,
         south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
-        server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)
+        server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)::Topography
 
 Download and cache a topography file.
 
 Topographic data are downloaded from a data server that holds the ETOPO1
 dataset (see Amante and Eakins, 2009, for an introduction to the data and see
-    Pante and Simon-Bouhet, 2013, for code that queries a server in a manner
-        similar to that used here), and saved as a netCDF file that has a name
-        that reveals the data request, if a file of that name is not already
-            present on the local file system.  The return value is the name of
-            the data file, and its typical use is as the filename for a call to
-                [`read_topography`](@ref). Subsequent calls to
-                `get_topography` with identical parameters will return the
-                name of an already-downloaded file, without downloading a new
-                copy.
+Pante and Simon-Bouhet, 2013, for code that queries a server in a manner
+similar to that used here), and saved as a netCDF file that has a name that
+reveals the data request, if a file of that name is not already present on the
+local file system.  The return value is the name of the data file, and its
+typical use is as the filename for a call to [`read_topography`](@ref).
+Subsequent calls to `get_topography` with identical parameters will return the
+name of an already-downloaded file, without downloading a new copy.
 
 The specified longitude and latitude limits are rounded to 2 digits after the
 decimal place (corresponding to an equatorial footprint of approximately 1 km),
@@ -133,7 +131,7 @@ referenced was updated on 2025-Aug-2; for the query generation, see the
 """
 function get_topography(west::Real, east::Real,
     south::Real, north::Real; resolution::Real=4.0, destdir::String=".",
-    server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)
+    server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)::Topography
     oad(debug, "get_topography(west=$west," *
                ", east=$east" *
                ", south=$south" *
