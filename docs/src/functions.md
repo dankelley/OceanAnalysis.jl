@@ -9,6 +9,7 @@ OceanAnalysis.Amsr
 OceanAnalysis.Argo
 OceanAnalysis.Ctd
 OceanAnalysis.Coastline
+OceanAnalysis.Dem
 OceanAnalysis.Echosounder
 OceanAnalysis.Glider
 OceanAnalysis.Nonna

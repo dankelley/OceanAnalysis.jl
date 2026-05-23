@@ -37,6 +37,8 @@ graphical examples of many of these types.
   is in the 0-360 degree range for the built-in datasets. See the documentation
   for [`coastline`](@ref) for reading and plotting such data.
 
+- [`Dem`](@ref) holds digital elevation model datasets, as read with [`read_dem`](@ref).
+
 - [`Echosounder`](@ref) holds data from scientific echosounders, as read with [`read_echosounder`](@ref).
 
 - [`Glider`](@ref) holds data from glider platforms, as read with [`read_glider`](@ref).
