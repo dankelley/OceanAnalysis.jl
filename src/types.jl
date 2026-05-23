@@ -104,6 +104,20 @@ mutable struct Coastline <: OA
 end
 
 """
+    A type to hold DEM (digital-elevation model) data
+
+Dem is a type used to store DEM (digital-elevation model) data. It holds two items: `data` (a Dict that holds vectors `x`, `y`, `longitude`, `latitude` and corresponding matrix `z`) and `metadata` (a Dict that holds information about the dataset).
+
+Dem objects may be created with [`read_dem`](@ref). Subsets may be taken with `subset_dem`](@ref). Plots may be made with [`plot_dem`]()@ref).
+
+"""
+mutable struct Dem <: OA
+    metadata::Dict{String,Any}
+    data::Matrix{Float32}
+end
+
+
+"""
     A type to hold echosounder data
 
 Echosounder is a type to hold data from a Biosonics scientific echosounder, as

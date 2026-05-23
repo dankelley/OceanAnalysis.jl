@@ -134,7 +134,7 @@ useful for contour intervals, because the built-in contour() function
 contours can be quite ugly.
 
 # Examples
-```jldoc
+```jldoctest
 julia> using OceanAnalysis
 
 julia> pretty([22.299, 25.091])

@@ -59,6 +59,7 @@ OceanAnalysis.plot_adp
 OceanAnalysis.plot_amsr
 OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
+OceanAnalysis.plot_dem
 OceanAnalysis.plot_echosounder
 OceanAnalysis.plot_profile
 OceanAnalysis.plot_section
@@ -75,6 +76,7 @@ OceanAnalysis.read_argo_index
 OceanAnalysis.read_ctd_cnv
 OceanAnalysis.read_ctd_exchange
 OceanAnalysis.read_ctd_rsk
+OceanAnalysis.read_dem
 OceanAnalysis.read_echosounder
 OceanAnalysis.read_glider
 OceanAnalysis.read_nonna
@@ -92,6 +94,7 @@ OceanAnalysis.station_map
 OceanAnalysis.subset_amsr
 OceanAnalysis.subset_ctd
 OceanAnalysis.subset_ctd!
+OceanAnalysis.subset_dem
 OceanAnalysis.summarize_argo_data_tests
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68

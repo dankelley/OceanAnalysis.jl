@@ -282,6 +282,43 @@ savefig("ctd_diagram.png")
 ![CTD diagram](ctd_diagram.png)
 
 
+## Digital Elevation Model Data
+
+This example is based on a large file (not provided with this package) that was obtained through a public website. The view is focussed on Halifax Citadel, a fort built in 1820s for protection against the United States military. In the first diagram provided by the following code, the Citadel is seen as a somewhat indistinct polygonal structure atop a hill. Taking the derivative of elevation with respect to distance in the north-south direction, as in the second diagram, reveals more details of the fort, and also makes visible the modern roads and buildings of the area.
+
+```julia
+using OceanAnalysis, Plots
+
+file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+
+if isfile(file)
+    dem_all = read_dem(file)
+    # Focus near the Citadel fort
+    dem = subset_dem(dem_all, (-63.589, -63.572), (44.6426, 44.655))
+    middle_lat = dem["latitude"][div(end + 1, 2)]
+    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
+    # Heatmap of elevation
+    p1 = heatmap(dem["longitude"], dem["latitude"], dem.data,
+        color=:inferno, aspect_ratio=aspect_ratio,
+        framestyle=:box, tickdirection=:out)
+    savefig("dem_1.png")
+    # Heatmap of gradient of elevation with respect to northerly distance
+    z = -diff(dem.data, dims=1)
+    z = [zeros(1, size(dem.data, 2)); z]
+    heatmap(dem["longitude"], dem["latitude"], z,
+        color=:inferno, aspect_ratio=aspect_ratio,
+        framestyle=:box, tickdirection=:out, clim=(-0.5, 0.5))
+    savefig("dem_2.png")
+end
+
+```
+
+
+![DEM figure 1: topography near the Halifax Citadel fort](dem_1.png)
+
+![DEM figure 2: derivative of topography](dem_2.png)
+
+
 
 ## Echosounder Data
 

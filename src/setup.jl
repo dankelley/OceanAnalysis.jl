@@ -66,6 +66,7 @@ export plot_adp
 export plot_amsr
 export plot_coastline
 export plot_coastline!
+export plot_dem
 export plot_echosounder
 export plot_profile
 export plot_section
@@ -82,6 +83,7 @@ export read_argo_index
 export read_ctd_cnv
 export read_ctd_exchange
 export read_ctd_rsk
+export read_dem
 export read_echosounder
 export read_glider
 export read_nonna
@@ -100,6 +102,7 @@ export station_map
 export subset_amsr
 export subset_ctd
 export subset_ctd!
+export subset_dem
 export summarize
 export summarize_argo_data_tests
 export T90_from_T48

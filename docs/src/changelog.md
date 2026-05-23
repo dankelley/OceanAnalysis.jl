@@ -14,7 +14,7 @@ same colour as the lines, and (3) contours go under the data.
 
 ### Added
 
--
+- `read_dem`, `subset_dem` and `plot_dem`.
 
 
 
