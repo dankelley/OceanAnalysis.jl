@@ -20,6 +20,7 @@ export Amsr
 export Argo
 export Ctd
 export Coastline
+export Dem
 export Echosounder
 export Glider
 export Nonna
