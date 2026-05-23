@@ -284,7 +284,7 @@ savefig("ctd_diagram.png")
 
 ## Digital Elevation Model Data
 
-This example is based on a large file (not provided with this package) that was obtained through a public website. The view is focussed on Halifax Citadel, a fort built in 1820s for protection against the United States military. In the first diagram provided by the following code, the Citadel is seen as a somewhat indistinct polygonal structure atop a hill. Taking the derivative of elevation with respect to distance in the north-south direction, as in the second diagram, reveals more details of the fort, and also makes visible the modern roads and buildings of the area.
+This example is based on a large file (not provided with this package) that was obtained from [https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/). The view includes Halifax Citadel in Nova Scotia, Canada. (This is  a fort built in 1820s for protection against the United States military.) In the first diagram provided by the following code, the Citadel is seen as a somewhat indistinct polygonal structure atop a hill. Taking the derivative of elevation with respect to distance in the north-south direction, as in the second diagram, reveals more details of the fort, and also makes visible the modern roads and buildings of the area.
 
 ```julia
 using OceanAnalysis, Plots
