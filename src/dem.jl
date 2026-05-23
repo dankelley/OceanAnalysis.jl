@@ -29,7 +29,7 @@ end
 """
     read_dem(file::String; lonlat_method::Symbol = :interpolated)
 
-Read a digital-elevation-model file.
+Read a digital-elevation-model file.  See also [`subset_dem`](@ref) and [`plot_dem`](@ref) for more processing functions.
 
 # Arguments
 
@@ -49,6 +49,7 @@ Read a digital-elevation-model file.
 
 ```julia
 using OceanAnalysis, Plots
+# Data downloaded from https://nsgi.novascotia.ca/datalocator/elevation/
 file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 if isfile(file)
     dem = read_dem(file)
