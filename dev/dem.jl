@@ -14,7 +14,7 @@ if isfile(file)
         framestyle=:box, tickdirection=:out)
     savefig("dem_1.png")
     # Heatmap of gradient of elevation with respect to northerly distance
-    z = -diff(dem.data, dims=1)
+    z = -diff(dem.data, dims=1) / dem["dy"]
     z = [zeros(1, size(dem.data, 2)); z]
     heatmap(dem["longitude"], dem["latitude"], z,
         color=:inferno, aspect_ratio=aspect_ratio,
