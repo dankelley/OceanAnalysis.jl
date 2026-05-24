@@ -284,7 +284,7 @@ savefig("ctd_diagram.png")
 
 ## Digital Elevation Model Data
 
-This example is based on a large file (not provided with this package) that was obtained from [https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/). The view includes Halifax Citadel in Nova Scotia, Canada. (This is  a fort built in 1820s for protection against the United States military.) In the first diagram provided by the following code, the Citadel is seen as a somewhat indistinct polygonal structure atop a hill. Taking the derivative of elevation with respect to distance in the north-south direction, as in the second diagram, reveals more details of the fort, and also makes visible the modern roads and buildings of the area.
+This example is based on a large file (not provided with this package) that was obtained via a GUI interface at [https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/). The view is of a portion of Halifax, Nova Scotia. The polygonal shape is the Halifax Citadel, a fort built in 1820s for protection against the United States military. The code below produces two diagrams. The first shows elevation, and the second the derivative of elevation with respect to a north-south coordinate. The derivative view reveals small-scale features of the fort and the surrounding roads and buildings, at the cost of losing information on the actual height of features. A weighted sum of the two fields can also be informative.
 
 ```julia
 using OceanAnalysis, Plots
@@ -303,16 +303,14 @@ if isfile(file)
         framestyle=:box, tickdirection=:out)
     savefig("dem_1.png")
     # Heatmap of gradient of elevation with respect to northerly distance
-    z = -diff(dem.data, dims=1)
+    z = -diff(dem.data, dims=1) / dem["dy"]
     z = [zeros(1, size(dem.data, 2)); z]
     heatmap(dem["longitude"], dem["latitude"], z,
         color=:inferno, aspect_ratio=aspect_ratio,
         framestyle=:box, tickdirection=:out, clim=(-0.5, 0.5))
     savefig("dem_2.png")
 end
-
 ```
-
 
 ![DEM figure 1: topography near the Halifax Citadel fort](dem_1.png)
 

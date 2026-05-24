@@ -57,7 +57,8 @@ if isfile(file)
     middle_lat = dem["latitude"][div(end + 1, 2)]
     aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
     heatmap(dem["longitude"], dem["latitude"], dem.data,
-        color=:turbo, aspect_ratio=aspect_ratio, framestyle=:box, tickdirection=:out)
+        color=:turbo, aspect_ratio=aspect_ratio,
+        framestyle=:box, tickdirection=:out)
 end
 ```
 
@@ -102,6 +103,8 @@ function read_dem(file::String; lonlat_method::Symbol=:interpolated, debug::Int=
     end
     metadata = Dict(
         "filename" => file,
+        "dx" => g.inc[1],
+        "dy" => g.inc[2],
         "proj" => g.proj4, "x" => x, "y" => y, "longitude" => lon, "latitude" => lat)
     Dem(metadata, z)
 end
