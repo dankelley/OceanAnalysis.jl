@@ -101,8 +101,10 @@ end
 Print a summary of some of the contents of an OA object.
 """
 function summarize(x::OA)
-    println("OA Summary\n----------\n")
-    println("Metadata: a Dict() with ", length(x.metadata), " entries")
+    t = typeof(x)
+    println("$t Summary")
+    println(repeat("-", length(repr(t))) * "--------\n")
+    println("Metadata: a Dict() with entries: ", collect(sort(keys(x.metadata))))
     summarize_data(x)
 end
 
@@ -127,11 +129,11 @@ function summarize(x::Argo)
     println("Argo Summary\n------------\n")
     println("Metadata: a Dict with ", length(x.metadata), " keys, including the following")
     filename = x.metadata["filename"]
-    println("  filename:  \"", filename, "\"")
-    println("  time:      ", x.metadata["time"])
-    println("  latitude:  ", @sprintf "%.3fN" x.metadata["latitude"])
-    println("  longitude: ", @sprintf "%.3fE" x.metadata["longitude"])
-    println("  data_mode: ", x.metadata["data_mode"])
+    println(@sprintf("  filename:  \"%s\"", filename))
+    println(@sprintf("  time:      %s", x.metadata["time"]))
+    println(@sprintf("  latitude:  %.3fN", x.metadata["latitude"]))
+    println(@sprintf("  longitude: %.3fE", x.metadata["longitude"]))
+    println(@sprintf("  data_mode: %s", x.metadata["data_mode"]))
     summarize_data(x)
     println("Tests applied to the dataset")
     summarize_argo_data_tests(filename)
@@ -163,10 +165,10 @@ function summarize(x::Ctd)
             println("  filename:  \"", x.metadata["filename"], "\"")
         end
         if "latitude" in k
-            println("  latitude:  ", @sprintf "%8.3f N" x.metadata["latitude"])
+            println(@sprintf("  latitude:  %8.3f N", x.metadata["latitude"]))
         end
         if "longitude" in k
-            println("  longitude: ", @sprintf "%8.3f E" x.metadata["longitude"])
+            println(@sprintf("  longitude: %8.3f E", x.metadata["longitude"]))
         end
         if "time" in k && !isnothing(x.metadata["time"])
             println("  time:      ", x.metadata["time"])

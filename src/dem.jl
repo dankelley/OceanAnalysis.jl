@@ -1,30 +1,5 @@
-# Plot a DEM file (Point Pleasant Park, Halifax South End)
-using Plots, Plots.PlotMeasures, Statistics
+using Plots, Plots.PlotMeasures, Statistics, Printf
 using GMT: gmtread, xy2lonlat, grdproject # will only need first 2, later
-
-
-if false
-    @time g = GMT.gmtread(f; grid=true) # 3.4s 0.51s 0.58s
-    ENV["GDAL_STRATEGY"] = "HEURISTIC"
-    @time geo1 = grdproject(g, J=g.proj4, I=true) # 11.6s makes 4 errors on Halifax example
-    @time geo2 = grdinfo(f, C=true) # 0.15s
-    @time geo3 = grdinfo(f, R=true) # 0.05s
-end
-
-if false
-    # Find the lon and lat limits using the projection
-    a = gmtread(f, grid=true)
-    corners = [a.x[2] a.y[end]; a.x[end] a.y[end]; a.x[end] a.y[1]; a.x[1] a.y[1]]
-    proj = a.proj4
-    corners_lonlat = xy2lonlat(corners, proj)
-    lonlim = extrema(corners_lonlat[:, 1])
-    latlim = extrema(corners_lonlat[:, 2])
-    println("Longitude and latitude limits, using GMT functions:")
-    println("  lonlim: $lonlim")
-    println("  latlim: $latlim")
-    LON = range(lonlim[1]; stop=lonlim[2], length=length(a.x))
-    LAT = range(latlim[1]; stop=latlim[2], length=length(a.y))
-end
 
 """
     read_dem(file::String; lonlat_method::Symbol = :interpolated)
@@ -110,20 +85,10 @@ function read_dem(file::String; lonlat_method::Symbol=:interpolated, debug::Int=
 end
 
 
-if false
-    dem = read_dem(f) # 1.2s for 107 Mb file
-    length(dem["lon"])
-    length(dem["lat"])
-    size(dem["z"])
-    plondiff = plot(dem["lon"], dem["lon_new"] .- dem["lon"], label=false, xlabel="Lon", ylabel="Lon diff")
-    platdiff = plot(dem["lat"], 111.1e3 * (dem["lat_new"] .- dem["lat"]), label=false, xlabel="Lat", ylabel="Lat diff * 111e3 (to get m)")
-    plot(plondiff, platdiff, layout=(2, 1))
-    savefig("dem_2_lonlat_approx.pdf")
-end
-
 
 """
-    subset_dem(dem, lonlim, latlim; debug::Int=0)
+    subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real},
+        debug::Int=0)
 
 Subset a Dem object.
 
@@ -131,16 +96,21 @@ Subset a Dem object.
 
 - `dem` a Dem object, as read by [`read_dem`](@ref), perhaps later modified by [`subset_dem`](@ref).
 
+# Keywords
+
 - `lonlim` a tuple holding the minimum and maximum longitude to be retained.
 
 - `latlim` a tuple holding the minimum and maximum latitude to be retained.
 
-# Keywords
-
 - `debug` an integer that, if it exceeds 0, indicates that the function is to print out some intermediate steps.
 
 """
-function subset_dem(dem, lonlim, latlim; debug::Int=0)
+function subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real}, debug::Int=0)
+    oad(debug, "subset_dem() START")
+    oad(debug, "  lonlim: $lonlim")
+    oad(debug, "  latlim: $latlim")
+    2 == length(lonlim) || error("lonlim must be a Vector or Tuple of length 2")
+    2 == length(latlim) || error("latlim must be a Vector or Tuple of length 2")
     x = copy(dem["x"])
     y = copy(dem["y"])
     lon = copy(dem["longitude"])
@@ -148,17 +118,19 @@ function subset_dem(dem, lonlim, latlim; debug::Int=0)
     lon_keep = (lonlim[1] .<= lon) .& (lon .<= lonlim[2])
     lat_keep = (latlim[1] .<= lat) .& (lat .<= latlim[2])
     if debug > 0
-        lonmsg = 100.0 * sum(lon_keep) / length(lon_keep)
-        latmsg = 100.0 * sum(lat_keep) / length(lat_keep)
-        println("keeping $lonmsg % of longitude (len $(length(lon_keep)))")
-        println("keeping $latmsg % of latitude (len $(length(lat_keep)))")
+        lonpc = 100.0 * sum(lon_keep) / length(lon_keep)
+        latpc = 100.0 * sum(lat_keep) / length(lat_keep)
+        oad(debug, @sprintf("  keeping %.3f%%  of longitude (len %d)", lonpc, length(lon_keep)))
+        oad(debug, @sprintf("  keeping %.3f%%  of latitude (len %d)", latpc, length(lat_keep)))
     end
     metadata = copy(dem.metadata)
     metadata["x"] = x[lon_keep]
     metadata["y"] = y[lat_keep]
     metadata["longitude"] = lon[lon_keep]
     metadata["latitude"] = lat[lat_keep]
-    Dem(metadata, dem.data[lat_keep, lon_keep])
+    rval = Dem(metadata, dem.data[lat_keep, lon_keep])
+    oad(debug, "END subset_dem()")
+    rval
 end
 
 """
@@ -190,15 +162,3 @@ function plot_dem(dem::Dem; coordinates::Symbol=:distance, kwargs...)
     end
 end
 
-if false
-    file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
-    dem = read_dem(file)
-    dem2 = subset_dem(dem, (-63.587, -63.552), (44.615, 44.639))
-
-    middle_lat = dem2["lat"][div(end + 1, 2)]
-    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-
-    heatmap(dem2["lon"], dem2["lat"], dem2["z"], color=:turbo, aspect_ratio=aspect_ratio, framestyle=:box, tickdirection=:out)
-
-    savefig("dem_2.png")
-end
