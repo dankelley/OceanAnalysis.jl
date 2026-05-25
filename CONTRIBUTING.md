@@ -1,0 +1,5 @@
+This Julia package is still in development, with additions and changes being influenced by real-world usage by the author. Others are welcome to join in, but are encouraged to be on the lookout for problems, and to report them.  Requests for new features are welcome, but please note that some things can take a long time to implement (e.g. reading the dozens of unique data formats that result from oceanographic instruments) and so the chance of additions depends partly on whether the author or his close collaborators have a strong need. In many cases, the R package 'oce' will provide what is needed.
+
+If you would like to contribute, please follow the indentation and variable-naming conventions you see in the code.  And please make sure that the package builds and tests locally, before making a pull request.  Pull requests may be denied if there is unnecessary changes of indentation, renaming of variables, etc.
+
+As with many open-source projects coming out of academia, the best way to contribute is usually to post an issue, which will start a dialog with the author.
