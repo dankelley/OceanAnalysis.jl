@@ -1,7 +1,7 @@
 using OceanAnalysis, Plots, Statistics
 
 """
-    despike(x; k::Int64=7, n::Int64=4, action::Symbol=:replace)
+    despike(x::Vector{Float64}; k::Int64=7, n::Int64=4, action::Symbol=:replace)
 
 Despike a timeseries, or reveal spikes.
 
@@ -31,17 +31,20 @@ x = x0 .+ (rand(length(x0)) .- 0.5) / 10.0;
 x[10] = x[10] + 1;
 xd = despike(x);
 # Plot 'base' (before noise), 'signal' (base + noise) and 'despiked'
-plot(i, x0, label="base", ms=3)
-scatter!(i, x, label="signal")
-scatter!(i, xd, label="despiked", ms=2)
+scatter(i, x, label="signal")
+scatter!(i, xd, label="despiked")
 # Print overview of spikes (show it and nearest neighbours)
 spike_indices = findall(despike(x, action=:flag));
-for index in spike_indices
-    println(x[index.+range(-1, 1)])
+for j in spike_indices
+    println("Spike index ", j, " and its nearest neighbours:")
+    println("  ", x[(j-1):(j+1)])
 end
+
+
 ```
+
 """
-function despike(x; k::Int64=7, n::Int64=4, action::Symbol=:replace)
+function despike(x::Vector{Float64}; k::Int64=7, n::Int64=4, action::Symbol=:replace)
     x_smoothed = running_median(x, k)
     distance = abs.(x .- x_smoothed)
     stddev = std(distance)
