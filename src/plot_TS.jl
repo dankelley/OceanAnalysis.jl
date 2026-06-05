@@ -76,6 +76,9 @@ See also [`plot_profile`](@ref).
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
+    oad(debug, "  sigma0_levels: $sigma0_levels")
+    oad(debug, "  spiciness0_levels: $spiciness0_levels")
+    oad(debug, "  draw_freezing: $draw_freezing")
     local S = ctd.data.salinity
     local T = ctd.data.temperature
     local p = ctd.data.pressure
@@ -87,15 +90,11 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     if 0 == sum(ok)
         @warn "plot_TS(): no good SA,CT pairs, so plotting an aphysical default"
     end
-    # We start with the measurements ... 
+    # Draw the data.
     oad(debug, "  drawing data points")
-    #oad(debug, "    kwargs... ", kwargs...)
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
         @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
     end
-    # Draw the data. We will redraw the points/lines at the end, if
-    # there are density or spiciness contours that would otherwise
-    # be drawn on top.
     rval = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
@@ -104,82 +103,9 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
-
-    #need_redraw = false # will set to true if we contour the data
     # Possibly add density contours
-    plot_TS_sigma0_contours(sigma0_levels=sigma0_levels; debug=increment_debug(debug), kwargs...)
-    #<old> if false
-    #<old>     xlim = xlims()
-    #<old>     ylim = ylims()
-    #<old>     SAc = range(xlim[1], xlim[2], length=300)
-    #<old>     CTc = range(ylim[1], ylim[2], length=300)
-    #<old>     oad(debug, "    processing sigma0 contours")
-    #<old>     sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
-    #<old>     local levels = sigma0_levels
-    #<old>     if length(sigma0_levels) == 0
-    #<old>         oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
-    #<old>         levels = pretty(sigma0c) # returns [] if min=max
-    #<old>     elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
-    #<old>         if sigma0_levels > 0
-    #<old>             oad(debug, "        case 2a: auto-selecting $sigma0_levels sigma0 levels to contour")
-    #<old>             levels = pretty(sigma0c, sigma0_levels)
-    #<old>         else
-    #<old>             oad(debug, "        case 2b: will not contour sigma0 levels")
-    #<old>             levels = []
-    #<old>         end
-    #<old>     else
-    #<old>         oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
-    #<old>     end
-    #<old>     # Set contour linewidth to 2^(1/4) times grid line width. This
-    #<old>     # corresponds the diameter step between Rapidography technical pens
-    #<old>     # at number category 0 to 00.
-    #<old>     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
-    #<old>     if length(levels) > 0
-    #<old>         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-    #<old>         contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black)
-    #<old>         need_redraw = true
-    #<old>     else
-    #<old>         oad(debug, "        not drawing sigma0 contours")
-    #<old>     end
-    #<old> end
-    # ... then (optionally) add spiciness contours ...
-    #<old>oad(debug, "    processing spiciness0 contours")
-    plot_TS_spiciness0_contours(spiciness0_levels=spiciness0_levels; debug=increment_debug(debug), kwargs...)
-    #<old> if false
-    #<old>     spiciness0c = gsw_spiciness0.(SAc', CTc) |> fix_gsw_bad_code!
-    #<old>     local levels = spiciness0_levels
-    #<old>     if length(spiciness0_levels) == 0
-    #<old>         oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
-    #<old>         levels = pretty(spiciness0c)
-    #<old>     elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
-    #<old>         oad(debug, "        case 2: spiciness0_levels is a single integer ($spiciness0_levels)")
-    #<old>         if spiciness0_levels > 0
-    #<old>             levels = pretty(spiciness0c, spiciness0_levels)
-    #<old>         else
-    #<old>             levels = []
-    #<old>         end
-    #<old>     else
-    #<old>         oad(debug, "        case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
-    #<old>     end
-    #<old>     if length(levels) > 0
-    #<old>         oad(debug, "    drawing spiciness0 contours at levels $(levels)")
-    #<old>         contour!(SAc, CTc, spiciness0c, linewidth=contour_linewidth, color=:gray50, levels=levels,
-    #<old>                  cbar=false, clabels=true, foreground_color_text=:black)
-    #<old>         need_redraw = true
-    #<old>     else
-    #<old>         oad(debug, "        not drawing spiciness0 contours")
-    #<old>     end
-    #<old>     # ... and finally (optionally) add a freezing-temperature line.
-    #<old>     if draw_freezing
-    #<old>         oad(debug, "    adding freezing line")
-    #<old>         pf = 0.0 # let user specify this?
-    #<old>         SAf = range(xlim[1], xlim[2], length=100)
-    #<old>         saturation_fraction = 0.0
-    #<old>         CTf = gsw_ct_freezing.(SAf, pf, saturation_fraction)
-    #<old>         plot!(xlim=xlim, ylim=ylim)
-    #<old>         plot!(SAf, CTf, linewidth=0.75, color=:black, linestyle=:dash)
-    #<old>     end
-    #<old> end
+    plot_TS_sigma0_contours(sigma0_levels; debug=increment_debug(debug), kwargs...)
+    plot_TS_spiciness0_contours(spiciness0_levels; debug=increment_debug(debug), kwargs...)
     # Redraw the data, so they appear above other elements such as 
     # contours and the freezing-point line.
         plot!(SA, CT, legend=false, color=:black,
