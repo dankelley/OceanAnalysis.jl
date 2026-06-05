@@ -125,7 +125,6 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        #contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_text=:gray50)
         contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black)
         need_redraw = true
     else
@@ -177,4 +176,6 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     oad(debug, "END plot_TS()")
     rval
 end # plot_TS()
+
+
 
