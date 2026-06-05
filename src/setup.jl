@@ -73,7 +73,8 @@ export plot_profile
 export plot_section
 export plot_stations
 export plot_topography
-export plot_TS
+#export plot_TS
+#export plot_TS_isopycnals
 export pressure_from_depth
 export pressure_from_z
 export pretty

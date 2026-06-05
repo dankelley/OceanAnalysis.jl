@@ -1,3 +1,6 @@
+export plot_TS
+export plot_TS_isopycnals
+
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
@@ -179,3 +182,44 @@ end # plot_TS()
 
 
 
+export plot_TS_isopycnals
+
+"""
+    plot_TS_isopycnals(sigma0_levels=[], debug::Int64=0, kwargs...)
+
+Add contours of density to an existing TS plot.  This is used by
+[`plot_TS`](@ref), but can also be used separately, if the TS data
+have been drawn by other means.  For the meanings of the
+arguments, see the documentation for [`plot_TS`](@ref).
+"""
+function plot_TS_isopycnals(levels=[], debug::Int64=0; kwargs...)
+    oad(debug, "plot_TS_isopycnals() START")
+    xlim = xlims()
+    ylim = ylims()
+    SAc = range(xlim[1], xlim[2], length=300)
+    CTc = range(ylim[1], ylim[2], length=300)
+    oad(debug, "    processing sigma0 contours for salinity range $xlim and temperature range $ylim")
+    sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
+    if length(levels) == 0
+        oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
+        levels = pretty(sigma0c) # returns [] if min=max
+    elseif length(levels) == 1 && typeof(levels) == Int64
+        if levels > 0
+            oad(debug, "        case 2a: auto-selecting $sigma0_levels sigma0 levels to contour")
+            levels = pretty(sigma0c, levels)
+        else
+            oad(debug, "        case 2b: will not contour sigma0 levels")
+            levels = []
+        end
+    else
+        oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
+    end
+    # Set contour linewidth to 2^(1/4) times grid line width. This
+    # corresponds the diameter step between Rapidography technical pens
+    # at number category 0 to 00.
+    contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
+    if length(levels) > 0
+        oad(debug, "        drawing sigma0 contours at levels $(levels)")
+        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
+    end
+end
