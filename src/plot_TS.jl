@@ -84,16 +84,18 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
         @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
     end
-    # Draw the data (will redraw this at the end, if there are density
-    # or spiciness contours on top.
+    # Draw the data. We will redraw the points/lines at the end, if
+    # there are density or spiciness contours that would otherwise
+    # be drawn on top.
     rval = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
-        ylabel=abbreviate ? "C [°C]" : "Conservative Temperature [°C]",
+        ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
         yrot=90,
         framestyle=:box, legend=false, color=:black, tickdirection=:out,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
+
     need_redraw = false # will set to true if we contour the data
     # Possibly add density contours
     xlim = xlims()
@@ -123,7 +125,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
     if length(levels) > 0
         oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_text=:gray50)
+        #contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_text=:gray50)
+        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black)
         need_redraw = true
     else
         oad(debug, "        not drawing sigma0 contours")
@@ -148,7 +151,7 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     if length(levels) > 0
         oad(debug, "    drawing spiciness0 contours at levels $(levels)")
         contour!(SAc, CTc, spiciness0c, linewidth=contour_linewidth, color=:gray50, levels=levels,
-            cbar=false, clabels=true, foreground_color_text=:gray50)
+            cbar=false, clabels=true, foreground_color_text=:black)
         need_redraw = true
     else
         oad(debug, "        not drawing spiciness0 contours")
