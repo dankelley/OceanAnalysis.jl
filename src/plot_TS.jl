@@ -118,7 +118,7 @@ end # plot_TS()
 
 
 """
-    plot_TS_sigma0_contours(sigma0_levels=[], debug::Int64=0, kwargs...)
+    plot_TS_sigma0_contours(sigma0_levels=[]; debug::Int64=0, kwargs...)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
