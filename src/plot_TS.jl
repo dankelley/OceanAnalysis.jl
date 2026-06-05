@@ -1,5 +1,6 @@
 export plot_TS
-export plot_TS_isopycnals
+export plot_TS_sigma0_contours
+export plot_TS_spiciness0_contours
 
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
@@ -8,12 +9,17 @@ export plot_TS_isopycnals
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
 Whether contours of density and spiciness are drawn depends on values of the
-`sigma0_levels` and `spiciness0_level` arguments. There are 4 categories. (1)
-Setting either to 0 prevents contouring. (2) Setting either to `[]` enables
-contours with automatic selection of levels. (3) Setting either to a positive
-integer provides a suggestion for the number of levels, with the actual number
-being set by [`pretty`](@ref)), which is provided with the integer.  (4)
-Setting either to a vector of numbers specifies those numbers as the levels.
+`sigma0_levels` and `spiciness0_level` arguments. The actual work of contouring
+is carried out by calling [`plot_TS_sigma0_contours`](@ref) and
+[`plot_TS_spiciness0_contours`](@ref), both of which can be called after
+`plot_TS` completes its work, if desired. Depending on the values of
+`sigma0_levels` and `spiciness0_levels`, there are 3 possibilities. (1) Setting
+either to `[]` yields contours with automatic selection of levels. (2) Setting
+either to a positive integer provides a suggestion for the number of levels,
+with the actual number being set by [`pretty`](@ref)), which is provided with
+the integer, and with `0` meaning not to show contours at all.  And, finally,
+(3) Setting either to a vector of numbers specifies those numbers as the
+levels.
 
 By default, a freezing-point line is drawn (if it is within the range of the
 data). This behaviour is skipped if `draw_freezing` is false.
@@ -182,17 +188,15 @@ end # plot_TS()
 
 
 
-export plot_TS_isopycnals
-
 """
-    plot_TS_isopycnals(sigma0_levels=[], debug::Int64=0, kwargs...)
+    plot_TS_sigma0_contours(sigma0_levels=[], debug::Int64=0, kwargs...)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
 have been drawn by other means.  For the meanings of the
 arguments, see the documentation for [`plot_TS`](@ref).
 """
-function plot_TS_isopycnals(levels=[], debug::Int64=0; kwargs...)
+function plot_TS_sigma0_contours(sigma0_levels=[], debug::Int64=0; kwargs...)
     oad(debug, "plot_TS_isopycnals() START")
     xlim = xlims()
     ylim = ylims()
@@ -200,16 +204,16 @@ function plot_TS_isopycnals(levels=[], debug::Int64=0; kwargs...)
     CTc = range(ylim[1], ylim[2], length=300)
     oad(debug, "    processing sigma0 contours for salinity range $xlim and temperature range $ylim")
     sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
-    if length(levels) == 0
+    if length(sigma0_levels) == 0
         oad(debug, "        case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
-        levels = pretty(sigma0c) # returns [] if min=max
-    elseif length(levels) == 1 && typeof(levels) == Int64
-        if levels > 0
+        sigma0_levels = pretty(sigma0c) # returns [] if min=max
+    elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
+        if sigma0_levels > 0
             oad(debug, "        case 2a: auto-selecting $sigma0_levels sigma0 levels to contour")
-            levels = pretty(sigma0c, levels)
+            sigma0_levels = pretty(sigma0c, sigma0_levels)
         else
             oad(debug, "        case 2b: will not contour sigma0 levels")
-            levels = []
+            sigma0_levels = []
         end
     else
         oad(debug, "        case 3: sigma0_levels is a vector of sigma0 levels for contouring")
@@ -218,8 +222,49 @@ function plot_TS_isopycnals(levels=[], debug::Int64=0; kwargs...)
     # corresponds the diameter step between Rapidography technical pens
     # at number category 0 to 00.
     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
-    if length(levels) > 0
-        oad(debug, "        drawing sigma0 contours at levels $(levels)")
-        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
+    if length(sigma0_levels) > 0
+        oad(debug, "        drawing sigma0 contours at levels $(sigma0_levels)")
+        contour!(SAc, CTc, sigma0c, linewidth=contour_linewidth, color=:gray50, levels=sigma0_levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
     end
 end
+
+"""
+    plot_TS_spiciness0_contours(spiciness0_levels=[], debug::Int64=0, kwargs...)
+
+Add contours of density to an existing TS plot.  This is used by
+[`plot_TS`](@ref), but can also be used separately, if the TS data
+have been drawn by other means.  For the meanings of the
+arguments, see the documentation for [`plot_TS`](@ref).
+"""
+function plot_TS_spiciness0_contours(spiciness0_levels=[], debug::Int64=0; kwargs...)
+    oad(debug, "plot_TS_isopycnals() START")
+    xlim = xlims()
+    ylim = ylims()
+    SAc = range(xlim[1], xlim[2], length=300)
+    CTc = range(ylim[1], ylim[2], length=300)
+    oad(debug, "    processing spiciness0 contours for salinity range $xlim and temperature range $ylim")
+    spiciness0c = gsw_spiciness0.(SAc', CTc) |> fix_gsw_bad_code!
+    if length(spiciness0_levels) == 0
+        oad(debug, "        case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
+        spiciness0_levels = pretty(spiciness0c) # returns [] if min=max
+    elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
+        if spiciness0_levels > 0
+            oad(debug, "        case 2a: auto-selecting $spiciness0_levels spiciness0 levels to contour")
+            spiciness0_levels = pretty(spiciness0c, spiciness0_levels)
+        else
+            oad(debug, "        case 2b: will not contour spiciness0 levels")
+            spiciness0_levels = []
+        end
+    else
+        oad(debug, "        case 3: spiciness0_levels is a vector of spiciness0 levels for contouring")
+    end
+    # Set contour linewidth to 2^(1/4) times grid line width. This
+    # corresponds the diameter step between Rapidography technical pens
+    # at number category 0 to 00.
+    contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
+    if length(spiciness0_levels) > 0
+        oad(debug, "        drawing spiciness0 contours at levels $(spiciness0_levels)")
+        contour!(SAc, CTc, spiciness0c, linewidth=contour_linewidth, color=:gray50, levels=spiciness0_levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
+    end
+end
+
