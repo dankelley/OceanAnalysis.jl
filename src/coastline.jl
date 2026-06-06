@@ -199,12 +199,12 @@ is given by `fontsize`.
 ```julia
 using OceanAnalysis, Plots
 cl = coastline();
-plot_coastline(cl, xlims=(-70, -60), ylims=(42, 48))
+plot_coastline(cl, xlim=(-70, -60), ylim=(42, 48))
 scale_bar(100.0)
 ```
 """
 function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, fontsize::Real=8)
-    distance > 0.0 || error("'distance' must be a positive number")
+    distance > 0.0 || throw(ArgumentError("distance must be a positive number, but it is $distance"))
     xlim, ylim = xlims(), ylims() # from existing plot_coastline() diagram
     ymid = (ylim[1] + ylim[2]) / 2.0
     km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
@@ -215,12 +215,10 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, f
     elseif x == :right
         X = xlim[2] - dx .- [0.0, distance / km_per_degree_lon]
     elseif isa(x, Number)
-        #X = x + dx .+ [0.0, distance / km_per_degree_lon]
         X = x .+ [0.0, distance / km_per_degree_lon]
     else
-        error("x must be :left, :right, or a number, but it is ", x)
+        throw(ArgumentError("x must be :left, :right, or a number, but it is $(repr(x))"))
     end
-    #println("X: ", X)
     if y == :top
         y0 = ylim[2] - 1.5 * dy
     elseif y == :bottom
@@ -228,11 +226,9 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, f
     elseif isa(y, Number)
         y0 = y
     else
-        error("y must be :top, :bottom, or a number, but it is ", y)
+        throw(ArgumentError("y must be :top, :bottom, or a number, but it is $(repr(y))"))
     end
-    #println("y0: ", y0)
     Y = [y0, y0]
-    #println("Y: ", Y)
     plot!(X, Y, color=:black, linewidth=linewidth, label=false)
     annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
         Plots.text("$(trunc(Int, distance)) km", fontsize))

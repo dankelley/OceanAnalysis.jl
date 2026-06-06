@@ -20,7 +20,7 @@ function get_topography(name::Symbol=:global_coarse; debug::Int64=0)
     if name == :global_coarse
         rval = joinpath(dir, "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
     else
-        error("    expecting 'name' to be :global_coarse, but :", name, " was provided")
+        throw(ArgumentError("expecting 'name' to be :global_coarse, but it is $(repr(name))"))
     end
     oad(debug, "END get_topography()")
     rval
@@ -85,9 +85,9 @@ end
 """
     get_topography(west::Real, east::Real,
         south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
-        server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)::Topography
+        server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)::String
 
-Download and cache a topography file.
+Download and cache a topography file, returning the name of that file.
 
 Topographic data are downloaded from a data server that holds the ETOPO1
 dataset (see Amante and Eakins, 2009, for an introduction to the data and see
@@ -131,7 +131,7 @@ referenced was updated on 2025-Aug-2; for the query generation, see the
 """
 function get_topography(west::Real, east::Real,
     south::Real, north::Real; resolution::Real=4.0, destdir::String=".",
-    server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)::Topography
+    server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)::String
     oad(debug, "get_topography(west=$west," *
                ", east=$east" *
                ", south=$south" *
@@ -262,7 +262,7 @@ function plot_topography(topo::Topography;
     draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
     debug::Int64=0, kwargs...)
     oad(debug, "plot_topography() BEGIN")
-    domain in (:sea, :land, :both) || error("domain :$domain not permited; use :sea, :land, or :both")
+    domain in (:sea, :land, :both) || throw(ArgumentError("domain $(repr(domain)) not permited; use :sea, :land, or :both"))
     oad(debug, "    domain: :", domain)
     oad(debug, "    color: :", color)
     oad(debug, "    clim: :", clim)

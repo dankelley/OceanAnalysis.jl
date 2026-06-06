@@ -181,8 +181,8 @@ function plot_amsr(amsr::Amsr;
     xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
     color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
     debug::Int64=0)
-    2 == length(xlims) || error("xlims must be of length 2")
-    2 == length(ylims) || error("ylims must be of length 2")
+    2 == length(xlims) || throw(ArgumentError("xlims must be of length 2"))
+    2 == length(ylims) || throw(ArgumentError("ylims must be of length 2"))
     oad(debug, "plot_amsr() START")
     draw_contours = levels != :none
     if draw_contours
@@ -243,8 +243,8 @@ Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
 """
 function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
     oad(debug, "subset_amsr BEGIN")
-    2 == length(lonlims) || error("lonlims must be a tuple of length 2")
-    2 == length(latlims) || error("latlims must be a tuple of length 2")
+    2 == length(lonlims) || throw(ArgumentError("lonlims must be a tuple of length 2"))
+    2 == length(latlims) || throw(ArgumentError("latlims must be a tuple of length 2"))
     lonOK = lonlims[1] .<= a.metadata["longitude"] .<= lonlims[2]
     latOK = latlims[1] .<= a.metadata["latitude"] .<= latlims[2]
     metadata = copy(a.metadata)

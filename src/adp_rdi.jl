@@ -61,8 +61,8 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     metadata = Dict()
     ntypes = Int(buf[start+5])
     metadata["ntypes"] = ntypes
-    ntypes > 0 || error("ntypes=$ntypes is not a positive integer")
-    ntypes < 201 || error("ntypes=$ntypes exceeds 200")
+    ntypes > 0 || error("inferred ntypes must be a positive integer, but it is $ntypes")
+    ntypes < 201 || error("inferred ntypes must be < 200, but it is $ntypes")
     # data_offset in 2-byte elements
     data_offsets = Vector{Int}(undef, ntypes)
     # FIXME: is it ok to read this just once per file?

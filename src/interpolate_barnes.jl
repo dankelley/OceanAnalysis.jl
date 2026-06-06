@@ -162,12 +162,12 @@ function interpolate_barnes(
         yr = (e[2] - e[1]) / sqrt(n)
         oad(debug, "  set yr to ", yr)
     end
-    xr > 0.0 || error("xr ($xr) is not a positive value")
-    yr > 0.0 || error("xr ($yr) is not a positive value")
+    xr > 0.0 || throw(ArgumentError("xr must be positive, but it is $xr"))
+    yr > 0.0 || throw(ArgumentError("xr must be positive, but it is $yr"))
     xr0 = xr # keep for computing weight matrix at end
     yr0 = yr # keep for computing weight matrix at end
-    gamma > 0.0 || error("gamma ($gamma) is not a positive number")
-    iterations > 0 || error("iteration ($iteration)is not a positive integer")
+    gamma > 0.0 || throw(ArgumentError("gamma must be positive, but it is $gamma"))
+    iterations > 0 || throw(ArgumentError("iteration must be positive, but it is $iteration"))
     # Set up storage
     zz = zeros(nyg, nxg)
     wg = zeros(nyg, nxg)
