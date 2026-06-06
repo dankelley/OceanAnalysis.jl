@@ -23,7 +23,7 @@ plot(a, b, title="Top 300m")
 """
 function subset_ctd(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Int64=0)
     oad(debug, "subset_ctd() START")
-    length(keep_levels) == nrow(ctd.data) || error("length(keep_levels) does not agree with nrows(ctd.data)")
+    length(keep_levels) == nrow(ctd.data) || throw(ArgumentError("length(keep_levels)=$(length(keep_levels)) differs from nrows(ctd.data)=$(nrows(ctd.data))"))
     oad(debug, "  retaining $(sum(keep_levels)) of $(length(keep_levels)) levels")
     data = copy(ctd.data)
     data = data[keep_levels, :]
@@ -55,7 +55,7 @@ plot(a, b)
 """
 function subset_ctd!(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Int64=0)
     oad(debug, "subset_ctd() START")
-    length(keep_levels) == nrow(ctd.data) || error("length(keep_levels) does not agree with nrows(ctd.data)")
+    length(keep_levels) == nrow(ctd.data) || throw(ArgumentError("length(keep_levels)=$(length(keep_levels)) differs from nrows(ctd.data)=$(nrows(ctd.data))"))
     oad(debug, "  retaining $(sum(keep_levels)) of $(length(keep_levels)) levels")
     ctd.data = ctd.data[keep_levels, :]
     oad(debug, "END subset_ctd()")

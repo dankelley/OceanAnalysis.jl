@@ -134,14 +134,14 @@ function interpolate_barnes(
     # Do some initial checks
     n = length(x)
     ny = length(y)
-    n == ny || error("lengths of x ($n) and y ($ny) do not match")
+    n == ny || throw(ArgumentError("lengths of x ($n) and y ($ny) do not match"))
     nz = length(z)
-    n == nz || error("lengths of x ($n) and y ($nz) do not match")
+    n == nz || throw(ArgumentError("lengths of x ($n) and y ($nz) do not match"))
     if isnothing(w)
         w = repeat([1.0], n)
     end
     nw = length(w)
-    n == nw || error("lengths of x ($n) and w ($nw) do not match")
+    n == nw || throw(ArgumentError("lengths of x ($n) and w ($nw) do not match"))
     if isnothing(xg)
         xg = pretty(x, 50)
         oad(debug, "  set xg to ", xg)

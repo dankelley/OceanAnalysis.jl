@@ -40,7 +40,7 @@ julia> for i in 1:length(s.data)
 function as_section(ctds::Vector{Ctd}; debug::Int64=0)
     oad(debug, "as_section() START")
     nctds = length(ctds)
-    nctds > 0 || error("  as_section() provided with zero-length first argument")
+    nctds > 0 || throw(ArgumentError("ctds is empty"))
     metadata = Dict()
     data = Vector{Ctd}(undef, nctds)
     for i in 1:nctds
@@ -82,7 +82,7 @@ println("Section contains ", length(section.data), " CTD profiles")
 function read_section(dir::String; debug::Int64=0)
     oad(debug, "read_section() START")
     files = readdir(dir)
-    length(files) > 0 || error("no ctd files found in $dir")
+    length(files) > 0 || throw(ArgumentError("no ctd files found in $dir"))
     # Reading typically takes about 7 ms per file
     ctds = map((file) -> read_ctd_exchange(joinpath(dir, file), debug=increment_debug(debug)), files)
     oad(debug, "  read $(length(ctds)) CTD files")
@@ -168,7 +168,7 @@ function grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64
     oad(debug, "grid_section() START")
     oad(debug, "  setting up uniform pressure grid with pressure step $pressure_step")
     nctds = length(section.data)
-    nctds > 0 || error("  grid_section() requires at least 1 CTD station in 'data'")
+    nctds > 0 || throw(ArgumentError("section must hold have at least 1 station"))
     metadata = section.metadata
     metadata["gridded"] = true
     data = Vector{Ctd}(undef, nctds)

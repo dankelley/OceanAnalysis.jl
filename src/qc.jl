@@ -78,7 +78,7 @@ Many files use a scheme similar to that used in the Argo program (see e.g. Secti
 """
 function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", action::Symbol=:NaN, debug::Int64=0)
     oad(debug, "handle_qc($(typeof(x)), action=$(repr(action)), retain=$retain) START")
-    action == :NaN || action == :delete || error("action is $(repr(action)) but it must be :NaN or :delete")
+    action == :NaN || action == :delete || throw(ArgumentError("action must be :NaN or :delete, but it is :$action"))
     rval_metadata = copy(x.metadata)
     rval_data = copy(x.data)
     if x isa Argo

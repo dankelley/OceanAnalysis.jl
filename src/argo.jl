@@ -130,8 +130,8 @@ argo_id_cycle("4902911_095")
 ```
 """
 function argo_id_cycle(idcycle::String="")
-    !isempty(idcycle) || error("'idcycle' must be a non-empty string")
-    occursin(r"_", idcycle) || error("'idcycle' must contain an underline character")
+    !isempty(idcycle) || throw(ArgumentError("'idcycle' must be a non-empty string"))
+    occursin(r"_", idcycle) || throw(ArgumentError("'idcycle' must contain an underline character"))
     split(idcycle, "_")
 end
 

@@ -22,7 +22,7 @@ a2 = handle_qc(a, retain="1");
 @test all(isnan.(a2.data.salinity_adjusted))
 
 c = as_ctd(a);
-c2 = handle_qc(c, debug=1);
+c2 = handle_qc(c);
 @test !any(isnan.(c2.data.temperature))
 @test !any(isnan.(c2.data.pressure))
 @test all(isnan.(c2.data.salinity))
