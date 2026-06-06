@@ -216,7 +216,7 @@ function grid_ctd(ctd::Ctd;
     pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Real=2.0,
     method::Symbol=:interpolate, debug::Int64=0)
     oad(debug, "grid_ctd() START")
-    method == :interpolate || error("only method=:interpolate is handled in this version")
+    method == :interpolate || throw(ArgumentError("method=:$method not handled; try :interpolate"))
     if isnothing(pressure_grid)
         pressure_grid = 0.0:pressure_step:maximum(ctd.data.pressure)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))

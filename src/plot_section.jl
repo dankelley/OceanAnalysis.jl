@@ -53,7 +53,7 @@ function plot_section(section::Section, which::String="salinity";
     # assume all CTDs have the same data-column names
     fields = names(section.data[1].data)
     which in fields || error("which=\"$which\" not allowed; try one of the following: ", fields)
-    type in (:contour, :contourf, :heatmap) || error("type=$(repr(type)) not allowed; try using :contour, :contourf or :heatmap")
+    type in (:contour, :contourf, :heatmap) || throw(ArgumentError("type=$(repr(type)) not allowed; try using :contour, :contourf or :heatmap"))
     if xvar isa Symbol
         oad(debug, "  xvar is a Symbol")
         if xvar == :longitude

@@ -26,7 +26,7 @@ scatter!(a.bin_x_mean, a.bin_y_mean, ms=2,
 ```
 """
 function bin_mean(x, y, bins)
-    length(x) == length(y) || error("lengths of x and y do not match")
+    length(x) == length(y) || throw(Argumenterror("lengths of x ($(length(x))) and y ($(length(y))) do not match"))
     bin_step = step(bins)
     bin_bdy = first(bins) - bin_step / 2
     n = length(bins)

@@ -17,7 +17,7 @@ function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Int64=0)
         end
         start += 1
         if start >= nbuf - 1
-            error("This file does not have any 0x7f 0x74 byte pairs")
+            throw(FormatException("This file does not have any 0x7f 0x74 byte pairs"))
         end
     end
     starts = Vector{Int64}()
@@ -33,7 +33,7 @@ function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Int64=0)
         local bytes_to_check = reinterpret(Int16, buf[start.+(2:3)])[1]
         ntypes = buf[start+5]
         if ntypes < 1 | ntypes > 200
-            error("something is wrong with ntypes (=$ntypes)")
+            throw(FormatException("Invalid ntypes ($ntypes); expecting an integer from 1 to 200"))
         end
         if start + bytes_to_check + 1 > nbuf
             if debug > 0
@@ -61,8 +61,8 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     metadata = Dict()
     ntypes = Int(buf[start+5])
     metadata["ntypes"] = ntypes
-    ntypes > 0 || error("inferred ntypes must be a positive integer, but it is $ntypes")
-    ntypes < 201 || error("inferred ntypes must be < 200, but it is $ntypes")
+    ntypes > 0 || throw(FormatException("inferred ntypes must be a positive integer, but it is $ntypes"))
+    ntypes < 201 || throw(FormatException("inferred ntypes must be < 200, but it is $ntypes"))
     # data_offset in 2-byte elements
     data_offsets = Vector{Int}(undef, ntypes)
     # FIXME: is it ok to read this just once per file?
@@ -228,7 +228,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     nE_ = length(E_)
     # interpret ensembles, possibly subsetting H_
     if length(ensembles) == 1
-        ensembles > -1 || error("negative 'ensembles' (here, $ensembles) are not allowed")
+        ensembles > -1 || throw(FormatException("negative 'ensembles' (here, $ensembles) are not allowed"))
         if ensembles != 0
             E_ = E_[1:min(nE_, ensembles)]
         end
@@ -247,11 +247,11 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     metadata["nensembles"] = length(E_)
     # FL_ holds pointers to the starts of fixed-length headers (See Figure 8 of [1])
     FL_ = E_ .+ 6 .+ 2 * metadata["ntypes"]
-    0 == buf[FL_[1]] || error("problem w/ buf[FL_[1]")
-    0 == buf[FL_[1]+1] || error("problem w/ buf[FL_[1+1]")
+    0 == buf[FL_[1]] || throw(FormatException("problem w/ buf[FL_[1]"))
+    0 == buf[FL_[1]+1] || throw(FormatException("problem w/ buf[FL_[1+1]"))
     # VL_ holds pointers to the starts of variable-length headers
     VL_ = FL_ .+ 59 # (see Figure 8 of [1])
-    0x80 == buf[VL_[1]] || error("problem w/ VL_starts[1]")
+    0x80 == buf[VL_[1]] || throw(FormatException("problem w/ VL_starts[1]"))
     0x00 == buf[VL_[1]+1]
     # comb is used for getting two-byte entries
     comb2 = sort([VL_; VL_ .+ 1])
@@ -482,12 +482,12 @@ plot(pu, pv, pw, pe, layout=(4, 1), size=(1000, 700))
 """
 function beam_to_xyz(adp::Adp; debug::Int64=0)
     oad(debug, "beam_to_xyz() BEGIN")
-    :beam == adp["coordinate_system"] || error("coordinate_system must be :beam, but it is :", adp["coordinate_system"])
+    :beam == adp["coordinate_system"] || throw(FormatException("coordinate_system must be :beam, but it is :", adp["coordinate_system"]))
     T = adp["transformation_matrix"]
     v = adp.data["velocity"]
     dim = size(v)
     dim[3] == 4 || error("beam_to_xyz only works for 4-beam Workhorse data")
-    :beam == adp["coordinate_system"] || error("coordinate_system must be :beam, but it is ", adp["coordinate_system"])
+    :beam == adp["coordinate_system"] || throw(FormatException("coordinate_system must be :beam, but it is ", adp["coordinate_system"]))
     ṽ = Array{Float64}(undef, dim)
     # Method 1 (see notes.md for why this was used)
     TT = transpose(T)
