@@ -113,9 +113,7 @@ using OceanAnalysis, Plots, Printf
 f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
 c = read_ctd_cnv(f);
 MLD = MLD_CF(c);
-inML = c["pressure"] .< MLD;
-pT = scatter(c["temperature"], c["pressure"], group=inML, marker=[:x :cross],
-    xlab="Temperature", ylab="Pressure [dbar]", legend=false, yflip=true)
+plot_profile(c, which="temperature")
 hline!([MLD], color=:red)
 title!(@sprintf("MLD %.1f m by Chu-Fanning (2010) method", MLD))
 ```
@@ -123,87 +121,4 @@ title!(@sprintf("MLD %.1f m by Chu-Fanning (2010) method", MLD))
 """
 function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Float64
     MLD_CF_detailed(ctd; variable=variable, n=n)["MLD"]
-end
-
-
-"""
-    MLD_KRH(c::Ctd; variable::String="temperature", criterion=0.8)
-
-Compute surface isothermal layer depth (ILD) with the method described by Kara,
-Rochford and Hurlburt (2000). An alternative method is used by
-[`MLD_CF`](@ref).
-
-**Plans.** Add density-based mixed layer depth (MLD).
-
-# Arguments
-
-- `c` a [`Ctd`] object.
-
-# Keywords
-
-- `variable` a String holding the name of the relevant hydrographic variable. At present, this must be `"temperature"`, but in a later version, "density" may also be permitted.
-
-- `criterion` a number giving the criterion for changes in the designated variable. By default, this is 0.8°C, as suggested by Kara et al. (2000).
-
-# References
-
-Kara, A. Birol, Peter A. Rochford, and Harley E. Hurlburt. “An Optimal
-Definition for Ocean Mixed Layer Depth.” Journal of Geophysical Research 105,
-no. C7 (2000): 16803–21. https://doi.org/10.1029/2000JC900072.
-
-# Examples
-```julia
-using OceanAnalysis, Plots, Printf
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-c = read_ctd_cnv(f);
-MLD = MLD_KRH(c); # really, it is ILD (isothermal layer depth)
-inML = c["pressure"] .< MLD;
-pT = scatter(c["temperature"], c["pressure"], group=inML, marker=[:x :cross],
-    xlab="Temperature", ylab="Pressure [dbar]", legend=false, yflip=true)
-hline!([MLD], color=:red)
-title!(@sprintf("MLD %.1f m by Kara-Rochford-Hurlburt (2000) method", MLD))
-```
-"""
-function MLD_KRH(c::Ctd; variable::String="temperature", criterion=0.8)
-    variable == "temperature" || throw(ArgumentError("variable must be :temperature, but it is :$variable"))
-    p = c.data.pressure
-    Interpolations.deduplicate_knots!(p)
-    # FIXME: handle "density" as a choice
-    T = c[variable]
-    # initial estimate for T_ref (may be updated)
-    itp = linear_interpolation((p,), T, extrapolation_bc=Flat())
-    Tref = itp.(10.0) # initial reference value (may be updated)
-    #println("initial Tref: $Tref (interpolated to p=10.0)")
-    n = length(T)
-    increasing = T[2] > T[1] # may be updated in next loop
-    for i in 1:n-1
-        if abs(T[i+1] - T[i]) > 0.1 * criterion
-            Tref = T[i] # update since we found a ML
-            #println("updated Tref: $Tref (at i=$i and p=$(p[i]); note T[i+1]-T[i]=$(T[i+1]-T[i]))")
-            increasing = T[i+1] > T[i]
-            break
-        end
-    end
-    #println("increasing: $increasing")
-    iTb = findfirst(x -> abs(x - Tref) > criterion, T)
-    #println("iTb: $iTb")
-    #println("below Tdiff: ", T[iTb] - Tref)
-    # Interpolate pressure to find where T[i]-Tref == criterion
-    ii = iTb .+ [0, -1]
-    pp = p[ii]
-    TT = T[ii]
-    j = sortperm(TT)
-    pp = pp[j]
-    TT = TT[j]
-    #println(DataFrame(i=1:10, p=p[1:10], T=T[1:10]))
-    #println("ii: $ii")
-    #println("pp: $pp")
-    #println("TT: $TT")
-    itp2 = linear_interpolation((TT,), pp, extrapolation_bc=Flat())
-    #println("Tref-criterion $(Tref-criterion)")
-    Tstar = increasing ? Tref + criterion : Tref - criterion
-    pstar = itp2.(Tstar)
-    #println("pstar: $pstar, Tstar: $Tstar")
-    #pstar, Tref, Tstar
-    pstar
 end
