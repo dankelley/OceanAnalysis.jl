@@ -60,6 +60,7 @@ export interpolate_barnes
 export label_from_varname
 export MLD_CF
 export MLD_CF_detailed
+export MLD_KRH
 export N2
 export N2_spline
 export N2_first_difference
@@ -73,8 +74,9 @@ export plot_profile
 export plot_section
 export plot_stations
 export plot_topography
-#export plot_TS
-#export plot_TS_isopycnals
+export plot_TS
+export plot_TS_sigma0_contours
+export plot_TS_spiciness0_contours
 export pressure_from_depth
 export pressure_from_z
 export pretty

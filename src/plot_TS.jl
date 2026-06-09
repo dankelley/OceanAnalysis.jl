@@ -1,7 +1,3 @@
-export plot_TS
-export plot_TS_sigma0_contours
-export plot_TS_spiciness0_contours
-
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
@@ -108,9 +104,9 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
     plot_TS_spiciness0_contours(spiciness0_levels; debug=increment_debug(debug), kwargs...)
     # Redraw the data, so they appear above other elements such as 
     # contours and the freezing-point line.
-        plot!(SA, CT, legend=false, color=:black,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
-            kwargs...)
+    plot!(SA, CT, legend=false, color=:black,
+        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
+        kwargs...)
     oad(debug, "END plot_TS()")
     rval
 end # plot_TS()
