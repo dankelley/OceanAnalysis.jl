@@ -63,12 +63,11 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Di
     v = ctd[variable]
     np = length(p)
     np > 5 || error("ctd must have >5 measurement levels, but it has only $np")
-    n >= 3 || error("n must be at least 3, but got n=$n")
+    n >= 3 || error("n must be at least 4, but got n=$n")
     kstart = min(3, n)
     ks = kstart:np-n-1
-    nks = length(ks)
-    E1 = fill(NaN, np) # ks + n)
-    E2 = fill(NaN, np) # nks + n)
+    E1 = fill(NaN, np)
+    E2 = fill(NaN, np)
     E2_over_E1 = fill(0.0, np) # nks + n)
     df_vp = DataFrame(v=v, p=p)
     df_p = DataFrame(p=p)
