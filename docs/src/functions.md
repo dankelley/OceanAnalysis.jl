@@ -48,11 +48,12 @@ OceanAnalysis.grid_ctd
 OceanAnalysis.grid_section
 OceanAnalysis.handle_qc
 OceanAnalysis.handle_qc!
+OceanAnalysis.ILD_KRH
 OceanAnalysis.interpolate_barnes
 OceanAnalysis.label_from_varname
 OceanAnalysis.MLD_CF
 OceanAnalysis.MLD_CF_detailed
-OceanAnalysis.MLD_KRH
+# OceanAnalysis.MLD_KRH FIXME: code this
 OceanAnalysis.N2
 OceanAnalysis.N2_spline
 OceanAnalysis.N2_first_difference
