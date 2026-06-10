@@ -21,6 +21,9 @@ used by [`MLD_CF`](@ref), with the difference being that `MLD_CF_detailed`
 returns a Dict with more information than the single number returned by
 [`MLD_CF`](@ref).
 
+An alternative estimate of MLD is provided by [`MLD_KRH`](@ref); its cousin,
+[`ILD_KRH`](@ref) is also worthy of consideration.
+
 # Arguments
 
 - `ctd` a [`Ctd`](@ref) object.

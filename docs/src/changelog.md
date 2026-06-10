@@ -16,6 +16,8 @@ Release notes:
 - `plot_TS_isopycnals` and `plot_TS_spiciness`, to add density and spiciness
 contours to an existing TS plot. These are now used by `plot_TS`, but it can be
 convenient for users to add contours for themselves.
-- `MLD_KRH`, to calculate surface isothermal layer depth (ILD) using the Kara
+- `ILD_KRH`, to calculate surface isothermal layer depth (ILD) using the Kara
+et al. (2000) method.
+- `MLD_KRH`, to calculate surface mixed layer depth (MLD) using the Kara
 et al. (2000) method.
 
