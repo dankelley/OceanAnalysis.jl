@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · OceanAnalysis.jl</title><meta name="title" content="Examples · OceanAnalysis.jl"/><meta property="og:title" content="Examples · OceanAnalysis.jl"/><meta property="twitter:title" content="Examples · OceanAnalysis.jl"/><meta name="description" content="Documentation for OceanAnalysis.jl."/><meta property="og:description" content="Documentation for OceanAnalysis.jl."/><meta property="twitter:description" content="Documentation for OceanAnalysis.jl."/><meta property="og:url" content="https::dankelley.github.io/OceanAnalysis.jl/dev/examples/"/><meta property="twitter:url" content="https::dankelley.github.io/OceanAnalysis.jl/dev/examples/"/><link rel="canonical" href="https::dankelley.github.io/OceanAnalysis.jl/dev/examples/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">OceanAnalysis.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../installation/">Installation</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Acoustic-Doppler-Profiler-Data"><span>Acoustic-Doppler Profiler Data</span></a></li><li><a class="tocitem" href="#AMSR-Satellite-Data"><span>AMSR Satellite Data</span></a></li><li><a class="tocitem" href="#Argo-Data"><span>Argo Data</span></a></li><li><a class="tocitem" href="#Bathymetry-(high-resolution)-Data"><span>Bathymetry (high-resolution) Data</span></a></li><li><a class="tocitem" href="#Coastline-Data"><span>Coastline Data</span></a></li><li><a class="tocitem" href="#CTD-Data"><span>CTD Data</span></a></li><li><a class="tocitem" href="#Digital-Elevation-Model-Data"><span>Digital Elevation Model Data</span></a></li><li><a class="tocitem" href="#Echosounder-Data"><span>Echosounder Data</span></a></li><li><a class="tocitem" href="#Section-Data"><span>Section Data</span></a></li></ul></li><li><a class="tocitem" href="../data_types/">Data Types</a></li><li><a class="tocitem" href="../functions/">Function Reference</a></li><li><a class="tocitem" href="../changelog/">Changelog</a></li><li><a class="tocitem" href="../developer_notes/">Developer Notes</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/dankelley/OceanAnalysis.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/dankelley/OceanAnalysis.jl/blob/main/docs/src/examples.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><h2 id="Acoustic-Doppler-Profiler-Data"><a class="docs-heading-anchor" href="#Acoustic-Doppler-Profiler-Data">Acoustic-Doppler Profiler Data</a><a id="Acoustic-Doppler-Profiler-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Acoustic-Doppler-Profiler-Data" title="Permalink"></a></h2><p>A built-in file (sub-sampled to just one sample per hour, and only a single day) is provided with the package. Below, you can see how to plot (1) images of velocity components as a function of time and distance and (2) covariation of eastward and northward components, with a red line indicating local coastal orientation.</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    &quot;data&quot;, &quot;adp_rdi.000&quot;)
+beam = read_adp_rdi(file);
+xyz = beam_to_xyz(beam);
+enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
+
+# 1. Heatmap of u, v and w
+plot_adp(enu; size=(800, 700), dpi=150)
+savefig(&quot;adp_rdi_heatmap.png&quot;)
+
+# 2. U-V scattergraph, with local coastline direction shown
+
+# In R, find angle of coastline for Île-aux-Lièvres
+#   load(&quot;/Users/kelley/git/oar_book/data/coastlineSLE.rda&quot;)
+#   plot(coastlineSLE,clon=-69.7,clat=47.79,span=100)
+#   ial &lt;- locator(2) # click on ends of IAL
+#   xy &lt;- lonlat2utm(lon=ial$x,lat=ial$y)
+#   a &lt;- diff(xy$northing)/diff(xy$easting)
+plot_adp(enu, which=:uv)
+a = 1.71 # from the R code shown above (private file)
+plot!([-1; 1], [-a; a], color=:red, label=false, dpi=150)
+savefig(&quot;adp_rdi_uv.png&quot;)</code></pre><p><img src="../adp_rdi_heatmap.png" alt="Acoustic-Doppler Profiler plot"/> <img src="../adp_rdi_uv.png" alt="Acoustic-Doppler Profiler plot"/></p><h2 id="AMSR-Satellite-Data"><a class="docs-heading-anchor" href="#AMSR-Satellite-Data">AMSR Satellite Data</a><a id="AMSR-Satellite-Data-1"></a><a class="docs-heading-anchor-permalink" href="#AMSR-Satellite-Data" title="Permalink"></a></h2><p>The AMSR satellite provides several data streams, including sea-surface temperature, which may be plotted as follows.</p><pre><code class="language-julia hljs"># North Atlantic Sea Surface Temperature
+using OceanAnalysis, Plots, Dates
+f = get_amsr(&quot;2025-09-07&quot;);
+a = read_amsr(f, &quot;SST&quot;);
+plot_amsr(a, xlims=(290.0, 340.0), ylims=(30.0, 60.0), color=:turbo,
+    levels=0.0:2.5:30.0, clim=(0, 30))
+savefig(&quot;amsr.png&quot;)</code></pre><p><img src="../amsr.png" alt="AMSR-derived sea-surface temperature"/></p><h2 id="Argo-Data"><a class="docs-heading-anchor" href="#Argo-Data">Argo Data</a><a id="Argo-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Data" title="Permalink"></a></h2><h3 id="Argo-Profile"><a class="docs-heading-anchor" href="#Argo-Profile">Argo Profile</a><a id="Argo-Profile-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Profile" title="Permalink"></a></h3><p>The following shows how to read an Argo NetCDF file, convert to a <a href="../functions/#OceanAnalysis.Ctd"><code>Ctd</code></a> object, and then make a summary plot.</p><pre><code class="language-julia hljs"># Read and plot a built-in Argo file
+using OceanAnalysis, Dates, Measures, Plots, Printf
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), &quot;data&quot;,
+    &quot;D4902911_095.nc&quot;)
+argo = read_argo(filename)
+ctd = as_ctd(argo)
+p1 = plot_profile(ctd; which=&quot;CT&quot;);
+p2 = plot_profile(ctd; which=&quot;SA&quot;);
+p3 = plot_profile(ctd; which=&quot;sigma0&quot;);
+p4 = plot_TS(ctd);
+title = @sprintf(&quot;CTD observations at %.3fN and %.3fE, on %s&quot;,
+    ctd.metadata[&quot;latitude&quot;], ctd.metadata[&quot;longitude&quot;],
+    Dates.format(ctd.metadata[&quot;time&quot;], &quot;yyyy-mm-dd&quot;))
+plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
+    dpi=200, plot_title=title, plot_titlefontsize=9)
+savefig(&quot;argo_profile.png&quot;)</code></pre><p><img src="../argo_profile.png" alt="Argo profile"/></p><h3 id="Argo-quality-control-handling"><a class="docs-heading-anchor" href="#Argo-quality-control-handling">Argo quality-control handling</a><a id="Argo-quality-control-handling-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-quality-control-handling" title="Permalink"></a></h3><p>The following illustrates the use of <a href="../functions/#OceanAnalysis.handle_qc"><code>handle_qc</code></a> for Argo data. The top row shows salinity and temperature profiles, with red dots for points marked with quality-control (QC) values other than <code>&#39;1&#39;</code>.  (Note that Argo QC values are stored as characters, not as numbers.) The bottom row shows a TS diagrams for the raw data and the cleaned-up data. Note that the salinity errors are so large as to control the plot scales in the left-hand panels. This is not an uncommon situation, and so it is a good idea to handle QC flags early in analysis procedures. However, sometimes the flags seem to be in error, and so a prudent analyst will start by plotting as in the top row.  <em>Exercise:</em> add a middle row showing just the cleaned-up profiles.</p><p>plotting </p><pre><code class="language-julia hljs"># Illustrate QC processing of hydrographic data
+using OceanAnalysis, Plots
+f = joinpath(dirname(dirname(pathof(OceanAnalysis))), &quot;data&quot;, &quot;D4901076_139.nc&quot;)
+argo = read_argo(f);
+ctd = as_ctd(argo);
+ctd_clean = handle_qc(ctd);
+
+ul = plot_profile(ctd; which=&quot;salinity&quot;, dpi=200, fontsize=6)
+badS = ctd[&quot;salinity_qc&quot;] .!= &#39;1&#39;
+scatter!(ctd[&quot;salinity&quot;][badS], ctd[&quot;pressure&quot;][badS], color=:red, markersize=2)
+
+ur = plot_profile(ctd; which=&quot;temperature&quot;, dpi=200, fontsize=6)
+badT = ctd[&quot;temperature_qc&quot;] .!= &#39;1&#39;
+scatter!(ctd[&quot;temperature&quot;][badT], ctd[&quot;pressure&quot;][badT], color=:red, markersize=2)
+
+ll = plot_TS(ctd, fontsize=6)
+bad = badS .| badT
+scatter!(ctd[&quot;SA&quot;][bad], ctd[&quot;CT&quot;][bad], color=:red, markersize=2)
+
+lr = plot_TS(ctd_clean, fontsize=6)
+
+plot(ul, ur, ll, lr, layout=(2, 2))
+savefig(&quot;argo_qc.png&quot;)
+
+</code></pre><p><img src="../argo_qc.png" alt="Argo search results"/></p><h3 id="Argo-Search"><a class="docs-heading-anchor" href="#Argo-Search">Argo Search</a><a id="Argo-Search-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Search" title="Permalink"></a></h3><p>The following shows how to map Argo profile locations made within 200 km of Sable Island, during the past year.</p><pre><code class="language-julia hljs"># Show Argo profiles within 200 km of Sable Island in last year
+using OceanAnalysis, CSV, Dates, DataFrames, Plots, Printf
+# Get the index
+index_file = get_argo_index(&quot;~/data/argo&quot;)
+index_all = read_argo_index(index_file) # 3.2e6 profiles
+# Set time subset
+today = now(UTC)
+start = today - Dates.Year(1)
+recent = start .&lt; index_all.time .&lt; today
+# Set distance subset
+SI_lon = -59.915
+SI_lat = 43.934
+radius = 200.0 # km
+distance = map(i -&gt; geod_distance(SI_lon, SI_lat,
+        index_all.longitude[i], index_all.latitude[i]),
+    1:nrow(index_all))
+near = distance .&lt; radius
+# Filter by both time and distance
+index = index_all[recent.&amp;near, :]
+# Extend region of map to show geographic context
+aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
+scale = radius / 111.0
+plot_stations(index.longitude, index.latitude,
+    xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
+    ylims=SI_lat .+ scale .* (-1.2, 1.2))
+float_IDs = replace.(index.file, r&quot;.*/(.*)_.*&quot; =&gt; s&quot;\1&quot;) |&gt; unique;
+t = @sprintf(&quot;%d profiles of %d floats&quot;, length(index.file), length(float_IDs))
+title!(t, titlefontsize=9)
+scale_bar(100; x=:right, y=:top)
+savefig(&quot;argo_search.png&quot;)</code></pre><p><img src="../argo_search.png" alt="Argo search results"/></p><h3 id="Argo-Trajectory"><a class="docs-heading-anchor" href="#Argo-Trajectory">Argo Trajectory</a><a id="Argo-Trajectory-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Trajectory" title="Permalink"></a></h3><p>The following shows how to display a trace of the positions of a single Argo float.</p><pre><code class="language-julia hljs"># Plot a float trajectory with colour for sequence number
+using OceanAnalysis, Plots, Printf, Statistics
+ID = r&quot;D4902911&quot; # focus on this ID
+index_file = get_argo_index(&quot;~/data/argo&quot;);
+index_all = read_argo_index(index_file) # 3.2e6 profiles
+index = index_all[occursin.(ID, index_all.file), :]
+sort!(index, :time) # this lets us join dots in time order
+lon, lat = index.longitude, index.latitude
+plot(lon, lat,
+    aspect_ratio=1.0 / cos(mean(lat) * pi / 180),
+    framestyle=:box, color=:gray, dpi=200,
+    title=@sprintf(&quot;Argo float %s coloured by cycle index&quot;, ID.pattern),
+    titlefontsize=9)
+colors = cgrad(:turbo)
+scatter!(lon, lat, marker_z=1:length(lon),
+    markersize=3, markerstyle=:circle, color=colors)
+# Add land and 1km isobath
+plot_coastline!(coastline())
+topo_file = get_topography(-110.0, -30, 20, 60, resolution=30,
+    destdir=&quot;~/data/topo&quot;)
+topo = read_topography(topo_file)
+contour!(topo.metadata[&quot;longitude&quot;], topo.metadata[&quot;latitude&quot;],
+    topo.data, xlim=xlims(), ylim=ylims(),
+    color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
+scale_bar(500; x=:right, y=:top)
+savefig(&quot;argo_trajectory.png&quot;)</code></pre><p><img src="../argo_trajectory.png" alt="Argo trajectory"/></p><h2 id="Bathymetry-(high-resolution)-Data"><a class="docs-heading-anchor" href="#Bathymetry-(high-resolution)-Data">Bathymetry (high-resolution) Data</a><a id="Bathymetry-(high-resolution)-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Bathymetry-(high-resolution)-Data" title="Permalink"></a></h2><h3 id="High-resolution-bathymetry-data"><a class="docs-heading-anchor" href="#High-resolution-bathymetry-data">High-resolution bathymetry data</a><a id="High-resolution-bathymetry-data-1"></a><a class="docs-heading-anchor-permalink" href="#High-resolution-bathymetry-data" title="Permalink"></a></h3><p>Bathymetry files at 10m and 100m resolution are provided for some Canadian waters via a somewhat-awkward GUI interface at <a href="https://data.chs-shc.ca/dashboard/map">https://data.chs-shc.ca/dashboard/map</a>. The following shows how to plot such data, after downloading a dataset.  (This only works for the TIFF form of the data.)</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots
+filename = expanduser(&quot;~/data/nonna/NONNA10_4460N06360W.tiff&quot;)
+n = read_nonna(filename);
+heatmap(n[&quot;longitude&quot;], n[&quot;latitude&quot;], n.data, c=:turbo,
+    size=(400, 400), dpi=300, framestyle=:box, tickdirection=:out)
+savefig(&quot;nonna.png&quot;)</code></pre><p><img src="../nonna.png" alt="NONNA_plot"/></p><h3 id="Bathymetry-(low-resolution)-and-topography-data"><a class="docs-heading-anchor" href="#Bathymetry-(low-resolution)-and-topography-data">Bathymetry (low-resolution) and topography data</a><a id="Bathymetry-(low-resolution)-and-topography-data-1"></a><a class="docs-heading-anchor-permalink" href="#Bathymetry-(low-resolution)-and-topography-data" title="Permalink"></a></h3><p>The following downloads topographic data for a domain including southern Nova Scotia, and displays the data in three plot styles.</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots, TiffImages
+topo_file = get_topography(-67, -63, 43, 46, resolution=1)
+topo = read_topography(topo_file);
+p1 = plot_topography(topo, domain=:both);
+p2 = plot_topography(topo, domain=:sea);
+p3 = plot_topography(topo, domain=:land);
+plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=300)
+savefig(&quot;topography.png&quot;)</code></pre><p><img src="../topography.png" alt="Topography diagram"/></p><h2 id="Coastline-Data"><a class="docs-heading-anchor" href="#Coastline-Data">Coastline Data</a><a id="Coastline-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Coastline-Data" title="Permalink"></a></h2><p>The following produces a world map in Cartesian coordinates, with aspect ratio set so that shapes and relative sizes are appropriate at the equator.</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots
+c = coastline()
+plot_coastline(c)
+savefig(&quot;coastline.png&quot;)</code></pre><p><img src="../coastline.png" alt="Coastline diagram"/></p><h2 id="CTD-Data"><a class="docs-heading-anchor" href="#CTD-Data">CTD Data</a><a id="CTD-Data-1"></a><a class="docs-heading-anchor-permalink" href="#CTD-Data" title="Permalink"></a></h2><p>The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.</p><pre><code class="language-julia hljs"># Read and plot a built-in CTD file
+using OceanAnalysis, Dates, Measures, Plots, Printf
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    &quot;data&quot;, &quot;ctd.cnv&quot;)
+ctd = read_ctd_cnv(filename);
+p1 = plot_profile(ctd; which=&quot;CT&quot;);
+p2 = plot_profile(ctd; which=&quot;SA&quot;);
+p3 = plot_profile(ctd; which=&quot;sigma0&quot;);
+p4 = plot_TS(ctd);
+title = @sprintf(&quot;CTD observations at %.3fN and %.3fE on %s&quot;,
+    ctd[&quot;latitude&quot;], ctd[&quot;longitude&quot;], ctd[&quot;time&quot;])
+plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
+    dpi=200, plot_title=title, plot_titlefontsize=11)
+savefig(&quot;ctd_diagram.png&quot;)</code></pre><p><img src="../ctd_diagram.png" alt="CTD diagram"/></p><h2 id="Digital-Elevation-Model-Data"><a class="docs-heading-anchor" href="#Digital-Elevation-Model-Data">Digital Elevation Model Data</a><a id="Digital-Elevation-Model-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Digital-Elevation-Model-Data" title="Permalink"></a></h2><p>This example is based on a large file (not provided with this package) that was obtained via a GUI interface at <a href="https://nsgi.novascotia.ca/datalocator/elevation/">https://nsgi.novascotia.ca/datalocator/elevation/</a>. The view is of a portion of Halifax, Nova Scotia. The polygonal shape is the Halifax Citadel, a fort built in 1820s for protection against the United States military. The code below produces two diagrams. The first shows elevation, revealing that the Citadel sits atop a hill (which, a broader view would show, overlooks Halifax Harbour), while the second shows more detail on small-scale features of the old fort and the modern roads and building in downtown Halifax.</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots
+
+file = &quot;/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif&quot;
+
+if isfile(file)
+    dem_all = read_dem(file)
+    # Focus near the Citadel fort
+    dem = subset_dem(dem_all, lonlim=(-63.589, -63.572), latlim=(44.6426, 44.655))
+    middle_lat = dem[&quot;latitude&quot;][div(end + 1, 2)]
+    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
+    # Heatmap of elevation
+    p1 = heatmap(dem[&quot;longitude&quot;], dem[&quot;latitude&quot;], dem.data,
+        color=:inferno, aspect_ratio=aspect_ratio,
+        framestyle=:box, tickdirection=:out)
+    savefig(&quot;dem_1.png&quot;)
+    # Heatmap of gradient of elevation with respect to northerly distance
+    z = -diff(dem.data, dims=1) / dem[&quot;dy&quot;]
+    z = [zeros(1, size(dem.data, 2)); z]
+    heatmap(dem[&quot;longitude&quot;], dem[&quot;latitude&quot;], z,
+        color=:inferno, aspect_ratio=aspect_ratio,
+        framestyle=:box, tickdirection=:out, clim=(-0.5, 0.5))
+    savefig(&quot;dem_2.png&quot;)
+end</code></pre><p><img src="../dem_1.png" alt="DEM figure 1: topography near the Halifax Citadel fort"/></p><p><img src="../dem_2.png" alt="DEM figure 2: derivative of topography"/></p><h2 id="Echosounder-Data"><a class="docs-heading-anchor" href="#Echosounder-Data">Echosounder Data</a><a id="Echosounder-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Echosounder-Data" title="Permalink"></a></h2><p>This uses a private data file acquired using a Biosonics scientific echosounder.</p><pre><code class="language-julia hljs"># This uses a private file
+using OceanAnalysis, Plots
+f = &quot;/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4&quot;
+if isfile(f)
+    e = read_echosounder(f)
+    plot_echosounder(e)
+    savefig(&quot;echosounder.png&quot;)
+end</code></pre><p><img src="../echosounder.png" alt="Echosounder plot"/></p><h2 id="Section-Data"><a class="docs-heading-anchor" href="#Section-Data">Section Data</a><a id="Section-Data-1"></a><a class="docs-heading-anchor-permalink" href="#Section-Data" title="Permalink"></a></h2><p>The following code downloads data from a section survey in the North Atlantic ocean. (See <a href="https://cchdo.ucsd.edu">https://cchdo.ucsd.edu</a> for paths to other sections, noting that only the data type named &#39;exchange&#39; is handled by the OceanAnalysis package.) Then it reads the data, and isolates a subset that runs roughly orthogonal to the mean path of the Gulf Stream. Finally, it plots a chart of sampling locations, along with cross-section diagrams of salinity and temperature.</p><pre><code class="language-julia hljs">using OceanAnalysis, Plots
+url = &quot;https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip&quot;;
+dir = get_section(url);
+s = read_section(dir);
+s.data = s.data[s[&quot;longitude&quot;].&lt;-68.0];
+sg = grid_section(s);
+
+p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
+scale_bar(500);
+p2 = plot_section(sg, &quot;salinity&quot;, ylim=(0, 2000));
+p3 = plot_section(sg, &quot;temperature&quot;, ylim=(0, 2000));
+l = @layout [a; b c]
+plot(p1, p2, p3, layout=l, dpi=200);
+savefig(&quot;section.png&quot;)</code></pre><p><img src="../section.png" alt="Section diagram"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 10 June 2026 13:27">Wednesday 10 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
