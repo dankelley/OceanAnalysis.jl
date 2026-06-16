@@ -1,5 +1,5 @@
 """
-    read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)
+    read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)::Ctd
 
 Read a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 
@@ -50,7 +50,7 @@ julia> names(d.data)
  "flag"
 ```
 """
-function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)
+function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)::Ctd
     #!ismissing(filename) || error("please supply 'filename'")
     filename = expanduser(filename)
     open(filename) do file

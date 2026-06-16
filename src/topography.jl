@@ -27,7 +27,7 @@ function get_topography(name::Symbol=:global_coarse; debug::Int64=0)
 end
 
 """
-    read_topography(filename::String; debug::Int64 = 0)
+    read_topography(filename::String; debug::Int64 = 0)::Topography
 
 Read a topography file that is in NetCDF format. The return value stores
 longitude in `rval.metadata["longitude"]`, latitude in
@@ -35,6 +35,15 @@ longitude in `rval.metadata["longitude"]`, latitude in
 matrix is transposed, to make it easier to plot.
 
 See also [`get_topography`](@ref).
+
+# Arguments
+
+- `filename` a String holding a topographic file, as downloaded
+with [`get_topography`](@ref).
+
+# Keywords
+
+- `debug` an integer value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
 
 # Examples
 
@@ -52,7 +61,7 @@ cl = coastline();
 plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
 ```
 """
-function read_topography(filename::String; debug::Int64=0)
+function read_topography(filename::String; debug::Int64=0)::Topography
     filename = expanduser(filename)
     oad(debug, "read_topography(\"", filename, "\", ...) START")
     NCDataset(filename, "r") do nc
@@ -89,45 +98,50 @@ end
 
 Download and cache a topography file, returning the name of that file.
 
-Topographic data are downloaded from a data server that holds the ETOPO1
-dataset (see Amante and Eakins, 2009, for an introduction to the data and see
-Pante and Simon-Bouhet, 2013, for code that queries a server in a manner
-similar to that used here), and saved as a netCDF file that has a name that
-reveals the data request, if a file of that name is not already present on the
-local file system.  The return value is the name of the data file, and its
-typical use is as the filename for a call to [`read_topography`](@ref).
-Subsequent calls to `get_topography` with identical parameters will return the
-name of an already-downloaded file, without downloading a new copy.
+The data source is a NOAA server that holds the ETOPO1 dataset (see Amante and
+Eakins, 2009, for an introduction to the data and see Pante and Simon-Bouhet,
+2013, for code that queries a server in a manner similar to that used here).
+Based on the region and resolution arguments of the present function, a
+potential name for downloaded data is constructed. Then, if no file of that
+name is present in the provided destination directory, then the NOAA server is
+queried to get the data, and the results are stored in the filename. Whether a
+new download is required or not, the function returns the name of the local
+data file; thus, the function can both download and cache topographic data.
 
-The specified longitude and latitude limits are rounded to 2 digits after the
-decimal place (corresponding to an equatorial footprint of approximately 1 km),
-and these are used in the server request.
+# Arguments
 
-The region of interest is defined by a rectangle bounded by the values of
-`west`, `east`, `south` and `north`. The resolution is set by the value of
-`resolution`, which is minutes. The default, 4.0 minutes, corresponds to 4
-nautical miles (approx. 7.4km) in the north-south direction, and less in the
-east-west direction. The default values of these 5 arguments yield
-a view of the Bay of Fundy region.
+- `west` western boundary of focus region, in the -180° to 180° range.
+- `east` eastern boundary of focus region, in the -180° to 180° range.
+- `south` southern boundary of focus region, in the -90° to 90° range.
+- `north` northern boudnary of focus region, in the -90° to 90° range.
 
-The value of `server` ought not to be modified by users, except perhaps
-to experiment if the NOAA server changes.  (It is unlikely that merely
-changing this value will help much, though, since changes tend not
-to be small on these servers.)
+# Keywords
+
+- `resolution` the resolution of the returned grid, in minutes. By default, this is 4 minutes, or about 7.4 km in the north-south direction.
+- `destdir` a String giving the name of the directory into which to place the downloaded file.
+- `server` a String naming the server. By default, this is `"https://gis.ngdc.noaa.gov"`, which is (as of writing) the only server that provides such files
+- `debug` an integer value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
+
+# Return
+
+`get_topography` returns the name of the downloaded file.
+
 
 # References
 
 1. Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model:
-Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS
-NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M
+   Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS
+   NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M
 
 2. Pante, Eric, and Benoit Simon-Bouhet. "Marmap: A Package for Importing,
-Plotting and Analyzing Bathymetric and Topographic Data in R." PLoS ONE 8,
-no. 9 (2013): e73051. doi:10.1371/journal.pone.0073051. (The package
-referenced was updated on 2025-Aug-2; for the query generation, see the
-`fetch` function of that package's source code in `R/getNOAA.bathy`.
+   Plotting and Analyzing Bathymetric and Topographic Data in R." PLoS ONE 8,
+   no. 9 (2013): e73051. doi:10.1371/journal.pone.0073051. (The package
+   referenced was updated on 2025-Aug-2; for the query generation, see the
+   `fetch` function of that package's source code in `R/getNOAA.bathy`.
 
-3. API https://gis.ngdc.noaa.gov/arcgis/help/en/rest/services-reference/enterprise/export-image/
+3. API
+   https://gis.ngdc.noaa.gov/arcgis/help/en/rest/services-reference/enterprise/export-image/
+
 """
 function get_topography(west::Real, east::Real,
     south::Real, north::Real; resolution::Real=4.0, destdir::String=".",
