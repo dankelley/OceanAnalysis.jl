@@ -37,7 +37,7 @@ end
         temperature::Union{AbstractVector,AbstractRange},
         pressure::Union{AbstractVector,AbstractRange};
         longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
-        add_teos::Bool=true, debug::Integer=0)
+        add_teos::Bool=true, debug::Integer=0)::Ctd
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and possibly a location.
 
@@ -94,35 +94,23 @@ Ctd(Dict{String, Any}("filename" => nothing, "latitude" => [-63.0], "time" => no
 function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     temperature::Union{AbstractVector,AbstractRange},
     pressure::Union{AbstractVector,AbstractRange};
-    longitude::Union{Real,AbstractVector}=-63.0,
-    latitude::Union{Real,AbstractVector}=45.0, time=nothing,
-    add_teos::Bool=true, debug::Integer=0)
+    longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
+    add_teos::Bool=true, debug::Integer=0)::Ctd
     oad(debug, "as_ctd(salinity, ...) START")
-    #oad(debug, "  given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     nsamp = length(salinity)
     length(temperature) == nsamp || error("salinity and temperature have differing lengths ($nsamp and $(length(temperature)), respectively)")
     length(pressure) == nsamp || error("salinity and pressure have differing lengths ($nsamp and $(length(pressure)), respectively)")
     oad(debug, "  given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
     oad(debug, "  given temperature of length ", length(temperature), ", which starts: ", first(temperature, 2))
     oad(debug, "  given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
-    #oad(debug, "  given longitude of length ", length(latitude), ", which starts: ", first(longitude, 2))
-    #oad(debug, "  given latitude of length ", length(latitude), ", which starts: ", first(latitude, 2))
-    #if !isa(latitude, Vector)
-    #    latitude = repeat([latitude], nsamp)
-    #end
-    #if !isa(longitude, Vector)
-    #    longitude = repeat([longitude], nsamp)
-    #end
     oad(debug, "  assembling data as a DataFrame with $nsamp rows")
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
     oad(debug, "  assembling metadata (a Dict)")
-    metadata = Dict{String,Any}()
-    metadata["filename"] = nothing
-    metadata["longitude"] = longitude
-    metadata["latitude"] = latitude
-    if time !== nothing
-        metadata["time"] = time
-    end
+    metadata = Dict{String,Any}(
+        "filename" => nothing,
+        "longitude" => longitude,
+        "latitude" => latitude,
+        "time" => time)
     oad(debug, "  passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
     if add_teos
@@ -150,7 +138,7 @@ An error is reported if the `x.data` lacks `salinity`, `temperature` or
 `pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
 """
 function set_teos(x::OA; debug::Integer=0)::Ctd
-    oad(debug, "set_teos10 START")
+    oad(debug, "set_teos START")
     metadata = copy(x.metadata)
     data = copy(x.data)
     metadata_names = keys(metadata)
@@ -162,7 +150,7 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
     required_metadata = ("longitude", "latitude")
     missing_metadata = filter(k -> !(k in keys(metadata)), required_metadata)
-    isempty(missing_metadata) || error("lacking required metadata: $(missing_cols)")
+    isempty(missing_metadata) || error("lacking required metadata: $(missing_metadata)")
     oad(debug, "  have requisite hydrographic and location data, so can set TEOS-10 variables")
     S = data.salinity
     T = data.temperature
@@ -236,7 +224,7 @@ function grid_ctd(ctd::Ctd;
     end
     pressure_orig = collect(ctd.data.pressure)
     valid = .!ismissing.(pressure_orig) .& .!isnan.(pressure_orig)
-    any(valid) || error("no valid prssure data")
+    any(valid) || error("no valid pressure data")
     pressure = pressure_orig[valid]
     order = sortperm(pressure)
     pressure_sorted = pressure[order]
