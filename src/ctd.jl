@@ -21,7 +21,7 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 function as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
     oad(debug, "as_ctd(Argo, ...)")
     oad(debug, "  add_teos: $(add_teos)")
-    rval = Ctd(a.metadata, a.data)
+    rval = Ctd(deepcopy(a.metadata), deepcopy(a.data))
     if add_teos
         ncol0 = ncol(rval.data)
         rval = set_teos(rval, debug=increment_debug(debug))
@@ -100,9 +100,6 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     nsamp = length(salinity)
     length(temperature) == nsamp || error("salinity and temperature have differing lengths ($nsamp and $(length(temperature)), respectively)")
     length(pressure) == nsamp || error("salinity and pressure have differing lengths ($nsamp and $(length(pressure)), respectively)")
-    oad(debug, "  given salinity of length ", length(salinity), ", which starts: ", first(salinity, 2))
-    oad(debug, "  given temperature of length ", length(temperature), ", which starts: ", first(temperature, 2))
-    oad(debug, "  given pressure of length ", length(pressure), ", which starts: ", first(pressure, 2))
     oad(debug, "  assembling data as a DataFrame with $nsamp rows")
     data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
     oad(debug, "  assembling metadata (a Dict)")
@@ -139,15 +136,15 @@ An error is reported if the `x.data` lacks `salinity`, `temperature` or
 """
 function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "set_teos START")
-    metadata = copy(x.metadata)
-    data = copy(x.data)
+    metadata = deepcopy(x.metadata)
+    data = deepcopy(x.data)
     metadata_names = keys(metadata)
     oad(debug, "  metadata_names: ", metadata_names)
     data_names = names(data)
     oad(debug, "  data_names: ", data_names)
-    required_cols = (:salinity, :temperature, :pressure)
-    data_names_sym = Symbol.(string.(names(data)))
-    missing_cols = filter(c -> !(c in data_names_sym), required_cols)
+    required_cols = ("salinity", "temperature", "pressure")
+    data_names = string.(names(data))
+    missing_cols = filter(c -> !(c in data_names), required_cols)
     isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
     required_metadata = ("longitude", "latitude")
     missing_metadata = filter(k -> !(k in keys(metadata)), required_metadata)
@@ -168,6 +165,8 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     elseif length(lat) != length(S)
         error("length(latitude) ($(length(lat))) must equal number of samples ($(length(S)))")
     end
+    !any(isnan.(lon)) || error("cannot handle NaNs in longitude")
+    !any(isnan.(lat)) || error("cannot handle NaNs in latitude")
     data.SA = similar(S)
     data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     oad(debug, "    SA completed, starting with ", first(data.SA, 2))
@@ -235,20 +234,20 @@ function grid_ctd(ctd::Ctd;
     Interpolations.deduplicate_knots!(pressure_sorted)
     nrow = length(pressure_grid)
     ncol = size(ctd.data)[2]
-    rval = zeros(nrow, ncol)
-    column_names_sym = Symbol.(string.names(ctd.data))
+    arr = Array{Float64}(undef, nrow, ncol)
+    column_names = string.(names(ctd.data))
     for i in 1:ncol
         col = collect(ctd.data[:, i])[valid][order]
-        if column_names_sym[i] == :pressure
-            rval[:, i] = collect(pressure_grid)
+        if column_names[i] == "pressure"
+            arr[:, i] = collect(pressure_grid)
         else
             # this interpolation is good for ML at top and low variation at bottom
             itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
-            rval[:, i] = itp.(pressure_grid)
+            arr[:, i] = itp.(pressure_grid)
         end
     end
-    data = DataFrame(rval, names(ctd.data))
-    rval = Ctd(ctd.metadata, data)
+    data = DataFrame(arr, names(ctd.data))
+    rval = Ctd(deepcopy(ctd.metadata), data)
     oad(debug, "END grid_ctd()")
     rval
 end
