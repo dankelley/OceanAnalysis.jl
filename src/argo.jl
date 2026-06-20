@@ -33,19 +33,34 @@ Return label for Argo data test (if `i` is from 2 to 27) or list of possible lab
 
 The meanings are from https://vocab.nerc.ac.uk/collection/R11/current/, consulted 2026-05-04.
 """
-function argo_test_meaning(i)
+function argo_test_meaning(i::Integer)
     if i < 1
-        sort(atm)
+        keys = sort(collect(keys(atm)))
+        return [atm[key] for key in keys]
     elseif haskey(atm, i)
-        atm[i]
+        return atm[i]
     else
         error("Test index $i not found")
     end
 end
 
-function character_vector_to_string(x)
-    x[ismissing.(x)] .= ' '
-    replace(join(x), " " => "")
+"""
+    character_vector_to_string(x)::String
+
+Convert vector of characters into a string.
+"""
+function character_vector_to_string(x)::String
+    # New version is non-mutating
+    #OLD x[ismissing.(x)] .= ' '
+    #OLD replace(join(x), " " => "")
+    rval = String[]
+    for xx in x
+        if ismissing(xx)
+            continue
+        end
+        push!(rval, replace(string(xx), " " => ""))
+    end
+    return strip(join(rval))
 end
 
 """
@@ -83,7 +98,7 @@ function summarize_argo_data_tests(filename::String)
                 result = character_vector_to_string(hq[:, j, k])
                 if test == "QCP\$"
                     result_bits = collect(string(parse(Int, result, base=16), base=2))
-                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, intepreted as $(join(result_bits))):")
+                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, interpreted as $(join(result_bits))):")
                     i = 1
                     for bit in result_bits[end-1:-1:1]
                         if bit == '1'
@@ -250,7 +265,7 @@ function get_argo_index(destdir::String="."; age::Real=1.0, server::String="http
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
     oad(debug, "  local_file: \"$local_file\"")
-    remote_file = joinpath(server, file)
+    remote_file = chomp(server, '/') * "/" * file
     oad(debug, "  remote_file: \"$remote_file\"")
     oad(debug, "  age: \"$age\"")
     rval = get_file(remote_file; destdir, age, debug=increment_debug(debug))
