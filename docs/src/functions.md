@@ -49,6 +49,7 @@ OceanAnalysis.grid_section
 OceanAnalysis.handle_qc
 OceanAnalysis.handle_qc!
 OceanAnalysis.ILD_KRH
+OceanAnalysis.increment_debug
 OceanAnalysis.interpolate_barnes
 OceanAnalysis.label_from_varname
 OceanAnalysis.MLD_CF
@@ -57,6 +58,7 @@ OceanAnalysis.MLD_KRH
 OceanAnalysis.N2
 OceanAnalysis.N2_spline
 OceanAnalysis.N2_first_difference
+OceanAnalysis.oad
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp
 OceanAnalysis.plot_amsr

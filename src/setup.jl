@@ -58,6 +58,7 @@ export grid_section
 export handle_qc
 export handle_qc!
 export interpolate_barnes
+export increment_debug
 export label_from_varname
 export MLD_CF
 export MLD_CF_detailed

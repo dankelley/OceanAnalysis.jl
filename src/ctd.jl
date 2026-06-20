@@ -108,8 +108,8 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     oad(debug, "  assembling metadata (a Dict)")
     metadata = Dict{String,Any}(
         "filename" => nothing,
-        "longitude" => longitude,
-        "latitude" => latitude,
+        "longitude" => [longitude],
+        "latitude" => [latitude],
         "time" => time)
     oad(debug, "  passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
@@ -167,8 +167,10 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     elseif length(lat) != length(S)
         error("length(latitude) ($(length(lat))) must equal number of samples ($(length(S)))")
     end
+    data.SA = similar(S)
     data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     oad(debug, "    SA completed, starting with ", first(data.SA, 2))
+    data.CT = similar(T)
     data.CT = gsw_ct_from_t.(data.SA, T, p) |> fix_gsw_bad_code!
     oad(debug, "    CT completed, starting with : ", first(data.CT, 2))
     data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
@@ -197,7 +199,7 @@ the value exceeds the maximum pressure in `ctd`.
 
 # Keywords
 
-- `method`: a symbol indicating the gridding method. At the moment, only one choice is accepted, namely `:interpolate`, which means to use linear interpolation of each field to the specified pressure grid.
+- `method`: a symbol indicating the gridding method; this must be `:interpolate`, indicating linear interpolation to the specified pressure grid.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
@@ -218,6 +220,7 @@ function grid_ctd(ctd::Ctd;
     method::Symbol=:interpolate, debug::Integer=0)::Ctd
     oad(debug, "grid_ctd() START")
     method == :interpolate || throw(ArgumentError("method=:$method not handled; try :interpolate"))
+    pressure_step > 0.0 || throw(ArgumentError("pressure_step must be > 0.0"))
     if isnothing(pressure_grid)
         pressure_grid = 0.0:pressure_step:maximum(ctd.data.pressure)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
@@ -243,8 +246,7 @@ function grid_ctd(ctd::Ctd;
             rval[:, i] = itp.(pressure_grid)
         end
     end
-    data = DataFrame(rval, :auto)
-    rename!(data, names(ctd.data))
+    data = DataFrame(rval, names(ctd.data))
     rval = Ctd(ctd.metadata, data)
     oad(debug, "END grid_ctd()")
     rval
