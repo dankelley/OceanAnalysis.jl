@@ -60,9 +60,9 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 
 # Keywords
 
-- `longitude`: observation longitude, in degrees East. The default is a location in the North Atlantic).
+- `longitude`: observation longitude, in degrees East. The default, -63.0, is a location in the North Atlantic).
 
-- `latitude`: observation latitude, in degrees North. The default is a location in the North Atlantic).
+- `latitude`: observation latitude, in degrees North. The default, 45.0, is a location in the North Atlantic).
 
 - `time`: an optional indication of the measurement start time.
 
@@ -142,12 +142,12 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "  metadata_names: ", metadata_names)
     data_names = names(data)
     oad(debug, "  data_names: ", data_names)
-    required_cols = ("salinity", "temperature", "pressure")
+    const REQUIRED_COLS = ("salinity", "temperature", "pressure")
     data_names = string.(names(data))
-    missing_cols = filter(c -> !(c in data_names), required_cols)
+    missing_cols = filter(c -> !(c in data_names), REQUIRED_COLS)
     isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
-    required_metadata = ("longitude", "latitude")
-    missing_metadata = filter(k -> !(k in keys(metadata)), required_metadata)
+    const REQUIRED_METADATA = ("longitude", "latitude")
+    missing_metadata = filter(k -> !(k in keys(metadata)), REQUIRED_METADATA)
     isempty(missing_metadata) || error("lacking required metadata: $(missing_metadata)")
     oad(debug, "  have requisite hydrographic and location data, so can set TEOS-10 variables")
     S = data.salinity
@@ -225,6 +225,7 @@ function grid_ctd(ctd::Ctd;
         pressure_grid = 0.0:pressure_step:maximum(ctd.data.pressure)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
     end
+    "pressure" in names(ctd.data) || error("no pressure in Ctd object")
     pressure_orig = ctd.data.pressure
     valid = .!ismissing.(pressure_orig) .& .!isnan.(pressure_orig)
     any(valid) || error("no valid pressure data")
