@@ -265,7 +265,7 @@ function get_argo_index(destdir::String="."; age::Real=1.0, server::String="http
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
     oad(debug, "  local_file: \"$local_file\"")
-    remote_file = chomp(server, '/') * "/" * file
+    remote_file = server * "/" * file
     oad(debug, "  remote_file: \"$remote_file\"")
     oad(debug, "  age: \"$age\"")
     rval = get_file(remote_file; destdir, age, debug=increment_debug(debug))
@@ -306,7 +306,8 @@ index_file = get_argo_index()
 index = read_argo_index(index_file)
 argo_file = get_argo(index.file[end])
 argo = read_argo(argo_file)
-plot_profile(argo, which="CT")
+ctd = as_ctd(argo)
+plot_profile(ctd, which="CT")
 ```
 """
 function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Integer=0)
