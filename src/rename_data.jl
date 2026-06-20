@@ -25,7 +25,7 @@ rename_data(["CTDPRS", "CTDTMP", "CTDTMP_FLAG"]) # 3-element Vector{String}: "pr
 ```
 
 """
-function rename_data(names::Union{String,Vector{String}}; number_replicates::Bool=true)
+function rename_data(names::Union{String,Vector{String}}; number_replicates::Bool=true)::Vector{String}
     # FIXME: add new items to the following
     rval = replace.(names,
         "CTDPRS" => "pressure",

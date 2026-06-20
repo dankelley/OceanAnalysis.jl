@@ -187,7 +187,7 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
             error("Cannot find salinity, temperature or pressure in $(filename)")
         name_changes = Dict(data_names .=> data_names_original)
         for key in keys(name_changes)
-            if contains(key, r"_qc$")
+            if endswith(key, "qc")
                 data[!, key] = d[name_changes[key]][:, profile]
             else
                 tmp1 = d[name_changes[key]][:, profile]
