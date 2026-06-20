@@ -37,6 +37,7 @@ export coastline
 export coordinate_from_string
 export coriolis
 export CT
+export debug
 export depth_from_pressure
 export despike
 export drop_qc
@@ -65,6 +66,7 @@ export ILD_KRH
 export N2
 export N2_spline
 export N2_first_difference
+export oad
 export plot_adp
 export plot_amsr
 export plot_coastline
