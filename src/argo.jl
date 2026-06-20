@@ -137,9 +137,10 @@ end
 
 
 """
-    read_argo(filename::String; column::Int64=1, debug::Int64=0)::Argo
+    read_argo(filename::String; column::Integer=1, debug::Integer=0)::Argo
 
-Read a profile within an Argo file. For convenience, such files may be downloaded with [`get_argo`](@ref).
+Read a profile within an Argo file. For convenience, such files may be
+downloaded with [`get_argo`](@ref).
 
 # Arguments
 
@@ -171,7 +172,7 @@ d.metadata["longitude"] # -66.38298
 size(d.data) # (1014, 15)
 ```
 """
-function read_argo(filename::String; profile::Int64=1, debug::Int64=0)::Argo
+function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
     oad(debug, "read_argo(<filename>; profile=$profile, debug=$debug) START")
     metadata = Dict()
     data = DataFrame()
@@ -182,14 +183,8 @@ function read_argo(filename::String; profile::Int64=1, debug::Int64=0)::Argo
         data_names_original = [v for v in keys(d) if "N_LEVELS" in dimnames(d[v])]
         data_names = rename_data(data_names_original)
         # Insist that salinity, temperature and pressure are found.
-        found = sum(in.(data_names, (Set(["salinity", "temperature", "pressure"]),)))
-        if found != 3
-            if debug == 0
-                error("Cannot find salinity, temperature or pressure in $(filename); try rerunning with debug=1 to learn more")
-            else
-                error("Cannot find salinity, temperature or pressure in $(filename)")
-            end
-        end
+        3 == sum(in.(data_names, (Set(["salinity", "temperature", "pressure"]),))) ||
+            error("Cannot find salinity, temperature or pressure in $(filename)")
         name_changes = Dict(data_names .=> data_names_original)
         for key in keys(name_changes)
             if contains(key, r"_qc$")
@@ -225,13 +220,13 @@ function read_argo(filename::String; profile::Int64=1, debug::Int64=0)::Argo
         oad(debug, "  finished reading metadata, a Dict holding $(length(metadata)) items")
     end
     oad(debug, "END read_argo()")
-    Argo(metadata, data)
+    return Argo(metadata, data)
 end # read_argo()
 
 
 """
     get_argo_index(destdir::String="."; age::Real=1.0,
-        server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+        server::String="https://data-argo.ifremer.fr", debug::Integer=0)
 
 Download an Argo index file, unless an existing local copy is newly downloaded.
 
@@ -251,7 +246,7 @@ file.
 
 Use [`read_argo_index`](@ref) to interpret the downloaded file.
 """
-function get_argo_index(destdir::String="."; age::Real=1.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo_index(destdir::String="."; age::Real=1.0, server::String="https://data-argo.ifremer.fr", debug::Integer=0)
     oad(debug, "get_argo_index() START")
     file = "ar_index_global_prof.txt.gz"
     local_file = joinpath(destdir, file)
@@ -300,7 +295,7 @@ argo = read_argo(argo_file)
 plot_profile(argo, which="CT")
 ```
 """
-function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Int64=0)
+function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, server::String="https://data-argo.ifremer.fr", debug::Integer=0)
     oad(debug, "get_argo() START")
     file_original = filename
     oad(debug, "    filename: ", filename, " (original)")
@@ -316,9 +311,9 @@ end
 
 
 """
-    read_argo_index(filename::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
+    read_argo_index(filename::String; trim::Bool=true, header::Integer=9, debug::Integer=0)
 
-Read a file downloaded by [`get_argo_index`](@ref).
+Read an Argo file, as downloaded by [`get_argo_index`](@ref).
 
 This relies on there being exactly `header` lines of header, the last of which
 names the columns.  The default value of 9 works with index files downloaded
@@ -333,9 +328,10 @@ columns named `institution`, `date_update`, `ocean`, and `profiler_type`.
 `read_argo_index` returns a DataFrame with column names `"file"`, `"latitude"`,
 `"longitude"`, and `"time"`. Note that the `"file"` column holds information on
 the location on remote servers, as is required for use as the `file` argument
-    of [`get_argo`](@ref).
+of [`get_argo`](@ref).
+
 """
-function read_argo_index(filename::String; trim::Bool=true, header::Int64=9, debug::Int64=0)
+function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, debug::Integer=0)::DataFrame
     file = expanduser(filename)
     oad(debug, "read_argo_index() START")
     if !isfile(file)

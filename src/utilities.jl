@@ -1,5 +1,5 @@
 # Used internally
-function increment_debug(debug::Int64=0)
+function increment_debug(debug::Integer=0)
     debug > 0 ? debug + 1 : 0
 end
 
@@ -88,7 +88,7 @@ end
 
 
 """
-    T90 = T90_from_T68(T68::Float64)
+    T90 = T90_from_T68(T68::Real)
 
 Convert a temperature from the T68 scale to the T90 scale.
 
@@ -102,11 +102,10 @@ julia> T90_from_T68(10.0)
 9.997600575861792
 ```
 """
-T90_from_T68(T48::Float64) = T48 / 1.00024
-#T90fromT68(T48::Vector{Float64}) = T48 ./ 1.00024
+T90_from_T68(T48::Real) = T48 / 1.00024
 
 """
-    T90 = T90_from_T48(T48::Float64)
+    T90 = T90_from_T48(T48::Real)
 
 Convert a temperature from the T48 scale to the T90 scale.
 
@@ -120,11 +119,11 @@ julia> T90_from_T48(10.0)
 9.993641526033752
 ```
 """
-T90_from_T48(T48::Float64) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
-#T90fromT48(T48::Vector{Float64}) = (T48 .- 4.4e-6 .* T48 .* (100.0 .- T48)) ./ 1.00024
+T90_from_T48(T48::Real) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
+
 
 """
-    pretty(x, n::Int64=5; debug::Int64=0)
+    pretty(x, n::Integer=5; debug::Integer=0)
 
 Calculate sub-intervals with 125 scaling
 
@@ -153,7 +152,7 @@ julia> pretty([22.299, 25.091])
 
 1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
 """
-function pretty(x, n::Int64=5; debug::Int64=0)
+function pretty(x, n::Integer=5; debug::Integer=0)
     min, max = extrema(filter(!isnan, x))
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
@@ -184,7 +183,7 @@ function pretty(x, n::Int64=5; debug::Int64=0)
     return rval
 end
 
-function oad(debug::Int64=0, args...)
+function oad(debug::Integer=0, args...)
     if debug > 0
         print(repeat("    ", debug - 1))
         for arg in args
