@@ -1,5 +1,5 @@
 """
-    as_ctd(a::Argo; add_teos::Bool=false, debug::Int64=0)
+    as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
 
 Convert an Argo object into a Ctd object.
 
@@ -18,7 +18,7 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 """
-function as_ctd(a::Argo; add_teos::Bool=false, debug::Int64=0)
+function as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
     oad(debug, "as_ctd(Argo, ...)")
     oad(debug, "  add_teos: $(add_teos)")
     rval = Ctd(a.metadata, a.data)
@@ -37,7 +37,7 @@ end
         temperature::Union{AbstractVector,AbstractRange},
         pressure::Union{AbstractVector,AbstractRange};
         longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
-        add_teos::Bool=true, debug::Int64=0)
+        add_teos::Bool=true, debug::Integer=0)
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and possibly a location.
 
@@ -96,7 +96,7 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     pressure::Union{AbstractVector,AbstractRange};
     longitude::Union{Real,AbstractVector}=-63.0,
     latitude::Union{Real,AbstractVector}=45.0, time=nothing,
-    add_teos::Bool=true, debug::Int64=0)
+    add_teos::Bool=true, debug::Integer=0)
     oad(debug, "as_ctd(salinity, ...) START")
     #oad(debug, "  given salinity (length: $(length(salinity)), max: $(maximum(filter(!isnan, salinity))))")
     nsamp = length(salinity)
@@ -120,7 +120,7 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     metadata["filename"] = nothing
     metadata["longitude"] = longitude
     metadata["latitude"] = latitude
-    if !ismissing(time)
+    if time !== nothing
         metadata["time"] = time
     end
     oad(debug, "  passing metadata and data to Ctd()")
@@ -135,7 +135,7 @@ end # as_ctd()
 
 
 """
-    set_teos(x::OA; debug::Int64=0)
+    set_teos(x::OA; debug::Integer=0)::Ctd
 
 Add, or modify, TEOS-10 components to hydrographic data.
 
@@ -149,7 +149,7 @@ return value.
 An error is reported if the `x.data` lacks `salinity`, `temperature` or
 `pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
 """
-function set_teos(x::OA; debug::Int64=0)
+function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "set_teos10 START")
     metadata = copy(x.metadata)
     data = copy(x.data)
@@ -157,19 +157,32 @@ function set_teos(x::OA; debug::Int64=0)
     oad(debug, "  metadata_names: ", metadata_names)
     data_names = names(data)
     oad(debug, "  data_names: ", data_names)
-    data_needed = ("salinity", "temperature", "pressure")
-    has_needed_data = [x in data_names for x in data_needed]
-    sum(has_needed_data) == 3 || error("lacking 'salinity', 'temperature' or 'pressure' in data ")
-    metadata_needed = ("longitude", "latitude")
-    has_needed_metadata = [x in metadata_names for x in metadata_needed]
-    sum(has_needed_metadata) == 2 || error("lacking 'longitude' or 'latitude' in metadata ")
+    required_cols = ("salinity", "temperature", "pressure")
+    missing_cols = filter(c -> !(c in names(data)), required_cols)
+    isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
+    required_metadata = ("longitude", "latitude")
+    missing_metadata = filter(k -> !(k in keys(metadata)), required_metadata)
+    isempty(missing_metadata) || error("lacking required metadata: $(missing_cols)")
     oad(debug, "  have requisite hydrographic and location data, so can set TEOS-10 variables")
-    S, T, p = data.salinity, data.temperature, data.pressure
-    lon, lat = metadata["longitude"], metadata["latitude"]
+    S = data.salinity
+    T = data.temperature
+    p = data.pressure
+    lon = metadata["longitude"]
+    lat = metadata["latitude"]
+    if !(isa(lon, AbstractVector))
+        lon = fill(lon, length(S))
+    elseif length(lon) != length(S)
+        error("length(longitude) ($(length(lon))) must equal number of samples ($(length(S)))")
+    end
+    if !(isa(lat, AbstractVector))
+        lat = fill(lat, length(S))
+    elseif length(lat) != length(S)
+        error("length(latitude) ($(length(lat))) must equal number of samples ($(length(S)))")
+    end
     data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     oad(debug, "    SA completed, starting with ", first(data.SA, 2))
     data.CT = gsw_ct_from_t.(data.SA, T, p) |> fix_gsw_bad_code!
-    oad(debug, "    CT completed, stating with : ", first(data.CT, 2))
+    oad(debug, "    CT completed, starting with : ", first(data.CT, 2))
     data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
     oad(debug, "    sigma0 completed, starting with ", first(data.sigma0, 2))
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
@@ -182,7 +195,7 @@ end
 """
     grid_ctd(ctd::Ctd;
         pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Real=2.0,
-        method::Symbol=:interpolate, debug::Int64=0)
+        method::Symbol=:interpolate, debug::Integer=0)::Ctd
 
 Grid a CTD to standardized pressure levels.
 
@@ -214,24 +227,31 @@ plot!(ctd2["salinity"], ctd2["pressure"], color=:red)
 """
 function grid_ctd(ctd::Ctd;
     pressure_grid::Union{AbstractVector,AbstractRange,Nothing}=nothing, pressure_step::Real=2.0,
-    method::Symbol=:interpolate, debug::Int64=0)
+    method::Symbol=:interpolate, debug::Integer=0)::Ctd
     oad(debug, "grid_ctd() START")
     method == :interpolate || throw(ArgumentError("method=:$method not handled; try :interpolate"))
     if isnothing(pressure_grid)
         pressure_grid = 0.0:pressure_step:maximum(ctd.data.pressure)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
     end
-    pressure = ctd.data.pressure
-    Interpolations.deduplicate_knots!(pressure)
+    pressure_orig = collect(ctd.data.pressure)
+    valid = .!ismissing.(pressure_orig) .& .!isnan.(pressure_orig)
+    any(valid) || error("no valid prssure data")
+    pressure = pressure_orig[valid]
+    order = sortperm(pressure)
+    pressure_sorted = pressure[order]
+    Interpolations.deduplicate_knots!(pressure_sorted)
     nrow = length(pressure_grid)
     ncol = size(ctd.data)[2]
     rval = zeros(nrow, ncol)
     column_names = names(ctd.data)
     for i in 1:ncol
+        col = collect(ctd.data[:, i])[valid][order]
         if column_names[i] == "pressure"
-            rval[:, i] = pressure_grid
+            rval[:, i] = collect(pressure_grid)
         else
-            itp = linear_interpolation((pressure,), ctd.data[:, i], extrapolation_bc=Flat()) # usually only interpolate at top; this BC mimics ML
+            # this interpolation is good for ML at top and low variation at bottom
+            itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
             rval[:, i] = itp.(pressure_grid)
         end
     end
