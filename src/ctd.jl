@@ -145,8 +145,9 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "  metadata_names: ", metadata_names)
     data_names = names(data)
     oad(debug, "  data_names: ", data_names)
-    required_cols = ("salinity", "temperature", "pressure")
-    missing_cols = filter(c -> !(c in names(data)), required_cols)
+    required_cols = (:salinity, :temperature, :pressure)
+    data_names_sym = Symbol.(string.(names(data)))
+    missing_cols = filter(c -> !(c in data_names_sym), required_cols)
     isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
     required_metadata = ("longitude", "latitude")
     missing_metadata = filter(k -> !(k in keys(metadata)), required_metadata)
@@ -235,10 +236,10 @@ function grid_ctd(ctd::Ctd;
     nrow = length(pressure_grid)
     ncol = size(ctd.data)[2]
     rval = zeros(nrow, ncol)
-    column_names = names(ctd.data)
+    column_names_sym = Symbol.(string.names(ctd.data))
     for i in 1:ncol
         col = collect(ctd.data[:, i])[valid][order]
-        if column_names[i] == "pressure"
+        if column_names_sym[i] == :pressure
             rval[:, i] = collect(pressure_grid)
         else
             # this interpolation is good for ML at top and low variation at bottom
