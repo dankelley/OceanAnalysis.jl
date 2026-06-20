@@ -83,7 +83,7 @@ function summarize_argo_data_tests(filename::String)
                 result = character_vector_to_string(hq[:, j, k])
                 if test == "QCP\$"
                     result_bits = collect(string(parse(Int, result, base=16), base=2))
-                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, inteprepted as $(join(result_bits))):")
+                    println("    Tests performed (based on HISTORY_ACTION value 0x$result, intepreted as $(join(result_bits))):")
                     i = 1
                     for bit in result_bits[end-1:-1:1]
                         if bit == '1'
@@ -137,7 +137,7 @@ end
 
 
 """
-    read_argo(filename::String; column::Integer=1, debug::Integer=0)::Argo
+    read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
 
 Read a profile within an Argo file. For convenience, such files may be
 downloaded with [`get_argo`](@ref).
@@ -191,8 +191,7 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
                 data[!, key] = d[name_changes[key]][:, profile]
             else
                 tmp1 = d[name_changes[key]][:, profile]
-                TMP2 = map(x -> ismissing(x) ? NaN : Float64(x), tmp1)
-                data[!, key] = TMP2
+                data[!, key] = map(x -> ismissing(x) ? NaN : Float64(x), tmp1)
             end
         end
         oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
@@ -215,7 +214,7 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
         metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")
-        # I think one cycle can hold may profiles, so we only examine the first CYCLE_NUMBER value
+        # I think one cycle can hold many profiles, so we only examine the first CYCLE_NUMBER value
         metadata["cycle"] = d["CYCLE_NUMBER"][1]
         oad(debug, "  finished reading metadata, a Dict holding $(length(metadata)) items")
     end
@@ -335,7 +334,7 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
     file = expanduser(filename)
     oad(debug, "read_argo_index() START")
     if !isfile(file)
-        error("No file file named ", filename)
+        error("No file file named '$file'")
     end
     oad(debug, "    filename: ", filename)
     df = CSV.read(filename, DataFrame, header=header)
@@ -357,14 +356,9 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
             select!(df, Not(:date))
         end
         # Remove the some things that may not be needed in all applications.
-        oad(debug, "    trimming 'institution' column")
-        select!(df, Not(:institution))
-        oad(debug, "    trimming 'date_update' column")
-        select!(df, Not(:date_update))
-        oad(debug, "    trimming 'ocean' column")
-        select!(df, Not(:ocean))
-        oad(debug, "    trimming 'profiler_type' column")
-        select!(df, Not(:profiler_type))
+        #columns_to_drop = [:institution, :date_update, :ocean, :profiler_type]
+        columns_to_drop = [:ocean]
+        select!(df, Not(columns_to_drop))
     end
     oad(debug, "END read_argo_index()")
     return df
