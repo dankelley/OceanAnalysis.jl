@@ -225,9 +225,13 @@ function grid_ctd(ctd::Ctd;
         pressure_grid = 0.0:pressure_step:maximum(ctd.data.pressure)
         oad(debug, "  set pressure_grid to ", first(pressure_grid, 3), "...", last(pressure_grid, 2))
     end
-    pressure_orig = collect(ctd.data.pressure)
+    pressure_orig = ctd.data.pressure
     valid = .!ismissing.(pressure_orig) .& .!isnan.(pressure_orig)
     any(valid) || error("no valid pressure data")
+    num_bad = count(.!valid)
+    if num_bad > 0
+        oad(debug, "  removed $num_bad rows with missing/NaN pressure values")
+    end
     pressure = pressure_orig[valid]
     order = sortperm(pressure)
     pressure_sorted = pressure[order]
@@ -237,9 +241,9 @@ function grid_ctd(ctd::Ctd;
     arr = Array{Float64}(undef, nrow, ncol)
     column_names = string.(names(ctd.data))
     for i in 1:ncol
-        col = collect(ctd.data[:, i])[valid][order]
+        col = ctd.data[:, i][valid][order]
         if column_names[i] == "pressure"
-            arr[:, i] = collect(pressure_grid)
+            arr[:, i] = pressure_grid
         else
             # this interpolation is good for ML at top and low variation at bottom
             itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
