@@ -3,11 +3,17 @@ using Statistics: mean
 using Dierckx: Spline1D
 using GibbsSeaWater: gsw_ct_from_t, gsw_sigma0
 
+const G_ACCEL = 9.81
+
 
 """
     N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
 
-A general function to compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object. This works by dispatching to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), according as to whether `method` is `:spline` or `:first_difference`. The `kwargs...` arguments are passed to these lower-level functions, to control the details of processing.
+A general function to compute the square of the buoyancy frequency, N², for a
+[`Ctd`](@ref) object. This works by dispatching to [`N2_spline`](@ref) or to
+[`N2_first_difference`](@ref), according as to whether `method` is `:spline` or
+`:first_difference`. The `kwargs...` arguments are passed to these lower-level
+functions, to control the details of processing.
 
 # Parameters
 
@@ -106,7 +112,7 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     oad(debug, "N2_spline() START")
     oad(debug, "  s: $s")
     oad(debug, "  bc: $bc")
-    pressure = ctd.data.pressure
+    pressure::AbstractVector = ctd.data.pressure
     if isa(s, Symbol)
         sorig = s
         new_s = length(pressure) * delta^2
@@ -143,11 +149,10 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     j = i[ok]
     # FIXME: let user specify weights?
     local spline = Spline1D(pressure[j], sigma0[j], bc=bc, s=s)
-    sigma0p = evaluate(spline, pressure)
+    sigma0p = spline.(pressure)
     rho0 = 1000.0 + mean(sigma0p)
-    g = 9.8
     deriv = derivative(spline, pressure)
-    rval = (g / rho0) * deriv
+    rval = (G_ACCEL / rho0) * deriv
     oad(debug, "END N2_spline()")
     rval
 end
@@ -206,19 +211,13 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     design_method = Butterworth(order)
     filter = digitalfilter(response_type, design_method; fs=1.0 / dp[1])
     sigma0 = ctd["sigma0"]
-    sigma0 != Nothing || error("cannot find/compute sigma0 for this Ctd object")
+    sigma0 !== nothing || error("cannot find/compute sigma0 for this Ctd object")
     sigma0_filtered = filtfilt(filter, sigma0)
-    #println("\nsigma0:", first(sigma0, 10))
-    #println("\nsigma0_filtered:", first(sigma0_filtered, 10))
     # First-difference for derivative (repeat top value to match length)
     dsigma0_dp = diff(sigma0_filtered) ./ dp
-    #println("\ndsigma0_dp:", first(dsigma0_dp, 10))
     dsigma0_dp = [dsigma0_dp[1]; dsigma0_dp]
-    #println("\ndsigma0_dp:", first(dsigma0_dp, 10))
-    g = 9.8
     rho0 = 1000.0 + Statistics.mean(sigma0)
-    rval = g / rho0 * dsigma0_dp
+    rval = G_ACCEL / rho0 * dsigma0_dp
     oad(debug, "END N2_first_difference()")
-    #println("\nN2:", first(rval, 10))
     rval
 end
