@@ -33,12 +33,10 @@ julia> d.metadata["time"] # note the erroneous year
 1903-10-15T11:38:38
 
 julia> d.metadata["latitude"]
-1-element Vector{Float64}:
- 44.684266666666666
+44.684266666666666
 
 julia> d.metadata["longitude"]
-1-element Vector{Float64}:
- -63.643883333333335
+-63.643883333333335
 
 julia> names(d.data)
 8-element Vector{String}:
