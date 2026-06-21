@@ -89,9 +89,28 @@ user-specified `bc` to control behaviour near top and bottom, along with `s`
 
 # Keywords
 
-- `s` either a Float64 value or a symbol. In the first case, it is the value of  `s` supplied to `Dierckx::Spline1D()`, which is used to smooth the density curve as a function of pressure.  According to the documentation for the Fortran code behind this function (see [https://www.netlib.org/dierckx/curfit.f](https://www.netlib.org/dierckx/curfit.f)), a reasonable starting point for exploring the dependence of the spline curve on `s` is in the range from ``(n-\\sqrt{2n}) \\delta^2`` to ``(n+\\sqrt{2n}) \\delta^2``, where ``n`` is the number of data points and ``\\delta`` is a measure of the density "wiggles" (anomalies or high-wavenumber signals) to be smoothed across in the spline. The midpoint of this range, i.e. ``n\\delta^2``, is used if `s=:auto` (the default) is specified. Using `s=:smooth` and `s=:rough` multiplies this value by ``\\sqrt{2}`` and ``1/\\sqrt{2}``, respectively. (Setting `debug=1` will display the `s` values that are set up in these three cases, which may be of help to users who wish to supply `s` numerically.)
+- `s` either a Float64 value or a symbol. In the first case, it is the value of
+  `s` supplied to `Dierckx::Spline1D()`, which is used to smooth the density
+  curve as a function of pressure.  According to the documentation for the
+  Fortran code behind this function (see
+  [https://www.netlib.org/dierckx/curfit.f](https://www.netlib.org/dierckx/curfit.f)),
+  a reasonable starting point for exploring the dependence of the spline curve on
+  `s` is in the range from ``(n-\\sqrt{2n}) \\delta^2`` to ``(n+\\sqrt{2n})
+  \\delta^2``, where ``n`` is the number of data points and ``\\delta`` is a
+  measure of the density "wiggles" (anomalies or high-wavenumber signals) to be
+  smoothed across in the spline. The midpoint of this range, i.e. ``n\\delta^2``,
+  is used if `s=:auto` (the default) is specified. Using `s=:smooth` and
+  `s=:rough` multiplies this value by ``\\sqrt{2}`` and ``1/\\sqrt{2}``,
+  respectively. (Setting `debug=1` will display the `s` values that are set up in
+  these three cases, which may be of help to users who wish to supply `s`
+  numerically.)
 
-- `delta` a numeric value used only if `s` has been specified `:auto`, `:smooth` or `:rough`. See the discussion of how this is combined with the number of data points, to infer a numerical value for `s` in the call to `Dierckx::Spline1D()`. The default value of `delta`, 0.025, may be suitable for initial exploration, although detailed work normally involves specifying `s` as a numerical value, in which case `delta` is ignored.
+- `delta` a numeric value used only if `s` has been specified `:auto`,
+  `:smooth` or `:rough`. See the discussion of how this is combined with the
+  number of data points, to infer a numerical value for `s` in the call to
+  `Dierckx::Spline1D()`. The default value of `delta`, 0.025, may be suitable for
+  initial exploration, although detailed work normally involves specifying `s` as
+  a numerical value, in which case `delta` is ignored.
 
 - `bc` a string, passed to `Dierckx::Spline1D()`, that indicates what to do near boundaries. The default is `"nearest"`.
 
