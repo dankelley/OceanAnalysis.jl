@@ -4,6 +4,7 @@ using Dierckx: Spline1D
 using GibbsSeaWater: gsw_ct_from_t, gsw_sigma0
 
 const G_ACCEL = 9.81
+const RHO_REF = 1000.0
 
 
 """
@@ -61,7 +62,7 @@ function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
         order = haskey(kw, :order) ? kw[:order] : 4
         rval = N2_first_difference(ctd; M=M, order=order, debug=increment_debug(debug))
     else
-        error("method must be either :spline or :first_difference")
+        throw(ArgumentError("method must be either :spline or :first_difference"))
     end
     oad(debug, "END N2()")
     rval
@@ -72,9 +73,15 @@ end
     N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025,
         bc::String="nearest", debug::Integer=0)
 
-Compute the square of the buoyancy frequency, N² (in 1/s²), for a [`Ctd`](@ref) object. The value is inferred from a smoothing cubic spline that models the pressure-depdence of potential density anomaly, sigma0.
+Compute the square of the buoyancy frequency, N² (in 1/s²), for a [`Ctd`](@ref)
+object. The value is inferred from a smoothing cubic spline that models the
+pressure-depdence of potential density anomaly, sigma0.
 
-In the present version, the spline is fitted with the `Dierckx::Spline1D()` function (Reference 1), which is provided with equal weights, `w`, for all points, with `k=3` to set the polynomial order to cubic, and with the user-specified `bc` to control behaviour near top and bottom, along with `s` (and possibly `delta`) to control smoothness.
+In the present version, the spline is fitted with the `Dierckx::Spline1D()`
+function (Reference 1), which is provided with equal weights, `w`, for all
+points, with `k=3` to set the polynomial order to cubic, and with the
+user-specified `bc` to control behaviour near top and bottom, along with `s`
+(and possibly `delta`) to control smoothness.
 
 # Parameters
 
@@ -133,7 +140,7 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
         elseif s == :rough
             s = 0.707 * length(pressure) * delta^2
         else
-            error("If 's' is a symbol, it must be :auto, :smooth or :rough")
+            throw(ArgumentError("if s is a symbol, it must be :auto, :smooth or :rough, not :$s"))
         end
         oad(debug, "  converted s=:$sorig to s=$(round(s,digits=4))")
     else
@@ -150,7 +157,7 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     # FIXME: let user specify weights?
     local spline = Spline1D(pressure[j], sigma0[j], bc=bc, s=s)
     sigma0p = spline.(pressure)
-    rho0 = 1000.0 + mean(sigma0p)
+    rho0 = RHO_REF + mean(sigma0p)
     deriv = derivative(spline, pressure)
     rval = (G_ACCEL / rho0) * deriv
     oad(debug, "END N2_spline()")
@@ -166,13 +173,13 @@ Computation of N^2 based on first-differences of smoothed density.
 
 # Parameters
 
-- `ctd` a [`Ctd`](@ref) object. This must have pressure values increasing at a constant rate; if not, an error is reported, with a hint to first use [grid_ctd()] to grid the Ctd object.
+- `ctd` a [`Ctd`](@ref) object. This must have pressure values increasing at a constant rate; if not, an exception is thrown, with a hint to first use [grid_ctd()] to grid the Ctd object.
 
-- `M` cutoff length for Butterworth filter. An error is reported if this is less than 3.
+- `M` cutoff length for Butterworth filter. An exception is thrown if this is less than 3.
 
 # Keywords
 
-- `order` integer giving the order of the Butterworth filter. An error is reported if this is less than 1.
+- `order` integer giving the order of the Butterworth filter. An exception is thrown if this is less than 1.
 
 - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 
@@ -204,7 +211,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     order >= 1 || throw(ArgumentError("order must be 1 or larger, but it is $order"))
     p = ctd["pressure"]
     np = length(p)
-    np > M || error("Ctd object has only $np levels, so M must be reduced to compute N^2")
+    np > M || throw(ArgumentError("Ctd object has only $np levels, so M must be reduced to compute N^2"))
     dp = diff(p)
     all(dp .== dp[1]) || error("non-constant pressure interval; use grid_ctd() first")
     response_type = Lowpass(1.0 / M)
@@ -216,7 +223,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     # First-difference for derivative (repeat top value to match length)
     dsigma0_dp = diff(sigma0_filtered) ./ dp
     dsigma0_dp = [dsigma0_dp[1]; dsigma0_dp]
-    rho0 = 1000.0 + Statistics.mean(sigma0)
+    rho0 = RHO_REF + Statistics.mean(sigma0)
     rval = G_ACCEL / rho0 * dsigma0_dp
     oad(debug, "END N2_first_difference()")
     rval
