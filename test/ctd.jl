@@ -3,9 +3,7 @@ filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 
 @testset "mixed-layer depth" begin
-    MLDindex = MLD_CF(ctd)
-    @test MLDindex == 13
-    MLDpressure = ctd["pressure"][MLDindex]
+    MLDpressure = MLD_CF(ctd)
     @test MLDpressure == 4.292
 end
 
