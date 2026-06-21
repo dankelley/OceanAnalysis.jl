@@ -10,7 +10,7 @@ type, etc, is required.
 function add_freezing_curve!(xlim, ylim; kwargs...)
     n = 50 # it is a pretty straight curve
     x = range(xlim[1], xlim[2], length=n)
-    y = gsw_ct_freezing.(x, repeat([0.0], n), repeat([1.0], n))
+    y = gsw_ct_freezing.(x, 0.0, 1.0)
     plot!(x, y, color=:darkgray, xlim=xlim, ylim=ylim; kwargs...)
 end
 
