@@ -177,7 +177,6 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     rho0 = RHO_REF + mean(sigma0p)
     deriv = derivative(spline, pressure)
     rval = (G_ACCEL / rho0) * deriv
-    rval[isnan.(rval)] .= 0.0
     oad(debug, "END N2_spline()")
     rval
 end
@@ -185,7 +184,7 @@ end
 
 
 """
-    N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)
+    N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)::Vector{Float64}
 
 Computation of N^2 based on first-differences of smoothed density.
 
@@ -221,7 +220,7 @@ plot!(N2, ctd_gridded["pressure"], label="Smoothing method")
 plot(panel_left, panel_right, layout=(1, 2))
 ```
 """
-function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)
+function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)::Vector{Float64}
     oad(debug, "N2_first_difference() START")
     oad(debug, "  M: $M")
     oad(debug, "  order: $order")
@@ -238,7 +237,9 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     sigma0 = ctd["sigma0"]
     sigma0 !== nothing || error("cannot find/compute sigma0 for this Ctd object")
     sigma0_filtered = filtfilt(filter, sigma0)
-    # First-difference for derivative (repeat top value to match length)
+    # First-difference for derivative. We repeat the top value to match length, and
+    # to recognize that the top samples are very likely to be in a well-mixed
+    # layer.
     dsigma0_dp = diff(sigma0_filtered) ./ dp
     dsigma0_dp = vcat(dsigma0_dp[1], dsigma0_dp)
     rho0 = RHO_REF + mean(sigma0)
