@@ -28,6 +28,7 @@ export Section
 export Topography
 
 # Functions
+export add_freezing_curve!
 export argo_id_cycle
 export as_ctd
 export as_section

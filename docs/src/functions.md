@@ -20,6 +20,7 @@ OceanAnalysis.Topography
 ## Functions:
 
 ```@docs
+OceanAnalysis.add_freezing_curve!
 OceanAnalysis.argo_id_cycle
 OceanAnalysis.as_ctd
 OceanAnalysis.as_section

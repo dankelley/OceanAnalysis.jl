@@ -1,6 +1,20 @@
 using GibbsSeaWater: gsw_ct_freezing, gsw_ct_from_t, gsw_sa_from_sp, gsw_sigma0, gsw_spiciness0
 
 """
+    add_freezing_curve!(xlim, ylim; kwargs...)
+
+Draw a freezing-point curve on an existing CT-SA plot. This is called by
+[`plot_TS`](@ref), but can also be called by the user, if customization of line
+type, etc, is required.
+"""
+function add_freezing_curve!(xlim, ylim; kwargs...)
+    n = 50 # it is a pretty straight curve
+    x = range(xlim[1], xlim[2], length=n)
+    y = gsw_ct_freezing.(x, repeat([0.0], n), repeat([1.0], n))
+    plot!(x, y, color=:darkgray, xlim=xlim, ylim=ylim; kwargs...)
+end
+
+"""
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize=8, debug::Integer=0, kwargs...)
 
@@ -20,7 +34,9 @@ the integer, and with `0` meaning not to show contours at all.  And, finally,
 levels.
 
 By default, a freezing-point line is drawn (if it is within the range of the
-data). This behaviour is skipped if `draw_freezing` is false.
+data) by calling [`add_freezing_curve!`](@ref). If customization of line width,
+colour, etc., is required, uses `draw_freezing=false` and then call
+[`add_freezing_curve!](@ref) directly.
 
 By default, axis names are written in long form; set `abbreviate=true` for
 shorter versions.
@@ -42,7 +58,13 @@ to use `:path` instead.
 
 # Keywords
 
-- `sigma0_levels` a specification of sigma0 values to be contoured. If this is an empty vector (which is the default) then the levels are selected automatically by providing [`pretty`](@ref) with values inferred from `ctd`. If `sigma0_levels` equals 0 then no contours are drawn.  If it is a positive integer, then it is taken as a suggestion for the number of levels.  And, finally, if it is a vector, then it is taken as a specification of the levels to be contoured.
+- `sigma0_levels` a specification of sigma0 values to be contoured. If this is
+  an empty vector (which is the default) then the levels are selected
+  automatically by providing [`pretty`](@ref) with values inferred from `ctd`. If
+  `sigma0_levels` equals 0 then no contours are drawn.  If it is a positive
+  integer, then it is taken as a suggestion for the number of levels.  And,
+  finally, if it is a vector, then it is taken as a specification of the levels
+  to be contoured.
 
 - `spiciness0_levels` as `sigma0_levels`, but for spiciness0 contours.
 
@@ -50,11 +72,15 @@ to use `:path` instead.
 
 - `abbreviate` a Bool indicating whether to abbreviate the axis labels.
 
-- `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`, `guidefontsize` and `titlefontsize`. Note that any of these values may also be supplied as named arguments within `kwargs...`.
+- `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`,
+  `guidefontsize` and `titlefontsize`. Note that any of these values may also be
+  supplied as named arguments within `kwargs...`.
 
-- `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
+- `debug` indicator of debugging level. If this exceeds 0, some information is
+  printed during processing.
 
-- `kwargs...` is passed to `plot()`, to permit further customization; see https://docs.juliaplots.org/stable/ for more information on possibilities.
+- `kwargs...` is passed to `plot()`, to permit further customization; see
+   https://docs.juliaplots.org/stable/ for more information on possibilities.
 
 ```julia
 using OceanAnalysis, Plots, Dates
@@ -102,13 +128,8 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
     # Possibly add freezing-point curve
-    xlim = xlims()
-    ylim = ylims()
     if draw_freezing
-        nfl = 50
-        x = range(xlim[1], xlim[2], length=nfl)
-        y = gsw_ct_freezing.(x, repeat([0.0], nfl), repeat([1.0], nfl))
-        plot!(x, y, color=:darkgray, xlim=xlim, ylim=ylim)
+        add_freezing_curve!(xlims(), ylims())
     end
     # Possibly add density contours
     plot_TS_sigma0_contours(sigma0_levels; debug=increment_debug(debug), kwargs...)

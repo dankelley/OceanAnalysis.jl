@@ -13,7 +13,7 @@ Release notes:
 
 ### Added
 
-- none yet
+- Add `add_freezing_curve!`.
 
 
 ## Changelog from version 0.2.6 to version 0.2.7
