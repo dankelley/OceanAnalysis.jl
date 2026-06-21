@@ -1,11 +1,13 @@
+using DSP: Lowpass, Butterworth, digitalfilter, filtfilt
+using Statistics: mean
+using Dierckx: Spline1D
+using GibbsSeaWater: gsw_ct_from_t, gsw_sigma0
 
-using DSP, Statistics
 
 """
     N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
 
-A general function to compute the square of the buoyancy frequency, N², for a
-[`Ctd`](@ref) object. This works by dispatching to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), according as to whether `method` is `:spline` or `:first_difference`. The `kwargs...` arguments are passed to these lower-level functions, to control the details of processing.
+A general function to compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object. This works by dispatching to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), according as to whether `method` is `:spline` or `:first_difference`. The `kwargs...` arguments are passed to these lower-level functions, to control the details of processing.
 
 # Parameters
 
@@ -45,12 +47,12 @@ function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
     kw = (; kwargs...)
     oad(debug, "  method: $method")
     if method == :spline
-        s = haskey(kwargs, :s) ? kw[:s] : :auto
-        bc = haskey(kwargs, :bc) ? kw[:bc] : "nearest"
+        s = haskey(kw, :s) ? kw[:s] : :auto
+        bc = haskey(kw, :bc) ? kw[:bc] : "nearest"
         rval = N2_spline(ctd; s=s, bc=bc, debug=increment_debug(debug))
     elseif method == :first_difference
-        M = haskey(kwargs, :M) ? kw[:M] : 50
-        order = haskey(kwargs, :order) ? kw[:M] : 4
+        M = haskey(kw, :M) ? kw[:M] : 50
+        order = haskey(kw, :order) ? kw[:M] : 4
         rval = N2_first_difference(ctd; M=M, order=order, debug=increment_debug(debug))
     else
         error("method must be either :spline or :first_difference")
@@ -64,7 +66,7 @@ end
     N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025,
         bc::String="nearest", debug::Integer=0)
 
-Compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object. The value is inferred from a smoothing cubic spline that models the pressure-depdence of potential density anomaly, sigma0.
+Compute the square of the buoyancy frequency, N² (in 1/s²), for a [`Ctd`](@ref) object. The value is inferred from a smoothing cubic spline that models the pressure-depdence of potential density anomaly, sigma0.
 
 In the present version, the spline is fitted with the `Dierckx::Spline1D()` function (Reference 1), which is provided with equal weights, `w`, for all points, with `k=3` to set the polynomial order to cubic, and with the user-specified `bc` to control behaviour near top and bottom, along with `s` (and possibly `delta`) to control smoothness.
 
@@ -136,22 +138,16 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     CT_ = gsw_ct_from_t.(SA_, ctd.data.temperature, ctd.data.pressure)
     sigma0 = gsw_sigma0.(SA_, CT_)
     i = sortperm(pressure)
-    ok = diff(pressure[i]) .> 0.0
-    ok = [ok[1]; ok]
-    #oad(debug, "  sum(ok): $(sum(ok)) before considering NaN sigma0")
+    ok = vcat(true, diff(pressure[i]) .> 0.0)
     ok = ok .& (0 .== isnan.(sigma0[i]))
-    #oad(debug, "  sum(ok): $(sum(ok)) after considering NaN sigma0")
     j = i[ok]
-    #local spline = Spline1D(pressure[j], sigma0[j], w=ones(sum(ok)), k=3, bc="nearest", s=s)
     # FIXME: let user specify weights?
     local spline = Spline1D(pressure[j], sigma0[j], bc=bc, s=s)
     sigma0p = evaluate(spline, pressure)
     rho0 = 1000.0 + mean(sigma0p)
-    #oad(debug, "  rho0: ", round(rho0, digits=3))
     g = 9.8
     deriv = derivative(spline, pressure)
     rval = (g / rho0) * deriv
-    #rval = ifelse.(rval .< 0.0, 0.0, rval)
     oad(debug, "END N2_spline()")
     rval
 end
@@ -206,12 +202,12 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     np > M || error("Ctd object has only $np levels, so M must be reduced to compute N^2")
     dp = diff(p)
     all(dp .== dp[1]) || error("non-constant pressure interval; use grid_ctd() first")
-    response_type = DSP.Lowpass(1.0 / M)
-    design_method = DSP.Butterworth(order)
-    filter = DSP.digitalfilter(response_type, design_method; fs=dp[1])
+    response_type = Lowpass(1.0 / M)
+    design_method = Butterworth(order)
+    filter = digitalfilter(response_type, design_method; fs=1.0 / dp[1])
     sigma0 = ctd["sigma0"]
     sigma0 != Nothing || error("cannot find/compute sigma0 for this Ctd object")
-    sigma0_filtered = DSP.filtfilt(filter, sigma0)
+    sigma0_filtered = filtfilt(filter, sigma0)
     #println("\nsigma0:", first(sigma0, 10))
     #println("\nsigma0_filtered:", first(sigma0_filtered, 10))
     # First-difference for derivative (repeat top value to match length)

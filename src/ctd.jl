@@ -259,7 +259,7 @@ function grid_ctd(ctd::Ctd;
             continue
         end
         # Cannot interpolate non-numeric quantitles (like QC codes)
-        if !(eltype(col_all) <: Number)
+        if !(eltype(col) <: Number)
             arr[:, i] = fill(NaN, nrow)
             continue
         end
