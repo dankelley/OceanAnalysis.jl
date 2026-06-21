@@ -36,7 +36,7 @@ levels.
 By default, a freezing-point line is drawn (if it is within the range of the
 data) by calling [`add_freezing_curve!`](@ref). If customization of line width,
 colour, etc., is required, uses `draw_freezing=false` and then call
-[`add_freezing_curve!](@ref) directly.
+[`add_freezing_curve!`](@ref) directly.
 
 By default, axis names are written in long form; set `abbreviate=true` for
 shorter versions.
