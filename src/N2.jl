@@ -52,7 +52,7 @@ function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
         rval = N2_spline(ctd; s=s, bc=bc, debug=increment_debug(debug))
     elseif method == :first_difference
         M = haskey(kw, :M) ? kw[:M] : 50
-        order = haskey(kw, :order) ? kw[:M] : 4
+        order = haskey(kw, :order) ? kw[:order] : 4
         rval = N2_first_difference(ctd; M=M, order=order, debug=increment_debug(debug))
     else
         error("method must be either :spline or :first_difference")
