@@ -20,7 +20,7 @@ functions, to control the details of processing.
 
 - `ctd` a [`Ctd`](@ref) object. If `method` is `:first_difference`, then `ctd` must have a uniformly incrementing pressure; see [N2_first_difference()] for details.
 
-- `method` either `:spline` or `:first_difference`. There are pros and cons to each method, and users are advised to explore the documentation of [`N2_spline`](@ref) and [`N2_first_difference`](@ref) and to experiment with their own data, to learn more about the possibilities.
+- `method` either `:spline` or `:first_difference`; see the documentation of [`N2_spline`](@ref) and [`N2_first_difference`](@ref).
 
 # Keywords
 
@@ -75,7 +75,7 @@ end
 
 Compute the square of the buoyancy frequency, N² (in 1/s²), for a [`Ctd`](@ref)
 object. The value is inferred from a smoothing cubic spline that models the
-pressure-depdence of potential density anomaly, sigma0.
+pressure-dependence of potential density anomaly, sigma0.
 
 In the present version, the spline is fitted with the `Dierckx::Spline1D()`
 function (Reference 1), which is provided with equal weights, `w`, for all
@@ -154,7 +154,7 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     ok = vcat(true, diff(pressure[i]) .> 0.0)
     ok = ok .& (0 .== isnan.(sigma0[i]))
     j = i[ok]
-    # FIXME: let user specify weights?
+    # Perhaps we could let users specify weights, in a future version
     local spline = Spline1D(pressure[j], sigma0[j], bc=bc, s=s)
     sigma0p = spline.(pressure)
     rho0 = RHO_REF + mean(sigma0p)
@@ -213,7 +213,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     np = length(p)
     np > M || throw(ArgumentError("Ctd object has only $np levels, so M must be reduced to compute N^2"))
     dp = diff(p)
-    all(dp .== dp[1]) || error("non-constant pressure interval; use grid_ctd() first")
+    all(dp .== dp[1]) || error("non-constant pressure interval; see ?grid_ctd for a way to grid")
     response_type = Lowpass(1.0 / M)
     design_method = Butterworth(order)
     filter = digitalfilter(response_type, design_method; fs=1.0 / dp[1])
@@ -223,7 +223,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     # First-difference for derivative (repeat top value to match length)
     dsigma0_dp = diff(sigma0_filtered) ./ dp
     dsigma0_dp = [dsigma0_dp[1]; dsigma0_dp]
-    rho0 = RHO_REF + Statistics.mean(sigma0)
+    rho0 = RHO_REF + mean(sigma0)
     rval = G_ACCEL / rho0 * dsigma0_dp
     oad(debug, "END N2_first_difference()")
     rval
