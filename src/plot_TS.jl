@@ -1,3 +1,5 @@
+using GibbsSeaWater: gsw_ct_freezing, gsw_ct_from_t, gsw_sa_from_sp, gsw_sigma0, gsw_spiciness0
+
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize=8, debug::Integer=0, kwargs...)
@@ -99,6 +101,15 @@ function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
+    # Possibly add freezing-point curve
+    xlim = xlims()
+    ylim = ylims()
+    if draw_freezing
+        nfl = 50
+        x = range(xlim[1], xlim[2], length=nfl)
+        y = gsw_ct_freezing.(x, repeat([0.0], nfl), repeat([1.0], nfl))
+        plot!(x, y, color=:darkgray, xlim=xlim, ylim=ylim)
+    end
     # Possibly add density contours
     plot_TS_sigma0_contours(sigma0_levels; debug=increment_debug(debug), kwargs...)
     plot_TS_spiciness0_contours(spiciness0_levels; debug=increment_debug(debug), kwargs...)
@@ -132,7 +143,7 @@ function plot_TS_sigma0_contours(sigma0_levels=[]; debug::Integer=0, kwargs...)
     if length(sigma0_levels) == 0
         oad(debug, "  case 1: sigma0_levels is empty, so auto-compute sigma0 contour levels")
         sigma0_levels = pretty(sigma0c) # returns [] if min=max
-    elseif length(sigma0_levels) == 1 && typeof(sigma0_levels) == Int64
+    elseif length(sigma0_levels) == 1 && isa(sigma0_levels, Integer)
         if sigma0_levels > 0
             oad(debug, "  case 2a: auto-selecting $sigma0_levels sigma0 levels to contour")
             sigma0_levels = pretty(sigma0c, sigma0_levels)
@@ -173,7 +184,7 @@ function plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Integer=0, kwa
     if length(spiciness0_levels) == 0
         oad(debug, "  case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
         spiciness0_levels = pretty(spiciness0c) # returns [] if min=max
-    elseif length(spiciness0_levels) == 1 && typeof(spiciness0_levels) == Int64
+    elseif length(spiciness0_levels) == 1 && isa(spiciness0_levels, Integer)
         if spiciness0_levels > 0
             oad(debug, "  case 2a: auto-selecting $spiciness0_levels spiciness0 levels to contour")
             spiciness0_levels = pretty(spiciness0c, spiciness0_levels)
