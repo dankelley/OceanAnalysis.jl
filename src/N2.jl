@@ -49,7 +49,7 @@ plot!(N2_fd, ctd_gridded["pressure"], label="Smoothing method")
 plot(panel_left, panel_right, layout=(1, 2))
 ```
 """
-function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
+function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)::Vector{Float64}
     oad(debug, "N2() START")
     kw = (; kwargs...)
     oad(debug, "  method: $method")
@@ -71,7 +71,7 @@ end
 
 """
     N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025,
-        bc::String="nearest", debug::Integer=0)
+        bc::String="nearest", debug::Integer=0)::Vector{Float64}
 
 Compute the square of the buoyancy frequency, N² (in 1/s²), for a [`Ctd`](@ref)
 object. The value is inferred from a smoothing cubic spline that models the
@@ -131,7 +131,7 @@ ctd = read_ctd_cnv(filename);
 histogram(N2_spline(ctd), label="N²")
 ```
 """
-function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, bc::String="nearest", debug::Integer=0)
+function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, bc::String="nearest", debug::Integer=0)::Vector{Float64}
     # https://github.com/JuliaMath/Dierckx.jl/blob/dd942e4a38b9ab3288d74177aa36f828a91f56d4/src/Dierckx.jl#L151
     # https://www.netlib.org/dierckx/curfit.f
     # https://juliahub.com/ui/Packages/General/Dierckx/0.5.0
