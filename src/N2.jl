@@ -153,11 +153,12 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     ok = ok .& (0 .== isnan.(sigma0[i]))
     j = i[ok]
     # Perhaps we could let users specify weights, in a future version
-    local spline = Spline1D(pressure[j], sigma0[j], bc=bc, s=s)
+    spline::Spline1D = Spline1D(pressure[j], sigma0[j], bc=bc, s=s)
     sigma0p = spline.(pressure)
     rho0 = RHO_REF + mean(sigma0p)
     deriv = derivative(spline, pressure)
     rval = (G_ACCEL / rho0) * deriv
+    rval[isnan.(rval)] .= 0.0
     oad(debug, "END N2_spline()")
     rval
 end
@@ -211,7 +212,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     np = length(p)
     np > M || throw(ArgumentError("Ctd object has only $np levels, so M must be reduced to compute N^2"))
     dp = diff(p)
-    all(dp .== dp[1]) || error("non-constant pressure interval prevents digital filtering; use grid_ctd() on the Ctd forst")
+    all(dp .== dp[1]) || error("non-constant pressure interval prevents digital filtering; use grid_ctd() on the Ctd first")
     response_type = Lowpass(1.0 / M)
     design_method = Butterworth(order)
     filter = digitalfilter(response_type, design_method; fs=1.0 / dp[1])
@@ -222,7 +223,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     dsigma0_dp = diff(sigma0_filtered) ./ dp
     dsigma0_dp = vcat(dsigma0_dp[1], dsigma0_dp)
     rho0 = RHO_REF + mean(sigma0)
-    rval = G_ACCEL / rho0 * dsigma0_dp
+    rval = (G_ACCEL / rho0) * dsigma0_dp
     oad(debug, "END N2_first_difference()")
     rval
 end
