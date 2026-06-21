@@ -1,6 +1,6 @@
 using DSP: Lowpass, Butterworth, digitalfilter, filtfilt
 using Statistics: mean
-using Dierckx: Spline1D
+using Dierckx: Spline1D, derivative
 using GibbsSeaWater: gsw_ct_from_t, gsw_sigma0
 
 const G_ACCEL = 9.81
@@ -54,12 +54,12 @@ function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
     kw = (; kwargs...)
     oad(debug, "  method: $method")
     if method == :spline
-        s = haskey(kw, :s) ? kw[:s] : :auto
-        bc = haskey(kw, :bc) ? kw[:bc] : "nearest"
+        s = get(kw, :s, :auto)
+        bc = get(kw, :bc, "nearest")
         rval = N2_spline(ctd; s=s, bc=bc, debug=increment_debug(debug))
     elseif method == :first_difference
-        M = haskey(kw, :M) ? kw[:M] : 50
-        order = haskey(kw, :order) ? kw[:order] : 4
+        M = get(kw, :M, 50)
+        order = get(kw, :order, 4)
         rval = N2_first_difference(ctd; M=M, order=order, debug=increment_debug(debug))
     else
         throw(ArgumentError("method must be either :spline or :first_difference"))
@@ -91,7 +91,7 @@ user-specified `bc` to control behaviour near top and bottom, along with `s`
 
 - `s` either a Float64 value or a symbol. In the first case, it is the value of  `s` supplied to `Dierckx::Spline1D()`, which is used to smooth the density curve as a function of pressure.  According to the documentation for the Fortran code behind this function (see [https://www.netlib.org/dierckx/curfit.f](https://www.netlib.org/dierckx/curfit.f)), a reasonable starting point for exploring the dependence of the spline curve on `s` is in the range from ``(n-\\sqrt{2n}) \\delta^2`` to ``(n+\\sqrt{2n}) \\delta^2``, where ``n`` is the number of data points and ``\\delta`` is a measure of the density "wiggles" (anomalies or high-wavenumber signals) to be smoothed across in the spline. The midpoint of this range, i.e. ``n\\delta^2``, is used if `s=:auto` (the default) is specified. Using `s=:smooth` and `s=:rough` multiplies this value by ``\\sqrt{2}`` and ``1/\\sqrt{2}``, respectively. (Setting `debug=1` will display the `s` values that are set up in these three cases, which may be of help to users who wish to supply `s` numerically.)
 
-- `delta` a numeric value used only if `s` has been specified `:auto`, `:smooth` or `:rough`.See the discussion of how this is combined with the number of data points, to inder a numerical value for `s` in the call to `Dierckx::Spline1D()`. The default value of `delta`, 0.025, may be suitable for initial exploration, although detailed work normally involves specifying `s` as a numerical value, in which case `delta` is ignored.
+- `delta` a numeric value used only if `s` has been specified `:auto`, `:smooth` or `:rough`. See the discussion of how this is combined with the number of data points, to infer a numerical value for `s` in the call to `Dierckx::Spline1D()`. The default value of `delta`, 0.025, may be suitable for initial exploration, although detailed work normally involves specifying `s` as a numerical value, in which case `delta` is ignored.
 
 - `bc` a string, passed to `Dierckx::Spline1D()`, that indicates what to do near boundaries. The default is `"nearest"`.
 
@@ -122,7 +122,6 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     pressure::AbstractVector = ctd.data.pressure
     if isa(s, Symbol)
         sorig = s
-        new_s = length(pressure) * delta^2
         if s == :auto
             # According to https://www.netlib.org/dierckx/curfit.f the
             # algorithm adds knots until sum([w_i * (y_i - Y_i)]^2) < s
@@ -146,7 +145,6 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     else
         oad(debug, "  s=$s on entry")
     end
-    pressure = ctd.data.pressure
     SA_ = SA(ctd)
     CT_ = gsw_ct_from_t.(SA_, ctd.data.temperature, ctd.data.pressure)
     sigma0 = gsw_sigma0.(SA_, CT_)
@@ -213,7 +211,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     np = length(p)
     np > M || throw(ArgumentError("Ctd object has only $np levels, so M must be reduced to compute N^2"))
     dp = diff(p)
-    all(dp .== dp[1]) || error("non-constant pressure interval; see ?grid_ctd for a way to grid")
+    all(dp .== dp[1]) || error("non-constant pressure interval prevents digital filtering; use grid_ctd() on the Ctd forst")
     response_type = Lowpass(1.0 / M)
     design_method = Butterworth(order)
     filter = digitalfilter(response_type, design_method; fs=1.0 / dp[1])
@@ -222,7 +220,7 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     sigma0_filtered = filtfilt(filter, sigma0)
     # First-difference for derivative (repeat top value to match length)
     dsigma0_dp = diff(sigma0_filtered) ./ dp
-    dsigma0_dp = [dsigma0_dp[1]; dsigma0_dp]
+    dsigma0_dp = vcat(dsigma0_dp[1], dsigma0_dp)
     rho0 = RHO_REF + mean(sigma0)
     rval = G_ACCEL / rho0 * dsigma0_dp
     oad(debug, "END N2_first_difference()")
