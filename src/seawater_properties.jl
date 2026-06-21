@@ -2,8 +2,8 @@
     CT(SA, temperature, pressure)
     CT(ctd)
 
-Compute Conservative Temperature (CT), using `gsw_ct_from_t()` in the `GibbsSeaWater`
-package.
+Compute Conservative Temperature (CT), using `gsw_ct_from_t()` in the
+`GibbsSeaWater` package.
 
 The first form takes single values and returns a single value. The second form
 extracts values from a [`Ctd`](@ref) object and then calls the first form as

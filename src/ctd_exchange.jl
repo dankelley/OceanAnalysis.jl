@@ -1,5 +1,5 @@
 """
-    read_ctd_exchange(filename::String; add_teos=true, debug::Int64=0)
+    read_ctd_exchange(filename::String; add_teos=true, debug::Integer=0)
 
 Read a CTD file in 'exchange' format
 
@@ -42,7 +42,7 @@ println(first(d.data, 3))
 #    3 │      9.0              2      13.1152                 2   34.1837              2    266.4            2
 ```
 """
-function read_ctd_exchange(filename::String; add_teos=true, debug::Int64=0)
+function read_ctd_exchange(filename::String; add_teos=true, debug::Integer=0)
     !ismissing(filename) || error("please supply 'filename'")
     filename = expanduser(filename)
     open(filename) do file
@@ -51,7 +51,7 @@ function read_ctd_exchange(filename::String; add_teos=true, debug::Int64=0)
 end
 
 # Internal function used to read an exchange CTD file, optionally adding TEOS-10 variables.
-function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true, debug::Int64=0)
+function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true, debug::Integer=0)
     oad(debug, "read_ctd_exchange(\"", filename, "\", ...) START")
     lines = readlines(stream)
     # ensure the file is in the right format FIXME: maybe just warn?

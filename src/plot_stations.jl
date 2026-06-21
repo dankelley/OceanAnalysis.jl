@@ -1,6 +1,6 @@
 """
     plot_stations(longitude::Vector{Float64}, latitude::Vector{Float64};
-        draw_coastline::Bool=true, debug::Int64=0, kwargs...)
+        draw_coastline::Bool=true, debug::Integer=0, kwargs...)
 
 Plot station locations (or similar data) on a map.
 
@@ -33,7 +33,7 @@ plot_stations(lon, lat, xlim=(-65.0, -59.0), ylim=(43.0, 46.0))
 ```
 """
 function plot_stations(longitude::Vector{Float64}, latitude::Vector{Float64};
-    draw_coastline::Bool=true, debug::Int64=0, kwargs...)
+    draw_coastline::Bool=true, debug::Integer=0, kwargs...)
     oad(debug, "plot_stations(longitude, latitude, ...)")
     if haskey(kwargs, :ylim)
         kw = (; kwargs...)
@@ -56,7 +56,7 @@ function plot_stations(longitude::Vector{Float64}, latitude::Vector{Float64};
 end
 
 """
-    plot_stations(section::Section; draw_coastline::Bool=true, debug::Int64=0, kwargs...)
+    plot_stations(section::Section; draw_coastline::Bool=true, debug::Integer=0, kwargs...)
 
 Plot section station locations on a map.
 
@@ -86,6 +86,6 @@ s = read_section(dir);
 plot_stations(s, xlim=(-80,0), ylim=(20,50))
 ```
 """
-function plot_stations(section::Section; draw_coastline::Bool=true, debug::Int64=0, kwargs...)
+function plot_stations(section::Section; draw_coastline::Bool=true, debug::Integer=0, kwargs...)
     plot_stations(section["longitude"], section["latitude"]; draw_coastline=draw_coastline, debug=debug, kwargs...)
 end

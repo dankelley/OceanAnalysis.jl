@@ -1,5 +1,5 @@
 """
-    drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Int64=0)
+    drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Integer=0)
 
 Remove quality-control (qc) columns from the `data` of an objec of type
 [`Argo`](@ref) or [`Ctd`](@ref). This is required before gridding, because qc
@@ -33,7 +33,7 @@ size(a.data)[2], size(a2.data)[2]
 (15, 9)
 ```
 """
-function drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Int64=0)
+function drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Integer=0)
     oad(debug, "drop_qc() START")
     oad(debug, "  pattern: \"$(pattern)\"")
     r = Regex(pattern)
@@ -53,7 +53,7 @@ end
 
 """
     handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
-        action::Symbol=:NaN, debug::Int64=0)
+        action::Symbol=:NaN, debug::Integer=0)
 
 Handle quality-control flags in [`Argo`](@ref) or [`Ctd`](@ref) object `x`, by setting to NaN any variable entries that have matching qc flag not contained in `retain`.  The flag for a variable named e.g. `salinity` is named `salinity_qc`.  Any variable with no matching qc entries is left unaltered.  All of this is done with a copy of `x`; for an in-place version, use [`handle_qc!`](@ref).
 
@@ -76,7 +76,7 @@ Many files use a scheme similar to that used in the Argo program (see e.g. Secti
    Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9.
    Ifremer, 2025. https://doi.org/10.13155/33951.
 """
-function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", action::Symbol=:NaN, debug::Int64=0)
+function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1", action::Symbol=:NaN, debug::Integer=0)
     oad(debug, "handle_qc($(typeof(x)), action=$(repr(action)), retain=$retain) START")
     action == :NaN || action == :delete || throw(ArgumentError("action must be :NaN or :delete, but it is :$action"))
     rval_metadata = copy(x.metadata)
@@ -115,12 +115,12 @@ end
 
 """
     handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
-        action::Symbol=:NaN, debug::Int64=0)
+        action::Symbol=:NaN, debug::Integer=0)
 
 In-place version of [`handle_qc`](@ref).
 """
 function handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
-    action::Symbol=:NaN, debug::Int64=0)
+    action::Symbol=:NaN, debug::Integer=0)
     oad(debug, "handle_qc!($(typeof(x)), retain=$retain) START")
     rval = x
     retain_set = Set(retain)

@@ -8,7 +8,7 @@ function key_insert(dict, key)
     end
 end
 
-function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Int64=0)
+function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Integer=0)
     nbuf = length(buf)
     start = 1
     while true # Find first 7f 7f byte pair, in case file starts mid-ensemble
@@ -154,7 +154,7 @@ end
 
 
 """
-    read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Int64=0)
+    read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Integer=0)
 
 Read acoustic-Doppler profiler data in RDI "Workhorse-II' format
 
@@ -218,7 +218,7 @@ adp["frequency"]
 2. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
 3. Teledyne RD Instruments. “Acoustic Doppler Current Profiler Principles of Operation: A Practical Primer.” January 2011. https://www.comm-tec.com/Docs/Manuali/RDI/BBPRIME.pdf.
 """
-function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Int64=0)
+function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Integer=0)
     oad(debug, "read_adp_rdi() START")
     filename = expanduser(filename)
     buf = read(filename)
@@ -448,7 +448,7 @@ end
 
 
 """
-    beam_to_xyz(adp::Adp; debug::Int64=0)
+    beam_to_xyz(adp::Adp; debug::Integer=0)
 
     Change velocity in an RDI Adp object from beam to xyz coordinates
 
@@ -480,7 +480,7 @@ plot(pu, pv, pw, pe, layout=(4, 1), size=(1000, 700))
 ```
 
 """
-function beam_to_xyz(adp::Adp; debug::Int64=0)
+function beam_to_xyz(adp::Adp; debug::Integer=0)
     oad(debug, "beam_to_xyz() BEGIN")
     :beam == adp["coordinate_system"] || throw(FormatException("coordinate_system must be :beam, but it is :", adp["coordinate_system"]))
     T = adp["transformation_matrix"]
@@ -511,7 +511,7 @@ end
 
 
 """
-    xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
+    xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Integer=0)
 
     Change velocity in an RDI Workhorse Adp object from xyz to enu coordinates
 
@@ -531,7 +531,7 @@ xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz);
 v = enu["velocity"];
 """
-function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Int64=0)
+function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Integer=0)
     oad(debug, "xyz_to_enu() BEGIN")
     :xyz == adp["coordinate_system"] || error("coordinate_system must be :xyz, but it is :", adp["coordinate_system"])
     v = adp.data["velocity"]

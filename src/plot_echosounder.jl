@@ -1,5 +1,5 @@
 """
-    plot_echosounder(e::Echosounder; debug::Int64=0, kwargs...)
+    plot_echosounder(e::Echosounder; debug::Integer=0, kwargs...)
 
 Plot the data stored in an [`Echosounder`](@ref) object.
 
@@ -27,7 +27,7 @@ if isfile(f)
 end
 ```
 """
-function plot_echosounder(e::Echosounder; which=:log_amplitude, debug::Int64=0, kwargs...)
+function plot_echosounder(e::Echosounder; which=:log_amplitude, debug::Integer=0, kwargs...)
     oad(debug, "plot_echosounder() START")
     if which == :log_amplitude
         rval = heatmap(e["time"], e["range"], log10.(e.data["a"]), ylab="Range [m]",

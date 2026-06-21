@@ -136,7 +136,7 @@ end
     plot_amsr(amsr::Amsr;
         xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
         color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
-        debug::Int64=0)
+        debug::Integer=0)
 
 Plot a heatmap of an AMSR field.  By default, SST is shown using the default
 Julia colorscheme, and the view is of the whole earth.  See the example
@@ -180,7 +180,7 @@ plot_amsr(amsr, xlims=(300,360), ylims=(40,60))
 function plot_amsr(amsr::Amsr;
     xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
     color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
-    debug::Int64=0)
+    debug::Integer=0)
     2 == length(xlims) || throw(ArgumentError("xlims must be of length 2"))
     2 == length(ylims) || throw(ArgumentError("ylims must be of length 2"))
     oad(debug, "plot_amsr() START")
@@ -227,7 +227,7 @@ end
 
 
 """
-    subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
+    subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
 
 Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
 
@@ -241,7 +241,7 @@ Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
 
 - `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 """
-function subset_amsr(a::Amsr, lonlims, latlims; debug::Int64=0)
+function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     oad(debug, "subset_amsr BEGIN")
     2 == length(lonlims) || throw(ArgumentError("lonlims must be a tuple of length 2"))
     2 == length(latlims) || throw(ArgumentError("latlims must be a tuple of length 2"))

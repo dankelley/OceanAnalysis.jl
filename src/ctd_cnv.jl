@@ -1,5 +1,5 @@
 """
-    read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)::Ctd
+    read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Integer=0)::Ctd
 
 Read a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 
@@ -52,7 +52,7 @@ julia> names(d.data)
  "flag"
 ```
 """
-function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)::Ctd
+function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, debug::Integer=0)::Ctd
     #!ismissing(filename) || error("please supply 'filename'")
     filename = expanduser(filename)
     open(filename) do file
@@ -61,7 +61,7 @@ function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, 
 end
 
 # Internal function used byRead a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
-function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, add_teos::Bool=true, debug::Int64=0)
+function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, add_teos::Bool=true, debug::Integer=0)
     oad(debug, "read_ctd_cnv(\"", filename, "\", ...) START")
     lines = readlines(stream)
     #oad(debug, "  $(length(lines)) lines in file")

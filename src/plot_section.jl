@@ -2,7 +2,7 @@ using FileIO, JLD2
 
 """
     plot_section(section::Section, which="salinity";
-        type=:contourf, xvar=:latitude, yvar=:pressure, debug::Int64=0, kwargs...)
+        type=:contourf, xvar=:latitude, yvar=:pressure, debug::Integer=0, kwargs...)
 
 # Arguments
 
@@ -46,7 +46,7 @@ function plot_section(section::Section, which::String="salinity";
     type::Symbol=:contourf,
     xvar::Union{Symbol,Tuple}=:latitude,
     yvar=:pressure, show_stations::Bool=false,
-    debug::Int64=0, kwargs...)
+    debug::Integer=0, kwargs...)
     oad(debug, "plot_section(which=\"$which\") BEGIN")
     oad(debug, "  see if section is gridded")
     section_is_gridded(section) || error("must use grid_section() on the section before plotting it")

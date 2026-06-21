@@ -105,8 +105,8 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     oad(debug, "  assembling metadata (a Dict)")
     metadata = Dict{String,Any}(
         "filename" => nothing,
-        "longitude" => [longitude],
-        "latitude" => [latitude],
+        "longitude" => longitude,
+        "latitude" => latitude,
         "time" => time)
     oad(debug, "  passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
@@ -133,11 +133,15 @@ return value.
 
 An error is reported if the `x.data` lacks `salinity`, `temperature` or
 `pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
+
+Any `longitude` values that are NaN are converted to -30.0, while
+any `latitude` values that are NaN are converted to 30.0. These
+values corresponde to the mid-Atlantic.
 """
 function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "set_teos START")
-    metadata = deepcopy(x.metadata)
-    data = deepcopy(x.data)
+    metadata = copy(x.metadata)
+    data = copy(x.data)
     metadata_names = keys(metadata)
     oad(debug, "  metadata_names: ", metadata_names)
     data_names = names(data)
@@ -155,7 +159,7 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     p = data.pressure
     lon = metadata["longitude"]
     lat = metadata["latitude"]
-    if !(isa(lon, AbstractVector))
+    if !isa(lon, AbstractVector)
         lon = fill(lon, length(S))
     elseif length(lon) != length(S)
         error("length(longitude) ($(length(lon))) must equal number of samples ($(length(S)))")
@@ -165,18 +169,24 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     elseif length(lat) != length(S)
         error("length(latitude) ($(length(lat))) must equal number of samples ($(length(S)))")
     end
+    bad_lon = isnan.(lon)
+    if any(bad_lon)
+        @warn "NaN longitudes converted to -30E"
+        lon[bad_lon] = -30.0
+    end
+    bad_lat = isnan.(lat)
+    if any(bad_lat)
+        @warn "NaN latitudes converted to 30N"
+        lat[bad_lat] = 30.0
+    end
     !any(isnan.(lon)) || error("cannot handle NaNs in longitude")
     !any(isnan.(lat)) || error("cannot handle NaNs in latitude")
     data.SA = similar(S)
     data.SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
-    oad(debug, "    SA completed, starting with ", first(data.SA, 2))
     data.CT = similar(T)
     data.CT = gsw_ct_from_t.(data.SA, T, p) |> fix_gsw_bad_code!
-    oad(debug, "    CT completed, starting with : ", first(data.CT, 2))
     data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
-    oad(debug, "    sigma0 completed, starting with ", first(data.sigma0, 2))
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
-    oad(debug, "    spiciness0 completed, starting with ", first(data.spiciness0, 2))
     rval = Ctd(metadata, data)
     oad(debug, "END set_teos")
     rval
@@ -243,13 +253,19 @@ function grid_ctd(ctd::Ctd;
     column_names = string.(names(ctd.data))
     for i in 1:ncol
         col = ctd.data[:, i][valid][order]
+        # We use the grid for pressure
         if column_names[i] == "pressure"
-            arr[:, i] = pressure_grid
-        else
-            # this interpolation is good for ML at top and low variation at bottom
-            itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
-            arr[:, i] = itp.(pressure_grid)
+            arr[:, i] = collect(pressure_grid)
+            continue
         end
+        # Cannot interpolate non-numeric quantitles (like QC codes)
+        if !(eltype(col_all) <: Number)
+            arr[:, i] = fill(NaN, nrow)
+            continue
+        end
+        # this interpolation is good for ML at top and low variation at bottom
+        itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
+        arr[:, i] = itp.(pressure_grid)
     end
     data = DataFrame(arr, names(ctd.data))
     rval = Ctd(deepcopy(ctd.metadata), data)

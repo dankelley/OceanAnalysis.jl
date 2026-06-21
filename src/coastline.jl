@@ -95,7 +95,7 @@ function coastline(longitude::Union{AbstractVector,AbstractRange},
 end
 
 """
-    plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
+    plot_coastline(coastline::Coastline; debug::Integer=0, kwargs...)
 
 Plot a coastline with longitude and latitude axes (i.e. without a map projection).
 
@@ -121,7 +121,7 @@ plot_coastline(coastline())
 plot_coastline(coastline(); fillcolor=:gray85, xlim=(-70.0, -55.0), ylim=(43.0, 48.0))
 ```
 """
-function plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
+function plot_coastline(coastline::Coastline; debug::Integer=0, kwargs...)
     oad(debug, "plot_coastline() START")
     longitude = coastline["longitude"]
     latitude = coastline["latitude"]
@@ -145,7 +145,7 @@ function plot_coastline(coastline::Coastline; debug::Int64=0, kwargs...)
 end
 
 """
-    plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Int64=0, kwargs...)
+    plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Integer=0, kwargs...)
 
 Add a coastline to an existing plot.
 
@@ -166,7 +166,7 @@ in the `kwargs...` grouping.
 
 - `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
 """
-function plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Int64=0, kwargs...)
+function plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Integer=0, kwargs...)
     oad(debug, "plot_coastline!() START")
     oad(debug, "  kwargs...: $(kwargs...)")
     rval = plot!(coastline["longitude"], coastline["latitude"];
@@ -235,7 +235,7 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, f
 end
 
 """
-    station_map(longitude, latitude; scale::Real=5.0, debug::Int64=0, kwargs...)
+    station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
 
 Using [`plot_coastline`](@ref), draw a map that shows the location of a station
 (or stations) specified by `longitude` and `latitude`, each of which may be a
@@ -266,7 +266,7 @@ p2 = station_map(-56.33, 45.90;
 plot(p1, p2)
 ```
 """
-function station_map(longitude, latitude; scale::Real=5.0, debug::Int64=0, kwargs...)
+function station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
     oad(debug, "station_map() START")
     oad(debug, "  kwargs...: $(kwargs...)")
     length(longitude) == length(latitude) || throw(ArgumentError("longitude and latitude are of unequal lengths ($(length(longitude)) and $(length(latitude)))"))

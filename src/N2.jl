@@ -2,7 +2,7 @@
 using DSP, Statistics
 
 """
-    N2(ctd::Ctd; method::Symbol=:spline, debug=0, kwargs...)
+    N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
 
 A general function to compute the square of the buoyancy frequency, N², for a
 [`Ctd`](@ref) object. This works by dispatching to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), according as to whether `method` is `:spline` or `:first_difference`. The `kwargs...` arguments are passed to these lower-level functions, to control the details of processing.
@@ -40,7 +40,7 @@ plot!(N2_fd, ctd_gridded["pressure"], label="Smoothing method")
 plot(panel_left, panel_right, layout=(1, 2))
 ```
 """
-function N2(ctd::Ctd; method::Symbol=:spline, debug=0, kwargs...)
+function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)
     oad(debug, "N2() START")
     kw = (; kwargs...)
     oad(debug, "  method: $method")
@@ -62,7 +62,7 @@ end
 
 """
     N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025,
-        bc::String="nearest", debug::Int64=0)
+        bc::String="nearest", debug::Integer=0)
 
 Compute the square of the buoyancy frequency, N², for a [`Ctd`](@ref) object. The value is inferred from a smoothing cubic spline that models the pressure-depdence of potential density anomaly, sigma0.
 
@@ -97,7 +97,7 @@ ctd = read_ctd_cnv(filename);
 histogram(N2_spline(ctd), label="N²")
 ```
 """
-function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, bc::String="nearest", debug::Int64=0)
+function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, bc::String="nearest", debug::Integer=0)
     # https://github.com/JuliaMath/Dierckx.jl/blob/dd942e4a38b9ab3288d74177aa36f828a91f56d4/src/Dierckx.jl#L151
     # https://www.netlib.org/dierckx/curfit.f
     # https://juliahub.com/ui/Packages/General/Dierckx/0.5.0
@@ -195,7 +195,7 @@ plot!(N2, ctd_gridded["pressure"], label="Smoothing method")
 plot(panel_left, panel_right, layout=(1, 2))
 ```
 """
-function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Int=0)
+function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)
     oad(debug, "N2_first_difference() START")
     oad(debug, "  M: $M")
     oad(debug, "  order: $order")

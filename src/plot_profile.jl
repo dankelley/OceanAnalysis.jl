@@ -1,6 +1,6 @@
 """
     plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-        abbreviate::Symbol=:long, fontsize=8, debug::Int64=0, kwargs...)
+        abbreviate::Symbol=:long, fontsize::Integer=8, debug::Integer=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `ctd`, showing how the variable named by `which` depends on either pressure or density.  The variable is drawn on the x axis and pressure on the y axis. Following oceanographic convention, the y axis is set up so that waters nearer the air-sea interface are nearer the top of the plot.
 
@@ -45,9 +45,8 @@ plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
 ```
 """
 function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-    abbreviate::Symbol=:long, fontsize=8, debug::Int64=0, kwargs...)
+    abbreviate::Symbol=:long, fontsize::Integer=8, debug::Integer=0, kwargs...)
     oad(debug, "plot_profile(<ctd>, which='$which') START")
-    data_names = names(ctd.data)
     # For all cases, we need to set up the vertical axis, so do that first
     oad(debug, "  setting up coordinate system for vertical axis")
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
@@ -63,7 +62,7 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
         error("vertical must be either :pressure or :density")
     end
     x = get_element(ctd, which, debug=increment_debug(debug))
-    if x == Nothing
+    if isnothing(x)
         error("Cannot find \"$which\" in this object, and cannot compute it either")
     end
     rval = plot(x, y,
@@ -74,6 +73,6 @@ function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
         yrot=90; kwargs...)
     oad(debug, "END plot_profile()")
-    return (rval)
+    return rval
 end
 

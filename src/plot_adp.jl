@@ -1,5 +1,5 @@
 """
-    plot_adp(adp::Adp; which=:velocities, debug::Int64=0, kwargs...)
+    plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
 
 Plot the data stored in an [`Adp`](@ref) object.
 
@@ -28,7 +28,7 @@ adp_xyz = beam_to_xyz(adp_beam);
 plot_adp(adp_xyz)
 ```
 """
-function plot_adp(adp::Adp; which=:velocities, debug::Int64=0, kwargs...)
+function plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp() START")
     if adp["coordinate_system"] == :beam
         titles = ["beam 1", "beam 2", "beam 3", "beam 4"]

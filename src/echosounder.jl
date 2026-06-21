@@ -1,5 +1,5 @@
 """
-    biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
+    biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Integer=0)
 
 Expand a byte sequence according to the scheme explained in Section 5.3.1 of
 Reference 1.
@@ -19,7 +19,7 @@ Reference 1.
 1. C code in section 5.3.1 of BioSonics Advanced Digital Hydroacoustics. “DT4 Data File Format Specification.” BioSonics, May 2017.
 
 """
-function biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Int64=0)
+function biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Integer=0)
     if byte_per_sample != 2
         @warn "biosonic_expand_rle!() not tested on 4-byte samples"
     end

@@ -3,7 +3,7 @@ using DataStructures: OrderedDict
 using Printf
 
 """
-    get_topography(name::Symbol=:global_coarse; debug::Int64=0)
+    get_topography(name::Symbol=:global_coarse; debug::Integer=0)
 
 Access a built-in topography dataset.
 
@@ -14,7 +14,7 @@ spanning approximately 30 nautical miles.
 See also [`read_topography`](@ref).
 
 """
-function get_topography(name::Symbol=:global_coarse; debug::Int64=0)
+function get_topography(name::Symbol=:global_coarse; debug::Integer=0)
     oad(debug, "get_topography(name) BEGIN")
     dir = dirname(dirname(pathof(OceanAnalysis)))
     if name == :global_coarse
@@ -27,7 +27,7 @@ function get_topography(name::Symbol=:global_coarse; debug::Int64=0)
 end
 
 """
-    read_topography(filename::String; debug::Int64 = 0)::Topography
+    read_topography(filename::String; debug::Integer = 0)::Topography
 
 Read a topography file that is in NetCDF format. The return value stores
 longitude in `rval.metadata["longitude"]`, latitude in
@@ -61,7 +61,7 @@ cl = coastline();
 plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
 ```
 """
-function read_topography(filename::String; debug::Int64=0)::Topography
+function read_topography(filename::String; debug::Integer=0)::Topography
     filename = expanduser(filename)
     oad(debug, "read_topography(\"", filename, "\", ...) START")
     NCDataset(filename, "r") do nc
@@ -94,7 +94,7 @@ end
 """
     get_topography(west::Real, east::Real,
         south::Real, north::Real; resolution::Real=4.0, destdir::String = ".",
-        server::String = "https://gis.ngdc.noaa.gov", debug::Int64 = 0)::String
+        server::String = "https://gis.ngdc.noaa.gov", debug::Integer = 0)::String
 
 Download and cache a topography file, returning the name of that file.
 
@@ -145,7 +145,7 @@ data file; thus, the function can both download and cache topographic data.
 """
 function get_topography(west::Real, east::Real,
     south::Real, north::Real; resolution::Real=4.0, destdir::String=".",
-    server::String="https://gis.ngdc.noaa.gov", debug::Int64=0)::String
+    server::String="https://gis.ngdc.noaa.gov", debug::Integer=0)::String
     oad(debug, "get_topography(west=$west," *
                ", east=$east" *
                ", south=$south" *
@@ -252,7 +252,7 @@ end
         xlims=:auto, ylims=:auto, tickdirection=:out,
         domain=:sea, color=:land_sea, clim=:auto,
         draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-        debug::Int64=0, kwargs...)
+        debug::Integer=0, kwargs...)
 
 Draw a `heatmap` image of topography.
 
@@ -274,7 +274,7 @@ function plot_topography(topo::Topography;
     xlims=:auto, ylims=:auto, tickdirection=:out,
     domain=:sea, color=:land_sea, clim=:auto,
     draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-    debug::Int64=0, kwargs...)
+    debug::Integer=0, kwargs...)
     oad(debug, "plot_topography() BEGIN")
     domain in (:sea, :land, :both) || throw(ArgumentError("domain $(repr(domain)) not permited; use :sea, :land, or :both"))
     oad(debug, "    domain: :", domain)

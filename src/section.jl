@@ -1,5 +1,5 @@
 """
-    as_section(ctds::Vector{Ctd}; name::String="", source::String="", debug::Int64=0)
+    as_section(ctds::Vector{Ctd}; name::String="", source::String="", debug::Integer=0)
 
 Construct a Section object, which olds one or more Ctd objects.
 
@@ -37,7 +37,7 @@ julia> for i in 1:length(s.data)
 [30.921, 30.9205, 30.9206]
 ```
 """
-function as_section(ctds::Vector{Ctd}; debug::Int64=0)
+function as_section(ctds::Vector{Ctd}; debug::Integer=0)
     oad(debug, "as_section() START")
     nctds = length(ctds)
     nctds > 0 || throw(ArgumentError("ctds is empty"))
@@ -53,7 +53,7 @@ end # as_section()
 
 
 """
-    read_section(Section::s, debug::Int64=0)
+    read_section(Section::s, debug::Integer=0)
 
 Read an oceanographic section, as downloaded with [`get_section`](@ref).
 
@@ -79,7 +79,7 @@ display(section.metadata)
 println("Section contains ", length(section.data), " CTD profiles")
 ```
 """
-function read_section(dir::String; debug::Int64=0)
+function read_section(dir::String; debug::Integer=0)
     oad(debug, "read_section() START")
     files = readdir(dir)
     length(files) > 0 || throw(ArgumentError("no ctd files found in $dir"))
@@ -106,7 +106,7 @@ Return true if section is gridded (that is, if it has more than 1
 CTD station, and if the pressure levels match across all the
 CTD stations.
 """
-function section_is_gridded(section::Section; debug::Int64=0)
+function section_is_gridded(section::Section; debug::Integer=0)
     oad(debug, "section_is_gridded() START")
     nctds = length(section.data)
     rval = true
@@ -133,7 +133,7 @@ function section_is_gridded(section::Section; debug::Int64=0)
 end
 
 """
-    grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
+    grid_section(section::Section, pressure_step::Float64=2.0; debug::Integer=0)
 
 Grid a section, altering all the CTD objects to employ a uniform pressure grid.
 
@@ -164,7 +164,7 @@ section_gridded = grid_section(section)
 ```
 
 """
-function grid_section(section::Section, pressure_step::Float64=2.0; debug::Int64=0)
+function grid_section(section::Section, pressure_step::Float64=2.0; debug::Integer=0)
     oad(debug, "grid_section() START")
     oad(debug, "  setting up uniform pressure grid with pressure step $pressure_step")
     nctds = length(section.data)

@@ -1,6 +1,6 @@
 """
     plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-        draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
+        draw_freezing=true, abbreviate=false, fontsize=8, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -70,7 +70,7 @@ plot_TS(ctd, marker=:none)
 See also [`plot_profile`](@ref).
 """
 function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-    draw_freezing=true, abbreviate=false, fontsize=8, debug::Int64=0, kwargs...)
+    draw_freezing=true, abbreviate=false, fontsize=8, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS(<ctd>) START")
     oad(debug, "  sigma0_levels: $sigma0_levels")
     oad(debug, "  spiciness0_levels: $spiciness0_levels")
@@ -114,14 +114,14 @@ end # plot_TS()
 
 
 """
-    plot_TS_sigma0_contours(sigma0_levels=[]; debug::Int64=0, kwargs...)
+    plot_TS_sigma0_contours(sigma0_levels=[]; debug::Integer=0, kwargs...)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
 have been drawn by other means.  For the meanings of the
 arguments, see the documentation for [`plot_TS`](@ref).
 """
-function plot_TS_sigma0_contours(sigma0_levels=[]; debug::Int64=0, kwargs...)
+function plot_TS_sigma0_contours(sigma0_levels=[]; debug::Integer=0, kwargs...)
     oad(debug, "plot_TS_sigma0_contours() START")
     oad(debug, "  sigma0_levels: $sigma0_levels")
     xlim = xlims()
@@ -155,14 +155,14 @@ function plot_TS_sigma0_contours(sigma0_levels=[]; debug::Int64=0, kwargs...)
 end
 
 """
-    plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Int64=0, kwargs...)
+    plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Integer=0, kwargs...)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
 have been drawn by other means.  For the meanings of the
 arguments, see the documentation for [`plot_TS`](@ref).
 """
-function plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Int64=0, kwargs...)
+function plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Integer=0, kwargs...)
     oad(debug, "plot_TS_spiciness0_contours() START")
     oad(debug, "  spiciness0_levels: $spiciness0_levels")
     xlim = xlims()

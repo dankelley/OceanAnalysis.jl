@@ -1,7 +1,7 @@
 using ZipFile, ProgressMeter
 
 """
-    get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int64=0)
+    get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Integer=0)
 
 Download/cache a remote file
 
@@ -12,7 +12,7 @@ if such a file already exists, and if its age is under `age`
 days, then the file is assumed to be up-to-date and is not
 downloaded.  Some processing steps are printed if `debug>0`.
 """
-function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int64=0)
+function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Integer=0)
     oad(debug, "get_file START")
     length(url) > 0 || error("Must give 'url")
     file = replace(url, r".*/" => "")
@@ -63,7 +63,7 @@ sdir = get_section(url)
 println("Downloaded ", length(readdir(sdir)), " files to '", sdir, "'")
 ```
 """
-function get_section(url::String; destdir=".", debug::Int64=0)
+function get_section(url::String; destdir=".", debug::Integer=0)
     # FIXME: maybe an argument to reset for a fresh download+extraction
     oad(debug, "get_section() START")
     oad(debug, "  url: \"", url, "\"")
@@ -97,7 +97,7 @@ function get_section(url::String; destdir=".", debug::Int64=0)
 end
 
 """
-    get_element(x::OA, element::Union{String,Symbol}; debug::Int64=0)
+    get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
 
 Get an element from an object. (This is used by `object[element]`, which calls `getindex`.)
 
@@ -111,7 +111,7 @@ If `x` is a [`Section`](@ref) object, then `get_element` can return any
 item from the `metadata` of the constituent [`Ctd`](@ref)
 objects that are stored in `x.data`.
 """
-function get_element(x::OA, element::Union{String,Symbol}; debug::Int64=0)
+function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
     oad(debug, "get_element([OA object], element=$(repr(element))) START")
     if element isa Symbol
         element = String(element)

@@ -3,7 +3,7 @@ using SQLite, DataFrames, Plots, Dates, Printf, Statistics
 """
     read_ctd_rsk(filename::String; add_teos::Bool=true,
         atmospheric_pressure=missing, longitude::Real=-60.0, latitude::Real=40.0,
-        debug::Int64=0)
+        debug::Integer=0)
 
 Read a CTD file from an RBR instrument.
 
@@ -53,7 +53,7 @@ plot(Sp, Tp, pt, TS, layout=(2,2))
 """
 function read_ctd_rsk(filename::String; add_teos::Bool=true,
     atmospheric_pressure=missing, longitude::Real=-60.0, latitude::Real=40.0,
-    debug::Int64=0)
+    debug::Integer=0)
     oad(debug, "read_ctd_rsk() START")
     filename = expanduser(filename)
     # FIXME: how do we close the db?
