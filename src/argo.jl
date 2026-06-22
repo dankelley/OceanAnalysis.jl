@@ -141,7 +141,7 @@ argo_id_cycle("4902911_095")
 # output
 2-element Vector{SubString{String}}:
  "4902911"
- "09500000"
+ "095"
 ```
 """
 function argo_id_cycle(idcycle::String="")
