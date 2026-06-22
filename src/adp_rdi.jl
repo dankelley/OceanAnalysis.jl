@@ -172,13 +172,24 @@ function cannot handle.
 
 # Arguments
 
-- `filename` an ADCP file in the 'PD0' format as described in the Teledyne RD Instruments documentation (Reference 1).
+- `filename` an ADCP file in the 'PD0' format as described in the Teledyne RD
+  Instruments documentation (Reference 1).
 
-- `ensembles` an indication of which ensembles (data profiles) to read.  This may be an single integer or a vector of integers. In the first case, if `ensembles=0` then the whole file is read, otherwise the stated number of ensembles is read (provided that the file holds that number). In the second case, the value of `ensembles` dictates the indices of ensembles that are to be read. In both cases, the indices are trimmed to be from 1 to the number of ensembles in the file. The default is to read the whole file. and e.g. `ensembles=1:10:101` would read ensemble 1, ensemble 11, and so on, up to ensemble 101.
+- `ensembles` an indication of which ensembles (data profiles) to read.  This
+  may be an single integer or a vector of integers. In the first case, if
+  `ensembles=0` then the whole file is read, otherwise the stated number of
+  ensembles is read (provided that the file holds that number). In the second
+  case, the value of `ensembles` dictates the indices of ensembles that are to be
+  read. In both cases, the indices are trimmed to be from 1 to the number of
+  ensembles in the file. The default is to read the whole file. and e.g.
+  `ensembles=1:10:101` would read ensemble 1, ensemble 11, and so on, up to
+  ensemble 101.
 
 # Keywords
 
-- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+- `debug` an integer indicating whether to print information during processing.
+  The default value of 0 means to work quietly, and any larger integer indicates
+  to print some information.
 
 # Examples
 

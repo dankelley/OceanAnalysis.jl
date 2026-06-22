@@ -16,11 +16,16 @@ then [`plot_coastline`](@ref) is called to draw the land.
 
 # Keywords
 
-- `draw_coastline`: a Bool value indicating whether to plot the coastline, using [`plot_coastline`](@ref).
+- `draw_coastline`: a Bool value indicating whether to plot the coastline,
+   using [`plot_coastline`](@ref).
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
-- `kwargs`: optional items, passed down to lower-level plotting functions. For example, `size` controls the size of the plot, `xlim` and `ylim` control the viewing window, `color` controls the land colour, and `markercolor` controls the station-location colour.
+- `kwargs`: optional items, passed down to lower-level plotting functions. For
+  example, `size` controls the size of the plot, `xlim` and `ylim` control the
+  viewing window, `color` controls the land colour, and `markercolor` controls
+  the station-location colour.
 
 # Examples
 
@@ -70,11 +75,16 @@ then [`plot_coastline`](@ref) is called to draw the land.
 
 # Keywords
 
-- `draw_coastline`: a Bool value indicating whether to plot the coastline, using [`plot_coastline`](@ref).
+- `draw_coastline`: a Bool value indicating whether to plot the coastline,
+  using [`plot_coastline`](@ref).
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
-- `kwargs`: optional items, passed down to lower-level plotting functions. For example, `size` controls the size of the plot, `xlim` and `ylim` control the viewing window, `color` controls the land colour, and `markercolor` controls the station-location colour.
+- `kwargs`: optional items, passed down to lower-level plotting functions. For
+  example, `size` controls the size of the plot, `xlim` and `ylim` control the
+  viewing window, `color` controls the land colour, and `markercolor` controls
+  the station-location colour.
 
 # Examples
 

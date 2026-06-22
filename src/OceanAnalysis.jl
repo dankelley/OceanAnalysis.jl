@@ -11,19 +11,19 @@ The functions that read data return objects that are structs holding two items:
 `data` and `metadata`.
 
 * The `data` item holds the actual data. The form of the data depends on the
-class of the object.  For example, in a [`Ctd`](@ref) object, `data` is a
-`DataFrame`, whereas in a [`Section`](@ref) object, `data` is a Vector of
-[`Ctd`](@ref) objects.
+  class of the object.  For example, in a [`Ctd`](@ref) object, `data` is a
+  `DataFrame`, whereas in a [`Section`](@ref) object, `data` is a Vector of
+  [`Ctd`](@ref) objects.
 
 * The `metadata` item holds information about the data.  For example, with a
-[`Ctd`](@ref) object, `metadata` holds the location and time of sampling, along
-with other information, depending on the source of the data.
+  [`Ctd`](@ref) object, `metadata` holds the location and time of sampling, along
+  with other information, depending on the source of the data.
 
 As a convenience, [`get_element`](@ref) may be used to extract information from
-either the `metadata` or `data` parts of an OceanAnalysis object.
-
-FIXME: discuss the fact that [`get_element`](@ref) can return derived
-quantities.
+either the `metadata` or `data` parts of an OceanAnalysis object. It may also
+be used to calculate some information that can be inferred from what is
+actually stored in the object, e.g. Conservative Temperature and Absolute
+Salinity.
 
 FIXME: discuss `[` here.  I think maybe we ought to cause `[` to call
 `get_element` regardless of the object class. But, in that case, is there any

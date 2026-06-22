@@ -72,13 +72,24 @@ that of the `interp_barnes` function in the R `oce` package.
 
 # Keywords
 
-- `xg` Float64 vector giving grid coordinates in the x direction. If not provided, this is computed with `pretty(x,50)`.
+- `xg` Float64 vector giving grid coordinates in the x direction. If not
+  provided, this is computed with `pretty(x,50)`.
+
 - `yg` As `xg` but for the `y` direction.
-- `xr` Float64 telling the influence scale in the x direction. If not provided, this defaults to the range of `x` values, divided by the square root of the number of `x` values.
+
+- `xr` Float64 telling the influence scale in the x direction. If not provided,
+  this defaults to the range of `x` values, divided by the square root of the
+  number of `x` values.
+
 - `yr` As `xr` but for the `y` direction.
+
 - `gamma` Float64 telling the value of gamma to use (0.5 by default).
+
 - `iterations` integer telling how many iterations to perform (2 by default).
-- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+
+- `debug` an integer indicating whether to print information during processing.
+  The default value of 0 means to work quietly, and any larger integer indicates
+  to print some information.
 
 # Value
 

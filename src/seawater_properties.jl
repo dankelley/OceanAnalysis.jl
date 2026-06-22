@@ -72,7 +72,7 @@ julia> SA(35.0, 100.0, -30.0, 30.0)
 ```
 """
 function SA(salinity::Real, pressure::Real, longitude::Real, latitude::Real)
-    -90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
+    #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
     if rval > GSW_INVALID_THRESHOLD
         rval = NaN
@@ -125,7 +125,7 @@ julia> pressure_from_depth(10.0)
 ```
 """
 function pressure_from_depth(depth::Real, latitude::Real=DEFAULT_LATITUDE)
-    -90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
+    #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return gsw_p_from_z(-depth, latitude, 0.0, 0.0)
 end
 
@@ -145,7 +145,7 @@ julia> pressure_from_z(-10.0)
 ```
 """
 function pressure_from_z(z::Real, latitude::Real=DEFAULT_LATITUDE)
-    -90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
+    #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return gsw_p_from_z(z, latitude, 0.0, 0.0)
 end
 
@@ -168,7 +168,7 @@ julia> depth_from_pressure(100.0)
 ```
 """
 function depth_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
-    -90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
+    #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
 
@@ -191,7 +191,7 @@ julia> z_from_pressure(100.0)
 ```
 """
 function z_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
-    -90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
+    #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
 

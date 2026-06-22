@@ -93,7 +93,7 @@ and the return value is the path to the resultant local file.
 For example, if this function is called on 2025-09-27 with no arguments
 specified, an attempt will be made to download a file named
 `"./RSS_AMSR2_ocean_L3_3day_2025-09-23_v08.2.nc"` from the server
-`https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2023/".
+[https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2025/](https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2025/).
 
 See [`read_amsr`](@ref) for how to deal with the files downloaded
 by `get_amsr`.

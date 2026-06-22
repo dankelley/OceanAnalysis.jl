@@ -138,14 +138,15 @@ function biosonic_float(buf::Vector{UInt8})
 end
 
 """
-    read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:single_beam, sound_speed::Float64=1490.3, debug::Int=0)
+    read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:single_beam,
+        sound_speed::Float64=1490.3, debug::Int=0)
 
-    Read data from a Biosonics scientific echosounder.
+Read data from a Biosonics scientific echosounder.
 
-This function is still in development. The `read.echosounder()` function of the
-`oce` R package is being used as a guide, along with the Biosonics
-document (Reference 1) that describes the file format. FIXME: when code
-is stabilized, write more here.
+Caution: This function is still in development. The `read.echosounder()`
+function of the `oce` R package is being used as a guide, along with the
+Biosonics document (Reference 1) that describes the file format. FIXME: when
+code is stabilized, write more here.
 
 # Arguments
 
@@ -153,13 +154,21 @@ is stabilized, write more here.
 
 # Keywords
 
-- `channel` an Int64 giving the channel number to read. The default is 1. In the file named in the Examples section, there are two channels, numbered 1 and 2.
+- `channel` an Int64 giving the channel number to read. The default is 1. In
+  the file named in the Examples section, there are two channels, numbered 1 and
+  2.
 
-- `beam` a Symbol indicating which type of beam is sought. In the present version, only `:single_beam` is permitted. In a later version, `:dual_beam` and `:split_beam` may also be permitted.
+- `beam` a Symbol indicating which type of beam is sought. In the present
+  version, only `:single_beam` is permitted. In a later version, `:dual_beam` and
+  `:split_beam` may also be permitted.
 
-- `sound_speed` a Float64 value indicating the sound speed. The default is to use the sound speed at practical salinity 35, in-situ temperature 10 °C and pressure 30 dbar.  (Sound speed is also stored in the files, but Reference 1 says that they ought not to be used.)
+- `sound_speed` a Float64 value indicating the sound speed. The default is to
+  use the sound speed at practical salinity 35, in-situ temperature 10 °C and
+  pressure 30 dbar.  (Sound speed is also stored in the files, but Reference 1
+  says that they ought not to be used.)
 
-- `debug` an Int64 value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
+- `debug` an Int64 value indicating whether to print messages during
+  processing. By default, this is 0, meaning to work quietly.
 
 
 # Examples

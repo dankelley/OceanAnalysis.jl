@@ -3,7 +3,10 @@ using GLM, DataFrames, Interpolations, GibbsSeaWater
 """
     ILD_KRH(c::Ctd; criterion=0.8)::Float64
 
-Compute surface isothermal layer depth (ILD) with the method described by Kara et al. (2000). See also [`MLD_KRH`] for an analogous method for finding mixed layer depth (MLD).  An alternative estimate of MLD is provided by [`MLD_CF`](@ref).
+Compute surface isothermal layer depth (ILD) with the method described by Kara
+et al. (2000). See also [`MLD_KRH`] for an analogous method for finding mixed
+layer depth (MLD).  An alternative estimate of MLD is provided by
+[`MLD_CF`](@ref).
 
 # Arguments
 
@@ -11,7 +14,8 @@ Compute surface isothermal layer depth (ILD) with the method described by Kara e
 
 # Keywords
 
-- `criterion` a number giving a criterion for temperature change. The default is 0.8°C, as suggested by Kara et al. (2000).
+- `criterion` a number giving a criterion for temperature change. The default
+  is 0.8°C, as suggested by Kara et al. (2000).
 
 # References
 

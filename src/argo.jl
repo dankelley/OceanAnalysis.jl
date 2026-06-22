@@ -79,11 +79,15 @@ taken from https://vocab.nerc.ac.uk/collection/R11/current/ (accessed on
 2. The two sources just listed describe test 18 as having ID 261144, although
    it ought to be 262144, since the scheme otherwise uses powers of 2.
 
-**References**
+# References
 
-Carval, Thierry, Bob Keeley, Yasushi Takatsuki, et al. _Argo User’s Manual V3.3_. Ifremer, 2019. [https://doi.org/10.13155/29825](https://doi.org/10.13155/29825).
+1. Carval, Thierry, Bob Keeley, Yasushi Takatsuki, et al. _Argo User’s Manual
+   V3.3_. Ifremer, 2019.
+   [https://doi.org/10.13155/29825](https://doi.org/10.13155/29825).
 
-Wong, Annie, Robert Keeley, Thierry Carval, and Argo Data Management Team. _Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9. Ifremer, 2025. [https://doi.org/10.13155/33951](https://doi.org/10.13155/33951).
+2. Wong, Annie, Robert Keeley, Thierry Carval, and Argo Data Management Team.
+   _Argo Quality Control Manual for CTD and Trajectory Data. Version 3.9.
+   Ifremer, 2025. [https://doi.org/10.13155/33951](https://doi.org/10.13155/33951).
 
 """
 function summarize_argo_data_tests(filename::String)

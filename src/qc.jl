@@ -11,9 +11,13 @@ columns in such objects are of a one-byte type.
 
 # Keywords
 
-- `pattern` a string that gets converted into a regular expression, so backslashes are required for special characters. The default value has such a backslash, to "protect" the dollar sign.  Note that this default is suitable for [`Argo`](@ref) objects acquired from standard data servers.
+- `pattern` a string that gets converted into a regular expression, so
+  backslashes are required for special characters. The default value has such a
+  backslash, to "protect" the dollar sign.  Note that this default is suitable
+  for [`Argo`](@ref) objects acquired from standard data servers.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
 # Return value
 
@@ -55,20 +59,35 @@ end
     handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
         action::Symbol=:NaN, debug::Integer=0)
 
-Handle quality-control flags in [`Argo`](@ref) or [`Ctd`](@ref) object `x`, by setting to NaN any variable entries that have matching qc flag not contained in `retain`.  The flag for a variable named e.g. `salinity` is named `salinity_qc`.  Any variable with no matching qc entries is left unaltered.  All of this is done with a copy of `x`; for an in-place version, use [`handle_qc!`](@ref).
+Handle quality-control flags in [`Argo`](@ref) or [`Ctd`](@ref) object `x`, by
+setting to NaN any variable entries that have matching qc flag not contained in
+`retain`.  The flag for a variable named e.g. `salinity` is named
+`salinity_qc`.  Any variable with no matching qc entries is left unaltered.
+All of this is done with a copy of `x`; for an in-place version, use
+[`handle_qc!`](@ref).
 
-Many files use a scheme similar to that used in the Argo program (see e.g. Section 6.1 of Reference 1). Briefly, `"0"` means that "no QC was performed", `"1"` means "good data", `"2"` means "probably good data", `"3"` means "probably bad data", `"4"` means "bad data", `"5"` means "changed data", `"8"` means "estimated value" and `"9"` means "missing value".
+Many files use a scheme similar to that used in the Argo program (see e.g.
+Section 6.1 of Reference 1). Briefly, `"0"` means that "no QC was performed",
+`"1"` means "good data", `"2"` means "probably good data", `"3"` means
+"probably bad data", `"4"` means "bad data", `"5"` means "changed data", `"8"`
+means "estimated value" and `"9"` means "missing value".
 
 # Arguments
 - x an object of type [`Argo`](@ref) or [`Ctd`](@ref).
 
 # Keywords
 
-- `retain` a String, or a vector of Strings, holding the quality-control flags that are considered to reflect acceptable data. The default, `"1"` means to retain only data designated "Good" in the Argo system; this is a safe choice.
+- `retain` a String, or a vector of Strings, holding the quality-control flags
+  that are considered to reflect acceptable data. The default, `"1"` means to
+  retain only data designated "Good" in the Argo system; this is a safe choice.
 
-- `action`: either `:NaN` (the default), which means to change un-retained items to NaN values or `:delete`, which means to delete all data in any row where either `"salinity"`, `"temperature"` or `"pressure"` is not to be retained.
+- `action`: either `:NaN` (the default), which means to change un-retained
+  items to NaN values or `:delete`, which means to delete all data in any row
+  where either `"salinity"`, `"temperature"` or `"pressure"` is not to be
+  retained.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
 # References
 

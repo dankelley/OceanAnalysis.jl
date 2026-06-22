@@ -3,11 +3,19 @@
 
 Read a NONNA (NON-NAvigational) bathymetric file.
 
-The Canadian Hydrographic Service provides access to high-resolution bathymetric data for some Canadian waters at https://data.chs-shc.ca/dashboard/map. (This is a GUI-oriented site, and it is somewhat challenging to navigate.) Files are available at both 10-m and 100-m resolution and in a variety of formats. The present function handles only the GeoTIFF format.
+The Canadian Hydrographic Service provides access to high-resolution
+bathymetric data for some Canadian waters at
+https://data.chs-shc.ca/dashboard/map. (This is a GUI-oriented site, and it is
+somewhat challenging to navigate.) Files are available at both 10-m and 100-m
+resolution and in a variety of formats. The present function handles only the
+GeoTIFF format.
 
 # Return value
 
-This returns a [`Nonna`](@ref) object that holds `metadata` and `data`. The `metadata` item is a Dict that holds `easting`, `northing` (both in metres) and some other elements.  The `data` item is a Matrix of the height (in metres) above a nominal sea-level surface.
+This returns a [`Nonna`](@ref) object that holds `metadata` and `data`. The
+`metadata` item is a Dict that holds `easting`, `northing` (both in metres) and
+some other elements.  The `data` item is a Matrix of the height (in metres)
+above a nominal sea-level surface.
 
 
 # Examples

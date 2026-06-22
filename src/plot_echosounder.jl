@@ -3,17 +3,21 @@
 
 Plot the data stored in an [`Echosounder`](@ref) object.
 
-This function provides some basic plots of the contents of an acoustic-Doppler profiler ([`Adp`](@ref)) object.
+This function provides some basic plots of the contents of an acoustic-Doppler
+profiler ([`Adp`](@ref)) object.
 
 # Arguments
 
 - `e` an Echosounder object, as created with [`read_echosounder`](@ref).
 
-- `which` a Symbol indicating what to plot.  If `which` is `:log_amplitude` then a [`heatmap`] plot is made of the base-10 logarithm of the signal amplitude.  Eventually, other possible values of `which` may be handled.
+- `which` a Symbol indicating what to plot.  If `which` is `:log_amplitude`
+  then a [`heatmap`] plot is made of the base-10 logarithm of the signal
+  amplitude.  Eventually, other possible values of `which` may be handled.
 
 # Keywords
 
-- `debug`: an optional integer value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional integer value that, if it exceeds 0, indicates that
+  debugging output should be printed during processing.
 
 - `kwargs`: optional items, passed to `heatmap`.
 

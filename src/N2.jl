@@ -30,7 +30,7 @@ functions, to control the details of processing.
 
 # Return value
 
-This function returns a vector of N2 values.
+This function returns a vector of N² values.
 
 # Examples
 
@@ -186,23 +186,30 @@ end
 """
     N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)::Vector{Float64}
 
-Computation of N^2 based on first-differences of smoothed density.
+Compute the square of the buoyancy frequency, N² (in 1/s²), based on
+first-differences of smoothed density.
 
 # Parameters
 
-- `ctd` a [`Ctd`](@ref) object. This must have pressure values increasing at a constant rate; if not, an exception is thrown, with a hint to first use [grid_ctd()] to grid the Ctd object.
+- `ctd` a [`Ctd`](@ref) object. This must have pressure values increasing at a
+  constant rate; if not, an exception is thrown, with a hint to first use
+  [grid_ctd()] to grid the Ctd object.
 
-- `M` cutoff length for Butterworth filter. An exception is thrown if this is less than 3.
+- `M` cutoff length for Butterworth filter. An exception is thrown if this is
+  less than 3.
 
 # Keywords
 
-- `order` integer giving the order of the Butterworth filter. An exception is thrown if this is less than 1.
+- `order` integer giving the order of the Butterworth filter. An exception is
+  thrown if this is less than 1.
 
-- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+- `debug` an integer indicating whether to print information during processing.
+  The default value of 0 means to work quietly, and any larger integer indicates
+  to print some information.
 
 # Return value
 
-This function returns a vector of N2 values.
+This function returns a vector of N² values.
 
 # Examples
 

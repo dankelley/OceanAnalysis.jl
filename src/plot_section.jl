@@ -8,21 +8,40 @@ using FileIO, JLD2
 
 - `section` a Section, as created with [`as_section`](@ref) or [`read_section`](@ref).
 
-- `which` a String indicating the name of the hydrographic variable to be plotted. This must be present in each of the [`Ctd`](@ref) objects stored within the `section.data`.  Another requirement is that the section has been gridded, using [`grid_section`](@ref). The plotting is done with `contour`, `contourf` or `heatmap` as directed by the `type` argument. In each case, `kwargs...` is passed to the function to permit customization.  If `show_stations` is true, then `vline` is used to draw vertical lines indicating station locations. Note that case 2, [`section_is_gridded`](@ref) is called first to ensure that the section has been gridded with [`grid_section`](@ref), with an error being reported if not.
+- `which` a String indicating the name of the hydrographic variable to be
+  plotted. This must be present in each of the [`Ctd`](@ref) objects stored
+  within the `section.data`.  Another requirement is that the section has been
+  gridded, using [`grid_section`](@ref). The plotting is done with `contour`,
+  `contourf` or `heatmap` as directed by the `type` argument. In each case,
+  `kwargs...` is passed to the function to permit customization.  If
+  `show_stations` is true, then `vline` is used to draw vertical lines indicating
+  station locations. Note that case 2, [`section_is_gridded`](@ref) is called
+  first to ensure that the section has been gridded with [`grid_section`](@ref),
+  with an error being reported if not.
 
 # Keywords
 
-- `type` a Symbol indicating the type of plot. This may be `:contour` for simple contours, `:contourf` (the default) for filled contours, or `:heatmap` for an image.
+- `type` a Symbol indicating the type of plot. This may be `:contour` for
+  simple contours, `:contourf` (the default) for filled contours, or `:heatmap`
+  for an image.
 
-- `xvar` either a Symbol (which must be one of `:distance`, `:latitude` or `:longitude`) or a Tuple with two elements the first being a label for the x axis and the second being a vector of values for x that correspond to the stations in `section.data`.  See the Examples for a case in which sampling time is used for the Tuple case.
+- `xvar` either a Symbol (which must be one of `:distance`, `:latitude` or
+  `:longitude`) or a Tuple with two elements the first being a label for the x
+  axis and the second being a vector of values for x that correspond to the
+  stations in `section.data`.  See the Examples for a case in which sampling time
+  is used for the Tuple case.
 
 - `yvar` a Symbol, the permitted values of which are `:depth` and `:pressure`.
 
-- `show_stations` a Bool value indicating whether to draw vertical gray dotted lines to indicate station locations on cross-section diagrams.
+- `show_stations` a Bool value indicating whether to draw vertical gray dotted
+  lines to indicate station locations on cross-section diagrams.
 
-- `debug`: an optional integer value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional integer value that, if it exceeds 0, indicates that
+  debugging output should be printed during processing.
 
-- `kwargs`: optional items, passed down to lower-level plotting functions. For example, `size` controls the size of the plot, `xlim` and `ylim` control the viewing window, and `color` controls the colour.
+- `kwargs`: optional items, passed down to lower-level plotting functions. For
+  example, `size` controls the size of the plot, `xlim` and `ylim` control the
+  viewing window, and `color` controls the colour.
 
 # Examples
 

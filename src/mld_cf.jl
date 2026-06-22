@@ -30,9 +30,12 @@ An alternative estimate of MLD is provided by [`MLD_KRH`](@ref); its cousin,
 
 # Keywords
 
-- `variable` a String holding the name of the variable to be used in the analysis. The default, `"temperature"`, is traditional and arguably the most sensible in most instances.
+- `variable` a String holding the name of the variable to be used in the
+  analysis. The default, `"temperature"`, is traditional and arguably the most
+  sensible in most instances.
 
-- `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
+- `n` an Integer indicating how many levels to examine below each putative
+  mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
 
 # Return value
 
@@ -84,7 +87,10 @@ end
 """
     MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Float64
 
-Compute mixed-layer depth according to the Chu and Fan (2010) method; see also Kelley (2018) for an example. The usual practice is to use `MLD_CF()`, but [`MLD_CF_detailed`](@ref) may be used to investigate the steps in the analysis. An alternative formulation of MLD may be computed with [`MLD_KRH`](@ref).
+Compute mixed-layer depth according to the Chu and Fan (2010) method; see also
+Kelley (2018) for an example. The usual practice is to use `MLD_CF()`, but
+[`MLD_CF_detailed`](@ref) may be used to investigate the steps in the analysis.
+An alternative formulation of MLD may be computed with [`MLD_KRH`](@ref).
 
 # Arguments
 
@@ -92,13 +98,17 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 # Keywords
 
-- `variable` a String holding the name of the variable to be used in the analysis. The default, `"temperature"`, is traditional and arguably the most sensible in most instances.
+- `variable` a String holding the name of the variable to be used in the
+  analysis. The default, `"temperature"`, is traditional and arguably the most
+  sensible in most instances.
 
-- `n` an Integer indicating how many levels to examine below each putative mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
+- `n` an Integer indicating how many levels to examine below each putative
+  mixed-layer region. Chu and Fan (2010) suggest using a small value for this.
 
 # Return value
 
-`MLD_CF()` returns a single number, which is the index of the pressure vector that is closest to the estimated mixed-layer depth.
+`MLD_CF()` returns a single number, which is the index of the pressure vector
+that is closest to the estimated mixed-layer depth.
 
 # References
 

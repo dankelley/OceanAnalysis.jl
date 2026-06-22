@@ -7,11 +7,15 @@ Rename data items from labels used in files to names used in code.
 
 - `names` a String holding a name to be converted, or a vector of such strings.
 
-- `number_replicates` a Bool value indicating whether to prevent duplicated names by appending numbers to duplicates.  This is true by default. For example, the first salinity would be named `salinity`, while the second would be named `salinity2`.
+- `number_replicates` a Bool value indicating whether to prevent duplicated
+  names by appending numbers to duplicates.  This is true by default. For
+  example, the first salinity would be named `salinity`, while the second would
+  be named `salinity2`.
 
 # Return value
 
-A String or vector of String items, holding new names.  If any of the converted names appear more than once, then digits are appended (see last example).
+A String or vector of String items, holding new names.  If any of the converted
+names appear more than once, then digits are appended (see last example).
 
 # Examples
 

@@ -181,7 +181,10 @@ function plot_TS_sigma0_contours(sigma0_levels=[]; debug::Integer=0, kwargs...)
     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
     if length(sigma0_levels) > 0
         oad(debug, "  drawing sigma0 contours at levels $(sigma0_levels)")
-        contour!(SAc, CTc, sigma0c, xlim=xlim, ylim=ylim, linewidth=contour_linewidth, color=:gray50, levels=sigma0_levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
+        contour!(SAc, CTc, sigma0c, xlim=xlim, ylim=ylim,
+            linewidth=contour_linewidth, color=:gray50,
+            levels=sigma0_levels, cbar=false, clabels=true,
+            foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
     end
     oad(debug, "END plot_TS_sigma0_contours")
 end
@@ -222,7 +225,10 @@ function plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Integer=0, kwa
     contour_linewidth = 1.19 * default(:gridlinewidth) # factor is 2^(1/4)
     if length(spiciness0_levels) > 0
         oad(debug, "  drawing spiciness0 contours at levels $(spiciness0_levels)")
-        contour!(SAc, CTc, spiciness0c, xlim=xlim, ylim=ylim, linewidth=contour_linewidth, color=:gray50, levels=spiciness0_levels, cbar=false, clabels=true, foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
+        contour!(SAc, CTc, spiciness0c, xlim=xlim, ylim=ylim,
+            linewidth=contour_linewidth, color=:gray50,
+            levels=spiciness0_levels, cbar=false, clabels=true,
+            foreground_color_axis=:black, foreground_color_border=:black; kwargs...)
     end
     oad(debug, "END plot_TS_spiciness0_contours")
 end

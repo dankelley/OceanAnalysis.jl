@@ -4,7 +4,8 @@ using GMT: gmtread, xy2lonlat, grdproject # will only need first 2, later
 """
     read_dem(file::String; lonlat_method::Symbol = :interpolated)
 
-Read a digital-elevation-model file.  See also [`subset_dem`](@ref) and [`plot_dem`](@ref) for more processing functions.
+Read a digital-elevation-model file.  See also [`subset_dem`](@ref) and
+[`plot_dem`](@ref) for more processing functions.
 
 # Arguments
 
@@ -12,13 +13,22 @@ Read a digital-elevation-model file.  See also [`subset_dem`](@ref) and [`plot_d
 
 # Keywords
 
-- `lonlat_method` a Symbol, either `:interpolated` or `projected`. If the former (which is the default) then the corners are projected and then linear interpolation is done in between. If the latter, which is substantially slower, all the points in the grid are projected. The two methods disagreed in a test by at most the equivalent of 0.5 m distance.
+- `lonlat_method` a Symbol, either `:interpolated` or `projected`. If the
+  former (which is the default) then the corners are projected and then linear
+  interpolation is done in between. If the latter, which is substantially slower,
+  all the points in the grid are projected. The two methods disagreed in a test
+  by at most the equivalent of 0.5 m distance.
 
-- `debug` an integer that, if it exceeds 0, indicates that the function is to print out some intermediate steps.
+- `debug` an integer that, if it exceeds 0, indicates that the function is to
+  print out some intermediate steps.
 
 # Return
 
-`read_dem` returns an [`Dem`](@ref) object.  Its `metadata` item is a Dict holding the `filename`, along with grid axis variables `x` and `y` that are in the easterly and northerly directions, plus the corresponding geographical coordinates `longitude` and `latitude`. Its `data` item is a matrix of elevation, in metres.
+`read_dem` returns an [`Dem`](@ref) object.  Its `metadata` item is a Dict
+holding the `filename`, along with grid axis variables `x` and `y` that are in
+the easterly and northerly directions, plus the corresponding geographical
+coordinates `longitude` and `latitude`. Its `data` item is a matrix of
+elevation, in metres.
 
 # Examples
 
@@ -142,9 +152,13 @@ end
 
 # Keywords
 
-- `coordinates` a Symbol that indicates what to put on the axes. If this is `:distance` (the default) then distance (in m) is shown on the axes. Otherwise, if it is `:geographic` then longitude and latitude are used (with aspect ratio set for the middle latitude).
+- `coordinates` a Symbol that indicates what to put on the axes. If this is
+  `:distance` (the default) then distance (in m) is shown on the axes. Otherwise,
+  if it is `:geographic` then longitude and latitude are used (with aspect ratio
+  set for the middle latitude).
 
-- `kwargs...` other arguments, passed to `heatmap`, which plots the elevation data.
+- `kwargs...` other arguments, passed to `heatmap`, which plots the elevation
+  data.
 
 """
 function plot_dem(dem::Dem; coordinates::Symbol=:distance, kwargs...)
