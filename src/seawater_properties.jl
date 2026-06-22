@@ -7,7 +7,10 @@ const DEFAULT_LATITUDE = 45.0
     CT(ctd)
 
 Compute Conservative Temperature (CT), using `gsw_ct_from_t()` in the
-`GibbsSeaWater` package.
+`GibbsSeaWater` package. Note that return values exceeding
+$(GSW_INVALID_THRESHOLD) are set to NaN, in accordance with the missing-value
+convention used by `GibbSeaWater`.
+
 
 - Scalar form: takes single values and returns a single value.
 - Vector use: the broadcasting convention, i.e. calling as `CT.()` may be used
@@ -26,7 +29,11 @@ julia> CT(35.0, 10.0, 100.0)
 ```
 """
 function CT(SA::Real, temperature::Real, pressure::Real)
-    gsw_ct_from_t(SA, temperature, pressure)
+    rval = gsw_ct_from_t(SA, temperature, pressure)
+    if rval > GSW_INVALID_THRESHOLD
+        rval = NaN
+    end
+    rval
 end
 
 function CT(ctd::Ctd)
@@ -43,7 +50,8 @@ end
     SA(ctd)
 
 Compute Absolute Salinity (SA), using `gsw_sa_from_sp()` in the `GibbsSeaWater`
-package.
+package. Note that return values exceeding $(GSW_INVALID_THRESHOLD) are set to
+NaN, in accordance with the missing-value convention used by `GibbSeaWater`.
 
 - Scalar form: takes single values and returns a single value.
 - Vector use: the broadcasting convention, i.e. calling as `SA.()` may be used
@@ -102,7 +110,7 @@ end
 
 
 """
-    pressure_from_depth(depth::Real, latitude::Real=45.0)
+    pressure_from_depth(depth::Real, latitude::Real=$(DEFAULT_LATITUDE))
 
 Compute sea pressure from depth and latitude.
 
@@ -122,7 +130,7 @@ function pressure_from_depth(depth::Real, latitude::Real=DEFAULT_LATITUDE)
 end
 
 """
-    pressure_from_z(z::Real, latitude::Real=45.0)
+    pressure_from_z(z::Real, latitude::Real=$(DEFAULT_LATITUDE))
 
 Compute sea pressure from vertical coordinate (height above sea level) and latitude.
 
@@ -143,7 +151,7 @@ end
 
 
 """
-    depth_from_pressure(pressure::Real, latitude::Real=45.0)
+    depth_from_pressure(pressure::Real, latitude::Real=$(DEFAULT_LATITUDE))
 
 Compute seawater depth from sea pressure and latitude.
 
