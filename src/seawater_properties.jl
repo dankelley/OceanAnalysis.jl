@@ -1,4 +1,6 @@
 const GSW_INVALID_THRESHOLD = 1.0e15
+const DEFAULT_LONGITUDE = -30.0
+const DEFAULT_LATITUDE = 45.0
 
 """
     CT(SA, temperature, pressure)
@@ -7,9 +9,13 @@ const GSW_INVALID_THRESHOLD = 1.0e15
 Compute Conservative Temperature (CT), using `gsw_ct_from_t()` in the
 `GibbsSeaWater` package.
 
-The first form takes single values and returns a single value. The second form
-extracts values from a [`Ctd`](@ref) object and then calls the first form as
-`CT.()` so that it returns a vector of CT values.
+- Scalar form: takes single values and returns a single value.
+- Vector use: Use broadcasting, e.g. `CT.(SA_vec, temperature_vec,
+  pressure_vec)`, where the `_vec` items are vectors.
+- Ctd form: this extracts values from a [`Ctd`](@ref) object and then calls uses
+  the vector form.
+
+Units: temperature in °C, pressure in dbar, SA in g/kg.
 
 # Examples
 ```jldoctest
@@ -19,16 +25,16 @@ julia> CT(35.0, 10.0, 100.0)
 9.981322531922249
 ```
 """
+function CT(SA::Real, temperature::Real, pressure::Real)
+    gsw_ct_from_t(SA, temperature, pressure)
+end
+
 function CT(ctd::Ctd)
     if (:CT in propertynames(ctd.data)) || ("CT" in names(ctd.data))
         return copy(ctd.data.CT)
     else
         return CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
     end
-end
-
-function CT(SA::Real, temperature::Real, pressure::Real)
-    gsw_ct_from_t(SA, temperature, pressure)
 end
 
 
@@ -62,8 +68,8 @@ function SA(ctd::Ctd)
         salinity = ctd.data.salinity
         pressure = ctd.data.pressure
         n = length(salinity)
-        lon = get(ctd.metadata, "longitude", -30.0)
-        lat = get(ctd.metadata, "latitude", 45.0)
+        lon = get(ctd.metadata, "longitude", DEFAULT_LONGITUDE)
+        lat = get(ctd.metadata, "latitude", DEFAULT_LATITUDE)
         longitude = fill(lon, n)
         latitude = fill(lat, n)
         return SA.(salinity, pressure, longitude, latitude)
@@ -83,9 +89,11 @@ end
 
 
 """
-    Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and pressure (dbar).
+    salinity_from_conductivity(conductivity::Real, temperature::Real, pressure::Real)
+
+Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and
+pressure (dbar).
 """
-#gsw::gsw_SP_from_C(C0 * conductivity, temperature, pressure)
 function salinity_from_conductivity(conductivity::Real, temperature::Real, pressure::Real)
     gsw_sp_from_c(conductivity, temperature, pressure)
 end
@@ -121,6 +129,7 @@ function pressure_from_z(z::Real, latitude::Real=45.0)
     return gsw_p_from_z(z, latitude, 0.0, 0.0)
 end
 
+
 """
     Compute seawater depth (m) from sea pressure (dbar)
 
@@ -137,6 +146,7 @@ julia> depth_from_pressure(100.0)
 function depth_from_pressure(pressure::Real, latitude::Real=45.0)
     return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
+
 
 """
     Compute vertical coordinate (m) from sea pressure (dbar)
