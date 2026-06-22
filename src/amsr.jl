@@ -13,10 +13,17 @@ that may be given as `name` values.
 
 - `filename`: a string indicating the location of the local file.
 
-- `field`: a string used to identify the data field to be extracted.  If `field="?"` then `read_amsr` returns a vector of strings containing extractable data.  Otherwise, if `field` names one of those items, then `read_amsr` returns that dataset.
+- `field`: a string used to identify the data field to be extracted.  If
+  `field="?"` then `read_amsr` returns a vector of strings containing extractable
+  data.  Otherwise, if `field` names one of those items, then `read_amsr` returns
+  that dataset.
+
 # Keywords
 
-- `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+- `debug`: An indication of whether to print information during processing. The
+  default value of 0 means to work quietly, and any larger integer indicates to
+  print some information.
+
 
 # Examples
 
@@ -97,13 +104,26 @@ by `get_amsr`.
 
 # Keywords
 
-- `destdir`: Path to the destination directory. The author usually sets `destdir="~/data/amsr"`, so that the file will be in a central location for use by other analysis procedures.
+- `destdir`: Path to the destination directory. The author usually sets
+  `destdir="~/data/amsr"`, so that the file will be in a central location for use
+  by other analysis procedures.
 
-- `server`: The base of the server location. The default value ought to be used unless the data provider changes their web scheme, although the likelihood of the query working in such a case is slim, since changes tend to be sweeping.
+- `server`: The base of the server location. The default value ought to be used
+  unless the data provider changes their web scheme, although the likelihood of
+  the query working in such a case is slim, since changes tend to be sweeping.
 
-- `type`: The type of data requested. At the moment, the only choice is `"3day"` (the default), for a composite covering 3 days of observation, which removes most viewing-path and cloud blanks. If there is sufficient need, other types may be added, from the list: `"daily"` for a daily reading, `"weekly"` for a composite covering a week, and `"monthly"` for a composite covering a month.  In the `"daily"` case, the data arrays are 3D, with the third dimension representing ascending and descending traces, but in all the other cases, the arrays are 2D.
+- `type`: The type of data requested. At the moment, the only choice is
+  `"3day"` (the default), for a composite covering 3 days of observation, which
+  removes most viewing-path and cloud blanks. If there is sufficient need, other
+  types may be added, from the list: `"daily"` for a daily reading, `"weekly"`
+  for a composite covering a week, and `"monthly"` for a composite covering a
+  month.  In the `"daily"` case, the data arrays are 3D, with the third dimension
+  representing ascending and descending traces, but in all the other cases, the
+  arrays are 2D.
 
-- `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+- `debug`: An indication of whether to print information during processing. The
+  default value of 0 means to work quietly, and any larger integer indicates to
+  print some information.
 
 # Return value
 
@@ -150,23 +170,33 @@ circular island at the midpoint of the view would be drawn as a circle.
 
 # Keywords
 
-- `xlims`: The range of longitude to be shown.  This is based on the 0-to-360 notation, since that is how AMSR data are stored.
+- `xlims`: The range of longitude to be shown.  This is based on the 0-to-360
+  notation, since that is how AMSR data are stored.
 
 - `ylims`: The range of latitude to be shown.
 
-- `tickdirection`: The direction of axis tick marks. The default is for them to point outward, opposite to the Julia default.
+- `tickdirection`: The direction of axis tick marks. The default is for them to
+  point outward, opposite to the Julia default.
 
-- `color`: The colour scheme for the heatmap.  The default, `:turbo`, is a rainbow-like scheme.  Other popular choices include `:viridis` for a green-hued scheme, and `:auto` for the default yellow-hued Julia scheme.
+- `color`: The colour scheme for the heatmap.  The default, `:turbo`, is a
+  rainbow-like scheme.  Other popular choices include `:viridis` for a green-hued
+  scheme, and `:auto` for the default yellow-hued Julia scheme.
 
-- `levels`: either (1) a vector holding the desired contour levels (use `[]`, which is the default, to get auto-selected levels), or (2) `:none` to prevent contouring.
+- `levels`: either (1) a vector holding the desired contour levels (use `[]`,
+  which is the default, to get auto-selected levels), or (2) `:none` to prevent
+  contouring.
 
-- `clim`: A tuple specifying the range of values to be represented by the color scheme. If not provided, this defaults to the range of the data in the chosen view.
+- `clim`: A tuple specifying the range of values to be represented by the color
+  scheme. If not provided, this defaults to the range of the data in the chosen
+  view.
 
 - `size`: A numeric tuple holding the size of the plot.
 
 - `dpi`: A number representing the resolution of the plot, in dots per inch.
 
-- `debug`: An integer controlling whether to print information during processing. The default is to work silently; use any positive value to get some printing.
+- `debug`: An integer controlling whether to print information during
+  processing. The default is to work silently; use any positive value to get some
+  printing.
 
 # Examples
 
