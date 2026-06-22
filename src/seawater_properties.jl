@@ -1,3 +1,5 @@
+const GSW_INVALID_THRESHOLD = 1.0e15
+
 """
     CT(SA, temperature, pressure)
     CT(ctd)
@@ -17,8 +19,6 @@ julia> CT(35.0, 10.0, 100.0)
 9.981322531922249
 ```
 """
-const GSW_INVALID_THRESHOLD = 1.0e15
-
 function CT(ctd::Ctd)
     if (:CT in propertynames(ctd.data)) || ("CT" in names(ctd.data))
         return copy(ctd.data.CT)
