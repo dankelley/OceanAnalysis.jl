@@ -1,3 +1,10 @@
+"""
+    const GSW_INVALID_THRESHOLD = 1.0e15
+
+Threshold used to identify invalid values returned by GibbsSeaWater functions.
+Values exceeding this threshold are considered unphysical and so are replaced
+with NaN. See [`fix_gsw_bad_code`](@ref) and [`fix_gsw_bad_code!`](@ref).
+"""
 const GSW_INVALID_THRESHOLD = 1.0e15
 
 """
@@ -33,6 +40,7 @@ function Base.getindex(x::OA, name::Union{String,Symbol})
 end
 
 function Base.setindex!(oce::OA, value, name::String)
+    name = String(name)  # it could be in Symbol form
     if name in names(oce.data)
         oce.data[:, name] = value
     elseif name in keys(oce.metadata)
@@ -80,7 +88,7 @@ function coordinate_from_string(s::String)
     # ** Latitude: 27* 14.072 N
     # ** Longitude: 111* 31.440 W
     sign = occursin(r"[wWsS]", s) ? -1.0 : 1.0
-    s = replace(s, r"[nNsSeEwW\*]" => "")
+    s = replace(s, r"[nNsSeEwW°\*]" => "")
     tokens = split(s)
     if length(tokens) == 1
         return sign * parse(Float64, s)
@@ -161,10 +169,10 @@ julia> pretty([22.299, 25.091])
 function pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
     filtered = filter(!isnan, x)
     !isempty(filtered) || oad(debug, "pretty(x) has no non-NaN x values")
-    min, max = extrema(filter(!isnan, x))
+    min, max = extrema(filtered)
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        oad(debug, "pretty() got max=min=$min, so returning empty vector")
+        warning("pretty() got max=min=$min, so returning an empty vector")
         return []
     end
     dx = (max - min) / n
@@ -226,7 +234,7 @@ end
 As [`fix_gsw_bad_code`](@ref), but making changes directly in `x`.
 """
 function fix_gsw_bad_code!(x)
-    x[x.>=GSW_INVALID_THRESHOLD] .= NaN
+    @inbounds x[x.>=GSW_INVALID_THRESHOLD] .= NaN
     x
 end
 
@@ -304,6 +312,7 @@ gravity() # 9.806199977310339
 ```
 """
 function gravity(latitude::Real=45.0, z::Real=0.0)
+    -90.0 <= latitude <= 90.0 || error("latitude must be in range from -90 to 90")
     phi = latitude * π / 180.0
     9.7803271 * (1.0 + 5.3024e-3 * sin(phi)^2 - 5.8e-6 * sin(2.0 * phi)^2) * (1.0 - 2.26e-7 * z)
 end
