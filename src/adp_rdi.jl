@@ -530,6 +530,7 @@ beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz);
 v = enu["velocity"];
+```
 """
 function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Integer=0)
     oad(debug, "xyz_to_enu() BEGIN")
