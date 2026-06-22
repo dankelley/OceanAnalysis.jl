@@ -104,19 +104,20 @@ contour!(res["xg"], res["yg"], res["zg"],
 
 # References
 
-Barnes, Stanley L. “Applications of the Barnes Objective Analysis Scheme. Part
-I: Effects of Undersampling, Wave Position, and Station Randomness.” Journal of
-Atmospheric and Oceanic Technology. Journal of Atmospheric and Oceanic
-Technology 11, no. 6 (1994a): 1433–48.
+1. Barnes, Stanley L. “Applications of the Barnes Objective Analysis Scheme.
+   Part I: Effects of Undersampling, Wave Position, and Station Randomness.”
+   Journal of Atmospheric and Oceanic Technology. Journal of Atmospheric and
+   Oceanic Technology 11, no. 6 (1994a): 1433–48.
 
-Barnes, Stanley L. “Applications of the Barnes Objective Analysis Scheme. Part
-II: Improving Derivative Estimates.” Journal of Atmospheric and Oceanic
-Technology. Journal of Atmospheric and Oceanic Technology 11, no. 6 (1994b):
-1449-1458.
+2. Barnes, Stanley L. “Applications of the Barnes Objective Analysis Scheme.
+   Part II: Improving Derivative Estimates.” Journal of Atmospheric and Oceanic
+   Technology. Journal of Atmospheric and Oceanic Technology 11, no. 6 (1994b):
+   1449-1458.
 
-Barnes, Stanley L. “Applications of the Barnes Objective Analysis Scheme. Part
-III: Tuning for Minimum Error.” Journal of Atmospheric and Oceanic Technology.
-Journal of Atmospheric and Oceanic Technology 11, no. 6 (1994c): 1459–79.
+3. Barnes, Stanley L. “Applications of the Barnes Objective Analysis Scheme.
+   Part III: Tuning for Minimum Error.” Journal of Atmospheric and Oceanic
+   Technology. Journal of Atmospheric and Oceanic Technology 11, no. 6 (1994c):
+   1459–79.
 
 
 """

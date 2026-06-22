@@ -20,13 +20,14 @@ package by Dan Kelley.
 
 # References
 
-1. Vincenty,T. 1975. Direct and inverse solutions of geodesics on the ellipsoid
-   with application of nested equations. Survey Review 23(176):88-94.
+1. Vincenty, T. 1975. Direct and inverse solutions of geodesics on the
+   ellipsoid with application of nested equations. Survey Review 23(176):88-94.
    <https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf>
 
 2. Kelley, Dan E., Clark Richards, and Chantelle Layton. “Oce: An R Package for
    Oceanographic Analysis.” Journal of Open Source Software 7, no. 71 (2022).
    <https://doi.org/10.21105/joss.03594>
+
 """
 function geod_distance(lon1::Real, lat1::Real, lon2::Real, lat2::Real; a::Real=6378137.00, f::Real=1.0 / 298.257223563)
     # See git/oce/R/geod.R and git/oce/src/geod.cpp; the following code is a Julia

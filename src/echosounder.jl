@@ -16,7 +16,8 @@ Reference 1.
 
 # References
 
-1. C code in section 5.3.1 of BioSonics Advanced Digital Hydroacoustics. “DT4 Data File Format Specification.” BioSonics, May 2017.
+1. C code in section 5.3.1 of BioSonics Advanced Digital Hydroacoustics. “DT4
+   Data File Format Specification.” BioSonics, May 2017.
 
 """
 function biosonic_expand_rle!(buf::Vector{UInt8}, rval::Vector{UInt8}; byte_per_sample::Int64=2, debug::Integer=0)

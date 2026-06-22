@@ -214,9 +214,17 @@ adp["frequency"]
 ```
 
 # References
-1. Teledyne RD Instruments. “Workhorse II Commands and Output Data Format.” November 2025. P/N 957-6156-00. https://www.teledynemarine.com/en-us/support/SiteAssets/RDI/Manuals%20and%20Guides/Workhorse%20II/WorkHorse_Commands_and_Output_Data_Format.pdf.
+
+1. Teledyne RD Instruments. “Workhorse II Commands and Output Data Format.”
+   November 2025. P/N 957-6156-00.
+   https://www.teledynemarine.com/en-us/support/SiteAssets/RDI/Manuals%20and%20Guides/Workhorse%20II/WorkHorse_Commands_and_Output_Data_Format.pdf.
+
 2. Teledyne RD Instruments. “Workhorse Commands and Output Data Format.” 2010.
-3. Teledyne RD Instruments. “Acoustic Doppler Current Profiler Principles of Operation: A Practical Primer.” January 2011. https://www.comm-tec.com/Docs/Manuali/RDI/BBPRIME.pdf.
+
+3. Teledyne RD Instruments. “Acoustic Doppler Current Profiler Principles of
+   Operation: A Practical Primer.” January 2011.
+   https://www.comm-tec.com/Docs/Manuali/RDI/BBPRIME.pdf.
+
 """
 function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,Int64},Vector{Int64}}=0; debug::Integer=0)
     oad(debug, "read_adp_rdi() START")

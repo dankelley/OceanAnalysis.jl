@@ -44,13 +44,14 @@ provided by Chu and Fan (2010).
 
 # References
 
-Chu, Peter C., and Chenwu Fan. “Optimal Linear Fitting for Objective
-Determination of Ocean Mixed Layer Depth from Glider Profiles.” Journal of
-Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
-[https://doi.org/10.1175/2010JTECHO804.1](https://doi.org/10.1175/2010JTECHO804.1)
+1. Chu, Peter C., and Chenwu Fan. “Optimal Linear Fitting for Objective
+   Determination of Ocean Mixed Layer Depth from Glider Profiles.” Journal of
+   Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
+   [https://doi.org/10.1175/2010JTECHO804.1](https://doi.org/10.1175/2010JTECHO804.1)
 
-Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
-[https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
+2. Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
+   [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
+
 """
 function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Dict
     p = ctd["pressure"]
@@ -101,13 +102,13 @@ Compute mixed-layer depth according to the Chu and Fan (2010) method; see also K
 
 # References
 
-Chu, Peter C., and Chenwu Fan. “Optimal Linear Fitting for Objective
-Determination of Ocean Mixed Layer Depth from Glider Profiles.” Journal of
-Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
-[https://doi.org/10.1175/2010JTECHO804.1](https://doi.org/10.1175/2010JTECHO804.1)
+1. Chu, Peter C., and Chenwu Fan. “Optimal Linear Fitting for Objective
+   Determination of Ocean Mixed Layer Depth from Glider Profiles.” Journal of
+   Atmospheric and Oceanic Technology 27, no. 11 (2010): 1893–98.
+   [https://doi.org/10.1175/2010JTECHO804.1](https://doi.org/10.1175/2010JTECHO804.1)
 
-Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
-[https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
+2. Kelley, Dan E. Oceanographic Analysis with R. Springer-Verlag, 2018.
+   [https://www.springer.com/us/book/9781493988426](https://www.springer.com/us/book/9781493988426).
 
 # Examples
 

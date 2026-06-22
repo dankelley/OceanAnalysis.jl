@@ -15,9 +15,9 @@ Compute surface isothermal layer depth (ILD) with the method described by Kara e
 
 # References
 
-Kara, A. Birol, Peter A. Rochford, and Harley E. Hurlburt. “An Optimal
-Definition for Ocean Mixed Layer Depth.” Journal of Geophysical Research 105,
-no. C7 (2000): 16803–21. https://doi.org/10.1029/2000JC900072.
+1. Kara, A. Birol, Peter A. Rochford, and Harley E. Hurlburt. “An Optimal
+   Definition for Ocean Mixed Layer Depth.” Journal of Geophysical Research
+   105, no. C7 (2000): 16803–21. https://doi.org/10.1029/2000JC900072.
 
 # Examples
 ```julia
@@ -85,9 +85,9 @@ depth (ILD).
 
 # References
 
-Kara, A. Birol, Peter A. Rochford, and Harley E. Hurlburt. “An Optimal
-Definition for Ocean Mixed Layer Depth.” Journal of Geophysical Research 105,
-no. C7 (2000): 16803–21. https://doi.org/10.1029/2000JC900072.
+1. Kara, A. Birol, Peter A. Rochford, and Harley E. Hurlburt. “An Optimal
+   Definition for Ocean Mixed Layer Depth.” Journal of Geophysical Research
+   105, no. C7 (2000): 16803–21. https://doi.org/10.1029/2000JC900072.
 
 # Examples
 ```julia
