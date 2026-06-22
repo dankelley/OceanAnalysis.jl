@@ -10,9 +10,9 @@ Compute Conservative Temperature (CT), using `gsw_ct_from_t()` in the
 `GibbsSeaWater` package.
 
 - Scalar form: takes single values and returns a single value.
-- Vector use: Use broadcasting, e.g. `CT.(SA_vec, temperature_vec,
-  pressure_vec)`, where the `_vec` items are vectors.
-- Ctd form: this extracts values from a [`Ctd`](@ref) object and then calls uses
+- Vector use: the broadcasting convention, i.e. calling as `CT.()` may be used
+  if `SA`, `temperature`, and `pressure` are vectors.
+- Ctd form: extracts values from the [`Ctd`](@ref) object and then uses
   the vector form.
 
 Units: temperature in °C, pressure in dbar, SA in g/kg.
@@ -45,13 +45,15 @@ end
 Compute Absolute Salinity (SA), using `gsw_sa_from_sp()` in the `GibbsSeaWater`
 package.
 
-The first form takes single values and returns a single value, so it
-should be called with broadcasting, if the arguments are vectors.
+- Scalar form: takes single values and returns a single value.
+- Vector use: the broadcasting convention, i.e. calling as `SA.()` may be used
+  if `salinity`, `pressure`, `longitude` and `latitude` are vectors.
+- Ctd form: extracts values from the [`Ctd`](@ref) object and then uses
+  the vector form. (If `ctd.metadata` does not hold `longitude` and
+  `latitude`, then they default to DEFAULT_LONGITUDE and DEFAULT_LATITUDE.
 
-The second form extracts values from the provided [`Ctd`](@ref) object and then
-calls the first form as `SA.()`. Note that if the object does not contain
-longitude and latitude in its `metadata`, then default values of -30.0 and 45.0
-will be used, to represent a mid-Atlantic point.
+Units: SA in g/kg, salinity in practical salinity units, pressure in dbar,
+longitude in degrees E and latitude in degrees N.
 
 # Examples
 ```jldoctest
@@ -61,6 +63,15 @@ julia> SA(35.0, 100.0, -30.0, 30.0)
 35.165308620244
 ```
 """
+function SA(salinity::Real, pressure::Real,
+    longitude::Real, latitude::Real)
+    rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
+    if rval > GSW_INVALID_THRESHOLD
+        rval = NaN
+    end
+    rval
+end
+
 function SA(ctd::Ctd)
     if (:SA in propertynames(ctd.data)) || ("SA" in names(ctd.data))
         return copy(ctd.data.SA)
@@ -76,23 +87,14 @@ function SA(ctd::Ctd)
     end
 end
 
-function SA(salinity::Real, pressure::Real,
-    longitude::Real, latitude::Real)
-    #println("SA(): salinity $salinity, pressure $pressure, lon $longitude, lat $latitude")
-    rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
-    if rval > GSW_INVALID_THRESHOLD
-        rval = NaN
-    end
-    #println("  rval $rval")
-    rval
-end
-
 
 """
     salinity_from_conductivity(conductivity::Real, temperature::Real, pressure::Real)
 
-Compute Practical Salinity from conductivity (mS/cm), temperature (degC) and
-pressure (dbar).
+Compute Practical Salinity from electrical conductivity, temperature and
+pressure.
+
+Units: conductivity in mS/cm, temperature in °C and pressure in dbar.
 """
 function salinity_from_conductivity(conductivity::Real, temperature::Real, pressure::Real)
     gsw_sp_from_c(conductivity, temperature, pressure)
@@ -100,7 +102,11 @@ end
 
 
 """
-    Compute sea pressure (dbar) from depth (m) and latitude (deg).
+    pressure_from_depth(depth::Real, latitude::Real=45.0)
+
+Compute sea pressure from depth and latitude.
+
+Units: pressure in dbar, depth in m and latitude in °N.
 
 # Examples
 ```jldoctest
@@ -115,7 +121,11 @@ function pressure_from_depth(depth::Real, latitude::Real=45.0)
 end
 
 """
-    Compute sea pressure (dbar) from vertical coordinate (m) and latitude (deg).
+    pressure_from_z(z::Real, latitude::Real=45.0)
+
+Compute sea pressure from vertical coordinate (height above sea level) and latitude.
+
+Units: pressure in dbar, vertical coordinate in m and latitude in °N.
 
 # Examples
 ```jldoctest
@@ -131,7 +141,11 @@ end
 
 
 """
-    Compute seawater depth (m) from sea pressure (dbar)
+    depth_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
+
+Compute seawater depth from sea pressure and latitude.
+
+Units: depth in m below the surface, pressure in dbar and latitude in °N.
 
 See also [`z_from_pressure`](@ref).
 
@@ -143,13 +157,17 @@ julia> depth_from_pressure(100.0)
 99.16434938694897
 ```
 """
-function depth_from_pressure(pressure::Real, latitude::Real=45.0)
+function depth_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
     return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
 
 
 """
-    Compute vertical coordinate (m) from sea pressure (dbar)
+    z_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
+
+Compute vertical coordinate (height above sea surface) from sea pressure.
+
+Units: coordinate in m above the surface, pressure in dbar and latitude in °N.
 
 See also [`depth_from_pressure`](@ref).
 
@@ -161,7 +179,7 @@ julia> z_from_pressure(100.0)
 -99.16434938694897
 ```
 """
-function z_from_pressure(pressure::Real, latitude::Real=45.0)
+function z_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
     return gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
 
