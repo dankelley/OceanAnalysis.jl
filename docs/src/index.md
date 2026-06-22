@@ -1,8 +1,8 @@
 # OceanAnalysis
 
 `OceanAnalysis` is a Julia package designed to facilitate the analysis of
-oceanographic data. It is at a very early stage of development by someone who
-is still learning Julia.
+oceanographic data. It is at an early stage of development by someone who is
+still learning Julia, after decades using Fortran, C, C++, and then R.
 
 The documentation, also at an early stage of development, is broken down as
 follows.
