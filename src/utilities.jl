@@ -29,12 +29,10 @@ scatter(d["timeS"], d["pressure"], xlab="Time [s]", ylab="Pressure [dbar]",
 ```
 """
 function Base.getindex(x::OA, name::Union{String,Symbol})
-    #println("Getting data element '$name' from an OA object of type $(typeof(x)) using get_element(); call that directly to debug")
     get_element(x, name)
 end
 
 function Base.setindex!(oce::OA, value, name::String)
-    #println("Setting data element '$name' in a OA object")
     if name in names(oce.data)
         oce.data[:, name] = value
     elseif name in keys(oce.metadata)
@@ -78,6 +76,7 @@ julia> coordinate_from_string("111* 31.440 W")
 ```
 """
 function coordinate_from_string(s::String)
+    !isempty(strip(s)) || error("empty coordinate string")
     # ** Latitude: 27* 14.072 N
     # ** Longitude: 111* 31.440 W
     sign = occursin(r"[wWsS]", s) ? -1.0 : 1.0
@@ -109,7 +108,7 @@ julia> T90_from_T68(10.0)
 9.997600575861792
 ```
 """
-T90_from_T68(T48::Real) = T48 / 1.00024
+T90_from_T68(T68::Real) = T68 / 1.00024
 
 """
     T90 = T90_from_T48(T48::Real)
@@ -130,9 +129,9 @@ T90_from_T48(T48::Real) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
 
 
 """
-    pretty(x, n::Integer=5; debug::Integer=0)
+    pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
 
-Calculate sub-intervals with 125 scaling
+Calculate sub-intervals with 125 scaling.
 
 This function finds intervals that are multiples of 1, 2 or 5. The results are
 useful for contour intervals, because the built-in contour() function
@@ -159,11 +158,13 @@ julia> pretty([22.299, 25.091])
 
 1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
 """
-function pretty(x, n::Integer=5; debug::Integer=0)
+function pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
+    filtered = filter(!isnan, x)
+    !isempty(filtered) || oad(debug, "pretty(x) has no non-NaN x values")
     min, max = extrema(filter(!isnan, x))
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        println("pretty() got max=min=$min, so returning empty vector")
+        oad(debug, "pretty() got max=min=$min, so returning empty vector")
         return []
     end
     dx = (max - min) / n
@@ -215,10 +216,7 @@ See [`fix_gsw_bad_code!`](@ref) for an in-place version.
 """
 function fix_gsw_bad_code(x)
     rval = copy(x)
-    bad = rval .>= GSW_INVALID_THRESHOLD
-    if any(bad)
-        rval[bad] .= NaN
-    end
+    rval[rval.>=GSW_INVALID_THRESHOLD] .= NaN
     rval
 end
 
@@ -228,10 +226,7 @@ end
 As [`fix_gsw_bad_code`](@ref), but making changes directly in `x`.
 """
 function fix_gsw_bad_code!(x)
-    bad = x .>= GSW_INVALID_THRESHOLD
-    if any(bad)
-        x[bad] .= NaN
-    end
+    x[x.>=GSW_INVALID_THRESHOLD] .= NaN
     x
 end
 
