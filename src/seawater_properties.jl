@@ -50,10 +50,10 @@ package.
   if `salinity`, `pressure`, `longitude` and `latitude` are vectors.
 - Ctd form: extracts values from the [`Ctd`](@ref) object and then uses
   the vector form. (If `ctd.metadata` does not hold `longitude` and
-  `latitude`, then they default to DEFAULT_LONGITUDE and DEFAULT_LATITUDE.
+  `latitude`, then they default to -30.0°E and 45.0°N.
 
 Units: SA in g/kg, salinity in practical salinity units, pressure in dbar,
-longitude in degrees E and latitude in degrees N.
+longitude in °E and latitude in °N.
 
 # Examples
 ```jldoctest
@@ -116,7 +116,7 @@ julia> pressure_from_depth(10.0)
 10.082069761243858
 ```
 """
-function pressure_from_depth(depth::Real, latitude::Real=45.0)
+function pressure_from_depth(depth::Real, latitude::Real=DEFAULT_LATITUDE)
     return gsw_p_from_z(-depth, latitude, 0.0, 0.0)
 end
 
@@ -135,13 +135,13 @@ julia> pressure_from_z(-10.0)
 10.082069761243858
 ```
 """
-function pressure_from_z(z::Real, latitude::Real=45.0)
+function pressure_from_z(z::Real, latitude::Real=DEFAULT_LATITUDE)
     return gsw_p_from_z(z, latitude, 0.0, 0.0)
 end
 
 
 """
-    depth_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
+    depth_from_pressure(pressure::Real, latitude::Real=45.0)
 
 Compute seawater depth from sea pressure and latitude.
 
@@ -163,7 +163,7 @@ end
 
 
 """
-    z_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
+    z_from_pressure(pressure::Real, latitude::Real=45.0)
 
 Compute vertical coordinate (height above sea surface) from sea pressure.
 
