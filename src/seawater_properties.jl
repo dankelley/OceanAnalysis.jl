@@ -166,7 +166,7 @@ end
 
 
 """
-    z_from_pressure(pressure::Real, latitude::Real=45.0)
+    z_from_pressure(pressure::Real, latitude::Real=$(DEFAULT_LATITUDE))
 
 Compute vertical coordinate (height above sea surface) from sea pressure.
 
