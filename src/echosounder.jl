@@ -150,7 +150,8 @@ code is stabilized, write more here.
 
 # Arguments
 
-- `filename` string naming the file to be read.  It must be in Biosonics DT4 format (reference 1).
+- `filename` string naming the file to be read.  It must be in Biosonics DT4
+  format (reference 1).
 
 # Keywords
 

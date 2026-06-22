@@ -1,3 +1,5 @@
+const GSW_INVALID_THRESHOLD = 1.0e15
+
 """
     increment_debug(debug::Integer=0)::Integer
 
@@ -208,12 +210,12 @@ end
 """
     fix_gsw_bad_code(x)
 
-Change GSW 'missing' values (9.e15) to NaN A copy is returned, with x
-unaltered.  See [`fix_gsw_bad_code!`](@ref) for an in-place version.
+Copy `x`, then change any values in excess of $(GSW_INVALID_THRESHOLD) to NaN.
+See [`fix_gsw_bad_code!`](@ref) for an in-place version.
 """
 function fix_gsw_bad_code(x)
     rval = copy(x)
-    bad = rval .> 1e15
+    bad = rval .>= GSW_INVALID_THRESHOLD
     if any(bad)
         rval[bad] .= NaN
     end
@@ -223,11 +225,10 @@ end
 """
     fix_gsw_bad_code!(x)
 
-In-place change GSW 'missing' values (9.e15) to NaN This alters x.  See
-[`fix_gsw_bad_code`](@ref) for a version that does not alter x.
+As [`fix_gsw_bad_code`](@ref), but making changes directly in `x`.
 """
 function fix_gsw_bad_code!(x)
-    bad = x .> 1e15
+    bad = x .>= GSW_INVALID_THRESHOLD
     if any(bad)
         x[bad] .= NaN
     end

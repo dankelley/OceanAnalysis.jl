@@ -30,7 +30,7 @@ julia> CT(35.0, 10.0, 100.0)
 """
 function CT(SA::Real, temperature::Real, pressure::Real)
     rval = gsw_ct_from_t(SA, temperature, pressure)
-    if rval > GSW_INVALID_THRESHOLD
+    if rval >= GSW_INVALID_THRESHOLD
         rval = NaN
     end
     rval
@@ -74,7 +74,7 @@ julia> SA(35.0, 100.0, -30.0, 30.0)
 function SA(salinity::Real, pressure::Real, longitude::Real, latitude::Real)
     #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
-    if rval > GSW_INVALID_THRESHOLD
+    if rval >= GSW_INVALID_THRESHOLD
         rval = NaN
     end
     rval
