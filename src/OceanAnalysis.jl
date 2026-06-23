@@ -31,6 +31,9 @@ need for [`get_element`](@ref) at all?
 """
 module OceanAnalysis
 
+# Constants
+include("constants.jl")
+
 # Type definitions
 include("types.jl")
 

@@ -1,7 +1,3 @@
-const GSW_INVALID_THRESHOLD = 1.0e15
-const DEFAULT_LONGITUDE = -30.0
-const DEFAULT_LATITUDE = 45.0
-
 """
     CT(SA, temperature, pressure)
     CT(ctd)
@@ -58,7 +54,8 @@ NaN, in accordance with the missing-value convention used by `GibbSeaWater`.
   if `salinity`, `pressure`, `longitude` and `latitude` are vectors.
 - Ctd form: extracts values from the [`Ctd`](@ref) object and then uses
   the vector form. (If `ctd.metadata` does not hold `longitude` and
-  `latitude`, then they default to -30.0°E and 45.0°N.
+  `latitude`, then they default to $(DEFAULT_LONGITUDE)°E and
+  $(DEFAULT_LATITUDE)°N, respectively.)
 
 Units: SA in g/kg, salinity in practical salinity units, pressure in dbar,
 longitude in °E and latitude in °N.
