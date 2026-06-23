@@ -1,5 +1,11 @@
 # OceanAnalysis Functions
 
+## Constants:
+
+OceanAnalysis.GSW_INVALID_THRESHOLD
+OceanAnalysis.DEFAULT_LONGITUDE
+OceanAnalysis.DEFAULT_LATITUDE
+
 ## Data types:
 
 ```@docs
