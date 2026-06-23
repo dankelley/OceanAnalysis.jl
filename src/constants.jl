@@ -13,8 +13,8 @@ export GSW_INVALID_THRESHOLD
 """
     DEFAULT_LONGITUDE
 
-This value, $(DEFAULT_LONGITUDE), is used as a default in some functions
-relating to seawater properties as computed using the `GibbsSeaWater` library.
+This value, $(DEFAULT_LONGITUDE), is used as a default by [`SA`](@ref), if the
+call omits the `longitude` argument.
 
 """
 const DEFAULT_LONGITUDE = -30.0
@@ -23,8 +23,8 @@ export DEFAULT_LONGITUDE
 """
     DEFAULT_LATITUDE
 
-This value, $(DEFAULT_LATITUDE), is used as a default in some functions
-relating to seawater properties as computed using the `GibbsSeaWater` library.
+This value, $(DEFAULT_LATITUDE), is used as a default by [`SA`](@ref), if the
+call omits the `longitude` argument.
 """
 const DEFAULT_LATITUDE = 45.0
 export DEFAULT_LATITUDE

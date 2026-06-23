@@ -1,4 +1,4 @@
-# OceanAnalysis Functions
+# Constants, Data types and Functions
 
 ## Constants:
 

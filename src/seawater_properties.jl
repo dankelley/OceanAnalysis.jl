@@ -68,7 +68,7 @@ julia> SA(35.0, 100.0, -30.0, 30.0)
 35.165308620244
 ```
 """
-function SA(salinity::Real, pressure::Real, longitude::Real, latitude::Real)
+function SA(salinity::Real, pressure::Real, longitude::Real=DEFAULT_LONGITUDE, latitude::Real=DEFAULT_LATITUDE)
     #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     rval = gsw_sa_from_sp(salinity, pressure, longitude, latitude)
     if rval >= GSW_INVALID_THRESHOLD
@@ -81,13 +81,20 @@ function SA(ctd::Ctd)
     if (:SA in propertynames(ctd.data)) || ("SA" in names(ctd.data))
         return copy(ctd.data.SA)
     else
+        # Ctd objects ought to have salinity and pressure, unless the user has
+        # removed them (for some reason that escapes me).
         salinity = ctd.data.salinity
         pressure = ctd.data.pressure
-        n = length(salinity)
+        n = length(pressure)
+        n == length(salinity) || error("lengths of salinity and pressure do not match")
+        # If metadata stores longitude and latitude as vectors that
+        # match e.g. pressure, then use that; otherwise, repeat
+        # the first values to construct vectors of length
+        # matching pressure.
         lon = get(ctd.metadata, "longitude", DEFAULT_LONGITUDE)
         lat = get(ctd.metadata, "latitude", DEFAULT_LATITUDE)
-        longitude = fill(lon, n)
-        latitude = fill(lat, n)
+        longitude = length(lon) == n ? lon : fill(lon[1], n)
+        latitude = length(lat) == n ? lat : fill(lat[1], n)
         return SA.(salinity, pressure, longitude, latitude)
     end
 end
