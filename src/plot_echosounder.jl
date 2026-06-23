@@ -3,8 +3,8 @@
 
 Plot the data stored in an [`Echosounder`](@ref) object.
 
-This function provides some basic plots of the contents of an acoustic-Doppler
-profiler ([`Adp`](@ref)) object.
+This function provides some basic plots of the contents of an
+([`Echosounder`](@ref)) object.
 
 # Arguments
 
