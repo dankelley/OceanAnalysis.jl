@@ -1,3 +1,5 @@
+is_numeric_vector(x) = isa(x, AbstractVector) && eltype(x) <: Number
+
 """
     read_amsr(filename::String, field::String="SST"; debug=0)
 
@@ -153,16 +155,11 @@ function get_amsr(date::Date=Dates.today() - Dates.Day(4);
 end
 
 """
-    plot_amsr(amsr::Amsr;
-        xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
-        color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
-        debug::Integer=0)
-
-Plot a heatmap of an AMSR field.  By default, SST is shown using the default
-Julia colorscheme, and the view is of the whole earth.  See the example
-for how to use another colorscheme, and how to narrow the geographical
-view. Note that the graph scales longitude and latitude so that a hypothetical
-circular island at the midpoint of the view would be drawn as a circle.
+    plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
+        draw_contours=:none, debug::Integer=0, kwargs...)
+ 
+Plot a heatmap of an AMSR field.  By default, SST is shown using the `:turbo`
+colorscheme, and the view is of the whole earth.
 
 # Arguments
 
@@ -170,33 +167,26 @@ circular island at the midpoint of the view would be drawn as a circle.
 
 # Keywords
 
-- `xlims`: The range of longitude to be shown.  This is based on the 0-to-360
-  notation, since that is how AMSR data are stored.
+- `xlims`: a tuple giving the range of longitude to be shown.  This is based on
+  the 0 to 360 notation, since that is how AMSR data are stored.
 
-- `ylims`: The range of latitude to be shown.
+- `ylims`: a tuple giving the range of latitude to be shown. THis is based on
+  the -90 to 90 notation.
 
-- `tickdirection`: The direction of axis tick marks. The default is for them to
-  point outward, opposite to the Julia default.
-
-- `color`: The colour scheme for the heatmap.  The default, `:turbo`, is a
-  rainbow-like scheme.  Other popular choices include `:viridis` for a green-hued
-  scheme, and `:auto` for the default yellow-hued Julia scheme.
-
-- `levels`: either (1) a vector holding the desired contour levels (use `[]`,
-  which is the default, to get auto-selected levels), or (2) `:none` to prevent
-  contouring.
-
-- `clim`: A tuple specifying the range of values to be represented by the color
-  scheme. If not provided, this defaults to the range of the data in the chosen
-  view.
-
-- `size`: A numeric tuple holding the size of the plot.
-
-- `dpi`: A number representing the resolution of the plot, in dots per inch.
+- `draw_contours`: either symbol a numeric vector that controls contours that
+  may be added to the heatmap.  If this is `:none` (which is the default), then
+  no contours are drawn. If it is `:auto` then contours are drawn at 5°C
+  increments. And, finally, if it is a vector of numeric elements, then contours
+  are drawn (unlabelled) at those values.
 
 - `debug`: An integer controlling whether to print information during
   processing. The default is to work silently; use any positive value to get some
   printing.
+
+- `kwargs...` optional other arguments to customize the heatmap plot. For
+  example, specify a value for `color` to change the palette. Although it is
+  permitted to set `aspect_ratio`, the default will yield correct shapes in the
+  middle of the plot, which is likely the best approach.
 
 # Examples
 
@@ -207,35 +197,20 @@ amsr = read_amsr(file, "SST");
 plot_amsr(amsr, xlims=(300,360), ylims=(40,60))
 ```
 """
-function plot_amsr(amsr::Amsr;
-    xlims=[0.0, 360.0], ylims=[-90.0, 90.0], tickdirection=:out,
-    color=:turbo, levels=[], clim=:auto, size=(800, 550), dpi=300,
-    debug::Integer=0)
+function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
+    draw_contours=:none, debug::Integer=0, kwargs...)
     2 == length(xlims) || throw(ArgumentError("xlims must be of length 2"))
     2 == length(ylims) || throw(ArgumentError("ylims must be of length 2"))
     oad(debug, "plot_amsr() START")
-    draw_contours = levels != :none
-    if draw_contours
-        if 0 == length(levels)
-            oad(debug, "  setting default contour levels")
-            levels = range(-5.0, 35.0, step=5.0)
-        else
-            oad(debug, "  using supplied contour levels")
-        end
-    else
-        oad(debug, "  no contours will be drawn")
-    end
-    oad(debug, "  levels: ", levels)
-    oad(debug, "  xlims: ", xlims)
-    oad(debug, "  ylims: ", ylims)
+    oad(debug, "  xlims: $xlims, ylims: $ylims")
     longitude = amsr.metadata["longitude"]
     latitude = amsr.metadata["latitude"]
     oad(debug, "  plotting a heatmap of ", amsr.metadata["field"])
-    p = heatmap(longitude, latitude, amsr.data, framestyle=:box,
+    p = heatmap(longitude, latitude, amsr.data,
         xlims=xlims, ylims=ylims,
         aspect_ratio=1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0),
-        color=color, tickdirection=tickdirection, clim=clim,
-        size=size, dpi=dpi)
+        levels=range(-5.0, 35.0, step=5.0), color=:turbo, clim=:auto,
+        framestyle=:box, tickdirection=:out; kwargs...)
     oad(debug, "  adding a coastline")
     cl = coastline(:global_fine)
     plot!(p, cl.data.longitude, cl.data.latitude,
@@ -246,10 +221,20 @@ function plot_amsr(amsr::Amsr;
             seriestype=:shape, color=:bisque3, linewidth=0.5,
             legend=false)
     end
-    if draw_contours
-        oad(debug, "  adding contours")
-        contour!(p, longitude, latitude, amsr.data, levels=levels, color=:black,
-            linewidth=0.75)
+    # Possibly draw contours
+    if draw_contours != :none
+        if draw_contours == :auto
+            oad(debug, "  adding auto-selected contours")
+            contour!(p, longitude, latitude, amsr.data, levels=
+                range(-5.0, 35.0, step=5.0), color=:black,
+                linewidth=0.75)
+        elseif is_numeric_vector(draw_contours)
+            oad(debug, "  adding user-specified contours")
+            contour!(p, longitude, latitude, amsr.data, levels=draw_contours, color=:black,
+                linewidth=0.75)
+        else
+            @warn "draw_contours ($draw_contours) cannot be handled; try :none, :auto, or a numeric vector"
+        end
     end
     oad(debug, "END plot_amsr()")
     p
