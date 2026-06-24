@@ -11,6 +11,6 @@ follows.
 - [Installation](https://dankelley.github.io/OceanAnalysis.jl/dev/installation/): how to install the package.
 - [Examples](https://dankelley.github.io/OceanAnalysis.jl/dev/examples/): some examples, to give an idea of what the package can do for you
 - [Data Types](https://dankelley.github.io/OceanAnalysis.jl/dev/data_types/): explanation of data types used in `OceanAnalysis`.
-- [Data/Function Reference](https://dankelley.github.io/OceanAnalysis.jl/dev/functions/): details of the data types and functions provided by `OceanAnalyis`.
+- [Data/Function Reference](https://dankelley.github.io/OceanAnalysis.jl/dev/constants_types_functions/): details of the data types and functions provided by `OceanAnalyis`.
 - [Changelog](https://dankelley.github.io/OceanAnalysis.jl/dev/changelog/): list of changes made to the package over time.
 - [Developer Notes](https://dankelley.github.io/OceanAnalysis.jl/dev/developer_notes/): some notes that are mainly for use by the developer.
