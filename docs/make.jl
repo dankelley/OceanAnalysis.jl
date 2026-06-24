@@ -35,7 +35,8 @@ makedocs(;
         "Home" => "index.md",
         "Installation" => "installation.md",
         "Examples" => "examples.md",
-        "Data/Function Reference" => "constants_types_functions.md",
+        "Data Types" => "data_types.md",
+        "Functions" => "functions.md",
         "Changelog" => "changelog.md",
         "Developer Notes" => "developer_notes.md"
     ],

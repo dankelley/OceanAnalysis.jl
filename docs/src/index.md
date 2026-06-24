@@ -8,8 +8,9 @@ The documentation, also at an early stage of development, is broken down as
 follows.
 
 - Home: what you're reading now.
-- [Installation](https://dankelley.github.io/OceanAnalysis.jl/dev/installation/): how to install the package.
-- [Examples](https://dankelley.github.io/OceanAnalysis.jl/dev/examples/): some examples, to give an idea of what the package can do for you
-- [Data/Function Reference](https://dankelley.github.io/OceanAnalysis.jl/dev/constants_types_functions/): details of the data types and functions provided by `OceanAnalyis`.
-- [Changelog](https://dankelley.github.io/OceanAnalysis.jl/dev/changelog/): list of changes made to the package over time.
-- [Developer Notes](https://dankelley.github.io/OceanAnalysis.jl/dev/developer_notes/): some notes that are mainly for use by the developer.
+- [Installation](https://dankelley.github.io/OceanAnalysis.jl/dev/installation/): how to install `OceanAnalysis`.
+- [Examples](https://dankelley.github.io/OceanAnalysis.jl/dev/examples/): some examples of common `OceanAnalysis` usage.
+- [Data Types](https://dankelley.github.io/OceanAnalysis.jl/dev/data_types/): data types used by `OceanAnalyis`.
+- [Functions](https://dankelley.github.io/OceanAnalysis.jl/dev/functions/): functions provided in `OceanAnalyis`.
+- [Changelog](https://dankelley.github.io/OceanAnalysis.jl/dev/changelog/): changes made to `OceanAnalysis` over time.
+- [Developer Notes](https://dankelley.github.io/OceanAnalysis.jl/dev/developer_notes/): some development notes.
