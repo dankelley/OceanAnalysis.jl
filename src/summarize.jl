@@ -15,17 +15,12 @@ of missing values in `x`), and `number_NaN` (the number of NaN values in `x`).
 """
 function six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_NaN)}
     xx = vec(copy(x))
-    #println("FIXME: name: $name")
     number = length(xx)
-    #println("FIXME number: $number")
-    #println("DAN 1 xx: $xx")
     if xx[1] isa Char
-        #println("FIXME: handling Char????")
         return (name=name, min=NaN, mean=NaN, max=NaN, number=length(x), number_missing=0, number_NaN=0)
     end
     if xx[1] isa Dates.DateTime
         # NOTE: this is used by summary(), which expects columns to be numeric
-        #println("FIXME: handling time????")
         return (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=0, number_NaN=0)
     end
     number_missing = count(ismissing, xx)
@@ -174,7 +169,11 @@ function summarize(x::Ctd)
             println("  time:      ", x.metadata["time"])
         end
         if "header" in keys(x.metadata)
-            println("  header:    String vector with ", length(x.metadata["header"]), " entries")
+            if isa(x.metadata["header"], Vector)
+                println("  header:    String vector with ", length(x.metadata["header"]), " entries")
+            else
+                println("  header:    String with ", length(x.metadata["header"]), " characters")
+            end
         end
     end
     nr = nrow(x.data)

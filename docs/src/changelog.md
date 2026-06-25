@@ -7,7 +7,7 @@ Release notes:
 
 ### Changed
 
-- none yet
+- `plot_amsr` improvements, with new `draw_contours` argument.
 
 - BREAKING none yet
 

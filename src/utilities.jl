@@ -31,7 +31,7 @@ function Base.getindex(x::OA, name::Union{String,Symbol})
 end
 
 function Base.setindex!(oce::OA, value, name::String)
-    name = String(name)  # it could be in Symbol form
+    name = String(name)
     if name in names(oce.data)
         oce.data[:, name] = value
     elseif name in keys(oce.metadata)
@@ -155,7 +155,7 @@ julia> pretty([22.299, 25.091])
 
 # References
 
-1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>)
+1. <https://github.com/JuliaGeometry/Contour.jl/blob/daad6eb0b1464dbc7e824bf8384cad54a3b76445/src/Contour.jl#L100>
 """
 function pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
     filtered = filter(!isnan, x)
@@ -163,8 +163,8 @@ function pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
     min, max = extrema(filtered)
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        warning("pretty() got max=min=$min, so returning an empty vector")
-        return []
+        @warn "pretty() got max=min=$min, so returning an empty vector"
+        return Float64[]
     end
     dx = (max - min) / n
     fac = 10^floor(log10(dx))
@@ -272,7 +272,7 @@ Compute the value of the Coriolis parameter, given a latitude
 in degrees.
 
 # Examples
-```juliatest
+```juliadoctest
 julia> coriolis(45.0)
 0.00010312607931384281
 ```
