@@ -205,7 +205,7 @@ scale_bar(100.0)
 """
 function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, fontsize::Real=8)
     distance > 0.0 || throw(ArgumentError("distance must be a positive number, but it is $distance"))
-    xlim, ylim = xlims(), ylims() # from existing plot_coastline() diagram
+    xlim, ylim = xlims(), ylims() # need these to avoid changing view in the existing plot
     ymid = (ylim[1] + ylim[2]) / 2.0
     km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
     dx = (xlim[2] - xlim[1]) / 20 # FIXME: may need to adjust the divisor to look nice
@@ -229,7 +229,7 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, f
         throw(ArgumentError("y must be :top, :bottom, or a number, but it is $(repr(y))"))
     end
     Y = [y0, y0]
-    plot!(X, Y, color=:black, linewidth=linewidth, label=false)
+    plot!(X, Y, color=:black, linewidth=linewidth, label=false, xlim=xlim, ylim=ylim)
     annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
         Plots.text("$(trunc(Int, distance)) km", fontsize))
 end

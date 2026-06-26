@@ -30,6 +30,12 @@ function Base.getindex(x::OA, name::Union{String,Symbol})
     get_element(x, name)
 end
 
+"""
+    Base.setindex!(x::OA, value, name::String)
+
+Set a value in the `data` or `metadata` of an [`OA`](@ref) object.
+First checks `data` columns, then `metadata` keys, then raises an error if not found.
+"""
 function Base.setindex!(oce::OA, value, name::String)
     name = String(name)
     if name in names(oce.data)
