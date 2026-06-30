@@ -214,22 +214,19 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
             end
         end
         oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
+        k = keys(d)
         metadata["name_changes"] = name_changes
         metadata["longitude"] = get_nc_value(d, "LONGITUDE")
         metadata["latitude"] = get_nc_value(d, "LATITUDE")
-        metadata["time"] = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
         # Do some things directly, because get_nc_value() is designed for numeric items
-        if haskey(d, "DATE_CREATION")
-            metadata["date_creation"] = DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS")
-        else
-            metadata["date_creation"] = missing
-        end
-        # Some files don't have a DATA_MODE entry, so we set it to blank in that case
-        if haskey(d, "DATA_MODE")
-            metadata["data_mode"] = d["DATA_MODE"][1]
-        else
-            metadata["data_mode"] = "?"
-        end
+        metadata["time"] = d["JULD"][1] # NCDatasets converts this to a Date.DateTime for us!
+        metadata["data_centre"] = "DATA_CENTRE" in k ?
+                                  character_vector_to_string(d["DATA_CENTRE"][:, 1]) : missing
+        metadata["profiler_type"] = "WMO_INST_TYPE" in k ?
+                                    character_vector_to_string(d["WMO_INST_TYPE"][:, 1]) : missing
+        metadata["date_creation"] = "DATE_CREATION" in k ?
+                                    DateTime(join(d["DATE_CREATION"]), dateformat"yyyymmddHHMMSS") : missing
+        metadata["data_mode"] = "DATA_MODE" in k ? d["DATA_MODE"][1] : missing
         metadata["filename"] = filename
         # Remove trailing blanks in platform ID code, to avoid user problems with e.g. aggregating cycles
         metadata["platform"] = replace(join(d["PLATFORM_NUMBER"][:, 1]), "missing" => "")

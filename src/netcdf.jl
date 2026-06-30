@@ -18,7 +18,8 @@ numerical values, not strings or other types.
 """
 function get_nc_value(nc, name; require_valid=false)
     if !(name in keys(nc))
-        error("this NetCDF file does not contain a data element named ", name)
+        @warn "this NetCDF file does not contain a data element named $name"
+        return NaN
     end
     local item = nc[name]
     # NetCDF format stores even scalars as vectors.
