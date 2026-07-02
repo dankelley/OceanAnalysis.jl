@@ -198,5 +198,5 @@ function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
         end
     end
     # The item is not handled, so return an empty result
-    return Nothing
+    return nothing
 end

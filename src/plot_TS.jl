@@ -15,8 +15,9 @@ function add_freezing_curve!(xlim, ylim; kwargs...)
 end
 
 """
-    plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-        draw_freezing=true, abbreviate=false, fontsize=8, debug::Integer=0, kwargs...)
+    plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
+        draw_freezing::Bool=true, abbreviate::Bool=false, fontsize::Integer=8,
+        debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -54,7 +55,7 @@ to use `:path` instead.
 
 # Arguments
 
-- `ctd` a Ctd value for which a temperature-salinity diagram will be plotted.
+- `d` either an Argo object or a Ctd object.
 
 # Keywords
 
@@ -97,17 +98,24 @@ plot_TS(ctd, marker=:none)
 
 See also [`plot_profile`](@ref).
 """
-function plot_TS(ctd::Ctd; sigma0_levels=[], spiciness0_levels=0,
-    draw_freezing=true, abbreviate=false, fontsize=8, debug::Integer=0, kwargs...)
-    oad(debug, "plot_TS(<ctd>) START")
+function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
+    draw_freezing::Bool=true, abbreviate::Bool=false, fontsize::Integer=8,
+    debug::Integer=0, kwargs...)
+    # This test might be useful if further customization is needed for a future version
+    # of the package. For now, it simply makes for better debugging output.
+    if isa(d, Argo)
+        oad(debug, "plot_TS(::Argo) START")
+    else
+        oad(debug, "plot_TS(::Ctd) START")
+    end
     oad(debug, "  sigma0_levels: $sigma0_levels")
     oad(debug, "  spiciness0_levels: $spiciness0_levels")
     oad(debug, "  draw_freezing: $draw_freezing")
-    local S = ctd.data.salinity
-    local T = ctd.data.temperature
-    local p = ctd.data.pressure
-    local lon = ctd.metadata["longitude"]
-    local lat = ctd.metadata["latitude"]
+    local S = d.data.salinity
+    local T = d.data.temperature
+    local p = d.data.pressure
+    local lon = d.metadata["longitude"]
+    local lat = d.metadata["latitude"]
     SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     ok = isfinite.(SA) .& isfinite.(CT)

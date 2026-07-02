@@ -1,16 +1,15 @@
 """
-    plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
+    plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:pressure,
         abbreviate::Symbol=:long, fontsize::Integer=8, debug::Integer=0, kwargs...)
 
-Plot an oceanographic profile for data contained in `ctd`, showing how the
+Plot an oceanographic profile for data contained in `d`, showing how the
 variable named by `which` depends on either pressure or density.  The variable
-is drawn on the x axis and pressure on the y axis. Following oceanographic
-convention, the y axis is set up so that waters nearer the air-sea interface
-are nearer the top of the plot.
+is drawn on the x axis and either sigma0 or pressure on the y axis; in both
+cases, the waters nearer the surface are shown nearer the top of the plot.
 
 # Arguments
 
-- `ctd` a Ctd object to be plotted.
+- `d` either an Argo object or a Ctd object.
 
 # Keywords
 
@@ -62,26 +61,33 @@ ctd.data.conductivity = gsw_c_from_sp.(ctd["salinity"], ctd["temperature"], ctd[
 plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
 ```
 """
-function plot_profile(ctd::Ctd; which::String="CT", vertical::Symbol=:pressure,
-    abbreviate::Symbol=:long, fontsize::Integer=8, debug::Integer=0, kwargs...)
-    oad(debug, "plot_profile(<ctd>, which='$which') START")
+function plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:pressure,
+    abbreviate::Symbol=:long, fontsize=8, debug::Integer=0, kwargs...)
+    # This test might be useful if further customization is needed for a future version
+    # of the package. For now, it simply makes for better debugging output.
+    if isa(d, Argo)
+        oad(debug, "plot_profile(::Argo; which='$which', ...) START")
+    else
+        oad(debug, "plot_profile(::Ctd; which='$which', ...) START")
+    end
     # For all cases, we need to set up the vertical axis, so do that first
     oad(debug, "  setting up coordinate system for vertical axis")
+    # Catch a problematic call
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
         @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
     end
     if vertical == :pressure
-        y = ctd["pressure"]
+        y = d["pressure"]
         ylabel = label_from_varname("p", abbreviate)
     elseif vertical == :density
-        y = ctd["sigma0"]
+        y = d["sigma0"]
         ylabel = label_from_varname("sigma0", abbreviate)
     else
         error("vertical must be either :pressure or :density")
     end
-    x = get_element(ctd, which, debug=increment_debug(debug))
+    x = get_element(d, which, debug=increment_debug(debug))
     if isnothing(x)
-        error("Cannot find \"$which\" in this object, and cannot compute it either")
+        error("plot_profile() cannot find (or compute a value for) \"$which\"")
     end
     rval = plot(x, y,
         xlabel=label_from_varname(which), ylabel=ylabel,
