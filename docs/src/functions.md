@@ -21,6 +21,7 @@ OceanAnalysis.get_amsr
 OceanAnalysis.get_argo_index
 OceanAnalysis.get_argo
 OceanAnalysis.get_element
+OceanAnalysis.get_erddap_index
 OceanAnalysis.get_file
 OceanAnalysis.get_nc_value
 OceanAnalysis.get_section

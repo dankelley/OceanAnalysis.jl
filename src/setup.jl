@@ -49,6 +49,7 @@ export get_amsr
 export get_argo_index
 export get_argo
 export get_element
+export get_erddap_index
 export get_file
 export get_nc_value
 export get_section
@@ -119,4 +120,3 @@ export T90_from_T68
 export toc
 export xyz_to_enu
 export z_from_pressure
-

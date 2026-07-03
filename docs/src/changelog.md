@@ -14,6 +14,7 @@ Release notes:
 ### Added
 
 - Add `add_freezing_curve!`.
+- Add `get_erddap_index`.
 
 
 ## Changelog from version 0.2.6 to version 0.2.7
