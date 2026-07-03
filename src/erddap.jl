@@ -38,8 +38,14 @@ A Vector of String values that specify URLs for the files in the index.
 using OceanAnalysis
 urls = get_erddap_index("https://cioosatlantic.ca",
     "bio_maritimes_glider_SkyeSEA021_20230411");
-# Download first file, unless it exists and is < 10 days old.
-get_file(urls[1], destdir=".", age=10)
+
+# Isolate files from date 2023-05-01
+look = occursin.("20230501", urls)
+urls_focus = urls[look]
+println(urls_focus)
+
+# Download the first file in the list
+get_file(urls_focus[1], destdir=".", age=10)
 ```
 
 """
