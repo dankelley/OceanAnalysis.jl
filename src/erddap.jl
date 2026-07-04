@@ -3,18 +3,22 @@ import Base.parse
 
 """
     get_erddap_index(server::String="https://cioosatlantic.ca/",
-        item::String="bio_maritimes_glider_SkyeSEA021_20230411";
+        dir::String="bio_maritimes_glider_SkyeSEA021_20230411";
         debug::Integer=0)
 
-Find URLs listed on an ERDDAP website. By default, the URL of the website is
-constructed as `"\$(server)/erddap/files/\$(item)/.json"`. However, if `server`
-ends in the string `"/.json"`, then the URL is simply set to `server`,
-regardless of the value of `item`. The second form is intended for cases in
-which the first form cannot be reached, perhaps because the directory
-structure has changed.
+Find URLs listed on an ERDDAP website. There are three ways to do this.
 
-The default arguments will yield an index of a particular glider deployed by
-the Bedford Institute of Oceanography.
+1. If both `server` and `dri` are given (as in the default), then URL of the
+   website is constructed as `"\$(server)/erddap/files/\$(dir)/.json"`.
+
+2. If `server` ends in the string `"/.json"`, then the URL is simply set to
+   `server`, regardless of the value of `dir`. This offers the most
+   flexibility to the user, at the expense of demanding some understanding of
+   the URL structure.
+
+3. If `dir` is a zero-length string, then an overall index of the ERDDAP is
+   returned. Items that end with `"/"` are directories, so a call in this
+   form can be a first step in exploring what data the ERDAPP provides.
 
 # Return
 
@@ -24,7 +28,8 @@ A Vector of String values that specify URLs for the files in the index.
 
 - `server` a String specifying the server to be indexed; see above.
 
-- `item` an optional String specifying the item; see above.
+- `dir` an optional String specifying the directory of interest on the server;
+  see above.
 
 # Keywords
 
@@ -46,22 +51,29 @@ println(urls_focus)
 
 # Download the first file in the list
 get_file(urls_focus[1], destdir=".", age=10)
+
+# Get directory names, which are distinguished from file names
+# by a trailing "/" character.
+dirs = get_erddap_index("https://cioosatlantic.ca", "")
+dirs = dirs[endswith.(dirs, "/")]
+dirs = sort([split(dir, "/")[end-1] for dir in dirs])
+dirs
 ```
 
 """
 function get_erddap_index(server::String="https://cioosatlantic.ca/",
-    item::String="bio_maritimes_glider_SkyeSEA021_20230411"; debug::Integer=0)
+    dir::String="bio_maritimes_glider_SkyeSEA021_20230411"; debug::Integer=0)
     oad(debug, "get_erddap_index() START")
-    oad(debug, "  server: $server")
-    oad(debug, "  item: $item")
+    oad(debug, "  server: \"$server\"")
+    oad(debug, "  dir: \"$dir\"")
     if endswith(server, "/.json")
         url = server
     else
-        url = "$(server)/erddap/files/$(item)/.json"
+        url = "$(server)/erddap/files/$(dir)/.json"
     end
-    oad(debug, "  url: $url")
+    oad(debug, "  url: \"$url\"")
     url_without_dot_json = replace(url, "/.json" => "")
-    oad(debug, "  url_without_dot_json: $url_without_dot_json")
+    oad(debug, "  url_without_dot_json: \"$url_without_dot_json\"")
     response = HTTP.get(url)
     data = JSON.parse(String(response.body))
     file_rows = data["table"]["rows"]
