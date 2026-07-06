@@ -338,7 +338,7 @@ function plot_topography(topo::Topography;
     if draw_coastline && domain == :sea
         oad(debug, "    plotting the coastline")
         cl = coastline()
-        plot!(p, cl.data.longitude, cl.data.latitude, seriestype=:path, color=:black, legend=false)
+        plot!(p, cl.data.longitude, cl.data.latitude, lw=0.5, seriestype=:path, color=:black, legend=false; kwargs...)
     end
     oad(debug, "END plot_topography()")
     p
