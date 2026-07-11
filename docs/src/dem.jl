@@ -1,6 +1,6 @@
 using OceanAnalysis, Plots
 
-file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 
 if isfile(file)
     dem_all = read_dem(file)
