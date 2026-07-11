@@ -1,3 +1,7 @@
+using DataFrames
+using Dierckx: Spline1D
+using Statistics: mean
+
 """
     as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
 
@@ -272,4 +276,56 @@ function grid_ctd(ctd::Ctd;
     oad(debug, "END grid_ctd()")
     rval
 end
+
+
+"""
+    smooth_ctd(ctd::Ctd; variable="salinity", delta::Float64=0.001)
+
+Add a column to a Ctd object that holds a smoothed version of an existing column.
+
+This first finds any duplicated pressures, averaging the indicated `variable`
+within each such group., Then, it calls `Dierckx.Spline1D` to fit a smoothing
+cubic spline to `variable` as a function of pressure. In that call, the
+boundary condition is specified by setting `bc="nearest"` and the degree of
+smoothing is specified by setting `s=delta*n`, where `n` is set to the number of
+unique pressures in `ctd`.
+
+Note that this does not affect any other columns. So, for example, smoothing
+`salinity` will not affect a `SA` column, if one exists in `ctd.data`.
+
+# Arguments
+
+- `ctd` is a `Ctd` object.
+- `variable` is the name of a column in `ctd.data`.
+- `delta` is an indication of the uncertainty in the `variable` values.
+  Increasing `delta` will increase the amount of smoothing.
+
+# Return
+
+This returns a copy of `ctd`, but with a new column named as
+`\$variable_smooth` appended to the `data` component.
+
+# Examples
+```julia
+using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+ctd = read_ctd_cnv(file)
+ctd2 = smooth_ctd(ctd)
+plot_profile(ctd, which="salinity")
+plot!(ctd2["salinity_smooth"], ctd2["pressure"], color=:red)
+```
+"""
+function smooth_ctd(ctd::Ctd; variable="salinity", delta::Float64=0.001)
+    data = copy(ctd.data)
+    p = data.pressure
+    v = data[!, variable]
+    o = sortperm(p)
+    df = DataFrame(p=p[o], v=v[o])
+    pv = combine(groupby(df, :p), :v => mean => :v)
+    spline_function = Spline1D(pv.p, pv.v; bc="nearest", s=delta * size(pv, 1))
+    data[!, "$(variable)_smooth"] = spline_function.(p)
+    return Ctd(ctd.metadata, data)
+end
+export smooth_ctd
+
 

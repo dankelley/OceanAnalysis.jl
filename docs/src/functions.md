@@ -81,6 +81,7 @@ OceanAnalysis.set_teos
 OceanAnalysis.section_is_gridded
 OceanAnalysis.six_num
 OceanAnalysis.station_map
+OceanAnalysis.smooth_ctd
 OceanAnalysis.subset_amsr
 OceanAnalysis.subset_ctd
 OceanAnalysis.subset_ctd!

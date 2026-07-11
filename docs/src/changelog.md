@@ -12,7 +12,7 @@ Release notes:
 
 ### Added
 
-- `FILL IN`
+- `smooth_ctd`
 
 
 
