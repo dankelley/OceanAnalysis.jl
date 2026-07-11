@@ -49,6 +49,7 @@ function read_ctd_exchange(filename::String; add_teos=true, debug::Integer=0)
         read_ctd_exchange(file, filename; add_teos=add_teos, debug=debug)
     end
 end
+export read_ctd_exchange
 
 # Internal function used to read an exchange CTD file, optionally adding TEOS-10 variables.
 function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true, debug::Integer=0)
@@ -126,4 +127,5 @@ function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true,
     oad(debug, "END read_ctd_exchange()")
     rval
 end
+export read_ctd_exchange
 

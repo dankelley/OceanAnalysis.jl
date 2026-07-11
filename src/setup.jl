@@ -30,7 +30,6 @@ export Topography
 # Functions
 export add_freezing_curve!
 export argo_id_cycle
-export as_ctd
 export as_section
 export beam_to_xyz
 export bin_mean
@@ -38,7 +37,6 @@ export coastline
 export coordinate_from_string
 export coriolis
 export CT
-export debug
 export depth_from_pressure
 export despike
 export drop_qc
@@ -55,7 +53,6 @@ export get_nc_value
 export get_section
 export get_topography
 export gravity
-export grid_ctd
 export grid_section
 export handle_qc
 export handle_qc!
@@ -90,9 +87,6 @@ export read_adp_rdi
 export read_amsr
 export read_argo
 export read_argo_index
-export read_ctd_cnv
-export read_ctd_exchange
-export read_ctd_rsk
 export read_dem
 export read_echosounder
 export read_glider
@@ -106,12 +100,9 @@ export salinity_from_conductivity
 export SA
 export scale_bar
 export section_is_gridded
-export set_teos
 export six_num
 export station_map
 export subset_amsr
-export subset_ctd
-export subset_ctd!
 export subset_dem
 export summarize
 export summarize_argo_data_tests

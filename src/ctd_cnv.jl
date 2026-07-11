@@ -57,6 +57,7 @@ function read_ctd_cnv(filename::String; rename::Bool=true, add_teos::Bool=true, 
         read_ctd_cnv(file, filename; rename=rename, add_teos=add_teos, debug=increment_debug(debug))
     end
 end
+export read_ctd_cnv
 
 # Internal function used byRead a Seabird CTD file in cnv format, optionally adding TEOS-10 variables.
 function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, add_teos::Bool=true, debug::Integer=0)
@@ -269,4 +270,5 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
     oad(debug, "END read_ctd_cnv()")
     rval
 end
+export read_ctd_cnv
 

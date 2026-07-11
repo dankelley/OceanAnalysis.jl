@@ -31,6 +31,7 @@ function subset_ctd(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug:
     oad(debug, "END subset_ctd()")
     rval
 end
+export subset_ctd
 
 """
     subset_ctd!(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Integer=0)
@@ -61,4 +62,5 @@ function subset_ctd!(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug
     oad(debug, "END subset_ctd()")
     ctd
 end
+export subset_ctd!
 

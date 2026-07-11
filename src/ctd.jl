@@ -35,6 +35,7 @@ function as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
     oad(debug, "END as_ctd(Argo, ...)")
     rval
 end
+export as_ctd
 
 """
     as_ctd(salinity::Union{AbstractVector,AbstractRange},
@@ -120,7 +121,8 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     end
     oad(debug, "END as_ctd(salinity, ...)")
     rval
-end # as_ctd()
+end
+export as_ctd
 
 
 """
@@ -138,9 +140,9 @@ return value.
 An error is reported if the `x.data` lacks `salinity`, `temperature` or
 `pressure`, or if `x.metadata` lacks `longitude` or `latitude`.
 
-Any `longitude` values that are NaN are converted to -30.0, while
-any `latitude` values that are NaN are converted to 30.0. These
-values corresponde to the mid-Atlantic.
+Any `longitude` values that are NaN are converted to -30.0, while any
+`latitude` values that are NaN are converted to 30.0. These values correspond
+to the mid-Atlantic.
 """
 function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "set_teos START")
@@ -195,6 +197,7 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     oad(debug, "END set_teos")
     rval
 end
+export set_teos
 
 """
     grid_ctd(ctd::Ctd;
@@ -276,19 +279,20 @@ function grid_ctd(ctd::Ctd;
     oad(debug, "END grid_ctd()")
     rval
 end
+export grid_ctd
 
 
 """
-    smooth_ctd(ctd::Ctd; variable="salinity", delta::Float64=0.001)
+    smooth_ctd_variable(ctd::Ctd; variable="salinity", delta::Float64=0.001)
 
-Compute a ismoothed version of a data column in a `Ctd` object.
+Compute a smoothed version of a data column in a `Ctd` object.
 
 This first finds any duplicated pressures, averaging the indicated `variable`
-within each such group. Then, it calls `Dierckx.Spline1D` to fit a smoothing
-cubic spline to `variable` as a function of pressure. In that call, the
-boundary condition is specified by setting `bc="nearest"` and the degree of
-smoothing is specified by setting `s=delta*n`, where `n` is set to the number
-of unique pressures in `ctd`.
+within each such group. Then, it calls `Dierckx.Spline1D` (Ref. 1) to fit a
+smoothing cubic spline (Ref. 2) to `variable` as a function of pressure. In
+that call, the boundary condition is specified by setting `bc="nearest"` and
+the degree of smoothing is specified by setting `s=delta*n`, where `n` is set
+to the number of unique pressures in `ctd`.
 
 
 # Arguments
@@ -299,7 +303,7 @@ of unique pressures in `ctd`.
 - `delta` is an indication of the permissible root-mean-squared mismatch
   between `variable` and its smoothed version. This is multiplied by the
   number of distinct pressure values in `ctd`, and the result is provided
-  to `Dierckx.Spline`D` as the argument named `s`.
+  to `Dierckx.Spline` as the argument named `s`.
 
 # Return
 
@@ -318,6 +322,17 @@ plot!(salinity_smoothed, ctd["pressure"], label="Smoothed");
 # Now, check whether mean squared deviation is of order 0.001 (default delta)
 sum((salinity_smoothed .- ctd["salinity"]).^2) / length(ctd["salinity"])
 ```
+
+# References
+
+1. Julia Math. JuliaMath/Dierckx.Jl. Julia. October 15, 2014, Released June 22,
+   2026. https://github.com/JuliaMath/Dierckx.jl.
+
+2. Dierckx, P. “Algorithms for Smoothing Data with Periodic and Parametric
+   Splines.” Computer Graphics and Image Processing 20, no. 2 (1982): 171–84.
+   https://doi.org/10.1016/0146-664X(82)90043-0.
+
+
 """
 function smooth_ctd_variable(ctd::Ctd; variable="salinity", delta::Float64=0.001)
     data_names = names(ctd.data)

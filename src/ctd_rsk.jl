@@ -141,3 +141,5 @@ function read_ctd_rsk(filename::String; add_teos::Bool=true,
     oad(debug, "END read_ctd_rsk()")
     rval
 end
+export read_ctd_rsk
+
