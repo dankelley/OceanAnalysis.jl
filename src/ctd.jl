@@ -281,51 +281,55 @@ end
 """
     smooth_ctd(ctd::Ctd; variable="salinity", delta::Float64=0.001)
 
-Add a column to a Ctd object that holds a smoothed version of an existing column.
+Compute a ismoothed version of a data column in a `Ctd` object.
 
 This first finds any duplicated pressures, averaging the indicated `variable`
-within each such group., Then, it calls `Dierckx.Spline1D` to fit a smoothing
+within each such group. Then, it calls `Dierckx.Spline1D` to fit a smoothing
 cubic spline to `variable` as a function of pressure. In that call, the
 boundary condition is specified by setting `bc="nearest"` and the degree of
-smoothing is specified by setting `s=delta*n`, where `n` is set to the number of
-unique pressures in `ctd`.
+smoothing is specified by setting `s=delta*n`, where `n` is set to the number
+of unique pressures in `ctd`.
 
-Note that this does not affect any other columns. So, for example, smoothing
-`salinity` will not affect a `SA` column, if one exists in `ctd.data`.
 
 # Arguments
 
 - `ctd` is a `Ctd` object.
 - `variable` is the name of a column in `ctd.data`.
-- `delta` is an indication of the uncertainty in the `variable` values.
-  Increasing `delta` will increase the amount of smoothing.
+
+- `delta` is an indication of the permissible root-mean-squared mismatch
+  between `variable` and its smoothed version. This is multiplied by the
+  number of distinct pressure values in `ctd`, and the result is provided
+  to `Dierckx.Spline`D` as the argument named `s`.
 
 # Return
 
-This returns a copy of `ctd`, but with a new column named as
-`\$variable_smooth` appended to the `data` component.
+This returns a vector holding a smooth version of the `variable` column within
+`data.ctd`.
 
 # Examples
 ```julia
 using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-ctd = read_ctd_cnv(file)
-ctd2 = smooth_ctd(ctd)
-plot_profile(ctd, which="salinity")
-plot!(ctd2["salinity_smooth"], ctd2["pressure"], color=:red)
+ctd = read_ctd_cnv(file);
+salinity_smoothed = smooth_ctd_variable(ctd);
+# Compare visually
+plot_profile(ctd, which="salinity");
+plot!(salinity_smoothed, ctd["pressure"], label="Smoothed");
+# Now, check whether mean squared deviation is of order 0.001 (default delta)
+sum((salinity_smoothed .- ctd["salinity"]).^2) / length(ctd["salinity"])
 ```
 """
-function smooth_ctd(ctd::Ctd; variable="salinity", delta::Float64=0.001)
-    data = copy(ctd.data)
-    p = data.pressure
-    v = data[!, variable]
+function smooth_ctd_variable(ctd::Ctd; variable="salinity", delta::Float64=0.001)
+    data_names = names(ctd.data)
+    "pressure" in data_names || error("ctd.data does not contain a \"pressure\" column")
+    variable in data_names || error("ctd.data does not contain a \"$(variable)\" column")
+    p = ctd.data.pressure
+    v = ctd.data[!, variable]
     o = sortperm(p)
     df = DataFrame(p=p[o], v=v[o])
     pv = combine(groupby(df, :p), :v => mean => :v)
     spline_function = Spline1D(pv.p, pv.v; bc="nearest", s=delta * size(pv, 1))
-    data[!, "$(variable)_smooth"] = spline_function.(p)
-    return Ctd(ctd.metadata, data)
+    return spline_function.(p)
 end
-export smooth_ctd
-
+export smooth_ctd_variable
 
