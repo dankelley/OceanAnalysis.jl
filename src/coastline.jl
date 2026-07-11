@@ -196,9 +196,14 @@ dictated by `x` and `y`. The value of `x` must be `:left`, `:right` or a number
 (for latitude).  The default is to place the scale bar at the top-left.
 If none of the corners are suitable, e.g. if the label covers important
 parts of the plot, use numeric values for `x` and `y` as the longitude
-and latitude of the beginning of the line indicating the scale. The width
-of the line is given by `linewidth`, and the fontsize of the label
-is given by `fontsize`.
+and latitude of the beginning of the line indicating the scale.
+
+With `style=:Ibeam` (the default), a rotated Ibeam shape is drawn, with 2/3 of
+the indicated thickness. With `style=:line`, distance is represented by a
+single line that is drawn at the indicated thickness. An error is reported if
+any other `style` value is given.
+
+In both cases, `fontsize` dictates the size of the label.
 
 # Examples
 
@@ -209,7 +214,8 @@ plot_coastline(cl, xlim=(-70, -60), ylim=(42, 48))
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, fontsize::Real=8)
+function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, fontsize::Real=8,
+    style=:Ibeam)
     distance > 0.0 || throw(ArgumentError("distance must be a positive number, but it is $distance"))
     xlim, ylim = xlims(), ylims() # need these to avoid changing view in the existing plot
     ymid = (ylim[1] + ylim[2]) / 2.0
@@ -235,8 +241,16 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, f
         throw(ArgumentError("y must be :top, :bottom, or a number, but it is $(repr(y))"))
     end
     Y = [y0, y0]
+    if style == :Ibeam
+        linewidth = 2.0 * linewidth / 3.0
+        DY = (X[2] - X[1]) / 30
+        X = [X[1], X[1], X[1], X[2], X[2], X[2]]
+        Y = [Y[1] + DY, Y[1] - DY, Y[1], Y[2], Y[2] + DY, Y[2] - DY]
+    elseif style != :line
+        error("style $(repr(style)) not handled; try :line or :Ibeam")
+    end
     plot!(X, Y, color=:black, linewidth=linewidth, label=false, xlim=xlim, ylim=ylim)
-    annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
+    annotate!((X[1] + X[end]) / 2.0, y0 + 2.0 * dy / 3.0,
         Plots.text("$(trunc(Int, distance)) km", fontsize))
 end
 export scale_bar
