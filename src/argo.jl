@@ -130,6 +130,8 @@ function summarize_argo_data_tests(filename::String)
         end
     end
 end
+export summarize_argo_data_tests
+
 
 
 """
@@ -153,6 +155,8 @@ function argo_id_cycle(idcycle::String="")
     occursin(r"_", idcycle) || throw(ArgumentError("'idcycle' must contain an underline character"))
     split(idcycle, "_")
 end
+export argo_id_cycle
+
 
 
 """
@@ -237,6 +241,7 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
     oad(debug, "END read_argo()")
     return Argo(metadata, data)
 end # read_argo()
+export read_argo
 
 
 """
@@ -273,6 +278,8 @@ function get_argo_index(destdir::String="."; age::Real=1.0, server::String="http
     oad(debug, "END get_argo_index()")
     rval
 end
+export get_argo_index
+
 
 """
     get_argo(filename::String=""; destdir::String=".", age::Real=30.0,
@@ -335,6 +342,7 @@ function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, serv
     oad(debug, "END get_argo()")
     rval
 end
+export get_argo
 
 
 """
@@ -391,4 +399,5 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
     oad(debug, "END read_argo_index()")
     return df
 end
+export read_argo_index
 

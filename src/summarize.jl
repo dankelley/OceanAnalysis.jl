@@ -43,6 +43,9 @@ function six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max, :number
     end
     return (name=name, min=Min, mean=Mean, max=Max, number=number, number_missing=number_missing, number_NaN=number_NaN)
 end
+export six_num
+
+
 
 function summarize_data(x)
     if x.data isa DataFrame
@@ -102,6 +105,9 @@ function summarize(x::OA)
     println("Metadata: a Dict() with entries: ", collect(sort(keys(x.metadata))))
     summarize_data(x)
 end
+export summarize
+
+
 
 """
     summarize(x::Argo)

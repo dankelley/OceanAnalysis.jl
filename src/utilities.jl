@@ -7,6 +7,7 @@ Increment an integer (if it is positive). This is used in conjunction with
 function increment_debug(debug::Integer=0)::Integer
     debug > 0 ? debug + 1 : 0
 end
+export increment_debug
 
 """
     Base.getindex(x::OA, name::Union{String,Symbol})
@@ -29,6 +30,7 @@ scatter(d["timeS"], d["pressure"], xlab="Time [s]", ylab="Pressure [dbar]",
 function Base.getindex(x::OA, name::Union{String,Symbol})
     get_element(x, name)
 end
+export get_element
 
 """
     Base.setindex!(x::OA, value, name::String)
@@ -95,6 +97,7 @@ function coordinate_from_string(s::String)
         error("malformed coordinate string \"$s\"")
     end
 end
+export coordinate_from_string
 
 
 
@@ -114,6 +117,7 @@ julia> T90_from_T68(10.0)
 ```
 """
 T90_from_T68(T68::Real) = T68 / 1.00024
+export T90_from_T68
 
 """
     T90 = T90_from_T48(T48::Real)
@@ -131,6 +135,7 @@ julia> T90_from_T48(10.0)
 ```
 """
 T90_from_T48(T48::Real) = (T48 - 4.4e-6 * T48 * (100.0 - T48)) / 1.00024
+export T90_from_T48
 
 
 """
@@ -195,6 +200,8 @@ function pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
     rval = collect(range(minnew, maxnew, step=dxnew))
     return rval
 end
+export pretty
+
 
 """
     oad(debug::Integer=0, args...)
@@ -212,6 +219,8 @@ function oad(debug::Integer=0, args...)
         print("\n")
     end
 end
+export oad
+
 
 """
     fix_gsw_bad_code(x)
@@ -224,6 +233,7 @@ function fix_gsw_bad_code(x)
     rval[rval.>=GSW_INVALID_THRESHOLD] .= NaN
     rval
 end
+export fix_gsw_bad_code
 
 """
     fix_gsw_bad_code!(x)
@@ -234,6 +244,7 @@ function fix_gsw_bad_code!(x)
     @inbounds x[x.>=GSW_INVALID_THRESHOLD] .= NaN
     x
 end
+export fix_gsw_bad_code!
 
 
 """
@@ -269,6 +280,7 @@ function toc(x::OA)
         println("    data: ", names(x.data))
     end
 end
+export toc
 
 
 """
@@ -286,6 +298,8 @@ julia> coriolis(45.0)
 function coriolis(latitude::Real)
     1.458423e-4 * sin(latitude * pi / 180)
 end
+export coriolis
+
 
 """
     gravity(latitude::Real=45.0, z::Real=0.0)
@@ -313,3 +327,4 @@ function gravity(latitude::Real=45.0, z::Real=0.0)
     phi = latitude * π / 180.0
     9.7803271 * (1.0 + 5.3024e-3 * sin(phi)^2 - 5.8e-6 * sin(2.0 * phi)^2) * (1.0 - 2.26e-7 * z)
 end
+export gravity

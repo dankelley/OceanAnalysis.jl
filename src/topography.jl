@@ -25,6 +25,8 @@ function get_topography(name::Symbol=:global_coarse; debug::Integer=0)
     oad(debug, "END get_topography()")
     rval
 end
+export get_topography
+
 
 """
     read_topography(filename::String; debug::Integer = 0)::Topography
@@ -89,6 +91,8 @@ function read_topography(filename::String; debug::Integer=0)::Topography
         return Topography(metadata, data)
     end
 end
+export read_topography
+
 
 
 """
@@ -246,6 +250,7 @@ function get_topography(west::Real, east::Real,
         return destfile
     end
 end
+export get_topography
 
 """
     plot_topography(topo::Topography;
@@ -343,3 +348,5 @@ function plot_topography(topo::Topography;
     oad(debug, "END plot_topography()")
     p
 end
+export plot_topography
+

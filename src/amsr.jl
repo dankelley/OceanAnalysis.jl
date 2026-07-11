@@ -71,6 +71,8 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
         end
     end
 end
+export read_amsr
+
 
 """
     get_amsr(date::String)::String
@@ -79,6 +81,7 @@ end
 function get_amsr(date::String; kwargs...)::String
     get_amsr(Date(date), kwargs...)
 end
+export get_amsr
 
 """
     get_amsr(date::Date=Dates.today() - Day(4); type::String="3day",
@@ -153,6 +156,8 @@ function get_amsr(date::Date=Dates.today() - Dates.Day(4);
     oad(debug, "END get_amsr()")
     destpath
 end
+export get_amsr
+
 
 """
     plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
@@ -239,6 +244,7 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
     oad(debug, "END plot_amsr()")
     p
 end
+export plot_amsr
 
 
 """
@@ -273,4 +279,5 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     oad(debug, "END subset_amsr()")
     rval
 end
+export subset_amsr
 

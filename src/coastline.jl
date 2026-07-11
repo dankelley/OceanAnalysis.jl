@@ -29,6 +29,7 @@ function coastline(name::Symbol=:global_fine)
     end
     rval
 end
+export coastline
 
 """
     coastline(filename::String, header::Integer=0)
@@ -65,6 +66,7 @@ function coastline(filename::String, header::Integer=1)
     "latitude" in column_names || error("no 'latitude' column in CSV file; found ", column_names)
     Coastline(metadata, data)
 end
+export coastline
 
 """
     coastline(longitude::Union{AbstractVector,AbstractRange},
@@ -93,6 +95,7 @@ function coastline(longitude::Union{AbstractVector,AbstractRange},
     data = DataFrame(longitude=longitude, latitude=latitude)
     Coastline(metadata, data)
 end
+export coastline
 
 """
     plot_coastline(coastline::Coastline; debug::Integer=0, kwargs...)
@@ -143,6 +146,8 @@ function plot_coastline(coastline::Coastline; debug::Integer=0, kwargs...)
     oad(debug, "END plot_coastline()")
     rval
 end
+export plot_coastline
+
 
 """
     plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Integer=0, kwargs...)
@@ -177,6 +182,7 @@ function plot_coastline!(coastline::Coastline; fillcolor=:bisque3, debug::Intege
     oad(debug, "END plot_coastline!()")
     rval
 end
+export plot_coastline!
 
 """
     scale_bar(distance::Real=100.0; x=:left, y=:top,
@@ -233,6 +239,8 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, f
     annotate!((X[1] + X[2]) / 2.0, Y[1] + 0.66 * dy,
         Plots.text("$(trunc(Int, distance)) km", fontsize))
 end
+export scale_bar
+
 
 """
     station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
@@ -293,4 +301,5 @@ function station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwa
     oad(debug, "END station_map()")
     map
 end
+export station_map
 
