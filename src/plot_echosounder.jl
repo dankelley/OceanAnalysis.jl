@@ -44,4 +44,5 @@ function plot_echosounder(e::Echosounder; which=:log_amplitude, debug::Integer=0
     oad(debug, "END plot_echosounder()")
     return (rval)
 end
+export plot_echosounder
 

@@ -93,6 +93,7 @@ function read_dem(file::String; lonlat_method::Symbol=:interpolated, debug::Int=
         "proj" => g.proj4, "x" => x, "y" => y, "longitude" => lon, "latitude" => lat)
     Dem(metadata, z)
 end
+export read_dem
 
 
 
@@ -142,6 +143,8 @@ function subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real}
     oad(debug, "END subset_dem()")
     rval
 end
+export subset_dem
+
 
 """
     plot_dem(dem::Dem; debug::Int=0)
@@ -175,4 +178,5 @@ function plot_dem(dem::Dem; coordinates::Symbol=:distance, kwargs...)
         error("coordinates=$(repr(coordinates)) not permited; try :distance or :geographic")
     end
 end
+export plot_dem
 

@@ -13,6 +13,9 @@ function add_freezing_curve!(xlim, ylim; kwargs...)
     y = gsw_ct_freezing.(x, 0.0, 1.0)
     plot!(x, y, color=:darkgray, xlim=xlim, ylim=ylim; kwargs...)
 end
+export add_freezing_curve!
+
+
 
 """
     plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
@@ -150,6 +153,7 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
     oad(debug, "END plot_TS()")
     rval
 end # plot_TS()
+export plot_TS
 
 
 
@@ -196,6 +200,8 @@ function plot_TS_sigma0_contours(sigma0_levels=[]; debug::Integer=0, kwargs...)
     end
     oad(debug, "END plot_TS_sigma0_contours")
 end
+export plot_TS_sigma0_contours
+
 
 """
     plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Integer=0, kwargs...)
@@ -240,4 +246,5 @@ function plot_TS_spiciness0_contours(spiciness0_levels=[]; debug::Integer=0, kwa
     end
     oad(debug, "END plot_TS_spiciness0_contours")
 end
+export plot_TS_spiciness0_contours
 

@@ -42,6 +42,8 @@ plot!(ymean, label="mean")
 function running_mean(x::Vector{Float64}, k::Int64=3)
     running(x, k, mean)
 end
+export running_mean
+
 
 """
     running_median(x::vector{float64}, k::int64=3)
@@ -61,4 +63,5 @@ plot!(ymedian, label="median")
 function running_median(x::Vector{Float64}, k::Int64=3)
     running(x, k, median)
 end
+export running_median
 

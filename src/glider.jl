@@ -71,4 +71,5 @@ function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
     oad(debug, "END read_glider()")
     rval
 end
+export read_glider
 

@@ -77,3 +77,4 @@ function despike(x::Vector{Float64}; k::Int64=7, n::Int64=4, action::Symbol=:rep
         error("'action' must be :replace, :NaN or :flag")
     end
 end
+export despike

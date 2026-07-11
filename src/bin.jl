@@ -46,4 +46,5 @@ function bin_mean(x, y, bins)
         bin_y_mean=bin_y_sum ./ bin_count,
         bin_count=bin_count)
 end
+export bin_mean
 

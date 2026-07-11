@@ -24,6 +24,8 @@ function interpolate_barnes_point(xx::Float64, yy::Float64, zz::Float64,
     # sure this will happen, in real applications.)
     (sum_w > 0.0) ? (zz + sum / sum_w) : NaN
 end
+export interpolate_barnes
+
 
 # Compute a Barnes weight for a prediction of zz at a location
 # (xx, yy), given a field z defined at locations (x,y). The

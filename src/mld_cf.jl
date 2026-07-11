@@ -83,6 +83,8 @@ function MLD_CF_detailed(ctd::Ctd; variable::String="temperature", n::Int=5)::Di
     MLDindex = argmax(E2_over_E1)
     Dict("E1" => E1, "E2" => E2, "E2_over_E1" => E2_over_E1, "MLDindex" => MLDindex, "MLD" => p[MLDindex])
 end
+export MLD_CF_detailed
+
 
 """
     MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Float64
@@ -131,8 +133,9 @@ plot_profile(c, which="temperature")
 hline!([MLD], color=:red)
 title!(@sprintf("MLD %.1f m by Chu-Fanning (2010) method", MLD))
 ```
-
 """
 function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Float64
     MLD_CF_detailed(ctd; variable=variable, n=n)["MLD"]
 end
+export MLD_CF
+

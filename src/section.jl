@@ -50,6 +50,7 @@ function as_section(ctds::Vector{Ctd}; debug::Integer=0)
     oad(debug, "END as_section()")
     Section(metadata, data)
 end # as_section()
+export as_section
 
 
 """
@@ -98,6 +99,8 @@ function read_section(dir::String; debug::Integer=0)
     oad(debug, "END read_section()")
     rval
 end
+export read_section
+
 
 """
     section_is_gridded(Section:section; debug:Int64=0)
@@ -131,6 +134,7 @@ function section_is_gridded(section::Section; debug::Integer=0)
     oad(debug, "END section_is_gridded()")
     rval
 end
+export section_is_gridded
 
 """
     grid_section(section::Section, pressure_step::Float64=2.0; debug::Integer=0)
@@ -183,3 +187,5 @@ function grid_section(section::Section, pressure_step::Float64=2.0; debug::Integ
     oad(debug, "END grid_section()")
     rval
 end
+export grid_section
+

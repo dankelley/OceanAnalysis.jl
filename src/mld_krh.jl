@@ -65,6 +65,7 @@ function ILD_KRH(c::Ctd; criterion=0.8)::Float64
     Xstar = increasing ? Xref + criterion : Xref - criterion
     return (itp2.(Xstar))
 end
+export ILD_KRH
 
 """
     MLD_KRH(c::Ctd; criterion=0.8)::Float64
@@ -142,3 +143,4 @@ function MLD_KRH(c::Ctd; criterion=0.8)::Float64
     Xstar = increasing ? Xref + criterion : Xref - criterion
     return (itp2.(Xstar))
 end
+export MLD_KRH

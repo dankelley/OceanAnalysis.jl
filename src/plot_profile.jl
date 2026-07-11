@@ -99,4 +99,5 @@ function plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:
     oad(debug, "END plot_profile()")
     return rval
 end
+export plot_profile
 

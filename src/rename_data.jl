@@ -76,3 +76,4 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
     end
     rval
 end
+export rename_data

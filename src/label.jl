@@ -68,4 +68,5 @@ function label_from_varname(varname::String, abbreviate::Symbol=:long)
         varname in keys(long) ? long[varname] : varname
     end
 end
+export label_from_varname
 

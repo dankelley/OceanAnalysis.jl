@@ -59,6 +59,7 @@ function plot_stations(longitude::Vector{Float64}, latitude::Vector{Float64};
     oad(debug, "END plot_stations()")
     pl
 end
+export plot_stations
 
 """
     plot_stations(section::Section; draw_coastline::Bool=true, debug::Integer=0, kwargs...)
@@ -99,3 +100,4 @@ plot_stations(s, xlim=(-80,0), ylim=(20,50))
 function plot_stations(section::Section; draw_coastline::Bool=true, debug::Integer=0, kwargs...)
     plot_stations(section["longitude"], section["latitude"]; draw_coastline=draw_coastline, debug=debug, kwargs...)
 end
+export plot_stations

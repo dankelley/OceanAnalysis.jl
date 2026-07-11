@@ -86,3 +86,4 @@ function get_erddap_index(server::String="https://cioosatlantic.ca/",
     oad(debug, "END get_erddap_index()")
     return urls
 end
+export get_erddap_index

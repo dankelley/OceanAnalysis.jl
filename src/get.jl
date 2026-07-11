@@ -35,6 +35,7 @@ function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int
     oad(debug, "END get_file")
     file
 end
+export get_file
 
 
 """
@@ -95,6 +96,8 @@ function get_section(url::String; destdir=".", debug::Integer=0)
     oad(debug, "END get_section()")
     return (destdir)
 end
+export get_section
+
 
 """
     get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
@@ -200,3 +203,4 @@ function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
     # The item is not handled, so return an empty result
     return nothing
 end
+export get_element

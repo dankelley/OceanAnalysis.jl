@@ -464,6 +464,8 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     oad(debug, "END read_adp_rdi()")
     rval
 end
+export read_adp_rdi
+
 
 
 """
@@ -527,6 +529,7 @@ function beam_to_xyz(adp::Adp; debug::Integer=0)
     oad(debug, "END beam_to_xyz()")
     rval
 end
+export beam_to_xyz
 
 
 """
@@ -644,4 +647,4 @@ function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Integer=0)
     oad(debug, "END xyz_to_enu()")
     rval
 end
-
+export xyz_to_enu

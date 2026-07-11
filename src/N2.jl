@@ -67,6 +67,7 @@ function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)::Vect
     oad(debug, "END N2()")
     rval
 end
+export N2
 
 
 """
@@ -180,6 +181,7 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
     oad(debug, "END N2_spline()")
     rval
 end
+export N2_spline
 
 
 
@@ -254,3 +256,4 @@ function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Intege
     oad(debug, "END N2_first_difference()")
     rval
 end
+export N2_first_difference

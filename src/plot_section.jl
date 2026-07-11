@@ -177,4 +177,5 @@ function plot_section(section::Section, which::String="salinity";
     oad(debug, "END plot_section()")
     pl
 end
+export plot_section
 

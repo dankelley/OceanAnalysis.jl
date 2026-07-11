@@ -31,6 +31,7 @@ function CT(SA::Real, temperature::Real, pressure::Real)
     end
     rval
 end
+export CT
 
 function CT(ctd::Ctd)
     if (:CT in propertynames(ctd.data)) || ("CT" in names(ctd.data))
@@ -39,6 +40,7 @@ function CT(ctd::Ctd)
         return CT.(SA(ctd), ctd.data.temperature, ctd.data.pressure)
     end
 end
+export CT
 
 
 """
@@ -76,6 +78,7 @@ function SA(salinity::Real, pressure::Real, longitude::Real=DEFAULT_LONGITUDE, l
     end
     rval
 end
+export SA
 
 function SA(ctd::Ctd)
     if (:SA in propertynames(ctd.data)) || ("SA" in names(ctd.data))
@@ -98,6 +101,7 @@ function SA(ctd::Ctd)
         return SA.(salinity, pressure, longitude, latitude)
     end
 end
+export SA
 
 
 """
@@ -112,6 +116,7 @@ function salinity_from_conductivity(conductivity::Real, temperature::Real, press
     gsw_sp_from_c(conductivity, temperature, pressure)
 end
 
+export salinity_from_conductivity
 
 """
     pressure_from_depth(depth::Real, latitude::Real=$(DEFAULT_LATITUDE))
@@ -132,6 +137,8 @@ function pressure_from_depth(depth::Real, latitude::Real=DEFAULT_LATITUDE)
     #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return gsw_p_from_z(-depth, latitude, 0.0, 0.0)
 end
+export pressure_from_depth
+
 
 """
     pressure_from_z(z::Real, latitude::Real=$(DEFAULT_LATITUDE))
@@ -152,6 +159,7 @@ function pressure_from_z(z::Real, latitude::Real=DEFAULT_LATITUDE)
     #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return gsw_p_from_z(z, latitude, 0.0, 0.0)
 end
+export pressure_from_z
 
 
 """
@@ -175,6 +183,7 @@ function depth_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
     #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return -gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
+export depth_from_pressure
 
 
 """
@@ -198,4 +207,5 @@ function z_from_pressure(pressure::Real, latitude::Real=DEFAULT_LATITUDE)
     #-90.0 <= latitude <= 90.0 || throw(ArgumentError("latitude ($latitude) must be in range from -90 to 90"))
     return gsw_z_from_p(pressure, latitude, 0.0, 0.0)
 end
+export z_from_pressure
 

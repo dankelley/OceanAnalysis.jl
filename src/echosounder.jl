@@ -350,4 +350,6 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
     oad(debug, "END read_echosounder()")
     return rval
 end
+export read_echosounder
+
 

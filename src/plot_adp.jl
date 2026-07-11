@@ -114,8 +114,9 @@ function plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
         rval = scatter(U, V, aspect_ratio=1.0, label=false, framestyle=:box,
             xlab="u [m/s]", ylab="v [m/s]", kwargs...)
         oad(debug, "END plot_adp()")
-        return (rval)
+        return rval
     else
         error("unrecognized value of which ($(repr(which)))")
     end
 end
+export plot_adp

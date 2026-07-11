@@ -40,4 +40,5 @@ function read_nonna(filename::String)
     metadata["inc"] = I.inc
     Nonna(metadata, data)
 end
+export read_nonna
 

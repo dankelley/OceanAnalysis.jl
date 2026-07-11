@@ -57,3 +57,4 @@ function get_nc_value(nc, name; require_valid=false)
     end
     return rval
 end
+export get_nc_value

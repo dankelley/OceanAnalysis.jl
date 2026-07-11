@@ -54,6 +54,7 @@ function drop_qc(x::Union{Argo,Ctd}; pattern::String="_qc\$", debug::Integer=0)
     oad(debug, "END drop_qc()")
     rval
 end
+export drop_qc
 
 """
     handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
@@ -131,6 +132,7 @@ function handle_qc(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
     oad(debug, "END handle_qc()")
     rval
 end
+export handle_qc
 
 """
     handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1",
@@ -166,4 +168,5 @@ function handle_qc!(x::Union{Argo,Ctd}; retain::Union{String,Vector{String}}="1"
     oad(debug, "END handle_qc()!")
     rval
 end
+export handle_qc!
 

@@ -93,3 +93,4 @@ function geod_distance(lon1::Real, lat1::Real, lon2::Real, lat2::Real; a::Real=6
     s = ((((sy * sy * 4.0 - 3.0) * s * cz * d / 6.0 - x) * d / 4.0 + cz) * sy * d + y) * c * a * r
     return s / 1000.0
 end
+export geod_distance
