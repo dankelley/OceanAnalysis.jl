@@ -1,4 +1,4 @@
-using OceanAnalysis, Plots, TiffImages
+using OceanAnalysis, Plots
 topo_file = get_topography(-67, -63, 43, 46, resolution=1)
 topo = read_topography(topo_file);
 p1 = plot_topography(topo, domain=:both);
