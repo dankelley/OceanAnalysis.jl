@@ -12,7 +12,8 @@ Release notes:
 
 ### Added
 
-- `smooth_ctd`
+- `smooth_ctd_variable`, for smoothing columns in the `data` element of a Ctd
+object.
 
 
 

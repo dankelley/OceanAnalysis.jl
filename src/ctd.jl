@@ -287,28 +287,38 @@ export grid_ctd
 
 Compute a smoothed version of a data column in a `Ctd` object.
 
-This first finds any duplicated pressures, averaging the indicated `variable`
-within each such group. Then, it calls `Dierckx.Spline1D` (Ref. 1) to fit a
-smoothing cubic spline (Ref. 2) to `variable` as a function of pressure. In
-that call, the boundary condition is specified by setting `bc="nearest"` and
-the degree of smoothing is specified by setting `s=delta*n`, where `n` is set
-to the number of unique pressures in `ctd`.
-
+The procedure begins by finding any duplicated pressures, averaging the
+indicated `variable` within each such group. Then, it calls `Dierckx.Spline1D`
+(Ref. 1) to fit a smoothing cubic spline (Ref. 2) to `variable` as a function
+of pressure. In that call, the boundary condition is specified by setting
+`bc="nearest"` and the degree of smoothing is specified by setting `s=delta*n`,
+where `n` is set to the number of unique pressures in `ctd`. The default
+`delta` may be useful for salinity, but users would be well-advised to explore
+how results vary as `delta` is varied.
 
 # Arguments
 
 - `ctd` is a `Ctd` object.
-- `variable` is the name of a column in `ctd.data`.
+- `variable` is a String that names a column in `ctd.data`.
+
+# Keywords
+
+- `bc` is an indication, passed directly to `Dierckx, of how to extrapolate
+  beyond the range of the `x` values. The permitted choices are `"nearest"` (the
+  default), `"zero"`, `"extrapolate"` and `"error"`.
 
 - `delta` is an indication of the permissible root-mean-squared mismatch
-  between `variable` and its smoothed version. This is multiplied by the
-  number of distinct pressure values in `ctd`, and the result is provided
-  to `Dierckx.Spline` as the argument named `s`.
+  between `variable` and its smoothed version. The product of `delta` and the
+  number of distinct pressure is provided to `Dierckx.Spline1D` as the argument
+  named `s`, which specifies the maximum permitted sum of squares of the misfits
+  between the data and the spline. `Dierckx.Spline1D` increases the number of
+  knots (increasing the possibly wiggliness of the spline) until the misfit
+  passes this criterion.
 
 # Return
 
-This returns a vector holding a smooth version of the `variable` column within
-`data.ctd`.
+This returns a vector holding a smoothed version of the `variable` column
+within `data.ctd`.
 
 # Examples
 ```julia
@@ -331,10 +341,8 @@ sum((salinity_smoothed .- ctd["salinity"]).^2) / length(ctd["salinity"])
 2. Dierckx, P. “Algorithms for Smoothing Data with Periodic and Parametric
    Splines.” Computer Graphics and Image Processing 20, no. 2 (1982): 171–84.
    https://doi.org/10.1016/0146-664X(82)90043-0.
-
-
 """
-function smooth_ctd_variable(ctd::Ctd; variable="salinity", delta::Float64=0.001)
+function smooth_ctd_variable(ctd::Ctd; variable="salinity", bc="nearest", delta::Float64=0.001)
     data_names = names(ctd.data)
     "pressure" in data_names || error("ctd.data does not contain a \"pressure\" column")
     variable in data_names || error("ctd.data does not contain a \"$(variable)\" column")
@@ -343,7 +351,7 @@ function smooth_ctd_variable(ctd::Ctd; variable="salinity", delta::Float64=0.001
     o = sortperm(p)
     df = DataFrame(p=p[o], v=v[o])
     pv = combine(groupby(df, :p), :v => mean => :v)
-    spline_function = Spline1D(pv.p, pv.v; bc="nearest", s=delta * size(pv, 1))
+    spline_function = Spline1D(pv.p, pv.v; bc=bc, s=delta * size(pv, 1))
     return spline_function.(p)
 end
 export smooth_ctd_variable
