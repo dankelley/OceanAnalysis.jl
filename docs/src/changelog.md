@@ -1,19 +1,18 @@
 # Changes
 
-## Changelog from version 0.2.8 to version 0.2.9
+## Changelog from version 0.2.9 to version 0.2.10
 
 Release notes:
 
 ### Changed
 
-- `FILL IN`
+- none yet
 
 - BREAKING none yet
 
 ### Added
 
-- `smooth_ctd_variable`, for smoothing columns in the `data` element of a Ctd
-object.
+- none yet
 
 
 
