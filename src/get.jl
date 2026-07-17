@@ -26,7 +26,7 @@ function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Int
                 round(file_age, digits=4), " days old, exceeding threshold of ", age, " days")
             Downloads.download(url, file)
         else
-            oad(debug, "  using the cached version of the file, since it is under ", age, " days old")
+            oad(debug, "  using the cached version of the file, since it is less than ", age, " days old")
         end
     else
         oad(debug, "  downloading file, since it is not cached in the '$destdir' directory")
