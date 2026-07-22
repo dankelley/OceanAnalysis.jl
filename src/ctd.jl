@@ -41,8 +41,9 @@ export as_ctd
     as_ctd(salinity::Union{AbstractVector,AbstractRange},
         temperature::Union{AbstractVector,AbstractRange},
         pressure::Union{AbstractVector,AbstractRange};
-        longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
-        add_teos::Bool=true, debug::Integer=0)::Ctd
+        longitude::Union{Real,AbstractVector,AbstractRange}=-63.0,
+        latitude::Union{Real,AbstractVector,AbstractRange}=45.0,
+        time=nothing, add_teos::Bool=true, debug::Integer=0)::Ctd
 
 Construct a [`Ctd`](@ref) object, given S, T, p, and possibly a location.
 
@@ -65,15 +66,21 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 
 # Keywords
 
-- `longitude`: observation longitude, in degrees East. The default, -63.0, is a location in the North Atlantic).
+- `longitude`: observation longitude, in degrees East. This may be a
+  vector or a single value. The default, -63.0, is a location in the
+  Northwest Atlantic).
 
-- `latitude`: observation latitude, in degrees North. The default, 45.0, is a location in the North Atlantic).
+- `latitude`: observation latitude, in degrees North. This may be a
+  vector or a single value. The default, 45.0, is a location in the
+  Northwest Atlantic).
 
 - `time`: an optional indication of the measurement start time.
 
-- `add_teos`: an optional indication of whether to add `SA`, `CT`, `sigma0` and `spiciness0` to the `data` component of the return value.
+- `add_teos`: an optional indication of whether to add `SA`, `CT`,
+  `sigma0` and `spiciness0` to the `data` component of the return value.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that
+  debugging output should be printed during processing.
 
 # Examples
 ```julia
@@ -99,8 +106,9 @@ Ctd(Dict{String, Any}("filename" => nothing, "latitude" => [-63.0], "time" => no
 function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     temperature::Union{AbstractVector,AbstractRange},
     pressure::Union{AbstractVector,AbstractRange};
-    longitude::Real=-63.0, latitude::Real=45.0, time=nothing,
-    add_teos::Bool=true, debug::Integer=0)::Ctd
+    longitude::Union{Real,AbstractVector,AbstractRange}=-63.0,
+    latitude::Union{Real,AbstractVector,AbstractRange}=45.0,
+    time=nothing, add_teos::Bool=true, debug::Integer=0)::Ctd
     oad(debug, "as_ctd(salinity, ...) START")
     nsamp = length(salinity)
     length(temperature) == nsamp || error("salinity and temperature have differing lengths ($nsamp and $(length(temperature)), respectively)")

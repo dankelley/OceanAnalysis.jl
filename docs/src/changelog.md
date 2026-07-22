@@ -6,7 +6,8 @@ Release notes:
 
 ### Changed
 
-- none yet
+- `as_ctd()` will now accept vector values of `longitude` and
+  `latitude`.
 
 - BREAKING none yet
 
