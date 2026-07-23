@@ -328,3 +328,33 @@ function gravity(latitude::Real=45.0, z::Real=0.0)
     9.7803271 * (1.0 + 5.3024e-3 * sin(phi)^2 - 5.8e-6 * sin(2.0 * phi)^2) * (1.0 - 2.26e-7 * z)
 end
 export gravity
+
+
+"""
+    decode_color_by(x)
+
+Decode a Tuple that specifies colors that can be used to indicate a third
+variable on plots made by [`plot_TS`](@ref). This saves having to add three new
+arguments to that function.  See the help for [`plot_TS`](@ref) for the
+expected contents of `x` and how they are interpreted.
+"""
+function decode_color_by(x)
+    if isa(x, Tuple)
+        nx = length(x)
+        if 1 <= nx <= 3
+            levels = x[1]
+            color = nx > 1 ? x[2] : :turbo
+            clim = nx > 2 ? x[3] : extrema(levels)
+            if 2 != length(clim)
+                error("clim must be a numeric vector of length 2")
+            end
+        else
+            error("color_by is not a Tuple of length 1, 2 or 3")
+        end
+    else
+        error("color_by is not a Tuple of length 3")
+    end
+    (levels=levels, color=color, clim=clim)
+end
+export decode_color_by
+

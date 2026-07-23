@@ -11,6 +11,7 @@ OceanAnalysis.coastline
 OceanAnalysis.coriolis
 OceanAnalysis.coordinate_from_string
 OceanAnalysis.CT
+OceanAnalysis.decode_color_by
 OceanAnalysis.depth_from_pressure
 OceanAnalysis.despike
 OceanAnalysis.drop_qc

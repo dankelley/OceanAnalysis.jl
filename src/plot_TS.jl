@@ -19,8 +19,8 @@ export add_freezing_curve!
 
 """
     plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
-        draw_freezing::Bool=true, abbreviate::Bool=false, fontsize::Integer=8,
-        debug::Integer=0, kwargs...)
+        draw_freezing=true, abbreviate=false, fontsize::Integer=8,
+        color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -75,6 +75,15 @@ to use `:path` instead.
   `guidefontsize` and `titlefontsize`. Note that any of these values may also be
   supplied as named arguments within `kwargs...`.
 
+- `color_by` a Tuple with 1 to 3 elements, used to set up for colorized points on
+  the TS diagram, based on some variable that has the same length as
+  `ctd.data.pressure`.  The first element of `color_by` is a vector of values for
+  the variable to be represented by color. This is required. The second, if
+  provided, indicates the color scheme (e.g. use `:inferno` or `:viridis` for
+  popular alternatives to the rainbow-like `:turbo` default). And the third sets
+  the limits of the color scale, which defaults to `extrema(x)`, if not provided.
+  The Tuple is processed by [`decode_color_by`](@ref).
+
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
 
@@ -97,8 +106,8 @@ plot_TS(ctd, marker=:none)
 See also [`plot_profile`](@ref).
 """
 function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
-    draw_freezing::Bool=true, abbreviate::Bool=false, fontsize::Integer=8,
-    debug::Integer=0, kwargs...)
+    draw_freezing=true, abbreviate=false, fontsize::Integer=8,
+    color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
