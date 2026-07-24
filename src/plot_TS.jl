@@ -20,7 +20,7 @@ export add_freezing_curve!
 """
     plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize::Integer=8,
-        color_by=false, debug::Integer=0, kwargs...)
+        color_by=:none, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -75,14 +75,26 @@ to use `:path` instead.
   `guidefontsize` and `titlefontsize`. Note that any of these values may also be
   supplied as named arguments within `kwargs...`.
 
-- `color_by` a Tuple with 1 to 3 elements, used to set up for colorized points on
-  the TS diagram, based on some variable that has the same length as
-  `ctd.data.pressure`.  The first element of `color_by` is a vector of values for
-  the variable to be represented by color. This is required. The second, if
-  provided, indicates the color scheme (e.g. use `:inferno` or `:viridis` for
-  popular alternatives to the rainbow-like `:turbo` default). And the third sets
-  the limits of the color scale, which defaults to `extrema(x)`, if not provided.
-  The Tuple is processed by [`decode_color_by`](@ref).
+  - `color` the colour to be used for lines and possibly markers. This
+  is used for both if `color_by` (see next) is false. However, if
+  `color_by` is a NamedTuple, then `color` only applies to the lines.
+
+  - `color_by` either a Bool value or a Tuple that controls whether (SA,CT)
+  data points will be coloured by a third variable, with a color palette
+  shown to the right of the plot. By default, `color_by` is false, meaning
+  that point-by coloring is disabled. However, if `color_by` is a Tuple
+  of length 1, 2, 3 or 4, then coloring will occur. The first element of
+  `color_by` is a vector of values for the variable to be represented by
+  color. This is required, but if the other elements of the tuple are
+  optional. (Be sure to use a comma after the vector, if you do not
+  wish to specify the other elements.) The second element of the Tuple,
+  if provided, indicates the color scheme (e.g. use `:inferno` or
+  `:viridis` for popular alternatives to the rainbow-like `:turbo`
+  default). The third is a two-element Vector or Tuple that sets the
+  limits of the color scale, which defaults to `extrema(x)`, if not
+  provided. And, finally, the fourth is a two-element Vector or
+  Tuple that sets the widths of the main plot panel and the palette
+  panel. Note that Tuple is processed by [`decode_color_by`](@ref).
 
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
@@ -90,24 +102,31 @@ to use `:path` instead.
 - `kwargs...` is passed to `plot()`, to permit further customization; see
    https://docs.juliaplots.org/stable/ for more information on possibilities.
 
+# Examples
+
 ```julia
 using OceanAnalysis, Plots, Dates
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "ctd.cnv")
 ctd = read_ctd_cnv(f);
+
 # Example 1: set title
 plot_TS(ctd, title="Built-in CTD file")
+
 # Example 2: just symbols, with no line
 plot_TS(ctd, seriestype=:scatter)
+
 # Example 3: just a line, with no symbols
 plot_TS(ctd, marker=:none)
+
+# Example 4: colour-code by pressure
+plot_TS(ctd, ms=4, color_by=decode_color_by(ctd["pressure"]))
 ```
 
-See also [`plot_profile`](@ref).
 """
 function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false, fontsize::Integer=8,
-    color_by=false, debug::Integer=0, kwargs...)
+    color=:black, color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
@@ -134,7 +153,12 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
         @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
     end
-    rval = plot(SA, CT,
+    using_color_by = false
+    if color_by != false
+        isa(color_by, NamedTuple) || error("color_by must be 'false' or a NamedTuple")
+        using_color_by = true
+    end
+    p_TS = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
         yrot=90,
@@ -150,13 +174,28 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
     plot_TS_sigma0_contours(sigma0_levels; debug=increment_debug(debug))#, kwargs...)
     plot_TS_spiciness0_contours(spiciness0_levels; debug=increment_debug(debug))#, kwargs...)
     # Redraw the data, so they appear above other elements such as 
-    # contours and the freezing-point line.
-    plot!(SA, CT, legend=false, color=:black,
-        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
-        kwargs...)
+    # contours and the freezing-point line. Note that the path will be
+    # drawn with the provided the 'color'.
+    if using_color_by
+        oad(debug, "  plotting symbols with individual colours")
+        cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+        colormap = cgrad(color_by.colorscheme)
+        markercolor = colormap[cindex]
+        plot!(SA, CT, legend=false, linecolor=color, markercolor=markercolor,
+            seriestype=:scatter, linewidth=1.0, marker=:circle, markersize=1.4;
+            kwargs...)
+        p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
+        l = grid(1, 2, widths=[0.88, 0.12])
+        p_TS = plot(p_TS, p_cbar, layout=l)
+    else
+        oad(debug, "  plotting symbols with uniform colour")
+        plot!(SA, CT, legend=false, color=color,
+            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
+            kwargs...)
+    end
     oad(debug, "END plot_TS()")
-    rval
-end # plot_TS()
+    return p_TS
+end
 export plot_TS
 
 
@@ -190,8 +229,8 @@ have been drawn by other means.
 
 """
 function plot_TS_sigma0_contours(levels=[];
-        color=:gray50, linewidth=1.19*default(:gridlinewidth),
-        debug::Integer=0)
+    color=:gray50, linewidth=1.19 * default(:gridlinewidth),
+    debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours() START")
     oad(debug, "  levels: $levels")
     oad(debug, "  color: $(color)")
@@ -243,8 +282,8 @@ arguments and keywords, see the documentation for
 [`plot_TS_sigma0_contours`](@ref).
 """
 function plot_TS_spiciness0_contours(levels=[];
-        color=:gray50, linewidth=1.19*default(:gridlinewidth),
-        debug::Integer=0)
+    color=:gray50, linewidth=1.19 * default(:gridlinewidth),
+    debug::Integer=0)
     oad(debug, "plot_TS_spiciness0_contours() START")
     oad(debug, "  levels: $levels")
     xlim = xlims()

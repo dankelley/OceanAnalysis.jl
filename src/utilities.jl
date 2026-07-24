@@ -333,28 +333,51 @@ export gravity
 """
     decode_color_by(x)
 
-Decode a Tuple that specifies colors that can be used to indicate a third
-variable on plots made by [`plot_TS`](@ref). This saves having to add three new
-arguments to that function.  See the help for [`plot_TS`](@ref) for the
-expected contents of `x` and how they are interpreted.
+Create a NamedTuple for use as the `color_by` argument of [`plot_TS`](@ref).
+
+# Arguments
+
+- `levels` a Vector of numeric values. If the purpose of using `decode_color_by`
+  is to set a value for the `color_by` argument of [`plot_TS`](@ref), then
+  the length of `levels` must match the length of columns in the Ctd or
+  Argo object.
+
+- `colorscheme` a symbol stating the ColorScheme to use, with `:turbo` a the default.
+
+- `clims` a two-element numeric Vector or Tuple that sets the limits of the
+  color palette. If not provided, this defaults to `extrema(levels)`.
+
+- `widths` a two-element numeric Vector or Tuple that sets the widths of the
+  main plot panel and the palette panel. The sum of the elements must equal 1.
+  If "GMT" errors are reported by the plotting engine, try increasing
+  the size of the palette panel.
+
+
+# Return
+
+A NamedTuple with keys `:levels`, `:colorscheme`, `:clims`, and `:widths`, suitable as
+the `color_by` argument of [`plot_TS`](@ref).
+
+# Examples
+
+```julia
+using OceanAnalysis
+l = [1.0, 2.0]
+decode_color_by(l) # let all other arguments take on default values
+decode_color_by(l, :inferno) # as above, but set color scheme
+decode_color_by(l, :inferno, (0,5)) # as above, but set color range
+decode_color_by(l, :inferno, (0,5), (0.88, 0.12)) # as above, but tighten panel spacing
+```
+
 """
-function decode_color_by(x)
-    if isa(x, Tuple)
-        nx = length(x)
-        if 1 <= nx <= 3
-            levels = x[1]
-            color = nx > 1 ? x[2] : :turbo
-            clim = nx > 2 ? x[3] : extrema(levels)
-            if 2 != length(clim)
-                error("clim must be a numeric vector of length 2")
-            end
-        else
-            error("color_by is not a Tuple of length 1, 2 or 3")
-        end
-    else
-        error("color_by is not a Tuple of length 3")
+function decode_color_by(levels::Vector{Float64}, colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
+    if clims == :auto
+        clims = extrema(levels)
     end
-    (levels=levels, color=color, clim=clim)
+    length(clims) == 2 || error("length(clim) is $(length(clims)) but it ought to be 2")
+    length(widths) == 2 || error("length(widths) is $(length(widths)) but it ought to be 2")
+    sum(widths) == 1 || error("sum(widths) is $(sum(widths)), but it ought to be 1")
+    (levels=levels, colorscheme=colorscheme, clims=clims, widths=widths)
 end
 export decode_color_by
 
