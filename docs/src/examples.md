@@ -284,10 +284,8 @@ savefig("ctd_profiles.png")
 
 ### CTD temperature-salinity diagram
 
-In this example, colour indicates the pressure, in decibars; this is a very
-good approximation to depth below the surface, in metres. The symbols are drawn
-with zero-thickness borders, to avoid black borders painting over the colors of
-nearby markers.
+The colours in the diagram indicate sea pressure, in decibars. Zero-width
+marker borders are used to avoid having black ink obscuring the colours.
 
 ```julia
 # Read and plot a built-in CTD file
