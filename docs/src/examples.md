@@ -284,8 +284,10 @@ savefig("ctd_profiles.png")
 
 ### CTD temperature-salinity diagram
 
-Note the use of zero-thickness borders on the symbols, to avoid black
-borders painting over the colors of nearby markers.
+In this example, colour indicates the pressure, in decibars; this is a very
+good approximation to depth below the surface, in metres. The symbols are drawn
+with zero-thickness borders, to avoid black borders painting over the colors of
+nearby markers.
 
 ```julia
 # Read and plot a built-in CTD file
