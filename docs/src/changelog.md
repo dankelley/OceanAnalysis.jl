@@ -1,5 +1,21 @@
 # Changes
 
+## Changelog from version 0.2.10 to version 0.2.11
+
+Release notes:
+
+### Changed
+
+-
+
+- BREAKING none yet
+
+### Added
+
+-
+
+
+
 ## Changelog from version 0.2.9 to version 0.2.10
 
 Release notes:
