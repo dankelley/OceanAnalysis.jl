@@ -6,8 +6,8 @@ ctd = read_ctd_cnv(filename);
 p1 = plot_profile(ctd; which="CT");
 p2 = plot_profile(ctd; which="SA");
 p3 = plot_profile(ctd; which="sigma0");
-title = @sprintf("CTD observations at %.3fN and %.3fE on %s",
-    ctd["latitude"], ctd["longitude"], ctd["time"])
+title = @sprintf("CTD observations at %.3fN and %.3fE",
+    ctd["latitude"], ctd["longitude"])
 plot(p1, p2, p3, layout=(1, 3), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
 savefig("ctd_profiles.png")
