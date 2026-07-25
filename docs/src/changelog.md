@@ -6,11 +6,11 @@ Release notes:
 
 ### Changed
 
-- `as_ctd()` will now accept vector values of `longitude` and
-  `latitude`.
+- `as_ctd()` accepts vector values of `longitude` and `latitude`.
 
-- `plot_TS()` can now colorize points as specified by a new `color_by`
-  argument.
+- `plot_TS()` can colorize points, given new `color_by` argument.
+
+- `plot_profile()` can colorize points, given new `color_by` argument.
 
 - BREAKING none yet
 

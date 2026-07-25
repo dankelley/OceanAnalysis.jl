@@ -20,7 +20,7 @@ export add_freezing_curve!
 """
     plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize::Integer=8,
-        color_by=:none, debug::Integer=0, kwargs...)
+        color=:black, color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -75,26 +75,18 @@ to use `:path` instead.
   `guidefontsize` and `titlefontsize`. Note that any of these values may also be
   supplied as named arguments within `kwargs...`.
 
-  - `color` the colour to be used for lines and possibly markers. This
+- `color` the colour to be used for lines and possibly markers. This
   is used for both if `color_by` (see next) is false. However, if
   `color_by` is a NamedTuple, then `color` only applies to the lines.
 
-  - `color_by` either a Bool value or a Tuple that controls whether (SA,CT)
-  data points will be coloured by a third variable, with a color palette
-  shown to the right of the plot. By default, `color_by` is false, meaning
-  that point-by coloring is disabled. However, if `color_by` is a Tuple
-  of length 1, 2, 3 or 4, then coloring will occur. The first element of
-  `color_by` is a vector of values for the variable to be represented by
-  color. This is required, but if the other elements of the tuple are
-  optional. (Be sure to use a comma after the vector, if you do not
-  wish to specify the other elements.) The second element of the Tuple,
-  if provided, indicates the color scheme (e.g. use `:inferno` or
-  `:viridis` for popular alternatives to the rainbow-like `:turbo`
-  default). The third is a two-element Vector or Tuple that sets the
-  limits of the color scale, which defaults to `extrema(x)`, if not
-  provided. And, finally, the fourth is a two-element Vector or
-  Tuple that sets the widths of the main plot panel and the palette
-  panel. Note that Tuple is processed by [`decode_color_by`](@ref).
+- `color_by` a control on whether points on the plot are to be colorized
+  individually according to some specified value. If `color_by=false`, then this
+  is not done, and all points are painted with `color`. To colorize the points
+  according to the value of column in `d.data`, set `color_by` to the name of
+  that column. This yields a default colour scheme, displayed in a palette to the
+  right of the main graph (see Example 4). Greater control over the colorscheme
+  is provided by setting `color_by` to a NamedTuple that is constructed a call
+  to [`decode_color_by`](@ref).
 
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
@@ -105,22 +97,26 @@ to use `:path` instead.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots, Dates
+using OceanAnalysis, Plots
+
+# Get data for examples
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "ctd.cnv")
 ctd = read_ctd_cnv(f);
 
-# Example 1: set title
+# Example 1: set title.
 plot_TS(ctd, title="Built-in CTD file")
 
-# Example 2: just symbols, with no line
+# Example 2: just symbols, with no line.
 plot_TS(ctd, seriestype=:scatter)
 
-# Example 3: just a line, with no symbols
+# Example 3: just a line, with no symbols.
 plot_TS(ctd, marker=:none)
 
-# Example 4: colour-code by pressure
-plot_TS(ctd, ms=4, color_by=decode_color_by(ctd["pressure"]))
+# Example 4: colour-code by pressure.
+# The markers are drawn without borders, to avoid black overpainting.
+plot_TS(ctd, markerstrokewidth=0, markersize=3, color_by="pressure")
+
 ```
 
 """
@@ -155,14 +151,20 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
     end
     using_color_by = false
     if color_by != false
-        isa(color_by, NamedTuple) || error("color_by must be 'false' or a NamedTuple")
+        if isa(color_by, String)
+            color_by in names(d.data) || error("color_by, a String, is not in names(d.data)")
+            color_by = decode_color_by(d[color_by])
+        else
+            isa(color_by, NamedTuple) || error("color_by must be 'false', a String, or a NamedTuple")
+        end
+        length(color_by.levels) == nrow(d.data) || error("length of color_by.levels, $(length(colorby.levels)), does not equal nrow(d.data), $(nrow(d.data))")
         using_color_by = true
     end
     p_TS = plot(SA, CT,
         xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
         ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
         yrot=90,
-        framestyle=:box, legend=false, color=:black, tickdirection=:out,
+        framestyle=:box, legend=false, color=color, tickdirection=:out,
         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
@@ -181,17 +183,18 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
         cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
         colormap = cgrad(color_by.colorscheme)
         markercolor = colormap[cindex]
-        plot!(SA, CT, legend=false, linecolor=color, markercolor=markercolor,
-            seriestype=:scatter, linewidth=1.0, marker=:circle, markersize=1.4;
+        plot!(SA, CT, seriestype=:scatter,
+            legend=false, linecolor=color, markercolor=markercolor,
+            linewidth=1.0, marker=:circle, markersize=1.4;
             kwargs...)
         p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
         l = grid(1, 2, widths=[0.88, 0.12])
         p_TS = plot(p_TS, p_cbar, layout=l)
-    else
-        oad(debug, "  plotting symbols with uniform colour")
-        plot!(SA, CT, legend=false, color=color,
-            seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
-            kwargs...)
+        #<?> else
+        #<?>     oad(debug, "  plotting symbols with uniform colour")
+        #<?>     plot!(SA, CT, legend=false, color=color,
+        #<?>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
+        #<?>         kwargs...)
     end
     oad(debug, "END plot_TS()")
     return p_TS
