@@ -262,6 +262,8 @@ savefig("coastline.png")
 
 The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.
 
+### CTD profiles
+
 ```julia
 # Read and plot a built-in CTD file
 using OceanAnalysis, Dates, Measures, Plots, Printf
@@ -271,15 +273,34 @@ ctd = read_ctd_cnv(filename);
 p1 = plot_profile(ctd; which="CT");
 p2 = plot_profile(ctd; which="SA");
 p3 = plot_profile(ctd; which="sigma0");
-p4 = plot_TS(ctd);
 title = @sprintf("CTD observations at %.3fN and %.3fE on %s",
     ctd["latitude"], ctd["longitude"], ctd["time"])
-plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
+plot(p1, p2, p3, layout=(1, 3), size=(800, 600), margin=0.25cm,
     dpi=200, plot_title=title, plot_titlefontsize=11)
-savefig("ctd_diagram.png")
+savefig("ctd_profiles.png")
 ```
 
-![CTD diagram](ctd_diagram.png)
+![CTD profiles](ctd_profiles.png)
+
+### CTD temperature-salinity diagram
+
+Note the use of zero-thickness borders on the symbols, to avoid black
+borders painting over the colors of nearby markers.
+
+```julia
+# Read and plot a built-in CTD file
+using OceanAnalysis, Dates, Measures, Plots, Printf
+filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    "data", "ctd.cnv")
+ctd = read_ctd_cnv(filename);
+plot_TS(ctd, ms=3, markerstrokewidth=0, color_by="pressure");
+title = @sprintf("CTD observations at %.3fN and %.3fE on %s",
+    ctd["latitude"], ctd["longitude"], ctd["time"])
+savefig("ctd_TS.png")
+```
+
+![CTD TS](ctd_TS.png)
+
 
 
 ## Digital Elevation Model Data
