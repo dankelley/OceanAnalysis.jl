@@ -1,5 +1,5 @@
 # Read and plot a built-in CTD file
-using OceanAnalysis, Dates, Measures, Plots, Printf
+using OceanAnalysis, Measures, Plots, Printf
 filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 title = @sprintf("CTD observations at %.3fN and %.3fE",
