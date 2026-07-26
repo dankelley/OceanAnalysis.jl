@@ -81,16 +81,13 @@ include("utilities.jl")
 
 import PrecompileTools
 PrecompileTools.@compile_workload begin
-    # precompile CTD and Argo usage, including profile and TS plots
+    # precompile CTD read/plot, likely to be used quite a lot
     pkgdir = dirname(dirname(pathof(OceanAnalysis)))
     ctd_file = joinpath(pkgdir, "data", "ctd.cnv")
     ctd = read_ctd_cnv(ctd_file)
-    argo_file = joinpath(pkgdir, "data", "D4902911_095.nc")
-    argo = read_argo(argo_file)
-    ctd_argo = as_ctd(argo)
-    plot_profile(ctd_argo, which="temperature")
-    plot_TS(ctd_argo)
-    e = get_element(ctd_argo, "temperature")
+    plot_profile(ctd)
+    plot_TS(ctd)
+    e = get_element(ctd, "temperature")
 end
 
 end # module OceanAnalysis
