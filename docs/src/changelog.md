@@ -6,7 +6,8 @@ Release notes:
 
 ### Changed
 
--
+- `plot_TS()` can handle `color_by=""`.
+- `plot_profile()` can handle `color_by=""`.
 
 - BREAKING none yet
 
