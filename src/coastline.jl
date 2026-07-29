@@ -186,7 +186,7 @@ export plot_coastline!
 
 """
     scale_bar(distance::Real=100.0; x=:left, y=:top,
-        linewidth::Real=3.0, fontsize::Real=8)
+        linewidth::Real=1.8, fontsize::Real=8)
 
 Add a horizontal scalebar to a plot made with [`plot_coastline`]@ref).
 
@@ -214,7 +214,7 @@ plot_coastline(cl, xlim=(-70, -60), ylim=(42, 48))
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=3.0, fontsize::Real=8,
+function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=1.8, fontsize::Real=8,
     style=:Ibeam)
     distance > 0.0 || throw(ArgumentError("distance must be a positive number, but it is $distance"))
     xlim, ylim = xlims(), ylims() # need these to avoid changing view in the existing plot
