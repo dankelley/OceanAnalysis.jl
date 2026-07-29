@@ -6,29 +6,29 @@ Release notes:
 
 ### Changed
 
-- 
+- (none yet)
 
-- BREAKING none yet
+- BREAKING (none yet)
 
 ### Added
 
--
+- (none yet)
 
 
 
 
-## changelog from version 0.2.10 to version 0.2.11
+## Changelog from version 0.2.10 to version 0.2.11
 
-release notes:
+Release notes:
 
-### changed
+### Changed
 
 - `plot_ts()` can handle `color_by=""`.
 - `plot_profile()` can handle `color_by=""`.
 
 - BREAKING none yet
 
-### added
+### Added
 
 -
 
