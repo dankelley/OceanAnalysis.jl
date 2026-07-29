@@ -1,5 +1,5 @@
 """
-    plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:pressure,
+    plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         abbreviate::Symbol=:long, fontsize=8, color=:black, color_by=false,
         debug::Integer=0, kwargs...)
 
@@ -32,13 +32,19 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
   `color_by` is a NamedTuple, then `color` only applies to the lines.
 
 - `color_by` a control on whether points on the plot are to be colorized
-  individually according to some specified value. If `color_by=false`, then this
-  is not done, and all points are painted with `color`. To colorize the points
-  according to the value of column in `d.data`, set `color_by` to the name of
-  that column. This yields a default colour scheme, displayed in a palette to the
-  right of the main graph (see Example 3). Greater control over the colorscheme
-  is provided by setting `color_by` to a NamedTuple that is constructed a call
-  to [`decode_color_by`](@ref).
+  individually according to some specified value. Four choices are
+  possible. (1) If `color_by=false`, then all the data points are painted
+  with the same `color`. (2) If `color_by` is a string naming a column
+  in `d.data`, then colors are selected to show variation of the named
+  variable.  (3) If `color_by` is a NamedTuple as created by
+  [`decode_color_by`](@ref), then the variable may be in `ctd.data`
+  but it may also be a numeric vector of appropriate length. Furthermore,
+  in this choice the user can set the colorscheme and the spacing
+  between the main plot and the palette. (4) And, finally,
+  if `color_by=""` then the points are not colorized, and no
+  palette is drawn, but space set aside to the right of the plot,
+  where a palette would otherwise go.
+
 
 - `abbreviate` a Symbol indicating a category for axis length, used in
   determining how to label the axes. The valid choices are `:short`, `:medium`,
@@ -78,18 +84,20 @@ plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
 
 # Example 3: colourize Conservative Temperature to indicate salinity.
 # The markers are drawn without borders, to avoid black overpainting.
-plot_profile(ctd, which="CT", markerstrokewidth=0, markersize=3, color_by="salinity")
+plot_profile(ctd, which="CT", markerstrokewidth=0.1, markersize=3, color_by="salinity")
 ```
 """
-function plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:pressure,
+function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     abbreviate::Symbol=:long, fontsize=8, color=:black, color_by=false,
     debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
         oad(debug, "plot_profile(::Argo; which='$which', ...) START")
-    else
+    elseif isa(d, Ctd)
         oad(debug, "plot_profile(::Ctd; which='$which', ...) START")
+    else
+        error("plot_profile() only works on Argo and Ctd objects")
     end
     # For all cases, we need to set up the vertical axis, so do that first
     oad(debug, "  setting up coordinate system for vertical axis")
@@ -113,13 +121,22 @@ function plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:
     using_color_by = false
     if color_by != false
         if isa(color_by, String)
-            color_by in names(d.data) || error("color_by, a String, is not in names(d.data)")
-            oad(debug, "  creating color_by for data column named \"$color_by\"")
-            color_by = decode_color_by(d[color_by])
+            oad(debug, "  color_by: \"", color_by, "\"")
+            if color_by in names(d.data)
+                color_by = decode_color_by(d[color_by])
+                oad(debug, "  decoded palette details with decode_color_by()")
+            elseif color_by == ""
+                oad(debug, "  no palette will be drawn, since color_by=\"\"")
+            else
+                error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
+            end
+        elseif isa(color_by, NamedTuple)
+            if length(color_by.levels) != nrow(d.data)
+                error("length(color_by.levels)=", length(color_by.levels), " ≠ nrow(d.data)=", nrow(d.data))
+            end
         else
-            isa(color_by, NamedTuple) || error("color_by must be 'false' or a NamedTuple")
+            error("color_by must be 'false', a String, or a NamedTuple")
         end
-        length(color_by.levels) == nrow(d.data) || error("length of color_by.levels, $(length(color_by.levels)), does not equal nrow(d.data), $(nrow(d.data))")
         using_color_by = true
     end
     p_profile = plot(x, y,
@@ -130,19 +147,25 @@ function plot_profile(d::Union{Argo,Ctd}; which::String="CT", vertical::Symbol=:
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
         yrot=90; kwargs...)
     if using_color_by
-        oad(debug, "  plotting symbols with individual colours")
-        cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-        colormap = cgrad(color_by.colorscheme)
-        markercolor = colormap[cindex]
-        plot!(x, y,
-            seriestype=:scatter,
-            linecolor=color, markercolor=markercolor,
-            linewidth=1.0, marker=:circle, markersize=1.4;
-            kwargs...)
-        p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
-        l = grid(1, 2, widths=[0.88, 0.12])
-        p_profile = plot(p_profile, p_cbar, layout=l)
-        #<?> else...
+        if color_by == ""
+            oad(debug, "  not plotting symbols with individual colours, but leaving palette space")
+            p_cbar = plot(ticks=nothing, border=:none)
+            l = grid(1, 2, widths=[0.88, 0.12])
+            p_profile = plot(p_profile, p_cbar, layout=l)
+        else
+            oad(debug, "  plotting symbols with individual colours")
+            cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+            colormap = cgrad(color_by.colorscheme)
+            markercolor = colormap[cindex]
+            plot!(x, y,
+                seriestype=:scatter,
+                linecolor=color, markercolor=markercolor,
+                linewidth=1.0, marker=:circle, markersize=1.4;
+                kwargs...)
+            p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
+            l = grid(1, 2, widths=[0.88, 0.12])
+            p_profile = plot(p_profile, p_cbar, layout=l)
+        end
     end
     oad(debug, "END plot_profile()")
     return p_profile

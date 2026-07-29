@@ -125,7 +125,6 @@ plot_TS(ctd, markerstrokewidth=0, markersize=3, color_by="pressure")
 # Example 5: black/white plot, but with space where a palette would go.
 plot_TS(ctd, color_by="")
 ```
-
 """
 function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false, fontsize::Integer=8,
@@ -172,7 +171,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
             end
         elseif isa(color_by, NamedTuple)
             if length(color_by.levels) != nrow(d.data)
-                error("length of color_by.levels, $(length(colorby.levels)), does not equal nrow(d.data), $(nrow(d.data))")
+                error("length(color_by.levels)=", length(color_by.levels), " ≠ nrow(d.data)=", nrow(d.data))
             end
         else
             error("color_by must be 'false', a String, or a NamedTuple")
