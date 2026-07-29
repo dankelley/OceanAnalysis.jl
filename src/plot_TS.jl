@@ -18,7 +18,7 @@ export add_freezing_curve!
 
 
 """
-    plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
+    plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         draw_freezing=true, abbreviate=false, fontsize::Integer=8,
         color=:black, color_by=false, debug::Integer=0, kwargs...)
 
@@ -80,13 +80,18 @@ to use `:path` instead.
   `color_by` is a NamedTuple, then `color` only applies to the lines.
 
 - `color_by` a control on whether points on the plot are to be colorized
-  individually according to some specified value. If `color_by=false`, then this
-  is not done, and all points are painted with `color`. To colorize the points
-  according to the value of column in `d.data`, set `color_by` to the name of
-  that column. This yields a default colour scheme, displayed in a palette to the
-  right of the main graph (see Example 4). Greater control over the colorscheme
-  is provided by setting `color_by` to a NamedTuple that is constructed a call
-  to [`decode_color_by`](@ref).
+  individually according to some specified value. Four choices are
+  possible. (1) If `color_by=false`, then all the data points are painted
+  with the same `color`. (2) If `color_by` is a string naming a column
+  in `d.data`, then colors are selected to show variation of the named
+  variable.  (3) If `color_by` is a NamedTuple as created by
+  [`decode_color_by`](@ref), then the variable may be in `ctd.data`
+  but it may also be a numeric vector of appropriate length. Furthermore,
+  in this choice the user can set the colorscheme and the spacing
+  between the main plot and the palette. (4) And, finally,
+  if `color_by=""` then the points are not colorized, and no
+  palette is drawn, but space set aside to the right of the plot,
+  where a palette would otherwise go.
 
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
@@ -113,22 +118,26 @@ plot_TS(ctd, seriestype=:scatter)
 # Example 3: just a line, with no symbols.
 plot_TS(ctd, marker=:none)
 
-# Example 4: colour-code by pressure.
+# Example 4: color_by pressure.
 # The markers are drawn without borders, to avoid black overpainting.
 plot_TS(ctd, markerstrokewidth=0, markersize=3, color_by="pressure")
 
+# Example 5: black/white plot, but with space where a palette would go.
+plot_TS(ctd, color_by="")
 ```
 
 """
-function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
+function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     draw_freezing=true, abbreviate=false, fontsize::Integer=8,
     color=:black, color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
         oad(debug, "plot_TS(::Argo) START")
-    else
+    elseif isa(d, Ctd)
         oad(debug, "plot_TS(::Ctd) START")
+    else
+        error("plot_TS() only works on Argo and Ctd objects")
     end
     oad(debug, "  sigma0_levels: $sigma0_levels")
     oad(debug, "  spiciness0_levels: $spiciness0_levels")
@@ -152,12 +161,22 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
     using_color_by = false
     if color_by != false
         if isa(color_by, String)
-            color_by in names(d.data) || error("color_by, a String, is not in names(d.data)")
-            color_by = decode_color_by(d[color_by])
+            oad(debug, "  color_by: \"", color_by, "\"")
+            if color_by in names(d.data)
+                color_by = decode_color_by(d[color_by])
+                oad(debug, "  decoded palette details with decode_color_by()")
+            elseif color_by == ""
+                oad(debug, "  no palette will be drawn, since color_by=\"\"")
+            else
+                error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
+            end
+        elseif isa(color_by, NamedTuple)
+            if length(color_by.levels) != nrow(d.data)
+                error("length of color_by.levels, $(length(colorby.levels)), does not equal nrow(d.data), $(nrow(d.data))")
+            end
         else
-            isa(color_by, NamedTuple) || error("color_by must be 'false', a String, or a NamedTuple")
+            error("color_by must be 'false', a String, or a NamedTuple")
         end
-        length(color_by.levels) == nrow(d.data) || error("length of color_by.levels, $(length(colorby.levels)), does not equal nrow(d.data), $(nrow(d.data))")
         using_color_by = true
     end
     p_TS = plot(SA, CT,
@@ -173,28 +192,30 @@ function plot_TS(d::Union{Argo,Ctd}; sigma0_levels=[], spiciness0_levels=0,
         add_freezing_curve!(xlims(), ylims())
     end
     # Possibly add density contours
-    plot_TS_sigma0_contours(sigma0_levels; debug=increment_debug(debug))#, kwargs...)
-    plot_TS_spiciness0_contours(spiciness0_levels; debug=increment_debug(debug))#, kwargs...)
+    plot_TS_sigma0_contours(sigma0_levels; debug=debug)
+    plot_TS_spiciness0_contours(spiciness0_levels; debug=debug)
     # Redraw the data, so they appear above other elements such as 
     # contours and the freezing-point line. Note that the path will be
     # drawn with the provided the 'color'.
     if using_color_by
-        oad(debug, "  plotting symbols with individual colours")
-        cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-        colormap = cgrad(color_by.colorscheme)
-        markercolor = colormap[cindex]
-        plot!(SA, CT, seriestype=:scatter,
-            legend=false, linecolor=color, markercolor=markercolor,
-            linewidth=1.0, marker=:circle, markersize=1.4;
-            kwargs...)
-        p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
-        l = grid(1, 2, widths=[0.88, 0.12])
-        p_TS = plot(p_TS, p_cbar, layout=l)
-        #<?> else
-        #<?>     oad(debug, "  plotting symbols with uniform colour")
-        #<?>     plot!(SA, CT, legend=false, color=color,
-        #<?>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4;
-        #<?>         kwargs...)
+        if color_by == ""
+            oad(debug, "  not plotting symbols with individual colours, but leaving palette space")
+            p_cbar = plot(ticks=nothing, border=:none)
+            l = grid(1, 2, widths=[0.88, 0.12])
+            p_TS = plot(p_TS, p_cbar, layout=l)
+        else
+            oad(debug, "  plotting symbols with individual colours")
+            cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+            colormap = cgrad(color_by.colorscheme)
+            markercolor = colormap[cindex]
+            plot!(SA, CT, seriestype=:scatter,
+                legend=false, linecolor=color, markercolor=markercolor,
+                linewidth=1.0, marker=:circle, markersize=1.4;
+                kwargs...)
+            p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
+            l = grid(1, 2, widths=[0.88, 0.12])
+            p_TS = plot(p_TS, p_cbar, layout=l)
+        end
     end
     oad(debug, "END plot_TS()")
     return p_TS
@@ -235,19 +256,12 @@ function plot_TS_sigma0_contours(levels=[];
     color=:gray50, linewidth=1.19 * default(:gridlinewidth),
     debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours() START")
-    oad(debug, "  levels: $levels")
-    oad(debug, "  color: $(color)")
-    oad(debug, "  linewidth: $(linewidth)")
+    oad(debug, "  levels: ", levels)
     xlim = xlims()
     ylim = ylims()
-    oad(debug, "  xlim: $xlim")
-    oad(debug, "  ylim: $ylim")
     SAc = range(xlim[1], xlim[2], length=300)
     CTc = range(ylim[1], ylim[2], length=300)
     sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
-    oad(debug, "  SAc: $(extrema(SAc))")
-    oad(debug, "  CTc: $(extrema(CTc))")
-    oad(debug, "  sigma0c: $(extrema(sigma0c))")
     if length(levels) == 0
         oad(debug, "  case 1: levels is empty, so auto-compute sigma0 contour levels")
         levels = pretty(sigma0c) # returns [] if min=max
@@ -263,7 +277,6 @@ function plot_TS_sigma0_contours(levels=[];
         oad(debug, "  case 3: levels is a vector of sigma0 levels for contouring")
     end
     if length(levels) > 0
-        oad(debug, "  drawing sigma0 contours at levels $(levels)")
         contour!(SAc, CTc, sigma0c, xlim=xlim, ylim=ylim, levels=levels,
             linewidth=linewidth, color=color, cbar=false, clabels=true,
             foreground_color_axis=:black, foreground_color_border=:black)
@@ -288,7 +301,7 @@ function plot_TS_spiciness0_contours(levels=[];
     color=:gray50, linewidth=1.19 * default(:gridlinewidth),
     debug::Integer=0)
     oad(debug, "plot_TS_spiciness0_contours() START")
-    oad(debug, "  levels: $levels")
+    oad(debug, "  levels: ", levels)
     xlim = xlims()
     ylim = ylims()
     SAc = range(xlim[1], xlim[2], length=300)
