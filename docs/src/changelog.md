@@ -1,17 +1,34 @@
 # Changes
 
-## Changelog from version 0.2.10 to version 0.2.11
+## Changelog from version 0.2.11 to version 0.2.12
 
 Release notes:
 
 ### Changed
 
-- `plot_TS()` can handle `color_by=""`.
-- `plot_profile()` can handle `color_by=""`.
+- 
 
 - BREAKING none yet
 
 ### Added
+
+-
+
+
+
+
+## changelog from version 0.2.10 to version 0.2.11
+
+release notes:
+
+### changed
+
+- `plot_ts()` can handle `color_by=""`.
+- `plot_profile()` can handle `color_by=""`.
+
+- BREAKING none yet
+
+### added
 
 -
 
