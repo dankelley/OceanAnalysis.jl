@@ -6,7 +6,10 @@ Release notes:
 
 ### Changed
 
-- (none yet)
+- `interpolate_barnes()` finds default `xr` and `yr` based not the number of
+  values, but rather the number of distinct values. Also, the return value now
+  holds `xr`, `yr`, `gamma` and `iterations`, so that a user can start with the
+  default and then make adjustments.
 
 - BREAKING (none yet)
 

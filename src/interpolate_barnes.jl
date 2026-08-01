@@ -81,7 +81,7 @@ that of the `interp_barnes` function in the R `oce` package.
 
 - `xr` Float64 telling the influence scale in the x direction. If not provided,
   this defaults to the range of `x` values, divided by the square root of the
-  number of `x` values.
+  number of distinct `x` values.
 
 - `yr` As `xr` but for the `y` direction.
 
@@ -89,13 +89,17 @@ that of the `interp_barnes` function in the R `oce` package.
 
 - `iterations` integer telling how many iterations to perform (2 by default).
 
-- `debug` an integer indicating whether to print information during processing.
-  The default value of 0 means to work quietly, and any larger integer indicates
-  to print some information.
+- `debug` an integer indicating whether to print information during
+  processing. The default value of 0 means to work quietly, and any larger
+  integer indicates to print some information.
 
 # Value
 
-A Dict with elements named `xg`, `yg` and `zg` that hold the grid coordinates and values, along with `wg` (the final weights) and `zd` (the values interpolated at the data coordinates).
+A Dict with elements named `xg`, `yg` and `zg` that hold the grid coordinates
+and values, along with `wg` (the final weights) and `zd` (the values
+interpolated at the data coordinates). In addition to these, it has elements
+`xr` and `yr` (the initial influence lengths), as well as `gamma` and
+`iterations.
 
 # Examples
 
@@ -147,9 +151,11 @@ function interpolate_barnes(
     oad(debug, "interpolate_barnes() START")
     # Do some initial checks
     n = length(x)
+    nx_distinct = length(unique(x))
     ny = length(y)
     n == ny || throw(ArgumentError("lengths of x ($n) and y ($ny) do not match"))
     nz = length(z)
+    ny_distinct = length(unique(y))
     n == nz || throw(ArgumentError("lengths of x ($n) and y ($nz) do not match"))
     if isnothing(w)
         w = repeat([1.0], n)
@@ -168,12 +174,12 @@ function interpolate_barnes(
     nyg = length(yg)
     if isnothing(xr)
         e = extrema(x)
-        xr = (e[2] - e[1]) / sqrt(n)
+        xr = (e[2] - e[1]) / sqrt(nx_distinct)
         oad(debug, "  set xr to ", xr)
     end
     if isnothing(yr)
         e = extrema(y)
-        yr = (e[2] - e[1]) / sqrt(n)
+        yr = (e[2] - e[1]) / sqrt(ny_distinct)
         oad(debug, "  set yr to ", yr)
     end
     xr > 0.0 || throw(ArgumentError("xr must be positive, but it is $xr"))
@@ -217,5 +223,7 @@ function interpolate_barnes(
         end
     end
     oad(debug, "END interpolate_barnes()")
-    Dict("xg" => xg, "yg" => yg, "zg" => zz, "wg" => wg, "zd" => zd)
+    Dict("xg" => xg, "yg" => yg, "zg" => zz, "wg" => wg, "zd" => zd,
+        "xr" => xr0, "yr" => yr0,
+        "gamma" => gamma, "iterations" => iterations)
 end
