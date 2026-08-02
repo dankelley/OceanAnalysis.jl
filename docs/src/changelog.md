@@ -11,7 +11,9 @@ Release notes:
   holds `xr`, `yr`, `gamma` and `iterations`, so that a user can start with the
   default and then make adjustments.
 
-- BREAKING (none yet)
+- BREAKING improve freezing-curve drawing syntax. In `plot_TS()`, rename
+  `draw_freezing` argument as `plot_freezing`. Rename `draw_freezing_curve!()`
+  as `plot_freezing_curve!()`, and remove its `xlim` and `ylim` arguments.
 
 ### Added
 

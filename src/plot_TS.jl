@@ -1,25 +1,27 @@
 using GibbsSeaWater: gsw_ct_freezing, gsw_ct_from_t, gsw_sa_from_sp, gsw_sigma0, gsw_spiciness0
 
 """
-    add_freezing_curve!(xlim, ylim; kwargs...)
+    plot_freezing_curve!(xlim, ylim; kwargs...)
 
 Draw a freezing-point curve on an existing CT-SA plot. This is called by
 [`plot_TS`](@ref), but can also be called by the user, if customization of line
 type, etc, is required.
 """
-function add_freezing_curve!(xlim, ylim; kwargs...)
+function plot_freezing_curve!(; kwargs...)
     n = 50 # it is a pretty straight curve
-    x = range(xlim[1], xlim[2], length=n)
-    y = gsw_ct_freezing.(x, 0.0, 1.0)
-    plot!(x, y, color=:darkgray, xlim=xlim, ylim=ylim; kwargs...)
+    xlim = xlims()
+    ylim = ylims()
+    SA = range(xlim[1], xlim[2], length=n)
+    CT = gsw_ct_freezing.(SA, 0.0, 1.0) # SA, p, saturation_fraction
+    plot!(SA, CT, label=false, color=:darkgray, xlim=xlim, ylim=ylim; kwargs...)
 end
-export add_freezing_curve!
+export plot_freezing_curve!
 
 
 
 """
     plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-        draw_freezing=true, abbreviate=false, fontsize::Integer=8,
+        plot_freezing=true, abbreviate=false, fontsize::Integer=8,
         color=:black, color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
@@ -27,9 +29,9 @@ Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 Whether contours of density and spiciness are drawn depends on values of the
 `sigma0_levels` and `spiciness0_levels`. By default, a freezing-point line is
 drawn (if it is within the range of the data) by calling
-[`add_freezing_curve!`](@ref). If customization of line width, color, etc., is
-required, uses `draw_freezing=false` and then call
-[`add_freezing_curve!`](@ref) directly.
+[`plot_freezing_curve!`](@ref). If customization of line width, color, etc., is
+required, uses `plot_freezing=false` and then call
+[`plot_freezing_curve!`](@ref) directly.
 
 By default, axis names are written in long form; set `abbreviate=true` for
 shorter versions.
@@ -47,7 +49,7 @@ to use `:path` instead.
 
 # Arguments
 
-- `d` either an Argo object or a Ctd object.
+- `d` either an [`Argo`](@ref) object or a [`Ctd`](@ref) object.
 
 # Keywords
 
@@ -67,7 +69,7 @@ to use `:path` instead.
   `spiciness0_levels=0` and then call [`plot_TS_spiciness0_contours`(@ref)
   directly.
 
-- `draw_freezing` a Bool indicating whether to draw a freezing-point curve.
+- `plot_freezing` a Bool indicating whether to draw a freezing-point curve.
 
 - `abbreviate` a Bool indicating whether to abbreviate the axis labels.
 
@@ -127,7 +129,7 @@ plot_TS(ctd, color_by="")
 ```
 """
 function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-    draw_freezing=true, abbreviate=false, fontsize::Integer=8,
+    plot_freezing=true, abbreviate=false, fontsize::Integer=8,
     color=:black, color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
@@ -140,7 +142,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     end
     oad(debug, "  sigma0_levels: $sigma0_levels")
     oad(debug, "  spiciness0_levels: $spiciness0_levels")
-    oad(debug, "  draw_freezing: $draw_freezing")
+    oad(debug, "  plot_freezing: $plot_freezing")
     local S = d.data.salinity
     local T = d.data.temperature
     local p = d.data.pressure
@@ -187,8 +189,8 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
         kwargs...)
     # Possibly add freezing-point curve
-    if draw_freezing
-        add_freezing_curve!(xlims(), ylims())
+    if plot_freezing
+        plot_freezing_curve!()
     end
     # Possibly add density contours
     plot_TS_sigma0_contours(sigma0_levels; debug=debug)
