@@ -1,21 +1,26 @@
 using ZipFile, ProgressMeter
 
 """
-    get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Integer=0)
+    get_file(url::String=""; file=:default, destdir::String=".", age::Real=1.0, debug::Integer=0)
 
 Download/cache a remote file
 
-The `url` is a remote source for a file to be downloaded. If no file
-of that name exists in the destination directory, `destdir`,
-then the file is downloaded and its name is returned. However,
-if such a file already exists, and if its age is under `age`
-days, then the file is assumed to be up-to-date and is not
-downloaded.  Some processing steps are printed if `debug>0`.
+The `url` is a remote source for a file to be downloaded. If `file` is
+`:default`, then a filename is constructed from the `url`. In either
+case, if `file` is not the name of a file in the `destdir` directory,
+then the material at `url` is downloaded to `destdir/file`.
+However, `destdir/file` already exists, and if its age is
+under `age` days, then the file is considered to be up-to-date
+and so it is not downloaded.  Some processing steps are
+printed if `debug>0`.
+
 """
-function get_file(url::String=""; destdir::String=".", age::Real=1.0, debug::Integer=0)
+function get_file(url::String=""; file=:default, destdir::String=".", age::Real=1.0, debug::Integer=0)
     oad(debug, "get_file START")
     length(url) > 0 || error("Must give 'url")
-    file = replace(url, r".*/" => "")
+    if file == :default
+        file = replace(url, r".*/" => "")
+    end
     file = expanduser(joinpath(destdir, file))
     oad(debug, "  url: \"", url, "\"")
     oad(debug, "  file: \"", file, "\"")

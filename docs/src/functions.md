@@ -25,6 +25,8 @@ OceanAnalysis.get_erddap_index
 OceanAnalysis.get_file
 OceanAnalysis.get_nc_value
 OceanAnalysis.get_section
+OceanAnalysis.get_tide_gauge_index
+OceanAnalysis.get_tide_gauge_file
 OceanAnalysis.get_topography
 OceanAnalysis.gravity
 OceanAnalysis.grid_ctd

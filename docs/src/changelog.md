@@ -6,6 +6,8 @@ Release notes:
 
 ### Changed
 
+- `get_file()` gains a new argument named `file`.
+
 - `interpolate_barnes()` finds default `xr` and `yr` based not the number of
   values, but rather the number of distinct values. Also, the return value now
   holds `xr`, `yr`, `gamma` and `iterations`, so that a user can start with the
@@ -17,7 +19,8 @@ Release notes:
 
 ### Added
 
-- (none yet)
+- `OceanAnalysis.get_tide_gauge_index`
+- `OceanAnalysis.get_tide_gauge_file`
 
 
 
