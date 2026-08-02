@@ -174,8 +174,7 @@ function pretty(x, n::Integer=5; debug::Integer=0)::Vector{Float64}
     min, max = extrema(filtered)
     oad(debug, "pretty() got min=$min and max=$max")
     if max == min
-        @warn "pretty() got max=min=$min, so returning an empty vector"
-        return Float64[]
+        return [min]
     end
     dx = (max - min) / n
     fac = 10^floor(log10(dx))
