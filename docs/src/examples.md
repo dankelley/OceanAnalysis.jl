@@ -282,6 +282,31 @@ savefig("ctd_profiles.png")
 
 ![CTD profiles](ctd_profiles.png)
 
+### CTD smoothing
+
+The following shows how to grid CTD data in 1-dbar intervals; note that the
+mean spacing of the data is 0.24 dbar. Note the trick of using uniform `y` values, so that `interpolate_barnes()` will effectively do a one-dimensional
+analysis of the variation of Absolute Salinity with sea pressure.
+
+```julia
+using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+ctd = read_ctd_cnv(file);
+p = ctd["pressure"];
+y = repeat([1], length(p)); # fake y data, with arbitrary value
+SA = ctd["SA"];
+dp = 1.0;
+pg = range(0.0, maximum(p), step=dp);
+g = interpolate_barnes(p, y, SA; xg=pg, xr=dp);
+plot_profile(ctd, which="SA", seriestype=:scatter)
+plot!(g["zg"][:], g["xg"][:], color=:red, label=false)
+savefig("ctd_smooth.png")
+```
+
+![Smoothing a CTD profile](ctd_smooth.png)
+
+
+
 ### CTD temperature-salinity diagram
 
 The colours in the diagram indicate sea pressure, in decibars. Zero-width
