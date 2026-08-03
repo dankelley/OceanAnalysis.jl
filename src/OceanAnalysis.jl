@@ -75,6 +75,7 @@ include("seawater_properties.jl")
 include("section.jl")
 include("subset.jl")
 include("summarize.jl")
+include("tide_gauge.jl")
 include("topography.jl")
 include("utilities.jl")
 
