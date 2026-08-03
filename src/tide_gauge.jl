@@ -1,4 +1,4 @@
-using HTTP, JSON, JSON3
+using HTTP, JSON3
 using DataFrames, CSV
 using Dates
 using Printf
@@ -143,7 +143,9 @@ function get_tide_gauge_file(search; times=:default, variable=:wlo, resolution=3
     data = mktemp() do tmp_path, tmp_io
         close(tmp_io)
         Downloads.download(url, tmp_path)
-        return JSON.parsefile(tmp_path)
+        open(tmp_path) do io
+            return JSON3.read(io)
+        end
     end
     n = length(data)
     values = Vector{Float64}(undef, n)
