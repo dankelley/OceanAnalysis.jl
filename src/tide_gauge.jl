@@ -27,14 +27,19 @@ https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
 # Examples
 
 ```julia
-# Show stations in Atlantic Canada
-using OceanAnalysis
-i = get_tide_gauge_index();
-scatter(i.longitude, i.latitude, aspect_ratio=1.0 / cos(48.0 * pi / 180),
+# Show Nova Scotian stations, in red if permanent
+using OceanAnalysis, Plots
+i = get_tide_gauge_index(:all);
+scatter(i.longitude, i.latitude,
+    aspect_ratio=1.0 / cos(48.0 * pi / 180),
     framestyle=:box, tickdirection=:out, label=false, ms=0,
-    xlim=(-70, -55), ylim=(44, 50))
-plot_coastline!(c, fillcolor=:gray95)
-scatter!(i.longitude, i.latitude, color=:red, ms=ms, markerstrokewidth=0.3)
+    xlim=(-67, -59), ylim=(43.3, 47.2))
+plot_coastline!(coastline(:global_fine), fillcolor=:gray95)
+scatter!(i.longitude, i.latitude, color=:blue, ms=2,
+    markerstrokewidth=0.2)
+look = i.type .== "PERMANENT"
+scatter!(i.longitude[look], i.latitude[look],
+    color=:red, ms=4, markerstrokewidth=0.2)
 ```
 """
 function get_tide_gauge_index(search=:all)
@@ -57,7 +62,7 @@ function get_tide_gauge_index(search=:all)
         id[i] = ri["id"]
         type[i] = ri["type"]
     end
-    if name == :all
+    if search == :all
         return DataFrame(id=id, code=code, name=official_name, longitude=lon, latitude=lat, type=type)
     else
         j = findall(occursin.(search, official_name))
@@ -101,12 +106,13 @@ in early August 2026. Changes to the interface are not unlikely.
   # Examples
 ```julia
 # Show past week of sealevel in Bedford Basin, Nova Scotia
-using OceanAnalysis
+using OceanAnalysis, Plots, CSV, DataFrames
 search = "Bedford"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
-plot(data.time, data.value, label=false, framestyle=:box, tickdirection=:out, ylab="Elevation",
-    title=name, titlefontsize=9)
+plot(data.time, data.value, label=false,
+    framestyle=:box, tickdirection=:out, ylab="Elevation [m]",
+    title=name, labelfontsize=8, titlefontsize=8)
 ```
 
 # References
