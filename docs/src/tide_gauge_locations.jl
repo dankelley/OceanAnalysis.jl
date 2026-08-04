@@ -10,5 +10,5 @@ scatter!(i.longitude, i.latitude, color=:blue, ms=3,
 look = i.type .== "PERMANENT"
 scatter!(i.longitude[look], i.latitude[look],
     color=:red, ms=4, markerstrokewidth=0.2)
-savefig("tide_gauge_stations.png")
+savefig("tide_gauge_locations.png")
 
