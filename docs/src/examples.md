@@ -423,7 +423,7 @@ gauges.
 using OceanAnalysis, Plots
 i = get_tide_gauge_index(:all);
 scatter(i.longitude, i.latitude,
-    aspect_ratio=1.0 / cos(48.0 * pi / 180),
+    aspect_ratio=1.0 / cos(45.0 * pi / 180),
     framestyle=:box, tickdirection=:out, label=false, ms=0,
     xlim=(-67, -59), ylim=(43.3, 47.2))
 plot_coastline!(coastline(:global_fine), fillcolor=:gray95)
