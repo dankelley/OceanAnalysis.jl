@@ -409,3 +409,51 @@ savefig("section.png")
 ```
 
 ![Section diagram](section.png)
+
+
+## Tide Gauge (sealevel) Data
+
+### Map of stations
+
+This the locations of tide gauges in the Maritimes region of Canada.  Blue dots
+represent non-permanent tide gauges, while red dots represent permanent tide
+gauges.
+
+```julia
+using OceanAnalysis, Plots
+i = get_tide_gauge_index(:all);
+scatter(i.longitude, i.latitude,
+    aspect_ratio=1.0 / cos(48.0 * pi / 180),
+    framestyle=:box, tickdirection=:out, label=false, ms=0,
+    xlim=(-67, -59), ylim=(43.3, 47.2))
+plot_coastline!(coastline(:global_fine), fillcolor=:gray95)
+scatter!(i.longitude, i.latitude, color=:blue, ms=3,
+    markerstrokewidth=0.2)
+look = i.type .== "PERMANENT"
+scatter!(i.longitude[look], i.latitude[look],
+    color=:red, ms=4, markerstrokewidth=0.2)
+savefig("tide_gauge_locations.png")
+```
+
+![Tide gauge locations](tide_gauge_locations.png)
+
+### Plot elevation record
+
+This shows how to download a week's worth of data for the Bedford Basin tide
+gauge, and plot it as a timeseries.
+
+```julia
+using OceanAnalysis, Plots, CSV, DataFrames
+search = "Bedford" # full name is "Bedford Basin"
+name, csv = get_tide_gauge_file(search)
+data = CSV.read(csv, DataFrame)
+xlim = extrema(data.time)
+plot(data.time, data.value, xlim=xlim, label=false,
+    framestyle=:box, tickdirection=:out, ylab="Elevation [m]",
+    title=name, labelfontsize=8, titlefontsize=8)
+savefig("tide_gauge_timeseries.png")
+```
+
+![Tide gauge timeseries](tide_gauge_timeseries.png)
+
+
