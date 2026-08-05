@@ -40,33 +40,55 @@ function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
     oad(debug, "read_glider() START")
     oad(debug, "  file: $file")
     oad(debug, "  skip_qc: $skip_qc")
+
     metadata = Dict()
     metadata["file"] = file
     metadata["skip_qc"] = skip_qc
     data = DataFrame()
     NCDataset(expanduser(file), "r") do d
+        oad(debug, "  opened file '$file'")
+        # Get a list of all dimension names
+        # Print all dimension names and their sizes
+        if debug > 0
+            for (name, len) in d.dim
+                println("  dimension $name has length $len")
+            end
+        end
+        if !("time" in keys(d.dim))
+            error("cannot read a glider file unless it has a \"time\" dimension")
+        end
+        ntime = d.dim["time"]
         # metadata
         for item in ("title", "institution", "platform_code", "references")
             metadata[item] = haskey(d.attrib, item) ? d.attrib[item] : ""
+            oad(debug, "  defined metadata[\"$(item)\"]")
         end
         # data
         qc_regexp = r"_qc$"
+        oad(debug, "  size(data): $(size(data))")
         for key in keys(d)
+            oad(debug, "  key: \"$key\"")
             var = d[key]
-            if 1 == ndims(var)
-                if !skip_qc || !occursin(qc_regexp, key)
-                    data[!, lowercase(key)] = copy(var)
-                    oad(debug, " Stored column $key")
+            if length(var) == ntime
+                if 1 == ndims(var)
+                    if !skip_qc || !occursin(qc_regexp, key)
+                        data[!, lowercase(key)] = copy(var)
+                    end
                 else
-                    oad(debug, " Skipped QC column $key")
+                    oad(debug, "  skipping key \"$(key)\" because it has more than 1 dimension")
                 end
+            else
+                oad(debug, "  skipping key \"$(key)\" because its length ($(length(var))) does not equal that of \"time\" ($ntime))")
             end
         end
     end
     # Rename columns
+    oad(debug, "  columns before renaming: $(names(data))")
     for (old, new) in glider_dictionary
-        rename!(n -> replace(n, Regex(old) => new), data)
+        oad(debug, "  renaming \"$old\" as \"$new\"")
+        rename!(n -> replace(n, Regex("^" * old * "\$") => new), data)
     end
+    oad(debug, "  columns after renaming: $(names(data))")
     rval = Glider(metadata, data)
     oad(debug, "END read_glider()")
     rval
