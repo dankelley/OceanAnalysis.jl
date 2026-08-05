@@ -1,5 +1,22 @@
 # Changes
 
+## Changelog from version 0.2.12 to version 0.2.13
+
+Release notes:
+
+### Changed
+
+-
+
+- BREAKING
+
+### Added
+
+-
+
+
+
+
 ## Changelog from version 0.2.11 to version 0.2.12
 
 Release notes:
