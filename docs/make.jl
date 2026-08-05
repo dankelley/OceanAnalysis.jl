@@ -21,15 +21,15 @@ makedocs(;
     modules=[OceanAnalysis],
     authors="Dan Kelley",
     repo=Documenter.Remotes.GitHub("dankelley", "OceanAnalysis.jl"),
-    #repo="https://github.com/dankelley/OceanAnalysis.jl/blob/{commit}{path}#{line}",
     sitename="OceanAnalysis.jl",
-    #warnonly=true,
     checkdocs=:none,
     format=Documenter.HTML(;
         assets=String["assets/custom.css"],
         canonical="https::dankelley.github.io/OceanAnalysis.jl/dev/",
         repolink="https://github.com/dankelley/OceanAnalysis.jl",
         prettyurls=get(ENV, "CI", "false") == "true",
+        size_threshold=250_000,  # default is 200 KiB
+        size_threshold_warn=150_000,
     ),
     pages=[
         "Home" => "index.md",
