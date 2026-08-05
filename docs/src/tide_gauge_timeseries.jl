@@ -1,5 +1,5 @@
 using OceanAnalysis, Plots, CSV, DataFrames
-search = "Bedford" # full name is "Bedford Basin"
+search = "Bedford" # full name is "Bedford Institute"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
 xlim = extrema(data.time)

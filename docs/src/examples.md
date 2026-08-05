@@ -417,7 +417,9 @@ savefig("section.png")
 
 This the locations of tide gauges in the Maritimes region of Canada.  Blue dots
 represent non-permanent tide gauges, while red dots represent permanent tide
-gauges.
+gauges.  (As an exercise, restrict `i` according to latitude and longitude
+criteria, and then examine `i.name` to see the tide gauges in that region.)
+
 
 ```julia
 using OceanAnalysis, Plots
@@ -439,12 +441,15 @@ savefig("tide_gauge_locations.png")
 
 ### Plot elevation record
 
-This shows how to download a week's worth of data for the Bedford Basin tide
-gauge, and plot it as a timeseries.
+This shows how to download a week's worth of data for the Bedford Institute
+tide gauge, and plot it as a timeseries. (As an exercise, repeat the call to
+`get_tide_gauge_file()` with a specific `times` value. If you ask for too long
+an interval, the CHS server may report an error, in which case you ought to try
+increasing the value of `resolution`.)
 
 ```julia
 using OceanAnalysis, Plots, CSV, DataFrames
-search = "Bedford" # full name is "Bedford Basin"
+search = "Bedford" # full name is "Bedford Institute"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
 xlim = extrema(data.time)
