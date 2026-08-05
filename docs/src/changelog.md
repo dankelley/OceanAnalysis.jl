@@ -19,9 +19,9 @@ Release notes:
 
 ### Added
 
-- `OceanAnalysis.get_tide_gauge_index`
 - `OceanAnalysis.get_tide_gauge_file`
-
+- `OceanAnalysis.get_tide_gauge_index`
+- `OceanAnalysis.get_tide_gauge_metadata`
 
 
 
