@@ -5,7 +5,7 @@ using Printf
 using Downloads
 
 """
-    get_tide_gauge_index(search=:all)
+    get_tide_gauge_index(search=:all; debug::Integer=0)
 
 Get an index of tide-gauge data available on the Canadian
 Hydrographic Service (CHS) website.
@@ -160,7 +160,7 @@ function get_tide_gauge_file(search; times=:default, variable=:wlo, resolution=3
     i = get_tide_gauge_index(search)
     nr = size(i, 1)
     if nr > 1
-        error("$nr gauges match this search string; try using search=:all to get a listing")
+        error("'search' must be narrowed; the following are partial matches: $(i.name)")
     end
     i = i[1, :]
     fmt = "yyyy-mm-ddTHH%3AMM%3A00Z"
@@ -213,6 +213,11 @@ This returns a Dict that holds information about the tide gauge.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
+# References
+
+1. The API used by the CHS server is described at
+https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
+
 # Example
 
 ```julia
@@ -225,7 +230,7 @@ function get_tide_gauge_metadata(search::String; debug::Integer=0)
     i = get_tide_gauge_index(search)
     nr = size(i, 1)
     if nr > 1
-        error("$nr gauges match this search string; try using get_tide_gauge_index(:all) to get a listing")
+        error("'search' must be narrowed; the following are partial matches: $(i.name)")
     end
     url = "https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/$(i.id[1])/metadata"
     oad(debug, "  About to access $url")
