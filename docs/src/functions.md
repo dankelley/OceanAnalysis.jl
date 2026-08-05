@@ -27,6 +27,7 @@ OceanAnalysis.get_nc_value
 OceanAnalysis.get_section
 OceanAnalysis.get_tide_gauge_index
 OceanAnalysis.get_tide_gauge_file
+OceanAnalysis.get_tide_gauge_metadata
 OceanAnalysis.get_topography
 OceanAnalysis.gravity
 OceanAnalysis.grid_ctd
@@ -92,9 +93,6 @@ OceanAnalysis.subset_dem
 OceanAnalysis.summarize_argo_data_tests
 OceanAnalysis.T90_from_T48
 OceanAnalysis.T90_from_T68
-OceanAnalysis.get_tide_gauge_index
-OceanAnalysis.get_tide_gauge_file
-OceanAnalysis.get_tide_gauge_metadata
 OceanAnalysis.toc
 OceanAnalysis.xyz_to_enu
 OceanAnalysis.z_from_pressure
