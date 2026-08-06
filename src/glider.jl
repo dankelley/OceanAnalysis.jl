@@ -1,7 +1,7 @@
 # FIXME: add more to this list, as we see them in files
 
 """
-    glider_dictionary
+    GLIDER_DICTIONARY
 
 A `Dict` used by [`read_glider()`](@ref) to transform variable names in Argo
 files. For example, the string `"pres"` will be transformed `"pressure"`, the
@@ -14,20 +14,18 @@ not handled here.
 # Examples
 ```julia
 using OceanAnalysis
-glider_dictionary
+GLIDER_DICTIONARY
 ```
 """
-
-
-const glider_dictionary = Dict(
+const GLIDER_DICTIONARY = Dict(
     # Sample file(s):
     #   1. https://upwell.pfeg.noaa.gov/erddap/files/scrippsGliders/batch17/sp007-20200827T110800.nc
     # Data
     "doxy" => "oxygen",
     "flu2" => "fluorescence",
     "head" => "heading",
-    "lon" => "longitude",
     "lat" => "latitude",
+    "lon" => "longitude",
     "pres" => "pressure",
     "profile_index" => "profile",
     "profile_number" => "profile",
@@ -43,7 +41,7 @@ const glider_dictionary = Dict(
     "s_qc" => "salinity_qc",
     "t_qc" => "temperature_qc",
 );
-export glider_dictionary
+export GLIDER_DICTIONARY
 
 """
     read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
@@ -55,7 +53,7 @@ vector-form variables in the file, possibly ignoring ones with names ending in
 variables things are renamed, e.g. `"psal"` becomes `"salinity"`. Note that all
 the names in `data` are in lower case, no matter whether they are lower or
 upper case in the NetCDF file, and that variable names are transformed
-according to [`glider_dictionary`](@ref).
+according to [`GLIDER_DICTIONARY`](@ref).
 """
 function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
     oad(debug, "read_glider() START")
@@ -105,7 +103,7 @@ function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
     end
     # Rename columns
     oad(debug, "  columns before renaming: $(names(data))")
-    for (old, new) in glider_dictionary
+    for (old, new) in GLIDER_DICTIONARY
         oad(debug, "  renaming \"$old\" as \"$new\"")
         rename!(n -> replace(n, Regex("^" * old * "\$") => new), data)
     end

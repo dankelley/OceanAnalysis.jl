@@ -48,8 +48,10 @@ function summarize_data(x)
         if "time" in data_names
             println(@sprintf "\nTime: interval %s to %s, mean step %.1f s, median step %.1f s" minimum(x.data.time) maximum(x.data.time) mean(diff(datetime2unix.(x.data.time))) median(diff(datetime2unix.(x.data.time))))
             filter!(name -> name != "time", data_names)
+            println("\nData summary (skipping the time data):")
+        else
+            println("\nData summary:")
         end
-        println("\nData summary:")
         df = DataFrame("name" => String[],
             "min" => Float64[], "mean" => Float64[], "max" => Float64[],
             "number" => Int64[], "number_missing" => Int64[], "number_NaN" => Int64[])
@@ -62,7 +64,7 @@ function summarize_data(x)
         # Summarize QC flags (if they exist)
         QC_names = data_names[occursin.("_qc", data_names)]
         if length(QC_names) > 0
-            println("\nData-Processing Flags:")
+            println("\nQuality-Control Flags:")
             for name in QC_names
                 local tmp = StatsBase.countmap(x[name])
                 print(@sprintf "  %-25s " name * ":")

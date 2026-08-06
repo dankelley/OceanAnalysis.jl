@@ -48,7 +48,7 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
         "_FLAG_W" => "_flag",
         "_FLAG" => "_flag",
         "_QC" => "_qc",
-        "c0mS/cm" => "conductivty",
+        "c0mS/cm" => "conductivity",
         "c1mS/cm" => "conductivity",
         "pr" => "pressure",
         "sal00" => "salinity",

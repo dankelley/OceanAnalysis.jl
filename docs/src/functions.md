@@ -1,7 +1,7 @@
 # Data
 
 ```@docs
-OceanAnalysis.glider_dictionary
+OceanAnalysis.GLIDER_DICTIONARY
 ```
 
 # Functions
