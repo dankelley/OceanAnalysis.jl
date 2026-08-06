@@ -16,25 +16,20 @@ of missing values in `x`), and `number_NaN` (the number of NaN values in `x`).
 function six_num(x, name::String)::NamedTuple{(:name, :min, :mean, :max, :number, :number_missing, :number_NaN)}
     xx = vec(copy(x))
     number = length(xx)
-    if xx[1] isa Char
+    if isa(xx[1], Char)
         return (name=name, min=NaN, mean=NaN, max=NaN, number=length(x), number_missing=0, number_NaN=0)
-    end
-    if xx[1] isa Dates.DateTime
-        # NOTE: this is used by summary(), which expects columns to be numeric
-        return (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=0, number_NaN=0)
     end
     number_missing = count(ismissing, xx)
     if number_missing == number
         return (name=name, min=NaN, mean=NaN, max=NaN, number=number, number_missing=number, number_NaN=0)
     end
     # remove missing values (already counted)
-    #println("DAN 1")
     filter!(!ismissing, xx)
-    #println("DAN 2 xx: $xx")
     # Similarly, count and then remove NaN values
     number_NaN = count(isnan, xx)
-    filter!(!isnan, xx)
-    #println("DAN 3 xx: $xx")
+    if number_NaN > 0
+        filter!(!isnan, xx)
+    end
     if length(xx) > 0
         Min, Max = extrema(xx)
         Mean = mean(xx)
@@ -50,7 +45,11 @@ export six_num
 function summarize_data(x)
     if x.data isa DataFrame
         data_names = names(x.data)
-        println("\nData: a DataFrame, summarized as follows")
+        if "time" in data_names
+            println(@sprintf "\nTime: interval %s to %s, mean step %.1f s, median step %.1f s" minimum(x.data.time) maximum(x.data.time) mean(diff(datetime2unix.(x.data.time))) median(diff(datetime2unix.(x.data.time))))
+            filter!(name -> name != "time", data_names)
+        end
+        println("\nData summary:")
         df = DataFrame("name" => String[],
             "min" => Float64[], "mean" => Float64[], "max" => Float64[],
             "number" => Int64[], "number_missing" => Int64[], "number_NaN" => Int64[])

@@ -1,3 +1,9 @@
+# Data
+
+```@docs
+OceanAnalysis.glider_dictionary
+```
+
 # Functions
 
 ```@docs
