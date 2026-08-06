@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main # update to match your development branch (master, main, dev, trunk, ...)
-    tags: '*'
+    tags: "*"
   pull_request:
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
     # These permissions are needed to:
     # - Deploy the documentation: https://documenter.juliadocs.org/stable/man/hosting/#Permissions
     # - Delete old caches: https://github.com/julia-actions/cache#usage
-    runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       actions: write
@@ -24,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
-          version: '1'
+          version: "1"
       - uses: julia-actions/cache@v2
       # START (workaround for failing GH action)
       - name: Remove General registry (if exists)
@@ -44,7 +43,7 @@ jobs:
             #end
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
-          julia --project=docs/ docs/make.jl        
+          julia --project=docs/ docs/make.jl
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
