@@ -1,5 +1,7 @@
 # FIXME: add more to this list, as we see them in files
 
+using GibbsSeaWater: gsw_sigma0
+
 """
     GLIDER_DICTIONARY
 
@@ -20,12 +22,16 @@ GLIDER_DICTIONARY
 const GLIDER_DICTIONARY = Dict(
     # Sample file(s):
     #   1. https://upwell.pfeg.noaa.gov/erddap/files/scrippsGliders/batch17/sp007-20200827T110800.nc
+    #   2. sbloom2023.nc
     # Data
+    "absolute_salinity" => "SA",
+    "conservative_temperature" => "CT",
     "doxy" => "oxygen",
     "flu2" => "fluorescence",
     "head" => "heading",
     "lat" => "latitude",
     "lon" => "longitude",
+    "oxygen_concentration" => "oxygen",
     "pres" => "pressure",
     "profile_index" => "profile",
     "profile_number" => "profile",
@@ -102,12 +108,21 @@ function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
         end
     end
     # Rename columns
-    oad(debug, "  columns before renaming: $(names(data))")
+    oad(debug, "  columns before renaming: $(sort(names(data)))")
+    debug == 0 || println(GLIDER_DICTIONARY)
     for (old, new) in GLIDER_DICTIONARY
         oad(debug, "  renaming \"$old\" as \"$new\"")
         rename!(n -> replace(n, Regex("^" * old * "\$") => new), data)
     end
-    oad(debug, "  columns after renaming: $(names(data))")
+    oad(debug, "  columns after renaming: $(sort(names(data)))")
+    if !("sigma0" in names(data)) && ("SA" in names(data)) && ("CT" in names(data))
+        oad(debug, "  adding sigma0, since we have SA and CT")
+        n = size(data, 1)
+        sigma0 = Array{Union{Missing,Float64}}(missing, n)
+        ok = .!ismissing.(data.SA) .&& .!ismissing.(data.CT)
+        sigma0[ok] = gsw_sigma0.(data.SA[ok], data.CT[ok])
+        data.sigma0 = sigma0
+    end
     rval = Glider(metadata, data)
     oad(debug, "END read_glider()")
     rval
