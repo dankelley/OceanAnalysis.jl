@@ -380,3 +380,55 @@ function decode_color_by(levels::Vector{Float64}, colorscheme=:turbo, clims=:aut
 end
 export decode_color_by
 
+
+"""
+    interpolate_to_time(d)
+
+Use linear interpolation to fill in `missing` or `NaN` values in a DataFrame.
+This is done column by column, using the column named `"time"` as the
+independent variable.
+
+# Arguments
+
+- `d` a DataFrame that has a column named `"time"`.
+
+# Return value
+
+This returns a copy of `d`, but with all missing/NaN gaps in the columns filled
+in by linear interpolation over the `d.time` column
+
+# Examples
+```julia
+using DataFrames, Dates, Interpolations
+t = range(now(), now() + Day(9), step=Day(1))
+n = length(t)
+x = [1:3; missing; 5:10]
+y = [1:2; missing; 4:10]
+d = DataFrame(z=x, time=t, x=x, y=y)
+dd = interpolate_to_time(d)
+dd.x == dd.y == dd.z == 1:10 || error("something is wrong")
+```
+"""
+function interpolate_to_time(d)
+    rval = copy(d)
+    ncol = size(d, 2)
+    time_col = findall(==("time"), names(d))
+    length(time_col) > 0 || error("no \"time\" column found")
+    length(time_col) == 1 || error("more than 1 column named \"time\"")
+    time_col = time_col[1]
+    time = d[:, time_col]
+    utime = datetime2unix.(time)
+    for i in 1:ncol
+        if i != time_col
+            y = d[:, i]
+            ok = .!ismissing.(y) .&& .!isnan.(y)
+            interp = linear_interpolation(utime[ok],
+                disallowmissing(y[ok]), extrapolation_bc=Line())
+            rval[:, i] = interp(utime)
+        end
+    end
+    return rval
+end
+export interpolate_to_time
+
+

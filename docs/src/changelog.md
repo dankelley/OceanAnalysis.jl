@@ -12,7 +12,7 @@ Release notes:
 
 ### Added
 
--
+- `interpolate_to_time()`
 
 
 
