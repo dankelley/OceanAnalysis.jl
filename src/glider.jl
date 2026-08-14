@@ -50,25 +50,52 @@ const GLIDER_DICTIONARY = Dict(
 export GLIDER_DICTIONARY
 
 """
-    read_glider(file::String; skip_qc::Bool=true, debug::Integer=0)
+    read_glider(file::String; interpolate_locations::Bool=true, skip_qc::Bool=false, debug::Integer=0)
 
-Read glider data from a NetCDF file named `file`. This code is very
-preliminary, tested on only a few sample files. Essentially, it reads all
-vector-form variables in the file, possibly ignoring ones with names ending in
-`_qc`, and then stores the data for those variables in columns in `data`. Some
-variables things are renamed, e.g. `"psal"` becomes `"salinity"`. Note that all
-the names in `data` are in lower case, no matter whether they are lower or
-upper case in the NetCDF file, and that variable names are transformed
-according to [`GLIDER_DICTIONARY`](@ref).
+Read glider data from a NetCDF file named `file`, storing all vector-form
+variables in the file in the results (although possibly ignoring ones with
+names ending in `_qc`, if instructed). Many variables are renamed according to
+[`GLIDER_DICTIONARY`](@ref). If both `SA` and `CT` are present, but
+`sigma0` is not present, then the later is computed and stored in the
+result. By default, longitude and latitude are across missing values.
+
+This function was written in summer 2026, and has been used on only a few
+sample files to date. Its performance is adequate, e.g. taking 3 seconds to
+read a 139M file. Users should expect some changes to column names and
+possibly other things, through the autumn of 2026.
+
+# Arguments
+
+- `file` a String naming a NetCDF file holding glider data.
+
+# Keywords
+
+- `interpolate_locations` a Bool that indicates whether to interpolate longitude and
+latitude linearly with respect to time. This is useful in files that have non-missing
+locations only at swoops when data were transmitted. If the file already has fully
+non-missing location data, this is ignored. If the file has no non-missing location 
+data, a warning is issued. If there is just a single non-missing location, it is copied
+through all the rows of the resultant.  And, finally (the usual case) if the file
+has more than 1 non-missing location, then both longitude and latitude are interpolated
+linearly.
+
+- `skip_qc` FIXME: document this, or possibly remove the argument.
+
+# Return value
+
+An [`Glider`](@ref) object with `metadata` holding some information about
+the glider, and with `data` holding a DataFrame with the measured and
+inferred data.
 """
-function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
+function read_glider(file::String; interpolate_locations::Bool=true, skip_qc::Bool=false, debug::Integer=0)
     oad(debug, "read_glider() START")
     oad(debug, "  file: $file")
+    oad(debug, "  interpolate_locations: $interpolate_locations")
     oad(debug, "  skip_qc: $skip_qc")
-
     metadata = Dict()
     metadata["file"] = file
     metadata["skip_qc"] = skip_qc
+    metadata["interpolate_locations"] = interpolate_locations
     data = DataFrame()
     NCDataset(expanduser(file), "r") do d
         oad(debug, "  opened file '$file'")
@@ -122,6 +149,27 @@ function read_glider(file::String; skip_qc::Bool=false, debug::Integer=0)
         ok = .!ismissing.(data.SA) .&& .!ismissing.(data.CT)
         sigma0[ok] = gsw_sigma0.(data.SA[ok], data.CT[ok])
         data.sigma0 = sigma0
+    end
+    if interpolate_locations
+        if "longitude" in names(data) && "latitude" in names(data) && "time" in names(data)
+            ok = .!ismissing.(data.latitude) .&& .!ismissing.(data.longitude)
+            nok = sum(ok)
+            oad(debug, "  nok: ", nok)
+            if nok == 0
+                warning("no good locations, so cannot interpolate over missing values")
+            else
+                if nok == nrow(data)
+                    oad(debug, "  not interpolating locations, since file has no bad values")
+                elseif nok == 1
+                    oad(debug, "  FIXME: copy the one good value")
+                else
+                    oad(debug, "  interpolating longitude and latitude by time")
+                    lonlat = interpolate_to_time(DataFrame(time=data.time, lon=data.longitude, lat=data.latitude))
+                    data.longitude = lonlat.lon
+                    data.latitude = lonlat.lat
+                end
+            end
+        end
     end
     rval = Glider(metadata, data)
     oad(debug, "END read_glider()")
