@@ -50,17 +50,25 @@ end
 Convert vector of characters into a string.
 """
 function character_vector_to_string(x)::String
-    # New version is non-mutating
-    #OLD x[ismissing.(x)] .= ' '
-    #OLD replace(join(x), " " => "")
-    rval = String[]
-    for xx in x
-        if ismissing(xx)
-            continue
-        end
-        push!(rval, replace(string(xx), " " => ""))
+    # Fast, non-mutating: join the non-missing pieces once, then strip spaces.
+    # Works for Char, SubString, or small Strings in the NetCDF character arrays.
+    s = isempty(x) ? "" : join(skipmissing(x))
+    if isempty(s)
+        return ""
     end
-    return strip(join(rval))
+    s = replace(s, " " => "")   # replace spaces once on the full string
+    return strip(s)
+    #<old># New version is non-mutating
+    #<old>#OLD x[ismissing.(x)] .= ' '
+    #<old>#OLD replace(join(x), " " => "")
+    #<old>rval = String[]
+    #<old>for xx in x
+    #<old>    if ismissing(xx)
+    #<old>        continue
+    #<old>    end
+    #<old>    push!(rval, replace(string(xx), " " => ""))
+    #<old>end
+    #<old>return strip(join(rval))
 end
 
 """
@@ -209,12 +217,13 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
         3 == sum(in.(data_names, (Set(["salinity", "temperature", "pressure"]),))) ||
             error("Cannot find salinity, temperature or pressure in $(filename)")
         name_changes = Dict(data_names .=> data_names_original)
-        for key in keys(name_changes)
+        for key in keys(name_changes) # revised 2026-08-14 (DRY, maybe speed)
+            orig = name_changes[key]
+            col = d[orig][:, profile]
             if endswith(key, "qc")
-                data[!, key] = d[name_changes[key]][:, profile]
+                data[!, key] = col
             else
-                tmp1 = d[name_changes[key]][:, profile]
-                data[!, key] = map(x -> ismissing(x) ? NaN : Float64(x), tmp1)
+                data[!, key] = Float64.(coalesce.(col, NaN))
             end
         end
         oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
@@ -334,7 +343,7 @@ function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, serv
     file_original = filename
     oad(debug, "    filename: ", filename, " (original)")
     filename = replace(filename, r".*/" => "")
-    file = joinpath(destdir, filename)
+    #<unused>file = joinpath(destdir, filename)
     oad(debug, "    filename: ", filename, " (after prefixing with destdir)")
     url = joinpath(server, "dac", file_original)
     oad(debug, "    url: ", url)
@@ -352,7 +361,7 @@ Read an Argo file, as downloaded by [`get_argo_index`](@ref).
 
 This relies on there being exactly `header` lines of header, the last of which
 names the columns.  The default value of 9 works with index files downloaded
-from the ifremer.fr server, as of 2025-09-08.
+from the ifremer.fr server, as checked on dates: 2025-09-08, 2026-08-14.
 
 First, the `date` column is converted to a DateTime column named `time`.  If
 `trim` is true, then the original `date` column is removed, along with the the
@@ -373,6 +382,7 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
         error("No file file named '$file'")
     end
     oad(debug, "    filename: ", filename)
+    # I tried specifying the type/format for :time, but that slowed the operation from 5.2s to 5.4s.
     df = CSV.read(filename, DataFrame, header=header)
     norig = nrow(df)
     dropmissing!(df)
