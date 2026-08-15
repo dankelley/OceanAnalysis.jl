@@ -70,16 +70,18 @@ possibly other things, through the autumn of 2026.
 
 # Keywords
 
-- `interpolate_locations` a Bool that indicates whether to interpolate longitude and
-latitude linearly with respect to time. This is useful in files that have non-missing
-locations only at swoops when data were transmitted. If the file already has fully
-non-missing location data, this is ignored. If the file has no non-missing location 
-data, a warning is issued. If there is just a single non-missing location, it is copied
-through all the rows of the resultant.  And, finally (the usual case) if the file
-has more than 1 non-missing location, then both longitude and latitude are interpolated
-linearly.
+- `interpolate_locations` a Bool that indicates whether to interpolate
+  longitude and latitude linearly with respect to time. This is useful in files
+  that have non-missing locations only at swoops when data were transmitted. If
+  the file already has fully non-missing location data, this is ignored. If the
+  file has no non-missing location data, a warning is issued. If there is just a
+  single non-missing location, it is copied through all the rows of the
+  resultant.  And, finally (the usual case) if the file has more than 1
+  non-missing location, then both longitude and latitude are interpolated
+  linearly.
 
-- `skip_qc` FIXME: document this, or possibly remove the argument.
+- `skip_qc` Bool value indicating whether to skip reading QC (quality-control)
+  values. This is false by default.
 
 # Return value
 
@@ -156,12 +158,17 @@ function read_glider(file::String; interpolate_locations::Bool=true, skip_qc::Bo
             nok = sum(ok)
             oad(debug, "  nok: ", nok)
             if nok == 0
-                warning("no good locations, so cannot interpolate over missing values")
+                @warn "no good locations, so cannot interpolate over missing values"
             else
                 if nok == nrow(data)
                     oad(debug, "  not interpolating locations, since file has no bad values")
                 elseif nok == 1
-                    oad(debug, "  FIXME: copy the one good value")
+                    nrows = nrow(data)
+                    oad(debug, "  using the non-missing value for all latitude and longitude")
+                    i = findfirst(!ismissing, data.latitude)
+                    data.latitude = repeat([data.latitude[i]], nrows)
+                    i = findfirst(!ismissing, data.longitude)
+                    data.longitude = repeat([data.longitude[i]], nrows)
                 else
                     oad(debug, "  interpolating longitude and latitude by time")
                     lonlat = interpolate_to_time(DataFrame(time=data.time, lon=data.longitude, lat=data.latitude))
