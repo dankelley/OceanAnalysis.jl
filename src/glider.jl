@@ -40,7 +40,7 @@ const GLIDER_DICTIONARY = Dict(
     "temp" => "temperature",
     # QC flags
     "c_qc" => "conductivity_qc",
-    "d_qc" => "depth_qc", # I see this in file 1, even though it has no 'depth' data
+    "d_qc" => "depth_qc", # weirdly, I see this in a file that has no 'depth' data
     "lat_qc" => "latitude_qc",
     "lon_qc" => "longitude_qc",
     "p_qc" => "pressure_qc",
@@ -80,7 +80,7 @@ possibly other things, through the autumn of 2026.
   non-missing location, then both longitude and latitude are interpolated
   linearly.
 
-- `skip_qc` Bool value indicating whether to skip reading QC (quality-control)
+- `skip_qc` a Bool value that indicates whether to skip reading QC (quality-control)
   values. This is false by default.
 
 # Return value
