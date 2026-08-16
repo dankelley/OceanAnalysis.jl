@@ -74,16 +74,20 @@ function get_erddap_index(server::String="https://cioosatlantic.ca/",
     oad(debug, "  url: \"$url\"")
     url_without_dot_json = replace(url, "/.json" => "")
     oad(debug, "  url_without_dot_json: \"$url_without_dot_json\"")
-    response = HTTP.get(url)
-    data = JSON.parse(String(response.body))
-    file_rows = data["table"]["rows"]
-    n = length(file_rows)
-    files = Vector{String}(undef, n)
-    for i in 1:n
-        files[i] = file_rows[i][1] # 1=name, 2=modified_time, 3=size
+    response = HTTP.get(url; status_exception=false)
+    if response.status == 200
+        data = JSON.parse(String(response.body))
+        file_rows = data["table"]["rows"]
+        n = length(file_rows)
+        files = Vector{String}(undef, n)
+        for i in 1:n
+            files[i] = file_rows[i][1] # 1=name, 2=modified_time, 3=size
+        end
+        urls = (url_without_dot_json * "/") .* files
+        oad(debug, "END get_erddap_index()")
+        return urls
+    else
+        error("cannot access erddap at $url")
     end
-    urls = (url_without_dot_json * "/") .* files
-    oad(debug, "END get_erddap_index()")
-    return urls
 end
 export get_erddap_index

@@ -52,7 +52,10 @@ function get_tide_gauge_index(search=:all; debug::Integer=0)
     oad(debug, "get_tide_gauge_index() START")
     url = "https://api-iwls.dfo-mpo.gc.ca/api/v1/stations"
     oad(debug, "  url: $url")
-    response = HTTP.get(url)
+    response = HTTP.get(url; status_exception=false)
+    if response.status != 200
+        error("cannot access tide gauge index at $url")
+    end
     oad(debug, "  got response from server")
     r = JSON3.read(response.body)
     oad(debug, "  decoded the response")
@@ -234,7 +237,10 @@ function get_tide_gauge_metadata(search::String; debug::Integer=0)
     end
     url = "https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/$(i.id[1])/metadata"
     oad(debug, "  About to access $url")
-    response = HTTP.get(url)
+    response = HTTP.get(url; status_exception=false)
+    if response.status != 200
+        error("cannot access tide gauge metadata at $url")
+    end
     oad(debug, "  Decoding the downloaded information")
     rval = JSON3.read(response.body)
     oad(debug, "END get_tide_gauge_metadata()")
