@@ -2,6 +2,9 @@ using Downloads, TiffImages, NCDatasets, Plots, ColorSchemes, Printf
 using DataStructures: OrderedDict
 using Interpolations: interpolate, scale
 
+# Next is used in constructing filenames on topography server
+const TOPO_DATABASE = "27ETOPO_2022_v1"
+
 """
     get_topography(name::Symbol=:global_coarse; debug::Integer=0)
 
@@ -70,7 +73,7 @@ function read_topography(filename::String; debug::Integer=0)::Topography
         oad(debug, "  about to read topography data.")
         metadata = Dict()
         metadata["filename"] = filename
-        # FIXME: do we need to copy in a case like this?
+        # we need to copy because of how NCDataset works
         metadata["longitude"] = copy(nc["lon"])
         metadata["latitude"] = copy(nc["lat"])
         k = keys(nc)
@@ -117,14 +120,24 @@ data file; thus, the function can both download and cache topographic data.
 - `west` western boundary of focus region, in the -180° to 180° range.
 - `east` eastern boundary of focus region, in the -180° to 180° range.
 - `south` southern boundary of focus region, in the -90° to 90° range.
-- `north` northern boudnary of focus region, in the -90° to 90° range.
+- `north` northern boundary of focus region, in the -90° to 90° range.
 
 # Keywords
 
-- `resolution` the resolution of the returned grid, in minutes. By default, this is 4 minutes, or about 7.4 km in the north-south direction.
-- `destdir` a String giving the name of the directory into which to place the downloaded file.
-- `server` a String naming the server. By default, this is `"https://gis.ngdc.noaa.gov"`, which is (as of writing) the only server that provides such files
-- `debug` an integer value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
+- `resolution` the resolution of the returned grid, in minutes. By default,
+  this is 4 minutes, or about 7.4 km in the north-south direction. Note that
+  values below 0.5 are snapped to 0.25, and values between 0.5 and 1.0 are
+  snapped to 0.5.
+
+- `destdir` a String giving the name of the directory into which to place the
+  downloaded file.
+
+- `server` a String naming the server. By default, this is
+  `"https://gis.ngdc.noaa.gov"`, which is (as of writing) the only server that
+  provides such files
+
+- `debug` an integer value indicating whether to print messages during
+  processing. By default, this is 0, meaning to work quietly.
 
 # Return
 
@@ -159,17 +172,19 @@ function get_topography(west::Real, east::Real,
                ", server='$server') ... START"
     )
     if resolution < 0.5
+        @warn "Snapping resolution from $resolution to 0.25"
         resolution = 0.25
-    elseif resolution < 1.0
-        resolution = 0.50
+    elseif 0.5 < resolution < 1.0
+        @warn "Snapping resolution from $resolution to 0.5"
+        resolution = 0.5
     end
     oad(debug, "    query resolution: $resolution")
     if resolution == 0.25
-        database = "27ETOPO_2022_v1_15s_bed_elev"
+        database = "$(TOPO_DATABASE)_15s_bed_elev"
     elseif resolution == 0.50
-        database = "27ETOPO_2022_v1_30s_bed"
+        database = "$(TOPO_DATABASE)_30s_bed"
     else
-        database = "27ETOPO_2022_v1_60s_bed"
+        database = "$(TOPO_DATABASE)_60s_bed"
     end
     oad(debug, "    query database: '$database'")
     # The +-0.005 is to get rounding down for west and south, and rounding up for east and north.
@@ -193,7 +208,7 @@ function get_topography(west::Real, east::Real,
     destfile = expanduser(joinpath(destdir, "topo_" * wName * "_" * eName * "_" * sName * "_" * nName * "_" * resolutionName * ".nc"))
     if isfile(destfile)
         oad(debug, "    destfile $destfile already exists, so not downloading new data")
-        oad(debug, "END read_topography_file()")
+        oad(debug, "END get_topography_file()")
         return destfile
     else
         nlon = Int64(ceil(60.0 * (east - west) / resolution))
@@ -213,13 +228,19 @@ function get_topography(west::Real, east::Real,
               "&f=image"
         oad(debug, "    about to download $url")
         (tiff_file, io) = mktemp()
-        Downloads.download(url, tiff_file)
+        close(io)
+        try
+            Downloads.download(url, tiff_file)
+        catch
+            rm(tiff_file)
+            error("Download failed from url='$url'")
+        end
         oad(debug, "    downloaded as temporary TIFF file $tiff_file")
         #img = Float64.(TiffImages.load(tiff_file))
         z = Float64.(TiffImages.load(tiff_file))
+        rm(tiff_file)
         oad(debug, "    converted TIFF data to matrix format")
         nlat, nlon = size(z)
-        rm(tiff_file)
         oad(debug, "    removed temporary TIFF file")
         # flip vertically
         z = z[end:-1:1, :]
@@ -238,15 +259,15 @@ function get_topography(west::Real, east::Real,
         defDim(nc, "lat", nlat)
         lat_var = defVar(nc, "lat", lat, ("lat",),
             attrib=OrderedDict("units" => "degrees_north",
-                "lat_name" => "latitude"))
+                "long_name" => "latitude"))
         oad(debug, "    stored lat in NetCDF file")
         z_var = defVar(nc, "z", Float64, ("lon", "lat"))
-        z_var.attrib["units"] = "degrees"
+        z_var.attrib["units"] = "meters"
         z_var[:, :] = z'
         oad(debug, "    stored z (the topography matrix) in NetCDF file")
         close(nc)
         oad(debug, "    closed NetCDF file")
-        oad(debug, "END read_topography_file()")
+        oad(debug, "END get_topography_file()")
         return destfile
     end
 end
@@ -285,8 +306,8 @@ function plot_topography(topo::Topography;
     oad(debug, "    domain: :", domain)
     oad(debug, "    color: :", color)
     oad(debug, "    clim: :", clim)
-    longitude = copy(topo.metadata["longitude"])
-    latitude = copy(topo.metadata["latitude"])
+    longitude = copy(topo["longitude"])
+    latitude = copy(topo["latitude"])
     data = copy(topo.data)
     aspect_ratio = 1.0 / cos(0.5 * (latitude[1] + latitude[end]) * pi / 180.0)
     if xlims == :auto
@@ -373,8 +394,8 @@ function interpolate_topography(longitude, latitude, topo::Topography)
     # Use 'range()' to meet scale() requirements
     lon = topo["longitude"]
     lat = topo["latitude"]
-    all(lon[1] .< longitude .< lon[end]) || error("some longitudes are offscale")
-    all(lat[1] .< latitude .< lat[end]) || error("some latitudes are offscale")
+    all(lon[1] .<= longitude .<= lon[end]) || error("some longitudes are offscale")
+    all(lat[1] .<= latitude .<= lat[end]) || error("some latitudes are offscale")
     lon_range = range(lon[1], lon[end], length(lon))
     lat_range = range(lat[1], lat[end], length(lat))
     # Note the order, lat (=row) then lon (=col), to match matrix storage
