@@ -43,6 +43,7 @@ OceanAnalysis.handle_qc!
 OceanAnalysis.ILD_KRH
 OceanAnalysis.increment_debug
 OceanAnalysis.interpolate_barnes
+OceanAnalysis.interpolate_topography
 OceanAnalysis.interpolate_to_time
 OceanAnalysis.label_from_varname
 OceanAnalysis.MLD_CF

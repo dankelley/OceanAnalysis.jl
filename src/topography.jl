@@ -1,6 +1,6 @@
-using Downloads, TiffImages, NCDatasets, Plots, ColorSchemes
+using Downloads, TiffImages, NCDatasets, Plots, ColorSchemes, Printf
 using DataStructures: OrderedDict
-using Printf
+using Interpolations: interpolate, scale
 
 """
     get_topography(name::Symbol=:global_coarse; debug::Integer=0)
@@ -349,4 +349,37 @@ function plot_topography(topo::Topography;
     p
 end
 export plot_topography
+
+
+"""
+    interpolate_topography(longitude, latitude, topo::Topography)
+
+Interpolate topographic elevation to specified locations.
+
+# Arguments
+
+- `longitude` Vector of longitudes
+- `latitude` Vector of latitudes
+- `topo` a Topography object, e.g. as read by [`read_topography`](@ref).
+
+# Return value
+
+A vector of elevations above mean sea level (or whatever is the datum
+of the `topo` object).
+"""
+function interpolate_topography(longitude, latitude, topo::Topography)
+    length(longitude) == length(latitude) || error("lengths of latitude and longitude are unequal")
+    itp = interpolate(topo.data, BSpline(Linear()))
+    # Use 'range()' to meet scale() requirements
+    lon = topo["longitude"]
+    lat = topo["latitude"]
+    all(lon[1] .< longitude .< lon[end]) || error("some longitudes are offscale")
+    all(lat[1] .< latitude .< lat[end]) || error("some latitudes are offscale")
+    lon_range = range(lon[1], lon[end], length(lon))
+    lat_range = range(lat[1], lat[end], length(lat))
+    # Note the order, lat (=row) then lon (=col), to match matrix storage
+    sitp = scale(itp, lat_range, lon_range)
+    sitp(latitude, longitude)
+end
+export interpolate_topography
 

@@ -16,7 +16,7 @@ Release notes:
 
 - `interpolate_to_time()`, used by `read_glider()` but also perhaps useful for
   more general purposes, too.
-
+- `interpolate_topography()`
 
 
 
