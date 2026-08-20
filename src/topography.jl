@@ -387,20 +387,35 @@ Interpolate topographic elevation to specified locations.
 
 A vector of elevations above mean sea level (or whatever is the datum
 of the `topo` object).
+
+# Examples
+
+```julia
+using OceanAnalysis, Plots
+file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
+topo = read_topography(file)
+A = plot_topography(topo)
+vline!([-63], c=:magenta)
+lats = range(extrema(topo["latitude"])..., length=100)
+lons = repeat([-63.0], 100)
+z = interpolate_topography(lons, lats, topo)
+B = plot(lats, z, label=false)
+hline!([0.0], label=false)
+plot(A, B)
+```
 """
 function interpolate_topography(longitude, latitude, topo::Topography)
     length(longitude) == length(latitude) || error("lengths of latitude and longitude are unequal")
-    itp = interpolate(topo.data, BSpline(Linear()))
-    # Use 'range()' to meet scale() requirements
     lon = topo["longitude"]
     lat = topo["latitude"]
     all(lon[1] .<= longitude .<= lon[end]) || error("some longitudes are offscale")
     all(lat[1] .<= latitude .<= lat[end]) || error("some latitudes are offscale")
     lon_range = range(lon[1], lon[end], length(lon))
     lat_range = range(lat[1], lat[end], length(lat))
-    # Note the order, lat (=row) then lon (=col), to match matrix storage
+    itp = interpolate(topo.data, BSpline(Linear()))
     sitp = scale(itp, lat_range, lon_range)
-    sitp(latitude, longitude)
+    sitp.(latitude, longitude)
 end
 export interpolate_topography
 
