@@ -395,14 +395,14 @@ using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
 topo = read_topography(file)
-A = plot_topography(topo)
+A = plot_topography(topo, xlab="Longitude [°E]", ylab="Latitude [°N]")
 vline!([-63], c=:magenta)
 lats = range(extrema(topo["latitude"])..., length=100)
 lons = repeat([-63.0], 100)
 z = interpolate_topography(lons, lats, topo)
-B = plot(lats, z, label=false)
+B = plot(lats, z, xlab="Latitude [°N]", ylab="Vertical Coordinate [m]", label=false)
 hline!([0.0], label=false)
-plot(A, B)
+plot(A, B, layout=(2,1))
 ```
 """
 function interpolate_topography(longitude, latitude, topo::Topography)
