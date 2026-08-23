@@ -1,5 +1,20 @@
 is_numeric_vector(x) = isa(x, AbstractVector) && eltype(x) <: Number
 
+function average_amsr_passes(pass1, pass2)
+    n = 0
+    s = 0.0
+    if !isnan(pass1) & !ismissing(pass1)
+        s += pass1
+        n += 1
+    end
+    if !isnan(pass2) & !ismissing(pass2)
+        s += pass2
+        n += 1
+    end
+    return n == 0 ? NaN : s / n
+end
+
+
 """
     read_amsr(filename::String, field::String="SST"; debug=0)
 
@@ -56,6 +71,7 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
         if field == "?"
             return keys(nc)
         else
+            oad(debug, "    setting up metadata")
             metadata = Dict()
             metadata["filename"] = filename
             metadata["longitude"] = copy(nc["lon"])
@@ -65,28 +81,37 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
                 "time_coverage_end")
                 metadata[a] = nc.attrib[a]
             end
-            data = copy((Float64.(replace(nc[field], missing => NaN)))')
+            oad(debug, "    setting up data")
+            tmp = nc[field]
+            oad(debug, "    size of nc[field]: $(size(tmp))")
+            if length(size(tmp)) == 2
+                data = copy((Float64.(replace(tmp, missing => NaN)))')
+            else
+                oad(debug, "    averaging ascending and descending passes")
+                tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
+                data = copy((Float64.(replace(tmp2, missing => NaN)))')
+            end
+            rval = Amsr(metadata, data)
             oad(debug, "END read_amsr()")
-            return Amsr(metadata, data)
+            return rval
         end
     end
 end
 export read_amsr
 
 
-"""
-    get_amsr(date::String)::String
+# """
+#     get_amsr(date::String)::String
+# 
+# """
+# function get_amsr(date::String; kwargs...)::String
+#     get_amsr(Date(date), kwargs...)
+# end
+# export get_amsr
 
 """
-function get_amsr(date::String; kwargs...)::String
-    get_amsr(Date(date), kwargs...)
-end
-export get_amsr
-
-"""
-    get_amsr(date::Date=Dates.today() - Day(4); type::String="3day",
-        destdir::String=".", server::String="https://data.remss.com/amsr2/ocean/L3/v08.2",
-        debug::Integer=0)
+    get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
+        server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)::String
 
 Download a Advanced Microwave Scanning Radiometer data file.
 
@@ -95,27 +120,31 @@ exist in `destdir`, then it is downloaded from the server, and `get_amsr`
 returns the full path to that existing file. Otherwise, the file is downloaded,
 and the return value is the path to the resultant local file.
 
-For example, if this function is called on 2025-09-27 with no arguments
-specified, an attempt will be made to download a file named
-`"./RSS_AMSR2_ocean_L3_3day_2025-09-23_v08.2.nc"` from the server
-[https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2025/](https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2025/).
+If the date is not specified, it defaults to today's date.  To avoid errors of the
+server not yet having data for that time, `get_amsr` shifts the time backwards,
+in an attempt to get the most recent data.  If these shifts are insufficient,
+an error will be reported. The solution is to specify an appropriate date, and
+for that purpose it makes sense for the user to visit
+[https://data.remss.com/amsr2/ocean/L3/v08.2](https://data.remss.com/amsr2/ocean/L3/v08.2]
+and then select the appropriate subdirectory, given the desired `type`.
 
 See [`read_amsr`](@ref) for how to deal with the files downloaded
 by `get_amsr`.
 
+For code-maintenance reference, the following are sample URLs (valid as of 2026-08-23) for
+the four possible values of `type`:
+* "daily": https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
+* "3day": https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
+* "monthly": https://data.remss.com/amsr2/ocean/L3/v08.2/monthly/RSS_AMSR2_ocean_L3_monthly_2026-06_v08.2.nc
+* "weekly": https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
+
 # Arguments
 
-- `date` a Date object specifying the requested measurement time. The default value is 4 days prior to the present date.
+- `date` a Date object specifying the requested measurement time. The default
+  value is today's date (see above for how that will be shifted to the past,
+  depending on `type`.)
 
 # Keywords
-
-- `destdir`: Path to the destination directory. The author usually sets
-  `destdir="~/data/amsr"`, so that the file will be in a central location for use
-  by other analysis procedures.
-
-- `server`: The base of the server location. The default value ought to be used
-  unless the data provider changes their web scheme, although the likelihood of
-  the query working in such a case is slim, since changes tend to be sweeping.
 
 - `type`: The type of data requested. At the moment, the only choice is
   `"3day"` (the default), for a composite covering 3 days of observation, which
@@ -124,7 +153,16 @@ by `get_amsr`.
   for a composite covering a week, and `"monthly"` for a composite covering a
   month.  In the `"daily"` case, the data arrays are 3D, with the third dimension
   representing ascending and descending traces, but in all the other cases, the
-  arrays are 2D.
+  arrays are 2D. Note that `"weekly"` files are timestamped on Sundays.
+
+- `destdir`: Path to the destination directory. The author usually sets
+  `destdir="~/data/amsr"`, so that the file will be in a central location for use
+  by other analysis procedures.
+
+- `server`: The base of the server location. The default value ought to be used
+  unless the data provider changes their web scheme, although the likelihood of
+  the query working in such a case is slim, since changes tend to be sweeping.
+  Users are asked to report an issue, if they encounter failed server responses.
 
 - `debug`: An indication of whether to print information during processing. The
   default value of 0 means to work quietly, and any larger integer indicates to
@@ -133,19 +171,58 @@ by `get_amsr`.
 # Return value
 
 `get_amsr` returns a String that is the full pathname of the downloaded file,
-which may be supplied as the first argument to a call to [`read_amsr`](@ref).
+which may be supplied as the first argument of [`read_amsr`](@ref).
 """
-function get_amsr(date::Date=Dates.today() - Dates.Day(4);
-    type::String="3day",
-    destdir::String=".", server::String="https://data.remss.com/amsr2/ocean/L3/v08.2",
-    debug::Integer=0)::String
+function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
+    server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)::String
     oad(debug, "get_amsr() START")
-    destfile = @sprintf(
-        "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
-        type, year(date), month(date), day(date))
+    oad(debug, "    date=\"$date\"")
+    oad(debug, "    type=\"$type\"")
+    oad(debug, "    destdir=\"$destdir\"")
+    oad(debug, "    server=\"$server\"")
+    if type == "daily"
+        if date == Dates.today()
+            date = date - Dates.Day(3) # FIXME: will 3 days always work, at any time of day?
+        end
+        # https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
+        destfile = @sprintf(
+            "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
+            type, year(date), month(date), day(date))
+        url = @sprintf("%s/%s/%d/%s", server, type, year(date), destfile)
+    elseif type == "3day"
+        if date == Dates.today()
+            date = date - Dates.Day(4) # FIXME: will 4 days always work, at any time of day?
+        end
+        # https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
+        #?https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-21_v08.2.nc
+        destfile = @sprintf(
+            "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
+            type, year(date), month(date), day(date))
+        url = @sprintf("%s/%s/%d/%s", server, type, year(date), destfile)
+    elseif type == "monthly"
+        # https://data.remss.com/amsr2/ocean/L3/v08.2/monthly/RSS_AMSR2_ocean_L3_monthly_2026-06_v08.2.nc
+        if date == Dates.today()
+            date = date - Dates.Month(2)
+        end
+        destfile = @sprintf(
+            "RSS_AMSR2_ocean_L3_%s_%04d-%02d_v08.2.nc",
+            type, year(date), month(date))
+        url = @sprintf("%s/%s/%s", server, type, destfile)
+    elseif type == "weekly"
+        # https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
+        if date == Dates.today()
+            # The weekly data files are timestamped on Sundays
+            date = date - Day(Dates.dayofweek(date) + 1) - Dates.Week(2)
+        end
+        destfile = @sprintf(
+            "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
+            type, year(date), month(date), day(date))
+        url = @sprintf("%s/%s/%s", server, type, destfile)
+    else
+        error("type must be one of: \"3day\", \"daily\", \"monthly\" or \"weekly\" but it is \"$(type)\"")
+    end
     destpath = expanduser(joinpath(destdir, destfile))
     oad(debug, "    destpath: '$destpath'")
-    url = @sprintf("%s/%s/%d/%s", server, type, year(date), destfile)
     oad(debug, "    url: '$url'")
     if !isfile(destpath)
         oad(debug, "    downloading $url")
@@ -163,8 +240,9 @@ export get_amsr
     plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
         draw_contours=:none, debug::Integer=0, kwargs...)
  
-Plot a heatmap of an AMSR field.  By default, SST is shown using the `:turbo`
-colorscheme, and the view is of the whole earth.
+Plot a heatmap of a field in an [`Amsr`](@ref) object.  By default, SST is shown using the `:turbo`
+colorscheme, and the view is of the whole earth. For "daily" datasets (see the `type`
+argument of the [`get_amsr`](@ref) function), the ascending and descending swaths are averaged.
 
 # Arguments
 
