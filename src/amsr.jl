@@ -122,10 +122,10 @@ and the return value is the path to the resultant local file.
 
 If the date is not specified, it defaults to today's date.  To avoid errors of the
 server not yet having data for that time, `get_amsr` shifts the time backwards,
-in an attempt to get the most recent data.  If these shifts are insufficient,
-an error will be reported. The solution is to specify an appropriate date, and
-for that purpose it makes sense for the user to visit
-[https://data.remss.com/amsr2/ocean/L3/v08.2](https://data.remss.com/amsr2/ocean/L3/v08.2]
+depending on `type`, in an attempt to get the most recent data.  If these
+shifts are insufficient, an error will be reported. The solution is to
+specify an appropriate date, and for that purpose it makes sense for the
+user to visit [https://data.remss.com/amsr2/ocean/L3/v08.2](https://data.remss.com/amsr2/ocean/L3/v08.2]
 and then select the appropriate subdirectory, given the desired `type`.
 
 See [`read_amsr`](@ref) for how to deal with the files downloaded
@@ -146,14 +146,19 @@ the four possible values of `type`:
 
 # Keywords
 
-- `type`: The type of data requested. At the moment, the only choice is
-  `"3day"` (the default), for a composite covering 3 days of observation, which
-  removes most viewing-path and cloud blanks. If there is sufficient need, other
-  types may be added, from the list: `"daily"` for a daily reading, `"weekly"`
-  for a composite covering a week, and `"monthly"` for a composite covering a
-  month.  In the `"daily"` case, the data arrays are 3D, with the third dimension
-  representing ascending and descending traces, but in all the other cases, the
-  arrays are 2D. Note that `"weekly"` files are timestamped on Sundays.
+- `type`: The type of data requested, with default `"3day"`.
+  If `type="daily"` then data from a single day are acquired, and
+  this will typically leave quite a few gaps for clouds, as well
+  satellite-coverage gaps. It is advisable to use
+  [`plot_amsr`](@ref) to see whether the gaps affect
+  the area of interest. If they do, try the default,
+  i.e. `type="3day"`, for a composite covering 3 days of
+  observation, which will average over most spatial-coverage
+  and cloud gaps. If more averaging is desired, use
+  `type="weekly"` or `type="monthly"`, but be aware that
+  many time-varying features will be smeared with these averages.
+  Also, note that for `"weekly"` data, the date is always
+  a Sunday.
 
 - `destdir`: Path to the destination directory. The author usually sets
   `destdir="~/data/amsr"`, so that the file will be in a central location for use
@@ -171,7 +176,9 @@ the four possible values of `type`:
 # Return value
 
 `get_amsr` returns a String that is the full pathname of the downloaded file,
-which may be supplied as the first argument of [`read_amsr`](@ref).
+which may be supplied as the first argument of [`read_amsr`](@ref). In
+many cases, the goal may be to plot the data, and for that, [`plot_amsr`](@ref)
+may prove useful.
 """
 function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
     server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)::String
