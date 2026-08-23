@@ -125,18 +125,18 @@ server not yet having data for that time, `get_amsr` shifts the time backwards,
 depending on `type`, in an attempt to get the most recent data.  If these
 shifts are insufficient, an error will be reported. The solution is to
 specify an appropriate date, and for that purpose it makes sense for the
-user to visit [https://data.remss.com/amsr2/ocean/L3/v08.2](https://data.remss.com/amsr2/ocean/L3/v08.2]
-and then select the appropriate subdirectory, given the desired `type`.
+user to visit https://data.remss.com/amsr2/ocean/L3/v08.2 and then select
+the subdirectory with a name that suggests the desired `type`.
 
 See [`read_amsr`](@ref) for how to deal with the files downloaded
 by `get_amsr`.
 
 For code-maintenance reference, the following are sample URLs (valid as of 2026-08-23) for
 the four possible values of `type`:
-* "daily": https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
-* "3day": https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
-* "monthly": https://data.remss.com/amsr2/ocean/L3/v08.2/monthly/RSS_AMSR2_ocean_L3_monthly_2026-06_v08.2.nc
-* "weekly": https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
+* `"daily"`: https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
+* `"3day"`: https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
+* `"monthly"`: https://data.remss.com/amsr2/ocean/L3/v08.2/monthly/RSS_AMSR2_ocean_L3_monthly_2026-06_v08.2.nc
+* `"weekly"`: https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
 
 # Arguments
 
