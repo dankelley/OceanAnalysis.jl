@@ -1,13 +1,14 @@
-is_numeric_vector(x) = isa(x, AbstractVector) && eltype(x) <: Number
+is_numeric_vector(x) = isa(x, AbstractVector) &&
+                       (eltype(x) <: Number || eltype(x) <: Union{Missing,Number})
 
 function average_amsr_passes(pass1, pass2)
     n = 0
     s = 0.0
-    if !isnan(pass1) & !ismissing(pass1)
+    if !ismissing(pass1) && !isnan(pass1)
         s += pass1
         n += 1
     end
-    if !isnan(pass2) & !ismissing(pass2)
+    if !ismissing(pass2) && !isnan(pass2)
         s += pass2
         n += 1
     end
@@ -84,12 +85,15 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
             oad(debug, "    setting up data")
             tmp = nc[field]
             oad(debug, "    size of nc[field]: $(size(tmp))")
-            if length(size(tmp)) == 2
-                data = copy((Float64.(replace(tmp, missing => NaN)))')
+            # Some sources say that coalesce() is better than replace().
+            if ndims(tmp) == 2
+                #data = copy((Float64.(replace(tmp, missing => NaN)))')
+                data = copy((Float64.(coalesce.(tmp, NaN)))')
             else
                 oad(debug, "    averaging ascending and descending passes")
                 tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
-                data = copy((Float64.(replace(tmp2, missing => NaN)))')
+                #data = copy((Float64.(replace(tmp2, missing => NaN)))')
+                data = copy((Float64.(coalesce.(tmp2, NaN)))')
             end
             rval = Amsr(metadata, data)
             oad(debug, "END read_amsr()")
@@ -351,8 +355,10 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     oad(debug, "subset_amsr BEGIN")
     2 == length(lonlims) || throw(ArgumentError("lonlims must be a tuple of length 2"))
     2 == length(latlims) || throw(ArgumentError("latlims must be a tuple of length 2"))
-    lonOK = lonlims[1] .<= a.metadata["longitude"] .<= lonlims[2]
-    latOK = latlims[1] .<= a.metadata["latitude"] .<= latlims[2]
+    lon = a.metadata["longitude"]
+    lat = a.metadata["latitude"]
+    lonOK = (lonlims[1] .<= lon) .& (lon .<= lonlims[2])
+    latOK = (latlims[1] .<= lat) .& (lat .<= latlims[2])
     metadata = copy(a.metadata)
     metadata["longitude"] = metadata["longitude"][lonOK]
     metadata["latitude"] = metadata["latitude"][latOK]
