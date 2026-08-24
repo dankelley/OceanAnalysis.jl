@@ -1,4 +1,4 @@
-using DataFrames
+using DataFrames, Interpolations
 using Dierckx: Spline1D
 using Statistics: mean
 
@@ -17,9 +17,11 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 
 # Keywords
 
-- `add_teos` a logical value indicating whether to add TEOS-10 items (e.g. `SA`) to the `data` portion of the return value.
+- `add_teos` a logical value indicating whether to add TEOS-10 items (e.g.
+  `SA`) to the `data` portion of the return value.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
 """
 function as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
@@ -158,10 +160,9 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     data = copy(x.data)
     metadata_names = keys(metadata)
     oad(debug, "  metadata_names: ", metadata_names)
-    data_names = names(data)
+    data_names = string.(names(data))
     oad(debug, "  data_names: ", data_names)
     required_cols = ("salinity", "temperature", "pressure")
-    data_names = string.(names(data))
     missing_cols = filter(c -> !(c in data_names), required_cols)
     isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
     required_metadata = ("longitude", "latitude")
@@ -351,6 +352,7 @@ sum((salinity_smoothed .- ctd["salinity"]).^2) / length(ctd["salinity"])
    https://doi.org/10.1016/0146-664X(82)90043-0.
 """
 function smooth_ctd_variable(ctd::Ctd; variable="salinity", bc="nearest", delta::Float64=0.001)
+    delta > 0.0 || error("delta must be positive, but it is $delta")
     data_names = names(ctd.data)
     "pressure" in data_names || error("ctd.data does not contain a \"pressure\" column")
     variable in data_names || error("ctd.data does not contain a \"$(variable)\" column")
