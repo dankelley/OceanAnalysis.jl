@@ -1,5 +1,20 @@
 # Changes
 
+Release notes:
+
+## Changelog from version 0.2.14 to version 0.2.15
+
+### Changed
+
+- none
+
+- BREAKING none
+
+### Added
+
+ 
+
+
 ## Changelog from version 0.2.13 to version 0.2.14
 
 Release notes:
@@ -8,7 +23,7 @@ Release notes:
 
 - `get_amsr()` and `plot_amsr()` now handle all 4 data types (`daily`, `3day`, `weekly` and `monthly`)
 
-- BREAKING
+- BREAKING none
 
 ### Added
 
