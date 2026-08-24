@@ -171,6 +171,8 @@ function get_topography(west::Real, east::Real,
                ", destdir='$destdir'" *
                ", server='$server') ... START"
     )
+    west < east || error("require west<east, but west=$west and east=$east")
+    south < north || error("require south<north, but south=$south and north=$north")
     if resolution < 0.5
         @warn "Snapping resolution from $resolution to 0.25"
         resolution = 0.25
