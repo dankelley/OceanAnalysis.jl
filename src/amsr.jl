@@ -1,5 +1,5 @@
 is_numeric_vector(x) = isa(x, AbstractVector) &&
-                       (eltype(x) <: Union{Missing,<:Real})
+                       (eltype(x) <: Union{Missing,Real})
 
 function average_amsr_passes(pass1, pass2)
     n = 0
@@ -12,7 +12,7 @@ function average_amsr_passes(pass1, pass2)
         s += float(pass2)
         n += 1
     end
-    return n == 0 ? NaN : s / n
+    return n == 0 ? missing : s / n
 end
 
 
@@ -89,10 +89,15 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
         oad(debug, "    size of nc[field]: $(size(tmp))")
         if ndims(tmp) == 2
             arr = permutedims(Float64.(coalesce.(tmp, NaN)))
-        else
+        elseif ndims(tmp) == 3
+            if size(tmp, 3) != 2
+                error("The third dimension of a \"daily\" file must be 2, but it is $(size(tmp,3))")
+            end
             oad(debug, "    averaging ascending and descending passes")
             tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
             arr = permutedims(Float64.(coalesce.(tmp2, NaN)))
+        else
+            error("Field $file must be either 2D nor 3D")
         end
         rval = Amsr(metadata, copy(arr))
         oad(debug, "END read_amsr()")
@@ -185,7 +190,6 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
         end
         # https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
         destfile = "RSS_AMSR2_ocean_L3_$(type)_$(year(date))-$(lpad(month(date), 2, '0'))-$(lpad(day(date), 2, '0'))_v08.2.nc"
-        url = @sprintf("%s/%s/%d/%s", server, type, year(date), destfile)
         url = "$(server)/$(type)/$(year(date))/$destfile"
     elseif type == "3day"
         if date == Dates.today()
@@ -211,7 +215,7 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
         if date == Dates.today()
             # The weekly data files are timestamped on Sundays
             days_to_prior_sunday = mod(Dates.dayofweek(date), 7)  # 0 if Sunday, 1..6 otherwise
-            date = date - Day(days_to_prior_sunday) - Dates.Week(2)
+            date = date - Dates.Day(days_to_prior_sunday) - Dates.Week(2)
         end
         destfile = @sprintf(
             "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
@@ -228,10 +232,8 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
         try
             Downloads.download(url, destpath)
         catch err
-            # remove possibly created empty file
-            isfile(destpath) && rm(destpath; force=true)
-            # translate HTTP or network errors into a clearer message
-            throw(ErrorException("Failed to download $url: $err"))
+            isfile(destpath) && rm(destpath; force=true) # clean up
+            error("Failed to download $url: $err")
         end
     else
         oad(debug, "    $destpath has already been downloaded")
@@ -354,7 +356,7 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     lat = a.metadata["latitude"]
     lonOK = (lonlims[1] .<= lon) .& (lon .<= lonlims[2])
     latOK = (latlims[1] .<= lat) .& (lat .<= latlims[2])
-    if count(lonOK) == 0 || count(latOK) == 0
+    if sum(lonOK) == 0 || sum(latOK) == 0
         throw(ArgumentError("No data exist between stated longitude/latitude limits"))
     end
     metadata = copy(a.metadata)
