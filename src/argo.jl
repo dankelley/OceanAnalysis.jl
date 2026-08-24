@@ -120,7 +120,7 @@ function summarize_argo_data_tests(filename::String)
                     end
                 elseif test == "QCF\$"
                     result_bits = collect(string(parse(Int, result, base=16), base=2))
-                    println("    Tests failed (based on HISTORY_QCTEST value 0x$result, intepreted as $(join(result_bits))):")
+                    println("    Tests failed (based on HISTORY_QCTEST value 0x$result, interpreted as $(join(result_bits))):")
                     i = 1
                     some_failed = false
                     for bit in result_bits[end-1:-1:1]
@@ -205,6 +205,7 @@ size(d.data) # (1014, 15)
 """
 function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
     oad(debug, "read_argo(<filename>; profile=$profile, debug=$debug) START")
+    profile > 0 || error("'profile' must be a positive integer")
     metadata = Dict()
     data = DataFrame()
     oad(debug, "  filename: $filename")
@@ -227,6 +228,7 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
             end
         end
         oad(debug, "  finished reading data, a DataFrame of size $(size(data))")
+        nrow(data) > 0 || error("no data found for profile $profile in file $filename")
         k = keys(d)
         metadata["name_changes"] = name_changes
         metadata["longitude"] = get_nc_value(d, "LONGITUDE")
@@ -379,11 +381,15 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
     file = expanduser(filename)
     oad(debug, "read_argo_index() START")
     if !isfile(file)
-        error("No file file named '$file'")
+        error("There is no file named \"$file\"")
     end
     oad(debug, "    filename: ", filename)
     # I tried specifying the type/format for :time, but that slowed the operation from 5.2s to 5.4s.
-    df = CSV.read(filename, DataFrame, header=header)
+    try
+        df = CSV.read(filename, DataFrame, header=header)
+    catch e
+        error("Failed to read Argo index file '$filename': $(e.msg)")
+    end
     norig = nrow(df)
     dropmissing!(df)
     nnew = nrow(df)
