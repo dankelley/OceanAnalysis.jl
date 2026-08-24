@@ -1,3 +1,9 @@
+"""
+    atm
+
+A Dict that explains Argo test meanings.  For context, see
+https://vocab.nerc.ac.uk/collection/R11/current/ (last consulted 2026-05-04.)
+"""
 const atm = Dict(
     1 => "Platform Identification test (ID=2)",
     2 => "Impossible Date test (ID=4)",
@@ -45,11 +51,13 @@ function argo_test_meaning(i::Integer)
 end
 
 """
-    character_vector_to_string(x)::String
+    character_vector_to_string(x::AbstractVector)::String
 
-Convert vector of characters into a string.
+Convert vector of characters into a string, removing blanks. This
+is not exported, since it is only used for Argo NetCDF data (to address
+issues with how some items are formated in such files).
 """
-function character_vector_to_string(x)::String
+function character_vector_to_string(x::AbstractVector)::String
     # Fast, non-mutating: join the non-missing pieces once, then strip spaces.
     # Works for Char, SubString, or small Strings in the NetCDF character arrays.
     s = isempty(x) ? "" : join(skipmissing(x))
@@ -58,17 +66,6 @@ function character_vector_to_string(x)::String
     end
     s = replace(s, " " => "")   # replace spaces once on the full string
     return strip(s)
-    #<old># New version is non-mutating
-    #<old>#OLD x[ismissing.(x)] .= ' '
-    #<old>#OLD replace(join(x), " " => "")
-    #<old>rval = String[]
-    #<old>for xx in x
-    #<old>    if ismissing(xx)
-    #<old>        continue
-    #<old>    end
-    #<old>    push!(rval, replace(string(xx), " " => ""))
-    #<old>end
-    #<old>return strip(join(rval))
 end
 
 """
@@ -345,7 +342,6 @@ function get_argo(filename::String=""; destdir::String=".", age::Real=30.0, serv
     file_original = filename
     oad(debug, "    filename: ", filename, " (original)")
     filename = replace(filename, r".*/" => "")
-    #<unused>file = joinpath(destdir, filename)
     oad(debug, "    filename: ", filename, " (after prefixing with destdir)")
     url = joinpath(server, "dac", file_original)
     oad(debug, "    url: ", url)
@@ -388,7 +384,7 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
     try
         df = CSV.read(filename, DataFrame, header=header)
     catch e
-        error("Failed to read Argo index file '$filename': $(e.msg)")
+        error("Failed to read Argo index file '$filename': $(string(e))")
     end
     norig = nrow(df)
     dropmissing!(df)
