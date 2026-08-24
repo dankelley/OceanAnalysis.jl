@@ -1,15 +1,15 @@
 is_numeric_vector(x) = isa(x, AbstractVector) &&
-                       (eltype(x) <: Number || eltype(x) <: Union{Missing,Number})
+                       (eltype(x) <: Union{Missing,<:Real})
 
 function average_amsr_passes(pass1, pass2)
     n = 0
     s = 0.0
-    if !ismissing(pass1) && !isnan(pass1)
-        s += pass1
+    if !ismissing(pass1) && isfinite(pass1)
+        s += float(pass1)
         n += 1
     end
-    if !ismissing(pass2) && !isnan(pass2)
-        s += pass2
+    if !ismissing(pass2) && isfinite(pass2)
+        s += float(pass2)
         n += 1
     end
     return n == 0 ? NaN : s / n
@@ -70,48 +70,36 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
     NCDataset(filename, "r") do nc
         oad(debug, "    about to read SST")
         if field == "?"
-            return keys(nc)
-        else
-            oad(debug, "    setting up metadata")
-            metadata = Dict()
-            metadata["filename"] = filename
-            metadata["longitude"] = copy(nc["lon"])
-            metadata["latitude"] = copy(nc["lat"])
-            metadata["field"] = field
-            for a in ("sensor", "processing_level", "time_coverage_start",
-                "time_coverage_end")
-                metadata[a] = nc.attrib[a]
-            end
-            oad(debug, "    setting up data")
-            tmp = nc[field]
-            oad(debug, "    size of nc[field]: $(size(tmp))")
-            # Some sources say that coalesce() is better than replace().
-            if ndims(tmp) == 2
-                #data = copy((Float64.(replace(tmp, missing => NaN)))')
-                data = copy((Float64.(coalesce.(tmp, NaN)))')
-            else
-                oad(debug, "    averaging ascending and descending passes")
-                tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
-                #data = copy((Float64.(replace(tmp2, missing => NaN)))')
-                data = copy((Float64.(coalesce.(tmp2, NaN)))')
-            end
-            rval = Amsr(metadata, data)
-            oad(debug, "END read_amsr()")
-            return rval
+            return sort(collect(keys(nc)))
         end
+        if !haskey(nc, field)
+            error("There is no field '$field' in file. The possibilities are $(sort(collect(keys(nc))))")
+        end
+        oad(debug, "    setting up metadata")
+        metadata = Dict()
+        metadata["filename"] = filename
+        metadata["longitude"] = vec(Array(nc["lon"][:]))
+        metadata["lattude"] = vec(Array(nc["lat"][:]))
+        metadata["field"] = field
+        for a in ("sensor", "processing_level", "time_coverage_start", "time_coverage_end")
+            metadata[a] = get(nc.attrib, a, missing)
+        end
+        oad(debug, "    setting up data")
+        tmp = Array(nc[field][:])
+        oad(debug, "    size of nc[field]: $(size(tmp))")
+        if ndims(tmp) == 2
+            arr = permutedims(Float64.(coalesce.(tmp, NaN)))
+        else
+            oad(debug, "    averaging ascending and descending passes")
+            tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
+            arr = permutedims(Float64.(coalesce.(tmp2, NaN)))
+        end
+        rval = Amsr(metadata, copy(arr))
+        oad(debug, "END read_amsr()")
+        return rval
     end
 end
 export read_amsr
-
-
-# """
-#     get_amsr(date::String)::String
-# 
-# """
-# function get_amsr(date::String; kwargs...)::String
-#     get_amsr(Date(date), kwargs...)
-# end
-# export get_amsr
 
 """
     get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
@@ -223,7 +211,8 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
         # https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
         if date == Dates.today()
             # The weekly data files are timestamped on Sundays
-            date = date - Day(Dates.dayofweek(date) + 1) - Dates.Week(2)
+            days_to_prior_sunday = mod(Dates.dayofweek(date), 7)  # 0 if Sunday, 1..6 otherwise
+            date = date - Day(days_to_prior_sunday) - Dates.Week(2)
         end
         destfile = @sprintf(
             "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
@@ -237,7 +226,14 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
     oad(debug, "    url: '$url'")
     if !isfile(destpath)
         oad(debug, "    downloading $url")
-        Downloads.download(url, destpath)
+        try
+            Downloads.download(url, destpath)
+        catch err
+            # remove possibly created empty file
+            isfile(destpath) && rm(destpath; force=true)
+            # translate HTTP or network errors into a clearer message
+            throw(ErrorException("Failed to download $url: $err"))
+        end
     else
         oad(debug, "    $destpath has already been downloaded")
     end
@@ -300,9 +296,9 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
     longitude = amsr.metadata["longitude"]
     latitude = amsr.metadata["latitude"]
     oad(debug, "  plotting a heatmap of ", amsr.metadata["field"])
+    aspect_ratio = 1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0)
     p = heatmap(longitude, latitude, amsr.data,
-        xlims=xlims, ylims=ylims,
-        aspect_ratio=1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0),
+        xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         levels=range(-5.0, 35.0, step=5.0), color=:turbo, clim=:auto,
         framestyle=:box, tickdirection=:out; kwargs...)
     oad(debug, "  adding a coastline")
@@ -322,7 +318,7 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
             contour!(p, longitude, latitude, amsr.data, levels=
                 range(-5.0, 35.0, step=5.0), color=:black,
                 linewidth=0.75)
-        elseif is_numeric_vector(draw_contours)
+        elseif isa(draw_contours, AbstractVector) && eltype(draw_contours) <: Real
             oad(debug, "  adding user-specified contours")
             contour!(p, longitude, latitude, amsr.data, levels=draw_contours, color=:black,
                 linewidth=0.75)
@@ -359,6 +355,9 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     lat = a.metadata["latitude"]
     lonOK = (lonlims[1] .<= lon) .& (lon .<= lonlims[2])
     latOK = (latlims[1] .<= lat) .& (lat .<= latlims[2])
+    if count(lonOK) == 0 || count(latOK) == 0
+        throw(ArgumentError("No data exist between stated longitude/latitude limits"))
+    end
     metadata = copy(a.metadata)
     metadata["longitude"] = metadata["longitude"][lonOK]
     metadata["latitude"] = metadata["latitude"][latOK]
