@@ -106,6 +106,7 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
 end
 export read_amsr
 
+
 """
     get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
         server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)::String
@@ -125,8 +126,8 @@ specify an appropriate date, and for that purpose it makes sense for the
 user to visit https://data.remss.com/amsr2/ocean/L3/v08.2 and then select
 the subdirectory with a name that suggests the desired `type`.
 
-See [`read_amsr`](@ref) for how to deal with the files downloaded
-by `get_amsr`.
+See [`read_amsr`](@ref), [`subset_amsr`](@ref) and [`plot_amsr`](@ref) for how
+to deal with the files downloaded by `get_amsr`.
 
 For code-maintenance reference, the following are sample URLs (valid as of 2026-08-23) for
 the four possible values of `type`:
