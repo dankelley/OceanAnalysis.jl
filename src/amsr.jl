@@ -84,8 +84,8 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
         for a in ("sensor", "processing_level", "time_coverage_start", "time_coverage_end")
             metadata[a] = get(nc.attrib, a, missing)
         end
-        oad(debug, "    setting up data")
-        tmp = Array(nc[field][:])
+        oad(debug, "    setting up data for field=\"$field\"")
+        tmp = nc[field]
         oad(debug, "    size of nc[field]: $(size(tmp))")
         if ndims(tmp) == 2
             arr = permutedims(Float64.(coalesce.(tmp, NaN)))
@@ -97,7 +97,7 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
             tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
             arr = permutedims(Float64.(coalesce.(tmp2, NaN)))
         else
-            error("Field $file must be either 2D nor 3D")
+            error("Field $field must be either 2-D nor 3-D, but it is $(ndims(tmp))-D")
         end
         rval = Amsr(metadata, copy(arr))
         oad(debug, "END read_amsr()")
@@ -213,9 +213,8 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
     elseif type == "weekly"
         # https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
         if date == Dates.today()
-            # The weekly data files are timestamped on Sundays
-            days_to_prior_sunday = mod(Dates.dayofweek(date), 7)  # 0 if Sunday, 1..6 otherwise
-            date = date - Dates.Day(days_to_prior_sunday) - Dates.Week(2)
+            date_offset = mod(Dates.dayofweek(date), 7) + 1 # go back to a Sunday
+            date = date - Dates.Day(date_offset) - Dates.Week(2)
         end
         destfile = @sprintf(
             "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
@@ -228,7 +227,7 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
     oad(debug, "    destpath: '$destpath'")
     oad(debug, "    url: '$url'")
     if !isfile(destpath)
-        oad(debug, "    downloading $url")
+        oad(debug, "    will try to download destpath from url")
         try
             Downloads.download(url, destpath)
         catch err
@@ -236,7 +235,7 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
             error("Failed to download $url: $err")
         end
     else
-        oad(debug, "    $destpath has already been downloaded")
+        oad(debug, "    $destpath not downloaded, since it already exists")
     end
     oad(debug, "END get_amsr()")
     destpath
