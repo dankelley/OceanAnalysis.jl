@@ -78,8 +78,8 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
         oad(debug, "    setting up metadata")
         metadata = Dict()
         metadata["filename"] = filename
-        metadata["longitude"] = vec(Array(nc["lon"][:]))
-        metadata["lattude"] = vec(Array(nc["lat"][:]))
+        metadata["longitude"] = Float64.(vec(nc["lon"][:]))
+        metadata["latitude"] = Float64.(vec(nc["lat"][:]))
         metadata["field"] = field
         for a in ("sensor", "processing_level", "time_coverage_start", "time_coverage_end")
             metadata[a] = get(nc.attrib, a, missing)
@@ -184,10 +184,9 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
             date = date - Dates.Day(3) # FIXME: will 3 days always work, at any time of day?
         end
         # https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
-        destfile = @sprintf(
-            "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
-            type, year(date), month(date), day(date))
+        destfile = "RSS_AMSR2_ocean_L3_$(type)_$(year(date))-$(lpad(month(date), 2, '0'))-$(lpad(day(date), 2, '0'))_v08.2.nc"
         url = @sprintf("%s/%s/%d/%s", server, type, year(date), destfile)
+        url = "$(server)/$(type)/$(year(date))/$destfile"
     elseif type == "3day"
         if date == Dates.today()
             date = date - Dates.Day(4) # FIXME: will 4 days always work, at any time of day?
@@ -260,7 +259,7 @@ argument of the [`get_amsr`](@ref) function), the ascending and descending swath
 - `xlims`: a tuple giving the range of longitude to be shown.  This is based on
   the 0 to 360 notation, since that is how AMSR data are stored.
 
-- `ylims`: a tuple giving the range of latitude to be shown. THis is based on
+- `ylims`: a tuple giving the range of latitude to be shown. This is based on
   the -90 to 90 notation.
 
 - `draw_contours`: either symbol a numeric vector that controls contours that
