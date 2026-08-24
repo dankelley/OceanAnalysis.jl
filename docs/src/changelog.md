@@ -6,8 +6,7 @@ Release notes:
 
 ### Changed
 
-- `get_amsr()` handles all 4 data types (`daily`, `3day`, `weekly` and `monthly`)
-- `plot_amsr()` handles all 4 data types
+- `get_amsr()` and `plot_amsr()` now handle all 4 data types (`daily`, `3day`, `weekly` and `monthly`)
 
 - BREAKING
 
