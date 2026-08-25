@@ -27,6 +27,8 @@ grid and `data` holding a matrix of the data element with the indicated `name`.
 Using `name="?"` sidesteps this process, instead returning a vector of strings
 that may be given as `name` values.
 
+For examples, see the documentation for [`plot_amsr`](@ref).
+
 # Arguments
 
 - `filename`: a string indicating the location of the local file.
@@ -41,28 +43,6 @@ that may be given as `name` values.
 - `debug`: An indication of whether to print information during processing. The
   default value of 0 means to work quietly, and any larger integer indicates to
   print some information.
-
-
-# Examples
-
-```julia
-# North Atlantic view, using turbo colour scheme
-using OceanAnalysis, Plots
-f = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc";
-d = read_amsr(f, "SST");
-longitude = d.metadata["longitude"];
-latitude = d.metadata["latitude"];
-SST = d.data;
-heatmap(longitude, latitude, SST, framestyle=:box,
-    xlims=(290, 360), ylims=(20, 60),
-    aspect_ratio=1/cos(pi*40/180),
-    color=:turbo, size=(800, 550), dpi=300,
-    title=f * ": SST", titlefontsize=9)
-cl = coastline(:global_fine);
-plot!(cl.data.longitude .+ 360, cl.data.latitude,
-    seriestype=:shape, color=:bisque3, linewidth=0.8,
-    legend=false)
-```
 """
 function read_amsr(filename::String, field::String="SST"; debug=0)
     filename = expanduser(filename)
@@ -109,22 +89,25 @@ export read_amsr
 
 """
     get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
-        server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)::String
+        server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)
 
-Download a Advanced Microwave Scanning Radiometer data file.
+Download (or use an existing) file containing Advanced Microwave Scanning
+Radiometer data file.
 
-This works by constructing a filename to be downloaded. If that file does not
-exist in `destdir`, then it is downloaded from the server, and `get_amsr`
-returns the full path to that existing file. Otherwise, the file is downloaded,
-and the return value is the path to the resultant local file.
+This function works by constructing a filename to be downloaded,
+based on the specified time and data type. If such a file
+already exists in `destdir`, then it is not downloaded again,
+on the assumption that files on the remote server are not changed
+over time.
 
-If the date is not specified, it defaults to today's date.  To avoid errors of the
-server not yet having data for that time, `get_amsr` shifts the time backwards,
-depending on `type`, in an attempt to get the most recent data.  If these
-shifts are insufficient, an error will be reported. The solution is to
-specify an appropriate date, and for that purpose it makes sense for the
-user to visit https://data.remss.com/amsr2/ocean/L3/v08.2 and then select
-the subdirectory with a name that suggests the desired `type`.
+If `date` is not specified, it defaults to today's date.  To avoid errors of
+the server not yet having data for that time, `get_amsr` shifts the time
+backwards, depending on `type`, in an attempt to get the most recent data.
+If these shifts are insufficient, an error will be reported. The solution
+is to specify an appropriate date, and for that purpose it makes sense for
+the user to visit https://data.remss.com/amsr2/ocean/L3/v08.2 and
+then select the subdirectory with a name that suggests the desired
+`type`.
 
 See [`read_amsr`](@ref), [`subset_amsr`](@ref) and [`plot_amsr`](@ref) for how
 to deal with the files downloaded by `get_amsr`.
@@ -138,9 +121,10 @@ the four possible values of `type`:
 
 # Arguments
 
-- `date` a Date object specifying the requested measurement time. The default
-  value is today's date (see above for how that will be shifted to the past,
-  depending on `type`.)
+- `date` a Date object specifying a day for which data are sought. The
+  default value is today's date. Note that the day gets shifted earlier,
+  depending on the value of `type`, as e.g. monthly data only become
+  available after the month is finished.
 
 # Keywords
 
@@ -270,6 +254,10 @@ argument of the [`get_amsr`](@ref) function), the ascending and descending swath
   increments. And, finally, if it is a vector of numeric elements, then contours
   are drawn (unlabelled) at those values.
 
+- `fontsize` size of fonts to be supplied to [heatmap] as `tickfontsize`,
+  `guidefontsize` and `titlefontsize`. Note that any of these values may also be
+  supplied as named arguments within `kwargs...`.
+
 - `debug`: An integer controlling whether to print information during
   processing. The default is to work silently; use any positive value to get some
   printing.
@@ -282,14 +270,21 @@ argument of the [`get_amsr`](@ref) function), the ascending and descending swath
 # Examples
 
 ```julia
-using OceanAnalysis
-file = "~/data/amsr/RSS_AMSR2_ocean_L3_3day_2025-09-07_v08.2.nc"
-amsr = read_amsr(file, "SST");
-plot_amsr(amsr, xlims=(300,360), ylims=(40,60))
+using OceanAnalysis, Plots
+file = get_amsr()
+amsr_sst = read_amsr(file, "SST");
+p_sst = plot_amsr(amsr_sst,
+    xlims=(260,360), ylims=(20,60),
+    title="Sea-surface Temperature [°C]")
+amsr_wind = read_amsr(file, "wind_speed_MF");
+p_wind = plot_amsr(amsr_wind, color=:inferno, clim=(0,16),
+    xlims=(260,360), ylims=(20,60),
+    title="Wind Speed [m/s]")
+plot(p_sst, p_wind, layout=(2,1))
 ```
 """
 function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
-    draw_contours=:none, debug::Integer=0, kwargs...)
+    draw_contours=:none, fontsize=8, debug::Integer=0, kwargs...)
     2 == length(xlims) || throw(ArgumentError("xlims must be of length 2"))
     2 == length(ylims) || throw(ArgumentError("ylims must be of length 2"))
     oad(debug, "plot_amsr() START")
@@ -301,6 +296,7 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
     p = heatmap(longitude, latitude, amsr.data,
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         levels=range(-5.0, 35.0, step=5.0), color=:turbo, clim=:auto,
+        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
         framestyle=:box, tickdirection=:out; kwargs...)
     oad(debug, "  adding a coastline")
     cl = coastline(:global_fine)
