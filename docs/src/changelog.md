@@ -6,7 +6,8 @@ Release notes:
 
 ### Changed
 
-- none
+- `plot_amsr()` gains `fontsize` argument
+- `summarize()` detects erroneous _qc values (i.e. neither Char nor Integer)
 
 - BREAKING none
 

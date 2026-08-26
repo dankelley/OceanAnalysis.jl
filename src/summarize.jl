@@ -45,10 +45,13 @@ export six_num
 function summarize_data(x)
     if x.data isa DataFrame
         data_names = names(x.data)
+        # Handle time (if it is a DateTime) separately, because cannot do mean(DateTime)
         if "time" in data_names
-            println(@sprintf "\nTime: interval %s to %s, mean step %.1f s, median step %.1f s" minimum(x.data.time) maximum(x.data.time) mean(diff(datetime2unix.(x.data.time))) median(diff(datetime2unix.(x.data.time))))
-            filter!(name -> name != "time", data_names)
-            println("\nData summary (skipping the time data):")
+            val = x.data.time
+            if eltype(val) <: Union{Missing,DateTime} || eltype(val) <: DateTime
+                println(@sprintf "\nTime ranges from %s to %s with mean step %.1f s and median step %.1f s" minimum(val) maximum(val) mean(diff(datetime2unix.(val))) median(diff(datetime2unix.(val))))
+                println("\nData summary (skipping the time data):")
+            end
         else
             println("\nData summary:")
         end
@@ -56,8 +59,11 @@ function summarize_data(x)
             "min" => Float64[], "mean" => Float64[], "max" => Float64[],
             "number" => Int64[], "number_missing" => Int64[], "number_NaN" => Int64[])
         for name in data_names[.!occursin.(r"_qc$", data_names)]
-            sn = six_num(x[name], name)
-            push!(df, six_num(x[name], name))
+            val = x[name]
+            # Skip DateTime columns (need Union because there are often some missing values)
+            if !(eltype(val) <: Union{Missing,DateTime}) && !(eltype(val) <: DateTime)
+                push!(df, six_num(val, name))
+            end
         end
         indent = "  "
         println(indent, replace(string(df), "\n" => "\n" * indent))
@@ -66,17 +72,27 @@ function summarize_data(x)
         if length(QC_names) > 0
             println("\nQuality-Control Flags:")
             for name in QC_names
-                local tmp = StatsBase.countmap(x[name])
+                # Insist that *_qc items have Integer or Char values, because
+                # I encountered a glider file (sbloom2003) that had
+                # depth_qc==depth and similar errors for longitude_qc
+                # and latitude_qc, spewing 6M lines of output here.
+                val = x[name]
+                et = eltype(val)
                 print(@sprintf "  %-25s " name * ":")
-                local i = length(keys(tmp))
-                for key in keys(tmp)
-                    print("\"$key\" $(tmp[key])")
-                    i = i - 1
-                    if i >= 1
-                        print(", ")
+                if et <: Union{Missing,Integer} || et <: Integer || et <: Union{Missing,Char} || et <: Char
+                    local tmp = StatsBase.countmap(val)
+                    local i = length(keys(tmp))
+                    for key in keys(tmp)
+                        print("\"$key\" $(tmp[key])")
+                        i = i - 1
+                        if i >= 1
+                            print(", ")
+                        end
                     end
+                    print("\n")
+                else
+                    print("misconfigured (values neither Integer nor Char)\n")
                 end
-                print("\n")
             end
         end
     elseif x.data isa Matrix
@@ -103,7 +119,7 @@ function summarize(x::OA)
     t = typeof(x)
     println("$t Summary")
     println(repeat("-", length(repr(t))) * "--------\n")
-    println("Metadata: a Dict() with entries: ", collect(sort(keys(x.metadata))))
+    println("Metadata: a Dict() with entries: ", sort(collect(keys(x.metadata))))
     summarize_data(x)
 end
 export summarize
