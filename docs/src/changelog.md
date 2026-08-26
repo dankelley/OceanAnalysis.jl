@@ -2,6 +2,19 @@
 
 Release notes:
 
+## Changelog from version 0.2.15 to version 0.2.16
+
+### Changed
+
+- none
+
+- BREAKING none
+
+### Added
+
+- none
+
+
 ## Changelog from version 0.2.14 to version 0.2.15
 
 ### Changed
