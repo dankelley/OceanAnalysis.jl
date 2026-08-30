@@ -12,7 +12,8 @@ Release notes:
 
 ### Added
 
-- none
+- `magnetic_field()`
+
 
 
 ## Changelog from version 0.2.14 to version 0.2.15

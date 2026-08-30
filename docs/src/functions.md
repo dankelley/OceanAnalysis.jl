@@ -46,6 +46,7 @@ OceanAnalysis.interpolate_barnes
 OceanAnalysis.interpolate_topography
 OceanAnalysis.interpolate_to_time
 OceanAnalysis.label_from_varname
+OceanAnalysis.magnetic_field
 OceanAnalysis.MLD_CF
 OceanAnalysis.MLD_CF_detailed
 OceanAnalysis.MLD_KRH
