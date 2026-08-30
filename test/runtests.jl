@@ -99,6 +99,10 @@ end
     include("interpolate_barnes.jl")
 end
 
+@testset "magnetic_field oce/R" begin
+    include("magnetic_field.jl")
+end
+
 @testset "six_num" begin
     a = [1.0, 2.0, 3.0, 4.0]
     asn = six_num(a, "a")
@@ -107,5 +111,4 @@ end
     bsn = six_num(b, "b")
     @test bsn == (name="b", min=1.0, mean=2.5, max=4.0, number=6, number_missing=1, number_NaN=1)
 end
-
 

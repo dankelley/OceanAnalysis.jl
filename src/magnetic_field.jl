@@ -519,19 +519,32 @@ const GH = Float64[
     magnetic_field(time::Real, longitude::Real, latitude::Real, altitude::Real;
         isv::Integer=0, itype::Integer=1, version="igrf14syn")
 
-Compute the earth magnetic field at a given time and location. This is based on
-Julia translation of oce's `igrf14syn` Fortran routine (14-th generation IGRF
-synthesis, as agreed by IAGA Working Group V-MOD in December 2024). The
+Compute the earth magnetic field at a given time and location. The
 application range extends from year 1900 to 2035, with dates outside this range
-resulting in `inclination` and `declination` being 0.0, and intensity
-being `1.0e3`.  The results are only considered to be definitive from year
+resulting in `inclination` and `declination` being set to 0.0, and intensity
+being set to `1.0e8`.  The results are only considered to be definitive from year
 1945 to 2020 (inclusive).
 
-The core was translated using Claude from the Fortran (`R/igrf14.f` in oce),
-preserving variable names and control flow. The coefficients are stored
-in a single long vector, as opposed to the scheme used in `igrf14.f`.
-Once the core was working, the input parameters and the return value
-were changed to be more similar to the `magneticField` function in oce.
+At its core, function uses a translation by Claude of the Fortran source file
+(`R/igrf14.f` in oce), although the input arguments and return value were
+adjusted to be closer to the oce function named `magneticField`.
+(Permission to use that Fortran code in the oce package was granted by
+the respective authors.) The following quotes from the original
+Fortran source summarize the methodology employed and names
+some of the authors of that Fortran code.
+
+1. "This is a synthesis routine for the 14th generation IGRF as agreed in
+   December 2024 by IAGA Working Group V-MOD."
+
+2. "Adapted from 8th generation version to include new maximum degree for
+   main-field models for 2000.0 and onwards and use WGS84 spheroid instead of
+   International Astronomical Union 1966 spheroid as recommended by IAGA in
+   July 2003. Reference radius remains as 6371.2 km - it is NOT the mean
+   radius (= 6371.0 km) but 6371.2 km is what is used in determining the
+   coefficients. Adaptation by Susan Macmillan, August 2003 (for 9th
+   generation), December 2004, December 2009 & December 2014; by
+   William Brown, December 2019, February 2020. Updated by Ciaran
+   Beggan, November 2024."
 
 # Arguments
 
@@ -567,7 +580,7 @@ time = 2026.0
 longitude = -63.0
 latitude = 45.0
 altitude = 0.0
-inclination, declination, intensity = magnetic_field(time, longitude, latitude, altitude)
+declination, inclination, intensity = magnetic_field(time, longitude, latitude, altitude)
 # EXPECT, from oce:
 #  magneticField(time=2026.0, longitude=-63.0, latitude=45.0)
 #     declination -16.32922, inclination 66.44525, intensity 51110.98
