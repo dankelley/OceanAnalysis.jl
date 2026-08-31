@@ -519,11 +519,12 @@ const GH = Float64[
     magnetic_field(time::Real, longitude::Real, latitude::Real, altitude::Real;
         isv::Integer=0, itype::Integer=1, version="igrf14syn")
 
-Compute the earth magnetic field at a given time and location. The
-application range extends from year 1900 to 2035, with dates outside this range
-resulting in `inclination` and `declination` being set to 0.0, and intensity
-being set to `1.0e8`.  The results are only considered to be definitive from year
-1945 to 2020 (inclusive).
+Compute the earth magnetic field according to the International Geomagnetic
+Reference Field (IGRF) at a given time and location (see References 1 and 2).
+The application range extends from year 1900 to 2035, with dates outside this
+range resulting in `inclination` and `declination` being set to 0.0, and
+intensity being set to `1.0e8`.  The results are only considered to be
+definitive from year 1945 to 2020 (inclusive).
 
 At its core, function uses a translation by Claude of the Fortran source file
 (`R/igrf14.f` in oce), although the input arguments and return value were
@@ -574,6 +575,17 @@ nanoTesla). If `time` is less than 1900 or greater than 2035, then a warning is
 issued, with `declination` and `inclination` being set to `0.0` and with
 `intensity` being set to `1.0e8`.
 
+# References
+
+1. The International Geomatic Reference Field (IGRF) is provided by an
+   International Association of Geomagnetism and Aeronomy IAGA working group;
+   see e.g. https://iaga-aiga.org/data-products-services/
+
+2. The oce package in the R package provides this, along with two earlier
+   versions of the formulae, via its `magneticField` function. In
+   a spot test, the predictions of the two models agreed to 7 digits.
+
+
 # Examples
 ```julia
 using OceanAnalysis, Dates
@@ -581,10 +593,7 @@ time = 2026.0
 longitude = -63.0
 latitude = 45.0
 altitude = 0.0
-declination, inclination, intensity = magnetic_field(time, longitude, latitude, altitude)
-# EXPECT, from oce:
-#  magneticField(time=2026.0, longitude=-63.0, latitude=45.0)
-#     declination -16.32922, inclination 66.44525, intensity 51110.98
+magnetic_field(time, longitude, latitude, altitude)
 "
 ```
 """
