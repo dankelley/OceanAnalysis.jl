@@ -568,10 +568,11 @@ The defaults are likely preferable for most applications,
 
 # Returns
 
-A tuple containing `declination` (angle in degrees from North), `inclination`
-(angle in degrees above the horizon) and `intensity)` (in nanoTesla). If `time`
-is less than 1900 or greater than 2035, then a warning is issued, with the
-angles being set to `0.0` and `intensity` being set to `1.0e8`.
+A NamedTuple containing `declination` (angle in degrees from North),
+`inclination` (angle in degrees above the horizon) and `intensity)` (in
+nanoTesla). If `time` is less than 1900 or greater than 2035, then a warning is
+issued, with `declination` and `inclination` being set to `0.0` and with
+`intensity` being set to `1.0e8`.
 
 # Examples
 ```julia
@@ -749,7 +750,7 @@ function magnetic_field(time::Real, longitude::Real, latitude::Real, altitude::R
     # final conversion to variables used in R/oce
     declination = rad2deg(atan(y, x))
     inclination = rad2deg(atan(z, sqrt(x^2 + y^2)))
-    return (declination, inclination, intensity)
+    return (declination=declination, inclination=inclination, intensity=intensity)
 end
 export magnetic_field
 

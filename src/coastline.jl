@@ -1,18 +1,40 @@
 """
     coastline(symbol::Symbol=:world_fine)
+    coastline(filename::String, header::Integer=0)
+    coastline(longitude::Union{AbstractVector,AbstractRange}, latitude::Union{AbstractVector,AbstractRange})
 
-Access a built-in [`Coastline`](@ref) dataset. The only valid choices for `name` are
-`:global_coarse` and `:global_fine`.  These are handled by reading the built-in
-datasets `data/coastline_coarse.csv.gz` and datasets
-`data/coastline_fine.csv.gz`, respectively.
+Specify a coastline, in one of three possible ways.
+
+In the first method, use a built-in [`Coastline`](@ref) dataset (in the first form) or read a
+CSV file holding coastline `longitude` and `latitude` columns. In the first case,
+the only valid choices for `name` are `:global_coarse` and `:global_fine`.
+These are handled by reading the built-in datasets
+`data/coastline_coarse.csv.gz` and datasets `data/coastline_fine.csv.gz`,
+respectively.
+
+In the second method provide `filename` and `header` to `CSV.read()`. This
+file must contain columns name `longitude` and `latitude`, and must use
+NaN values to indicate breaks in the coastline.
+
+And, in the third method, the arguments specify `longitude` and `latitude`
+directly, again with NaN values to indicate breaks in the coastline.
 
 # Examples
 
 ```julia
-# Nova Scotia
 using OceanAnalysis, Plots
+# Method 1
 cl = coastline(:global_fine);
 plot_coastline(cl, xlims=(-68, -58), ylims=(43, 48))
+# Method 2
+dir = dirname(dirname(pathof(OceanAnalysis)))
+file = joinpath(dir, "data", "coastline_coarse.csv.gz")
+cl = coastline(file, 1)
+# Method 3
+dir = dirname(dirname(pathof(OceanAnalysis)));
+file = joinpath(dir, "data", "coastline_fine.csv.gz");
+data = CSV.read(file, DataFrame, header=1);
+cl = coastline(data.longitude, data.latitude);
 ```
 """
 function coastline(name::Symbol=:global_fine)
@@ -31,30 +53,30 @@ function coastline(name::Symbol=:global_fine)
 end
 export coastline
 
-"""
-    coastline(filename::String, header::Integer=0)
-
-Create a [`Coastline`](@ref) object from a CSV file.
-
-The file must have columns named `longitude` and `latitude`, with NaN values
-indicating breaks separating islands, etc.
-
-The work is done by passing `filename` and `header` to `CSV.read()`. The file
-must have 1 or more header lines, the last of which must contain column names
-`longitude` and `latitude`. NaN values will be taken to indicate breaks between
-segments that trace continents, nations, etc.
-
-# Examples
-
-```julia
-# World view
-using OceanAnalysis, Plots
-dir = dirname(dirname(pathof(OceanAnalysis)))
-file = joinpath(dir, "data", "coastline_coarse.csv.gz")
-cl = coastline(file, 1)
-plot_coastline(cl)
-```
-"""
+#<DELETE> """
+#<DELETE>     coastline(filename::String, header::Integer=0)
+#<DELETE> 
+#<DELETE> Create a [`Coastline`](@ref) object from a CSV file.
+#<DELETE> 
+#<DELETE> The file must have columns named `longitude` and `latitude`, with NaN values
+#<DELETE> indicating breaks separating islands, etc.
+#<DELETE> 
+#<DELETE> The work is done by passing `filename` and `header` to `CSV.read()`. The file
+#<DELETE> must have 1 or more header lines, the last of which must contain column names
+#<DELETE> `longitude` and `latitude`. NaN values will be taken to indicate breaks between
+#<DELETE> segments that trace continents, nations, etc.
+#<DELETE> 
+#<DELETE> # Examples
+#<DELETE> 
+#<DELETE> ```julia
+#<DELETE> # World view
+#<DELETE> using OceanAnalysis, Plots
+#<DELETE> dir = dirname(dirname(pathof(OceanAnalysis)))
+#<DELETE> file = joinpath(dir, "data", "coastline_coarse.csv.gz")
+#<DELETE> cl = coastline(file, 1)
+#<DELETE> plot_coastline(cl)
+#<DELETE> ```
+#<DELETE> """
 function coastline(filename::String, header::Integer=1)
     isfile(filename) || throw(ArgumentError("there is no file named $filename"))
     header > 0 || throw(ArgumentError("header must be a non-negative integer, but it is $header"))
@@ -68,26 +90,26 @@ function coastline(filename::String, header::Integer=1)
 end
 export coastline
 
-"""
-    coastline(longitude::Union{AbstractVector,AbstractRange},
-        latitude::Union{AbstractVector,AbstractRange})
-
-Create a [`Coastline`](@ref) object from longitude and latitude values.
-
-Use NaN values for both `longitude` and `latitude` to indicate breaks in the
-coastline from continent to continent, nation to nation, etc.
-
-# Examples
-```julia
-# Nova Scotia
-using OceanAnalysis, CSV, Plots, DataFrames
-dir = dirname(dirname(pathof(OceanAnalysis)));
-file = joinpath(dir, "data", "coastline_fine.csv.gz");
-data = CSV.read(file, DataFrame, header=1);
-cl = coastline(data.longitude, data.latitude);
-plot_coastline(cl, xlims=(-68, -58), ylims=(43, 48))
-```
-"""
+#<DELETE> """
+#<DELETE>     coastline(longitude::Union{AbstractVector,AbstractRange},
+#<DELETE>         latitude::Union{AbstractVector,AbstractRange})
+#<DELETE> 
+#<DELETE> Create a [`Coastline`](@ref) object from longitude and latitude values.
+#<DELETE> 
+#<DELETE> Use NaN values for both `longitude` and `latitude` to indicate breaks in the
+#<DELETE> coastline from continent to continent, nation to nation, etc.
+#<DELETE> 
+#<DELETE> # Examples
+#<DELETE> ```julia
+#<DELETE> # Nova Scotia
+#<DELETE> using OceanAnalysis, CSV, Plots, DataFrames
+#<DELETE> dir = dirname(dirname(pathof(OceanAnalysis)));
+#<DELETE> file = joinpath(dir, "data", "coastline_fine.csv.gz");
+#<DELETE> data = CSV.read(file, DataFrame, header=1);
+#<DELETE> cl = coastline(data.longitude, data.latitude);
+#<DELETE> plot_coastline(cl, xlims=(-68, -58), ylims=(43, 48))
+#<DELETE> ```
+#<DELETE> """
 function coastline(longitude::Union{AbstractVector,AbstractRange},
     latitude::Union{AbstractVector,AbstractRange})
     metadata = Dict()
@@ -111,9 +133,16 @@ The `aspect_ratio` of the plot is set as the reciprocal of the mean of the
 
 # Keywords
 
-- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+- `fontsize` size of fonts used in the plot. This will be used for the `plot()`
+  arguments `tickfontsize`, `guidefontsize` and `titlefontsize`; to alter any
+  of these, specify them within `kwargs...`.
 
-- `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `fillcolor` (*not* `color`) for the land colour, etc.
+- `debug` an integer indicating whether to print information during processing.
+  The default value of 0 means to work quietly, and any larger integer indicates
+  to print some information.
+
+- `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to
+  control the plot view, `fillcolor` (*not* `color`) for the land colour, etc.
 
 # Examples
 ```julia
@@ -124,7 +153,7 @@ plot_coastline(coastline())
 plot_coastline(coastline(); fillcolor=:gray85, xlim=(-70.0, -55.0), ylim=(43.0, 48.0))
 ```
 """
-function plot_coastline(coastline::Coastline; debug::Integer=0, kwargs...)
+function plot_coastline(coastline::Coastline; fontsize::Real=8.0, debug::Integer=0, kwargs...)
     oad(debug, "plot_coastline() START")
     longitude = coastline["longitude"]
     latitude = coastline["latitude"]
@@ -142,6 +171,7 @@ function plot_coastline(coastline::Coastline; debug::Integer=0, kwargs...)
         aspect_ratio=aspect_ratio, legend=false, seriestype=:shape,
         fillcolor=:bisque3, linecolor=:black, linewidth=0.5,
         framestyle=:box, tickdirection=:out,
+        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
         kwargs...)
     oad(debug, "END plot_coastline()")
     rval
