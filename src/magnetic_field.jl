@@ -594,7 +594,6 @@ longitude = -63.0
 latitude = 45.0
 altitude = 0.0
 magnetic_field(time, longitude, latitude, altitude)
-"
 ```
 """
 function magnetic_field(time::Real, longitude::Real, latitude::Real, altitude::Real;
