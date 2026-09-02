@@ -1,5 +1,18 @@
 Release notes:
 
+# Changelog from version 0.2.17 to version 0.2.18
+
+## Changed
+
+- none
+
+- BREAKING none
+
+## Added
+
+- none
+
+
 # Changelog from version 0.2.16 to version 0.2.17
 
 ## Changed
