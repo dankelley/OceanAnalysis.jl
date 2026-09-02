@@ -10,7 +10,7 @@ Release notes:
 
 ## Added
 
-- none
+- `prune_glider_profiles()`
 
 
 

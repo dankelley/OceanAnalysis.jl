@@ -72,6 +72,7 @@ OceanAnalysis.plot_topography
 OceanAnalysis.pressure_from_depth
 OceanAnalysis.pressure_from_z
 OceanAnalysis.pretty
+OceanAnalysis.prune_glider_profiles
 OceanAnalysis.read_adp_rdi
 OceanAnalysis.read_amsr
 OceanAnalysis.read_argo

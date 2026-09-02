@@ -184,3 +184,36 @@ function read_glider(file::String; interpolate_locations::Bool=true, skip_qc::Bo
 end
 export read_glider
 
+
+"""
+    prune_glider_profiles(g::Glider, top::Real=25.0, bottom::Real=50.0)
+
+Prune "bad" profiles from a glider object. This requires profiles
+to be identified by a column named `:profile`, and pressure to
+be in a column named `:pressure`.
+
+It works by using `groupby` to chop `g.data` up into profiles
+and then discarding any profiles that lack data above a pressure
+of `top` or lack data below a pressure of `bottom`.
+
+This is fairly fast, e.g. 1/4 second for a 139Mb file.
+
+# Return
+
+This returns a `DataFrame` with the same `.metadata` as `g`,
+but with `.data` pruned to the "good" profiles.
+"""
+function prune_glider_profiles(g::Glider, top::Real=25.0, bottom::Real=50.0)
+    gf = g.data
+    dfg = groupby(gf, :profile)
+    ndfg = length(dfg)
+    ok = Vector{Bool}(undef, ndfg)
+    for i in 1:ndfg
+        tmp = skipmissing(dfg[i].depth)
+        ok[i] = (minimum(tmp) .<= top) .& (maximum(tmp) .>= bottom)
+    end
+    dfg_ok = dfg[ok]
+    return Glider(g.metadata, vcat(dfg_ok...))
+end
+export prune_glider_profiles
+
