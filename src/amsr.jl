@@ -230,7 +230,8 @@ export get_amsr
 
 """
     plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
-        draw_contours=:none, debug::Integer=0, kwargs...)
+        draw_coastline=true, draw_contours=:none,
+        fontsize=8, debug::Integer=0, kwargs...)
  
 Plot a heatmap of a field in an [`Amsr`](@ref) object.  By default, SST is shown using the `:turbo`
 colorscheme, and the view is of the whole earth. For "daily" datasets (see the `type`
@@ -247,6 +248,12 @@ argument of the [`get_amsr`](@ref) function), the ascending and descending swath
 
 - `ylims`: a tuple giving the range of latitude to be shown. This is based on
   the -90 to 90 notation.
+
+- `draw_coastline`: a Bool indicating whether to draw the coastline.
+  If you want to contour something (e.g. depth) on top of the
+  image, you must set `draw_coastline=false`, do your drawing
+  after that, and finally use [`draw_coastline`](@ref).
+  This is owing to an issue with the gr/GMT system.
 
 - `draw_contours`: either symbol a numeric vector that controls contours that
   may be added to the heatmap.  If this is `:none` (which is the default), then
@@ -284,7 +291,8 @@ plot(p_sst, p_wind, layout=(2,1))
 ```
 """
 function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
-    draw_contours=:none, fontsize=8, debug::Integer=0, kwargs...)
+    draw_coastline=true, draw_contours=:none,
+    fontsize=8, debug::Integer=0, kwargs...)
     2 == length(xlims) || throw(ArgumentError("xlims must be of length 2"))
     2 == length(ylims) || throw(ArgumentError("ylims must be of length 2"))
     oad(debug, "plot_amsr() START")
@@ -293,20 +301,25 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
     latitude = amsr.metadata["latitude"]
     oad(debug, "  plotting a heatmap of ", amsr.metadata["field"])
     aspect_ratio = 1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0)
-    p = heatmap(longitude, latitude, amsr.data,
+    rval = heatmap(longitude, latitude, amsr.data,
         xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
         levels=range(-5.0, 35.0, step=5.0), color=:turbo, clim=:auto,
         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
         framestyle=:box, tickdirection=:out; kwargs...)
-    oad(debug, "  adding a coastline")
-    cl = coastline(:global_fine)
-    plot!(p, cl.data.longitude, cl.data.latitude,
-        seriestype=:shape, color=:bisque3, linewidth=0.5,
-        legend=false)
-    if any(xlims .> 180.0)
-        plot!(p, cl.data.longitude .+ 360, cl.data.latitude,
+    # Possibly draw the land
+    if draw_coastline
+        oad(debug, "  drawing the land and coastline")
+        cl = coastline(:global_fine)
+        plot!(p, cl.data.longitude, cl.data.latitude,
             seriestype=:shape, color=:bisque3, linewidth=0.5,
             legend=false)
+        if any(xlims .> 180.0)
+            plot!(p, cl.data.longitude .+ 360, cl.data.latitude,
+                seriestype=:shape, color=:bisque3, linewidth=0.5,
+                legend=false)
+        end
+    else
+        oad(debug, "  not drawing the land or coastline")
     end
     # Possibly draw contours
     if draw_contours != :none
@@ -324,7 +337,7 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
         end
     end
     oad(debug, "END plot_amsr()")
-    p
+    return rval
 end
 export plot_amsr
 
