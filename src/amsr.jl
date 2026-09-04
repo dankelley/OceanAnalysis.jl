@@ -252,8 +252,9 @@ argument of the [`get_amsr`](@ref) function), the ascending and descending swath
 - `draw_coastline`: a Bool indicating whether to draw the coastline.
   If you want to contour something (e.g. depth) on top of the
   image, you must set `draw_coastline=false`, do your drawing
-  after that, and finally use [`draw_coastline`](@ref).
-  This is owing to an issue with the gr/GMT system.
+  after that, and finally use [`plot_coastline!`](@ref)
+  to add the coastline. This may solve a long-standing issue
+  with the gr plotting backend.
 
 - `draw_contours`: either symbol a numeric vector that controls contours that
   may be added to the heatmap.  If this is `:none` (which is the default), then
