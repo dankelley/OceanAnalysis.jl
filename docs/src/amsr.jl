@@ -3,7 +3,7 @@ file = get_amsr()
 sst = read_amsr(file, "SST");
 fig = plot_amsr(sst; xlims=(275.0, 350.0),
     ylims=(20.0, 65.0), colorrange=(-2.0, 30.0),
-    title="Sea-surface Temperature [°C] with 1-km isobath")
+    title="Sea-surface Temperature [°C] with 1-km isobath");
 # Add 1-km isobath. Note the transposition of the data (for Makie)
 # and the redrawing, to handle the fact that AMSR has 0<=lon<=360
 # whereas topograph has -180<=lon<=180.
