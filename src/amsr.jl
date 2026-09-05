@@ -311,11 +311,11 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
     if draw_coastline
         oad(debug, "  drawing the land and coastline")
         cl = coastline(:global_fine)
-        plot!(p, cl.data.longitude, cl.data.latitude,
+        plot!(rval, cl.data.longitude, cl.data.latitude,
             seriestype=:shape, color=:bisque3, linewidth=0.5,
             legend=false)
         if any(xlims .> 180.0)
-            plot!(p, cl.data.longitude .+ 360, cl.data.latitude,
+            plot!(rval, cl.data.longitude .+ 360, cl.data.latitude,
                 seriestype=:shape, color=:bisque3, linewidth=0.5,
                 legend=false)
         end
@@ -326,12 +326,12 @@ function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
     if draw_contours != :none
         if draw_contours == :auto
             oad(debug, "  adding auto-selected contours")
-            contour!(p, longitude, latitude, amsr.data, levels=
+            contour!(rval, longitude, latitude, amsr.data, levels=
                 range(-5.0, 35.0, step=5.0), color=:black,
                 linewidth=0.75)
         elseif isa(draw_contours, AbstractVector) && eltype(draw_contours) <: Real
             oad(debug, "  adding user-specified contours")
-            contour!(p, longitude, latitude, amsr.data, levels=draw_contours, color=:black,
+            contour!(rval, longitude, latitude, amsr.data, levels=draw_contours, color=:black,
                 linewidth=0.75)
         else
             @warn "draw_contours ($draw_contours) cannot be handled; try :none, :auto, or a numeric vector"
