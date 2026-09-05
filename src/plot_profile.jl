@@ -90,56 +90,57 @@ plot_profile(ctd, which="CT", markerstrokewidth=0.1, markersize=3, color_by="sal
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     abbreviate::Symbol=:long, fontsize=8, color=:black, color_by=false,
     debug::Integer=0, kwargs...)
+    # This test might be useful if further customization is needed for a future version
+    # of the package. For now, it simply makes for better debugging output.
+    if isa(d, Argo)
+        oad(debug, "plot_profile(::Argo; which='$which', ...) START")
+    elseif isa(d, Ctd)
+        oad(debug, "plot_profile(::Ctd; which='$which', ...) START")
+    else
+        error("plot_profile() only works on Argo and Ctd objects")
+    end
+    # For all cases, we need to set up the vertical axis, so do that first
+    oad(debug, "  setting up coordinate system for vertical axis")
+    # Catch a problematic call
+    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
+        @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
+    end
+    if vertical == :pressure
+        y = d["pressure"]
+        ylabel = label_from_varname("p", abbreviate)
+    elseif vertical == :density
+        y = d["sigma0"]
+        ylabel = label_from_varname("sigma0", abbreviate)
+    else
+        error("vertical must be either :pressure or :density")
+    end
+    x = get_element(d, which, debug=increment_debug(debug))
+    if isnothing(x)
+        error("plot_profile() cannot find (or compute a value for) \"$which\"")
+    end
+    using_color_by = false
+    if color_by != false
+        if isa(color_by, String)
+            oad(debug, "  color_by: \"", color_by, "\"")
+            if color_by in names(d.data)
+                color_by = decode_color_by(d[color_by])
+                oad(debug, "  decoded palette details with decode_color_by()")
+            elseif color_by == ""
+                oad(debug, "  no palette will be drawn, since color_by=\"\"")
+            else
+                error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
+            end
+        elseif isa(color_by, NamedTuple)
+            if length(color_by.levels) != nrow(d.data)
+                error("length(color_by.levels)=", length(color_by.levels), " ≠ nrow(d.data)=", nrow(d.data))
+            end
+        else
+            error("color_by must be 'false', a String, or a NamedTuple")
+        end
+        using_color_by = true
+    end
     error("plot_profile() disabled, pending convertion from Plots to Makie")
-    #<disabled>     # This test might be useful if further customization is needed for a future version
-    #<disabled>     # of the package. For now, it simply makes for better debugging output.
-    #<disabled>     if isa(d, Argo)
-    #<disabled>         oad(debug, "plot_profile(::Argo; which='$which', ...) START")
-    #<disabled>     elseif isa(d, Ctd)
-    #<disabled>         oad(debug, "plot_profile(::Ctd; which='$which', ...) START")
-    #<disabled>     else
-    #<disabled>         error("plot_profile() only works on Argo and Ctd objects")
-    #<disabled>     end
-    #<disabled>     # For all cases, we need to set up the vertical axis, so do that first
-    #<disabled>     oad(debug, "  setting up coordinate system for vertical axis")
-    #<disabled>     # Catch a problematic call
-    #<disabled>     if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-    #<disabled>         @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
-    #<disabled>     end
-    #<disabled>     if vertical == :pressure
-    #<disabled>         y = d["pressure"]
-    #<disabled>         ylabel = label_from_varname("p", abbreviate)
-    #<disabled>     elseif vertical == :density
-    #<disabled>         y = d["sigma0"]
-    #<disabled>         ylabel = label_from_varname("sigma0", abbreviate)
-    #<disabled>     else
-    #<disabled>         error("vertical must be either :pressure or :density")
-    #<disabled>     end
-    #<disabled>     x = get_element(d, which, debug=increment_debug(debug))
-    #<disabled>     if isnothing(x)
-    #<disabled>         error("plot_profile() cannot find (or compute a value for) \"$which\"")
-    #<disabled>     end
-    #<disabled>     using_color_by = false
-    #<disabled>     if color_by != false
-    #<disabled>         if isa(color_by, String)
-    #<disabled>             oad(debug, "  color_by: \"", color_by, "\"")
-    #<disabled>             if color_by in names(d.data)
-    #<disabled>                 color_by = decode_color_by(d[color_by])
-    #<disabled>                 oad(debug, "  decoded palette details with decode_color_by()")
-    #<disabled>             elseif color_by == ""
-    #<disabled>                 oad(debug, "  no palette will be drawn, since color_by=\"\"")
-    #<disabled>             else
-    #<disabled>                 error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
-    #<disabled>             end
-    #<disabled>         elseif isa(color_by, NamedTuple)
-    #<disabled>             if length(color_by.levels) != nrow(d.data)
-    #<disabled>                 error("length(color_by.levels)=", length(color_by.levels), " ≠ nrow(d.data)=", nrow(d.data))
-    #<disabled>             end
-    #<disabled>         else
-    #<disabled>             error("color_by must be 'false', a String, or a NamedTuple")
-    #<disabled>         end
-    #<disabled>         using_color_by = true
-    #<disabled>     end
+
     #<disabled>     p_profile = plot(x, y,
     #<disabled>         xlabel=label_from_varname(which), ylabel=ylabel,
     #<disabled>         yaxis=:flip, xmirror=true, framestyle=:box, legend=false,
