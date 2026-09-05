@@ -50,13 +50,23 @@ using OceanAnalysis, CairoMakie
 file = get_amsr()
 
 # 1. SST heatmap
-amsr_sst = read_amsr(file, "SST");
-fig_sst = plot_amsr(amsr_sst,
-    xlims=(260, 360), ylims=(20, 60),
+sst = read_amsr(file, "SST");
+plot_amsr(sst; xlims=(260, 360), ylims=(20, 60),
     title="Sea-surface Temperature [°C]")
 
-# 2. SST heatmap, with wind-speed contours on top
-# FIXME: code this
+# 2. SST heatmap with 1km depth shown
+fig = plot_amsr(sst; xlims=(275.0, 350.0),
+    ylims=(20.0, 65.0), colorrange=(-2.0, 30.0),
+    title="Sea-surface Temperature [°C] with 1-km isobath")
+ax = fig[1, 1]
+tf = get_topography()
+t = read_topography(tf);
+# NB: transpose data and draw twice since -180<toopography longitude<180
+contour!(ax, t["longitude"], t["latitude"], t.data',
+    levels=[-1000.0], color=:black, linewidth=1)
+contour!(ax, 360.0 .+ t["longitude"], t["latitude"], t.data',
+    levels=[-1000.0], color=:black, linewidth=1)
+fig
 ```
 """
 function plot_amsr(amsr::Amsr; xlims=(0.0, 360.0), ylims=(-90.0, 90.0),
@@ -100,10 +110,18 @@ function plot_amsr(amsr::Amsr; xlims=(0.0, 360.0), ylims=(-90.0, 90.0),
     # Possibly draw the land
     if draw_coastline
         oad(debug, "  drawing the land and coastline")
-        cl = coastline(:global_fine)
-        draw_coastline_polygons!(ax, cl.data.longitude, cl.data.latitude)
+        if ylims[2] - ylims[1] > 50
+            oad(debug, "  defaulting to coastline(:global_coarse)")
+            cl = coastline(:global_coarse)
+        else
+            oad(debug, "  defaulting to coastline(:global_fine)")
+            cl = coastline(:global_fine)
+        end
+        draw_coastline_polygons!(ax, cl.data.longitude, cl.data.latitude,
+            debug=increment_debug(debug))
         if any(xlims .> 180.0)
-            draw_coastline_polygons!(ax, cl.data.longitude .+ 360, cl.data.latitude)
+            draw_coastline_polygons!(ax, cl.data.longitude .+ 360, cl.data.latitude,
+                debug=increment_debug(debug))
         end
     else
         oad(debug, "  not drawing the land or coastline")
@@ -132,7 +150,7 @@ end
 export plot_amsr
 
 """
-    draw_coastline_polygons!(ax, longitude, latitude; color=:bisque3)
+    draw_coastline_polygons!(ax, longitude, latitude; color=:bisque3, debug=0)
 
 Helper for [`plot_amsr`](@ref). Coastline data are stored as `longitude` and
 `latitude` vectors with `NaN` separating individual land-mass rings (this is
@@ -140,18 +158,25 @@ the convention Plots' `seriestype=:shape` relied on). Makie has no direct
 equivalent, so this splits the vectors on `NaN` and fills each ring
 separately with `poly!`.
 """
-function draw_coastline_polygons!(ax, longitude, latitude; color=:bisque3)
+function draw_coastline_polygons!(ax, longitude, latitude; color=:bisque3, debug=0)
+    oad(debug, "draw_coastline_polygons!() START")
+    polygons = Polygon{2,Float32}[]
     start = 1
     n = length(longitude)
+    oad(debug, "  assembling polygons")
     for i in 1:n+1
         if i == n + 1 || isnan(longitude[i]) || isnan(latitude[i])
             if i - start >= 3
                 ring = Point2f.(longitude[start:i-1], latitude[start:i-1])
-                poly!(ax, ring, color=color, strokewidth=0.5, strokecolor=:black)
+                push!(polygons, Polygon(ring))
             end
             start = i + 1
         end
     end
-    return nothing
+    oad(debug, "  plotting the assembled polygons")
+    if !isempty(polygons)
+        poly!(ax, polygons, color=color, strokewidth=0.5, strokecolor=:black)
+    end
+    oad(debug, "END draw_coastline_polygons!()")
 end
 
