@@ -60,6 +60,7 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
   https://docs.juliaplots.org/stable/ for more information on possibilities.
 
 # Return value
+
 `plot_profile` returns a `Makie.Figure`, which can be displayed directly or
 saved with `save("filename.png", fig)`.
 
@@ -155,11 +156,12 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         title=title,
         xlabel=xlab,
         ylabel=ylab,
-        color=color,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
     lines!(ax, x, y; color=color)
+    println("FIXME: handle color_by (TOP PRIORITY)")
+    println("FIXME: permit scatter or lines")
     return fig
     #<disabled>     p_profile = plot(x, y,
     #<disabled>         xlabel=label_from_varname(which), ylabel=ylabel,
