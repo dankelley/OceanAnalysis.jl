@@ -45,7 +45,6 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
   palette is drawn, but space set aside to the right of the plot,
   where a palette would otherwise go.
 
-
 - `abbreviate` a Symbol indicating a category for axis length, used in
   determining how to label the axes. The valid choices are `:short`, `:medium`,
   and `:long`.
@@ -59,6 +58,10 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
 
 - `kwargs...` is passed to `plot()`, to permit further customization; see
   https://docs.juliaplots.org/stable/ for more information on possibilities.
+
+# Return value
+`plot_profile` returns a `Makie.Figure`, which can be displayed directly or
+saved with `save("filename.png", fig)`.
 
 # Examples
 ```julia
@@ -139,8 +142,25 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         end
         using_color_by = true
     end
-    error("plot_profile() disabled, pending convertion from Plots to Makie")
-
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    title = pop!(kwargs_dict, :title, "")
+    xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
+    ylab = pop!(kwargs_dict, :ylab, ylabel)
+    xlims = pop!(kwargs_dict, :xlims, extrema(skipmissing(x)))
+    ylims = pop!(kwargs_dict, :ylims, reverse(extrema(skipmissing(y))))
+    color = pop!(kwargs_dict, :color, :black)
+    fig = Figure()
+    ax = Axis(fig[1, 1],
+        xaxisposition=:top,
+        title=title,
+        xlabel=xlab,
+        ylabel=ylab,
+        color=color,
+        xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
+        xticklabelsize=fontsize, yticklabelsize=fontsize)
+    limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
+    lines!(ax, x, y; color=color)
+    return fig
     #<disabled>     p_profile = plot(x, y,
     #<disabled>         xlabel=label_from_varname(which), ylabel=ylabel,
     #<disabled>         yaxis=:flip, xmirror=true, framestyle=:box, legend=false,
