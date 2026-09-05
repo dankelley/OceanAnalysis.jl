@@ -9,7 +9,7 @@ whole earth. For "daily" datasets (see the `type` argument of the
 [`get_amsr`](@ref) function), the ascending and descending swaths are
 averaged.
 
-Note: this function requires a Makie backend to be loaded and activated by
+This function requires a Makie backend to be loaded and activated by
 the caller (e.g. `using CairoMakie` or `using GLMakie`) before it is called.
 
 # Arguments
@@ -17,7 +17,7 @@ the caller (e.g. `using CairoMakie` or `using GLMakie`) before it is called.
 
 # Keywords
 - `xlims`: a tuple giving the range of longitude to be shown. This is based on
-  the 0 to 360 notation, since that is how AMSR data are stored.
+  the 0 to 360 notation, which is how AMSR data are stored.
 - `ylims`: a tuple giving the range of latitude to be shown. This is based on
   the -90 to 90 notation.
 - `draw_coastline`: a Bool indicating whether to draw the coastline.
@@ -41,7 +41,8 @@ the caller (e.g. `using CairoMakie` or `using GLMakie`) before it is called.
 
 # Return value
 `plot_amsr` returns a `Makie.Figure`, which can be displayed directly or
-saved with `save("filename.png", fig)`.
+saved with `save("filename.png", fig)`.  See Example 2 for how to add
+a depth contour to the image created by `plot_amsr`.
 
 # Examples
 ```julia
@@ -61,7 +62,9 @@ fig = plot_amsr(sst; xlims=(275.0, 350.0),
 ax = fig[1, 1]
 tf = get_topography()
 t = read_topography(tf);
-# NB: transpose data and draw twice since -180<toopography longitude<180
+# NB: transpose data (needed for Makie), and draw twice,
+# since -180<=longitude<=180 for topographic data,
+# as opposed to 0<=longitude<=360 for AMSR data.
 contour!(ax, t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
 contour!(ax, 360.0 .+ t["longitude"], t["latitude"], t.data',
@@ -80,32 +83,30 @@ function plot_amsr(amsr::Amsr; xlims=(0.0, 360.0), ylims=(-90.0, 90.0),
     latitude = amsr.metadata["latitude"]
     oad(debug, "  plotting a heatmap of ", amsr.metadata["field"])
 
-    # Emulate Plots' data-based aspect_ratio (1 unit of latitude drawn taller
-    # than 1 unit of longitude near the poles) via Makie's AxisAspect, which
-    # controls the on-screen box shape rather than a literal data scaling.
+    # Set the aspect ratio (different in Makie compared with Plots)
     aspect_ratio = 1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0)
     box_aspect = (xlims[2] - xlims[1]) / ((ylims[2] - ylims[1]) * aspect_ratio)
 
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     title = pop!(kwargs_dict, :title, "")
+    xlab = pop!(kwargs_dict, :xlab, "")
+    ylab = pop!(kwargs_dict, :ylab, "")
 
     fig = Figure()
     ax = Axis(fig[1, 1],
         title=title,
-        xlabel="Longitude",
-        ylabel="Latitude",
+        xlabel=xlab,
+        ylabel=ylab,
         aspect=AxisAspect(box_aspect),
-        xlabelsize=fontsize + 4, ylabelsize=fontsize + 4, titlesize=fontsize + 4,
+        xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
-
-    # Makie's heatmap!(x, y, z) expects z sized (length(x), length(y)), the
-    # transpose of what Plots' heatmap(x, y, z) expected.
+    # Transpose amsr.data for Makie (not done for Plots).
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     colorrange = pop!(kwargs_dict, :colorrange, (-5.0, 35.0))
     hm = heatmap!(ax, longitude, latitude, permutedims(amsr.data);
         colormap=colormap, colorrange=colorrange, kwargs_dict...)
-    Colorbar(fig[1, 2], hm)
+    Colorbar(fig[1, 2], hm, ticklabelsize=fontsize)
 
     # Possibly draw the land
     if draw_coastline
