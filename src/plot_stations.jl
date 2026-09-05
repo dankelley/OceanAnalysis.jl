@@ -39,25 +39,26 @@ plot_stations(lon, lat, xlim=(-65.0, -59.0), ylim=(43.0, 46.0))
 """
 function plot_stations(longitude::Vector{Float64}, latitude::Vector{Float64};
     draw_coastline::Bool=true, debug::Integer=0, kwargs...)
-    oad(debug, "plot_stations(longitude, latitude, ...)")
-    if haskey(kwargs, :ylim)
-        kw = (; kwargs...)
-        mid_latitude = 0.5 * sum(kw[:ylim])
-    else
-        mid_latitude = 0.5 * sum(extrema(filter(!isnan, latitude)))
-    end
-    oad(debug, "  mid_latitude=$mid_latitude")
-    aspect_ratio = 1.0 / cos(mid_latitude * pi / 180.0)
-    oad(debug, "  aspect_ratio=$aspect_ratio")
-    pl = scatter(longitude, latitude;
-        aspect_ratio=aspect_ratio, tickdirection=:out, framestyle=:box, legend=false,
-        markershape=:xcross, markercolor=:black, markersize=3,
-        kwargs...)
-    if draw_coastline
-        plot_coastline!(coastline(); kwargs...)
-    end
-    oad(debug, "END plot_stations()")
-    pl
+    error("plot_stations() disabled, pending convertion from Plots to Makie")
+    #<disabled>    oad(debug, "plot_stations(longitude, latitude, ...)")
+    #<disabled>    if haskey(kwargs, :ylim)
+    #<disabled>        kw = (; kwargs...)
+    #<disabled>        mid_latitude = 0.5 * sum(kw[:ylim])
+    #<disabled>    else
+    #<disabled>        mid_latitude = 0.5 * sum(extrema(filter(!isnan, latitude)))
+    #<disabled>    end
+    #<disabled>    oad(debug, "  mid_latitude=$mid_latitude")
+    #<disabled>    aspect_ratio = 1.0 / cos(mid_latitude * pi / 180.0)
+    #<disabled>    oad(debug, "  aspect_ratio=$aspect_ratio")
+    #<disabled>    pl = scatter(longitude, latitude;
+    #<disabled>        aspect_ratio=aspect_ratio, tickdirection=:out, framestyle=:box, legend=false,
+    #<disabled>        markershape=:xcross, markercolor=:black, markersize=3,
+    #<disabled>        kwargs...)
+    #<disabled>    if draw_coastline
+    #<disabled>        plot_coastline!(coastline(); kwargs...)
+    #<disabled>    end
+    #<disabled>    oad(debug, "END plot_stations()")
+    #<disabled>    pl
 end
 export plot_stations
 

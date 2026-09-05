@@ -32,17 +32,18 @@ end
 ```
 """
 function plot_echosounder(e::Echosounder; which=:log_amplitude, debug::Integer=0, kwargs...)
-    oad(debug, "plot_echosounder() START")
-    if which == :log_amplitude
-        rval = heatmap(e["time"], e["range"], log10.(e.data["a"]), ylab="Range [m]",
-            framestyle=:box, tickdirection=:out,
-            guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
-            yflip=true; kwargs...)
-    else
-        error("only which=:log_amplitude is handled in this version of plot_echosounder.")
-    end
-    oad(debug, "END plot_echosounder()")
-    return (rval)
+    error("plot_echosounder() disabled, pending convertion from Plots to Makie")
+    #<disabled>     oad(debug, "plot_echosounder() START")
+    #<disabled>     if which == :log_amplitude
+    #<disabled>         rval = heatmap(e["time"], e["range"], log10.(e.data["a"]), ylab="Range [m]",
+    #<disabled>             framestyle=:box, tickdirection=:out,
+    #<disabled>             guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
+    #<disabled>             yflip=true; kwargs...)
+    #<disabled>     else
+    #<disabled>         error("only which=:log_amplitude is handled in this version of plot_echosounder.")
+    #<disabled>     end
+    #<disabled>     oad(debug, "END plot_echosounder()")
+    #<disabled>     return (rval)
 end
 export plot_echosounder
 

@@ -131,95 +131,96 @@ plot_TS(ctd, color_by="")
 function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     plot_freezing=true, abbreviate=false, fontsize::Integer=8,
     color=:black, color_by=false, debug::Integer=0, kwargs...)
-    # This test might be useful if further customization is needed for a future version
-    # of the package. For now, it simply makes for better debugging output.
-    if isa(d, Argo)
-        oad(debug, "plot_TS(::Argo) START")
-    elseif isa(d, Ctd)
-        oad(debug, "plot_TS(::Ctd) START")
-    else
-        error("plot_TS() only works on Argo and Ctd objects")
-    end
-    oad(debug, "  sigma0_levels: $sigma0_levels")
-    oad(debug, "  spiciness0_levels: $spiciness0_levels")
-    oad(debug, "  plot_freezing: $plot_freezing")
-    local S = d.data.salinity
-    local T = d.data.temperature
-    local p = d.data.pressure
-    local lon = d.metadata["longitude"]
-    local lat = d.metadata["latitude"]
-    SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
-    CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
-    ok = isfinite.(SA) .& isfinite.(CT)
-    if 0 == sum(ok)
-        @warn "plot_TS(): no good SA,CT pairs, so plotting an aphysical default"
-    end
-    # Draw the data.
-    oad(debug, "  drawing data points")
-    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-        @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
-    end
-    using_color_by = false
-    if color_by != false
-        if isa(color_by, String)
-            oad(debug, "  color_by: \"", color_by, "\"")
-            if color_by in names(d.data)
-                color_by = decode_color_by(d[color_by])
-                oad(debug, "  decoded palette details with decode_color_by()")
-            elseif color_by == ""
-                oad(debug, "  no palette will be drawn, since color_by=\"\"")
-            else
-                error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
-            end
-        elseif isa(color_by, NamedTuple)
-            if length(color_by.levels) != nrow(d.data)
-                error("length(color_by.levels)=", length(color_by.levels), " ≠ nrow(d.data)=", nrow(d.data))
-            end
-        else
-            error("color_by must be 'false', a String, or a NamedTuple")
-        end
-        using_color_by = true
-    end
-    p_TS = plot(SA, CT,
-        xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
-        ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
-        yrot=90,
-        framestyle=:box, legend=false, color=color, tickdirection=:out,
-        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
-        kwargs...)
-    # Possibly add freezing-point curve
-    if plot_freezing
-        plot_freezing_curve!()
-    end
-    # Possibly add density contours
-    plot_TS_sigma0_contours(sigma0_levels; debug=debug)
-    plot_TS_spiciness0_contours(spiciness0_levels; debug=debug)
-    # Redraw the data, so they appear above other elements such as 
-    # contours and the freezing-point line. Note that the path will be
-    # drawn with the provided the 'color'.
-    if using_color_by
-        if color_by == ""
-            oad(debug, "  not plotting symbols with individual colours, but leaving palette space")
-            p_cbar = plot(ticks=nothing, border=:none)
-            l = grid(1, 2, widths=[0.88, 0.12])
-            p_TS = plot(p_TS, p_cbar, layout=l)
-        else
-            oad(debug, "  plotting symbols with individual colours")
-            cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-            colormap = cgrad(color_by.colorscheme)
-            markercolor = colormap[cindex]
-            plot!(SA, CT, seriestype=:scatter,
-                legend=false, linecolor=color, markercolor=markercolor,
-                linewidth=1.0, marker=:circle, markersize=1.4;
-                kwargs...)
-            p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
-            l = grid(1, 2, widths=[0.88, 0.12])
-            p_TS = plot(p_TS, p_cbar, layout=l)
-        end
-    end
-    oad(debug, "END plot_TS()")
-    return p_TS
+    error("plot_TS() disabled, pending convertion from Plots to Makie")
+    #<disabled>    # This test might be useful if further customization is needed for a future version
+    #<disabled>    # of the package. For now, it simply makes for better debugging output.
+    #<disabled>    if isa(d, Argo)
+    #<disabled>        oad(debug, "plot_TS(::Argo) START")
+    #<disabled>    elseif isa(d, Ctd)
+    #<disabled>        oad(debug, "plot_TS(::Ctd) START")
+    #<disabled>    else
+    #<disabled>        error("plot_TS() only works on Argo and Ctd objects")
+    #<disabled>    end
+    #<disabled>    oad(debug, "  sigma0_levels: $sigma0_levels")
+    #<disabled>    oad(debug, "  spiciness0_levels: $spiciness0_levels")
+    #<disabled>    oad(debug, "  plot_freezing: $plot_freezing")
+    #<disabled>    local S = d.data.salinity
+    #<disabled>    local T = d.data.temperature
+    #<disabled>    local p = d.data.pressure
+    #<disabled>    local lon = d.metadata["longitude"]
+    #<disabled>    local lat = d.metadata["latitude"]
+    #<disabled>    SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
+    #<disabled>    CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
+    #<disabled>    ok = isfinite.(SA) .& isfinite.(CT)
+    #<disabled>    if 0 == sum(ok)
+    #<disabled>        @warn "plot_TS(): no good SA,CT pairs, so plotting an aphysical default"
+    #<disabled>    end
+    #<disabled>    # Draw the data.
+    #<disabled>    oad(debug, "  drawing data points")
+    #<disabled>    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
+    #<disabled>        @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
+    #<disabled>    end
+    #<disabled>    using_color_by = false
+    #<disabled>    if color_by != false
+    #<disabled>        if isa(color_by, String)
+    #<disabled>            oad(debug, "  color_by: \"", color_by, "\"")
+    #<disabled>            if color_by in names(d.data)
+    #<disabled>                color_by = decode_color_by(d[color_by])
+    #<disabled>                oad(debug, "  decoded palette details with decode_color_by()")
+    #<disabled>            elseif color_by == ""
+    #<disabled>                oad(debug, "  no palette will be drawn, since color_by=\"\"")
+    #<disabled>            else
+    #<disabled>                error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
+    #<disabled>            end
+    #<disabled>        elseif isa(color_by, NamedTuple)
+    #<disabled>            if length(color_by.levels) != nrow(d.data)
+    #<disabled>                error("length(color_by.levels)=", length(color_by.levels), " ≠ nrow(d.data)=", nrow(d.data))
+    #<disabled>            end
+    #<disabled>        else
+    #<disabled>            error("color_by must be 'false', a String, or a NamedTuple")
+    #<disabled>        end
+    #<disabled>        using_color_by = true
+    #<disabled>    end
+    #<disabled>    p_TS = plot(SA, CT,
+    #<disabled>        xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
+    #<disabled>        ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
+    #<disabled>        yrot=90,
+    #<disabled>        framestyle=:box, legend=false, color=color, tickdirection=:out,
+    #<disabled>        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
+    #<disabled>        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
+    #<disabled>        kwargs...)
+    #<disabled>    # Possibly add freezing-point curve
+    #<disabled>    if plot_freezing
+    #<disabled>        plot_freezing_curve!()
+    #<disabled>    end
+    #<disabled>    # Possibly add density contours
+    #<disabled>    plot_TS_sigma0_contours(sigma0_levels; debug=debug)
+    #<disabled>    plot_TS_spiciness0_contours(spiciness0_levels; debug=debug)
+    #<disabled>    # Redraw the data, so they appear above other elements such as 
+    #<disabled>    # contours and the freezing-point line. Note that the path will be
+    #<disabled>    # drawn with the provided the 'color'.
+    #<disabled>    if using_color_by
+    #<disabled>        if color_by == ""
+    #<disabled>            oad(debug, "  not plotting symbols with individual colours, but leaving palette space")
+    #<disabled>            p_cbar = plot(ticks=nothing, border=:none)
+    #<disabled>            l = grid(1, 2, widths=[0.88, 0.12])
+    #<disabled>            p_TS = plot(p_TS, p_cbar, layout=l)
+    #<disabled>        else
+    #<disabled>            oad(debug, "  plotting symbols with individual colours")
+    #<disabled>            cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+    #<disabled>            colormap = cgrad(color_by.colorscheme)
+    #<disabled>            markercolor = colormap[cindex]
+    #<disabled>            plot!(SA, CT, seriestype=:scatter,
+    #<disabled>                legend=false, linecolor=color, markercolor=markercolor,
+    #<disabled>                linewidth=1.0, marker=:circle, markersize=1.4;
+    #<disabled>                kwargs...)
+    #<disabled>            p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
+    #<disabled>            l = grid(1, 2, widths=[0.88, 0.12])
+    #<disabled>            p_TS = plot(p_TS, p_cbar, layout=l)
+    #<disabled>        end
+    #<disabled>    end
+    #<disabled>    oad(debug, "END plot_TS()")
+    #<disabled>    return p_TS
 end
 export plot_TS
 

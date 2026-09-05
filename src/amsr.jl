@@ -15,7 +15,6 @@ function average_amsr_passes(pass1, pass2)
     return n == 0 ? missing : s / n
 end
 
-
 """
     read_amsr(filename::String, field::String="SST"; debug=0)
 
@@ -30,16 +29,13 @@ that may be given as `name` values.
 For examples, see the documentation for [`plot_amsr`](@ref).
 
 # Arguments
-
 - `filename`: a string indicating the location of the local file.
-
-- `field`: a string used to identify the data field to be extracted.  If
+- `field`: a string used to identify the data field to be extracted. If
   `field="?"` then `read_amsr` returns a vector of strings containing extractable
-  data.  Otherwise, if `field` names one of those items, then `read_amsr` returns
+  data. Otherwise, if `field` names one of those items, then `read_amsr` returns
   that dataset.
 
 # Keywords
-
 - `debug`: An indication of whether to print information during processing. The
   default value of 0 means to work quietly, and any larger integer indicates to
   print some information.
@@ -48,14 +44,14 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
     filename = expanduser(filename)
     oad(debug, "read_amsr() BEGIN")
     NCDataset(filename, "r") do nc
-        oad(debug, "    about to read SST")
+        oad(debug, " about to read SST")
         if field == "?"
             return sort(collect(keys(nc)))
         end
         if !haskey(nc, field)
             error("There is no field '$field' in file. The possibilities are $(sort(collect(keys(nc))))")
         end
-        oad(debug, "    setting up metadata")
+        oad(debug, " setting up metadata")
         metadata = Dict()
         metadata["filename"] = filename
         metadata["longitude"] = Float64.(vec(nc["lon"][:]))
@@ -64,16 +60,16 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
         for a in ("sensor", "processing_level", "time_coverage_start", "time_coverage_end")
             metadata[a] = get(nc.attrib, a, missing)
         end
-        oad(debug, "    setting up data for field=\"$field\"")
+        oad(debug, " setting up data for field=\"$field\"")
         tmp = nc[field]
-        oad(debug, "    size of nc[field]: $(size(tmp))")
+        oad(debug, " size of nc[field]: $(size(tmp))")
         if ndims(tmp) == 2
             arr = permutedims(Float64.(coalesce.(tmp, NaN)))
         elseif ndims(tmp) == 3
             if size(tmp, 3) != 2
                 error("The third dimension of a \"daily\" file must be 2, but it is $(size(tmp,3))")
             end
-            oad(debug, "    averaging ascending and descending passes")
+            oad(debug, " averaging ascending and descending passes")
             tmp2 = average_amsr_passes.(tmp[:, :, 1], tmp[:, :, 2])
             arr = permutedims(Float64.(coalesce.(tmp2, NaN)))
         else
@@ -86,10 +82,9 @@ function read_amsr(filename::String, field::String="SST"; debug=0)
 end
 export read_amsr
 
-
 """
     get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
-        server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)
+             server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)
 
 Download (or use an existing) file containing Advanced Microwave Scanning
 Radiometer data file.
@@ -100,7 +95,7 @@ already exists in `destdir`, then it is not downloaded again,
 on the assumption that files on the remote server are not changed
 over time.
 
-If `date` is not specified, it defaults to today's date.  To avoid errors of
+If `date` is not specified, it defaults to today's date. To avoid errors of
 the server not yet having data for that time, `get_amsr` shifts the time
 backwards, depending on `type`, in an attempt to get the most recent data.
 If these shifts are insufficient, an error will be reported. The solution
@@ -114,20 +109,19 @@ to deal with the files downloaded by `get_amsr`.
 
 For code-maintenance reference, the following are sample URLs (valid as of 2026-08-23) for
 the four possible values of `type`:
+
 * `"daily"`: https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
 * `"3day"`: https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
 * `"monthly"`: https://data.remss.com/amsr2/ocean/L3/v08.2/monthly/RSS_AMSR2_ocean_L3_monthly_2026-06_v08.2.nc
 * `"weekly"`: https://data.remss.com/amsr2/ocean/L3/v08.2/weekly/RSS_AMSR2_ocean_L3_weekly_2026-08-08_v08.2.nc
 
 # Arguments
-
 - `date` a Date object specifying a day for which data are sought. The
   default value is today's date. Note that the day gets shifted earlier,
   depending on the value of `type`, as e.g. monthly data only become
   available after the month is finished.
 
 # Keywords
-
 - `type`: The type of data requested, with default `"3day"`.
   If `type="daily"` then data from a single day are acquired, and
   this will typically leave quite a few gaps for clouds, as well
@@ -141,22 +135,18 @@ the four possible values of `type`:
   many time-varying features will be smeared with these averages.
   Also, note that for `"weekly"` data, the date is always
   a Sunday.
-
 - `destdir`: Path to the destination directory. The author usually sets
   `destdir="~/data/amsr"`, so that the file will be in a central location for use
   by other analysis procedures.
-
 - `server`: The base of the server location. The default value ought to be used
   unless the data provider changes their web scheme, although the likelihood of
   the query working in such a case is slim, since changes tend to be sweeping.
   Users are asked to report an issue, if they encounter failed server responses.
-
 - `debug`: An indication of whether to print information during processing. The
   default value of 0 means to work quietly, and any larger integer indicates to
   print some information.
 
 # Return value
-
 `get_amsr` returns a String that is the full pathname of the downloaded file,
 which may be supplied as the first argument of [`read_amsr`](@ref). In
 many cases, the goal may be to plot the data, and for that, [`plot_amsr`](@ref)
@@ -165,10 +155,10 @@ may prove useful.
 function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String=".",
     server::String="https://data.remss.com/amsr2/ocean/L3/v08.2", debug::Integer=0)::String
     oad(debug, "get_amsr() START")
-    oad(debug, "    date=\"$date\"")
-    oad(debug, "    type=\"$type\"")
-    oad(debug, "    destdir=\"$destdir\"")
-    oad(debug, "    server=\"$server\"")
+    oad(debug, "  date=\"$date\"")
+    oad(debug, "  type=\"$type\"")
+    oad(debug, "  destdir=\"$destdir\"")
+    oad(debug, "  server=\"$server\"")
     if type == "daily"
         if date == Dates.today()
             date = date - Dates.Day(3) # FIXME: will 3 days always work, at any time of day?
@@ -181,7 +171,6 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
             date = date - Dates.Day(4) # FIXME: will 4 days always work, at any time of day?
         end
         # https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
-        #?https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-21_v08.2.nc
         destfile = @sprintf(
             "RSS_AMSR2_ocean_L3_%s_%04d-%02d-%02d_v08.2.nc",
             type, year(date), month(date), day(date))
@@ -209,10 +198,10 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
         error("type must be one of: \"3day\", \"daily\", \"monthly\" or \"weekly\" but it is \"$(type)\"")
     end
     destpath = expanduser(joinpath(destdir, destfile))
-    oad(debug, "    destpath: '$destpath'")
-    oad(debug, "    url: '$url'")
+    oad(debug, "  destpath: '$destpath'")
+    oad(debug, "  url: '$url'")
     if !isfile(destpath)
-        oad(debug, "    will try to download destpath from url")
+        oad(debug, "  will try to download destpath from url")
         try
             Downloads.download(url, destpath)
         catch err
@@ -220,128 +209,12 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
             error("Failed to download $url: $err")
         end
     else
-        oad(debug, "    $destpath not downloaded, since it already exists")
+        oad(debug, "  $destpath not downloaded, since it already exists")
     end
     oad(debug, "END get_amsr()")
     destpath
 end
 export get_amsr
-
-
-"""
-    plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
-        draw_coastline=true, draw_contours=:none,
-        fontsize=8, debug::Integer=0, kwargs...)
- 
-Plot a heatmap of a field in an [`Amsr`](@ref) object.  By default, SST is shown using the `:turbo`
-colorscheme, and the view is of the whole earth. For "daily" datasets (see the `type`
-argument of the [`get_amsr`](@ref) function), the ascending and descending swaths are averaged.
-
-# Arguments
-
-- `amsr`: An [`Amsr`](@ref) object, as read by [`read_amsr`](@ref).
-
-# Keywords
-
-- `xlims`: a tuple giving the range of longitude to be shown.  This is based on
-  the 0 to 360 notation, since that is how AMSR data are stored.
-
-- `ylims`: a tuple giving the range of latitude to be shown. This is based on
-  the -90 to 90 notation.
-
-- `draw_coastline`: a Bool indicating whether to draw the coastline.
-  If you want to contour something (e.g. depth) on top of the
-  image, you must set `draw_coastline=false`, do your drawing
-  after that, and finally use [`plot_coastline!`](@ref)
-  to add the coastline. This may solve a long-standing issue
-  with the gr plotting backend.
-
-- `draw_contours`: either symbol a numeric vector that controls contours that
-  may be added to the heatmap.  If this is `:none` (which is the default), then
-  no contours are drawn. If it is `:auto` then contours are drawn at 5°C
-  increments. And, finally, if it is a vector of numeric elements, then contours
-  are drawn (unlabelled) at those values.
-
-- `fontsize` size of fonts to be supplied to [heatmap] as `tickfontsize`,
-  `guidefontsize` and `titlefontsize`. Note that any of these values may also be
-  supplied as named arguments within `kwargs...`.
-
-- `debug`: An integer controlling whether to print information during
-  processing. The default is to work silently; use any positive value to get some
-  printing.
-
-- `kwargs...` optional other arguments to customize the heatmap plot. For
-  example, specify a value for `color` to change the palette. Although it is
-  permitted to set `aspect_ratio`, the default will yield correct shapes in the
-  middle of the plot, which is likely the best approach.
-
-# Examples
-
-```julia
-using OceanAnalysis, Plots
-file = get_amsr()
-amsr_sst = read_amsr(file, "SST");
-p_sst = plot_amsr(amsr_sst,
-    xlims=(260,360), ylims=(20,60),
-    title="Sea-surface Temperature [°C]")
-amsr_wind = read_amsr(file, "wind_speed_MF");
-p_wind = plot_amsr(amsr_wind, color=:inferno, clim=(0,16),
-    xlims=(260,360), ylims=(20,60),
-    title="Wind Speed [m/s]")
-plot(p_sst, p_wind, layout=(2,1))
-```
-"""
-function plot_amsr(amsr::Amsr; xlims=[0.0, 360.0], ylims=[-90.0, 90.0],
-    draw_coastline=true, draw_contours=:none,
-    fontsize=8, debug::Integer=0, kwargs...)
-    2 == length(xlims) || throw(ArgumentError("xlims must be of length 2"))
-    2 == length(ylims) || throw(ArgumentError("ylims must be of length 2"))
-    oad(debug, "plot_amsr() START")
-    oad(debug, "  xlims: $xlims, ylims: $ylims")
-    longitude = amsr.metadata["longitude"]
-    latitude = amsr.metadata["latitude"]
-    oad(debug, "  plotting a heatmap of ", amsr.metadata["field"])
-    aspect_ratio = 1.0 / cos(pi * 0.5 * (ylims[1] + ylims[2]) / 180.0)
-    rval = heatmap(longitude, latitude, amsr.data,
-        xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
-        levels=range(-5.0, 35.0, step=5.0), color=:turbo, clim=:auto,
-        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
-        framestyle=:box, tickdirection=:out; kwargs...)
-    # Possibly draw the land
-    if draw_coastline
-        oad(debug, "  drawing the land and coastline")
-        cl = coastline(:global_fine)
-        plot!(rval, cl.data.longitude, cl.data.latitude,
-            seriestype=:shape, color=:bisque3, linewidth=0.5,
-            legend=false)
-        if any(xlims .> 180.0)
-            plot!(rval, cl.data.longitude .+ 360, cl.data.latitude,
-                seriestype=:shape, color=:bisque3, linewidth=0.5,
-                legend=false)
-        end
-    else
-        oad(debug, "  not drawing the land or coastline")
-    end
-    # Possibly draw contours
-    if draw_contours != :none
-        if draw_contours == :auto
-            oad(debug, "  adding auto-selected contours")
-            contour!(rval, longitude, latitude, amsr.data, levels=
-                range(-5.0, 35.0, step=5.0), color=:black,
-                linewidth=0.75)
-        elseif isa(draw_contours, AbstractVector) && eltype(draw_contours) <: Real
-            oad(debug, "  adding user-specified contours")
-            contour!(rval, longitude, latitude, amsr.data, levels=draw_contours, color=:black,
-                linewidth=0.75)
-        else
-            @warn "draw_contours ($draw_contours) cannot be handled; try :none, :auto, or a numeric vector"
-        end
-    end
-    oad(debug, "END plot_amsr()")
-    return rval
-end
-export plot_amsr
-
 
 """
     subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
@@ -349,13 +222,9 @@ export plot_amsr
 Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
 
 # Arguments
-
 - `a`: an [`Amsr`](@ref) object.
-
 - `lonlims`: A numeric tuple of length 2 specifying the minimum and maximum longitude values to be retained.
-
 - `latlims`: A numeric tuple of length 2 specifying the minimum and maximum latitude values to be retained.
-
 - `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
 """
 function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
@@ -374,11 +243,12 @@ function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     metadata["latitude"] = metadata["latitude"][latOK]
     data = copy(a.data)[latOK, lonOK]
     rval = Amsr(metadata, data)
-    oad(debug, "    keeping ",
+    oad(debug, "  keeping ",
         round(100.0 * sum(lonOK) / length(lonOK), digits=2), "% of longitudes and ",
         round(100.0 * sum(latOK) / length(latOK), digits=2), "% of latitudes")
     oad(debug, "END subset_amsr()")
     rval
 end
 export subset_amsr
+
 

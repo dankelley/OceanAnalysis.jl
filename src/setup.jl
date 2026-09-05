@@ -5,6 +5,7 @@ using Downloads
 using GibbsSeaWater
 using GMT: gmtread
 using Interpolations
+using Makie: Figure, Axis, heatmap!, contour!, poly!, Colorbar, AxisAspect, Point2f, limits!
 using Plots
 using Printf
 using CSV

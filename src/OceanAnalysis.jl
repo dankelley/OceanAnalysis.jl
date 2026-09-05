@@ -81,16 +81,16 @@ include("topography.jl")
 include("utilities.jl")
 
 
-import PrecompileTools
-PrecompileTools.@compile_workload begin
-    # precompile some argo and ctd functions that may be common
-    pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-    argo_file = joinpath(pkgdir, "data", "D4902911_095.nc")
-    argo = read_argo(argo_file)
-    ctd = as_ctd(argo)
-    plot_profile(ctd)
-    plot_TS(ctd)
-    e = get_element(ctd, "temperature")
-end
+#<disabled> import PrecompileTools
+#<disabled> PrecompileTools.@compile_workload begin
+#<disabled>     # precompile some argo and ctd functions that may be common
+#<disabled>     pkgdir = dirname(dirname(pathof(OceanAnalysis)))
+#<disabled>     argo_file = joinpath(pkgdir, "data", "D4902911_095.nc")
+#<disabled>     argo = read_argo(argo_file)
+#<disabled>     ctd = as_ctd(argo)
+#<disabled>     plot_profile(ctd)
+#<disabled>     plot_TS(ctd)
+#<disabled>     e = get_element(ctd, "temperature")
+#<disabled> end
 
 end # module OceanAnalysis
