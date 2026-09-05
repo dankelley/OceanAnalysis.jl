@@ -130,9 +130,9 @@ plot_TS(ctd, seriestype=:lines, linewidth=0.7)
 #<FIXME:> plot_TS(ctd, color_by="")
 ```
 """
-function plot_TS(d, sigma0_levels=[], spiciness0_levels=0,
+function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     plot_freezing=true, abbreviate=false, fontsize::Integer=8,
-    color=:black, color_by=false, debug::Integer=0; kwargs...)
+    color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
@@ -157,17 +157,21 @@ function plot_TS(d, sigma0_levels=[], spiciness0_levels=0,
         @warn "plot_TS(): no good SA,CT pairs, so plotting an aphysical default"
     end
     # Draw the data.
-    oad(debug, "  drawing data points")
-    #if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-    #    @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
-    #end
+    oad(debug, "  drawing the data")
+    oad(debug, "  color_by=$color_by")
     using_color_by = false
     if color_by != false
         if isa(color_by, String)
             oad(debug, "  color_by: \"", color_by, "\"")
             if color_by in names(d.data)
                 color_by = decode_color_by(d[color_by])
-                oad(debug, "  decoded palette details with decode_color_by()")
+                oad(debug, "    decoded palette details with decode_color_by()")
+                cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+                oad(debug, "    computed cindex")
+                colormap = cgrad(color_by.colorscheme)
+                oad(debug, "    computed colormap")
+                color = colormap[cindex]
+                oad(debug, "    computed color")
             elseif color_by == ""
                 oad(debug, "  no palette will be drawn, since color_by=\"\"")
             else
@@ -182,7 +186,13 @@ function plot_TS(d, sigma0_levels=[], spiciness0_levels=0,
         end
         using_color_by = true
     end
+    if using_color_by
+        oad(debug, "  set up color_by vector")
+    end
+    println("NEXT is kwargs ...")
+    println(kwargs...)
     kwargs_dict = Dict{Symbol,Any}(kwargs)
+    println("NEXT is kwargs_dict...")
     println(kwargs_dict)
     title = pop!(kwargs_dict, :title, "")
     xlabel = abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]"
@@ -196,7 +206,9 @@ function plot_TS(d, sigma0_levels=[], spiciness0_levels=0,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     oad(debug, "  set linewidth=$linewidth")
-    color = pop!(kwargs_dict, :color, :black)
+    if !using_color_by
+        color = pop!(kwargs_dict, :color, :black)
+    end
     oad(debug, "  set color=$color")
     marker = pop!(kwargs_dict, :marker, :circle)
     oad(debug, "  set marker=$marker")
@@ -207,12 +219,21 @@ function plot_TS(d, sigma0_levels=[], spiciness0_levels=0,
     seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
     oad(debug, "  set seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
+    #<disabled>            oad(debug, "  plotting symbols with individual colours")
+    #<disabled>            cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+    #<disabled>            colormap = cgrad(color_by.colorscheme)
+    #<disabled>            markercolor = colormap[cindex]
+
     if seriestype == :lines
         oad(debug, "  calling lines!()")
         lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "  calling scatter!()")
-        # FIXME: handle colorby
+        #<.> # FIXME: handle colorby
+        #<.> if using_color_by
+        #<.>     oad(debug, "  setting color as indicated by color_by")
+        #<.>     color = color_by
+        #<.> end
         scatter!(ax, SA, CT, marker=marker, markersize=markersize, color=color)
     elseif seriestype == :scatterlines
         oad(debug, "  calling scatterlines!()")

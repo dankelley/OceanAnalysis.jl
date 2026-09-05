@@ -332,14 +332,15 @@ export gravity
 """
     decode_color_by(x)
 
-Create a NamedTuple for use as the `color_by` argument of [`plot_TS`](@ref).
+Create a NamedTuple for use as the `color_by` argument of [`plot_TS`](@ref)
+and [`plot_profile`](@ref).
 
 # Arguments
 
 - `levels` a Vector of numeric values. If the purpose of using `decode_color_by`
-  is to set a value for the `color_by` argument of [`plot_TS`](@ref), then
-  the length of `levels` must match the length of columns in the Ctd or
-  Argo object.
+  is to set a value for the `color_by` argument of [`plot_TS`](@ref)
+  or [`plot_profile`](@ref), then the length of `levels` must match the
+  length of columns in the Ctd or Argo object.
 
 - `colorscheme` a symbol stating the ColorScheme to use, with `:turbo` a the default.
 
