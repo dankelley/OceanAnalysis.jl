@@ -1,3 +1,4 @@
+*.patch
 *.nc
 *.png
 *out
