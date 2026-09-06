@@ -7,7 +7,7 @@ Draw a freezing-point curve on an existing CT-SA plot. This is called by
 [`plot_TS`](@ref), but can also be called by the user, if customization of line
 type, etc, is required.
 """
-function plot_freezing_curve!(; kwargs...)
+function plot_freezing_curve!(; kwargs...) # BROKEN -- uses Plots.jl
     n = 50 # it is a pretty straight curve
     xlim = xlims()
     ylim = ylims()
@@ -158,7 +158,6 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     end
     # Draw the data.
     oad(debug, "  drawing the data")
-    oad(debug, "  color_by=$color_by")
     using_color_by = false
     if color_by != false
         if isa(color_by, String)
@@ -189,11 +188,8 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     if using_color_by
         oad(debug, "  set up color_by vector")
     end
-    println("NEXT is kwargs ...")
-    println(kwargs...)
     kwargs_dict = Dict{Symbol,Any}(kwargs)
-    println("NEXT is kwargs_dict...")
-    println(kwargs_dict)
+    oad(debug, "  keys in kwargs_dict: $(collect(keys(kwargs_dict)))")
     title = pop!(kwargs_dict, :title, "")
     xlabel = abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]"
     ylabel = abbreviate ? "CT [°C]" : "Conservative Temperature [°C]"
@@ -204,12 +200,17 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
+    xlims = pop!(kwargs_dict, :xlims, extend_extrema(SA))
+    ylims = pop!(kwargs_dict, :ylims, extend_extrema(CT))
+    limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     oad(debug, "  set linewidth=$linewidth")
-    if !using_color_by
+    if using_color_by
+        oad(debug, "  color being set by color_by")
+    else
         color = pop!(kwargs_dict, :color, :black)
+        oad(debug, "  set color=$color")
     end
-    oad(debug, "  set color=$color")
     marker = pop!(kwargs_dict, :marker, :circle)
     oad(debug, "  set marker=$marker")
     markercolor = pop!(kwargs_dict, :markercolor, :black)
@@ -229,11 +230,6 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "  calling scatter!()")
-        #<.> # FIXME: handle colorby
-        #<.> if using_color_by
-        #<.>     oad(debug, "  setting color as indicated by color_by")
-        #<.>     color = color_by
-        #<.> end
         scatter!(ax, SA, CT, marker=marker, markersize=markersize, color=color)
     elseif seriestype == :scatterlines
         oad(debug, "  calling scatterlines!()")
@@ -243,11 +239,18 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
     end
-    println("FIXME: handle color_by (TOP PRIORITY)")
-    println("FIXME: add freezing-point curve")
-    println("FIXME: add isopycnals")
-    println("FIXME: add spiciness curves")
-    # FIXME: permit scatter;
+    if plot_freezing
+        SAf = range(xlims[1], xlims[2], length=100)
+        CTf = gsw_ct_freezing.(SAf, 0.0, 1.0) # SA, p, saturation_fraction
+        lines!(SAf, CTf, color=:darkgray)
+    end
+
+    println("FIXME: draw color_by palette (top priority)")
+    println("FIXME: document color_by")
+    println("FIXME: document xlims and ylims (IMPORTANT: lim or lims? what is the wording)")
+    println("FIXME: add isopycnal contours")
+    println("FIXME: add spiciness contours")
+    println("FIXME: does scatterlines obey all relevant kwargs?")
     return fig
     #<disabled>    p_TS = plot(SA, CT,
     #<disabled>        xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",

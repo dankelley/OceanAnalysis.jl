@@ -147,8 +147,8 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     title = pop!(kwargs_dict, :title, "")
     xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
     ylab = pop!(kwargs_dict, :ylab, ylabel)
-    xlims = pop!(kwargs_dict, :xlims, extrema(skipmissing(x)))
-    ylims = pop!(kwargs_dict, :ylims, reverse(extrema(skipmissing(y))))
+    xlims = pop!(kwargs_dict, :xlims, extend_extrema(skipmissing(x)))
+    ylims = pop!(kwargs_dict, :ylims, reverse(extend_extrema(skipmissing(y))))
     color = pop!(kwargs_dict, :color, :black)
     fig = Figure()
     ax = Axis(fig[1, 1],

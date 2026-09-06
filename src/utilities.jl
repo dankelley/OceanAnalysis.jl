@@ -433,3 +433,10 @@ end
 export interpolate_to_time
 
 
+function extend_extrema(x, percent=4.0)
+    xmin, xmax = extrema(skipmissing(x))
+    xrange = xmax - xmin
+    percent /= 100.0
+    return (xmin - percent * xrange, xmax + percent * xrange)
+end
+export extend_extrema
