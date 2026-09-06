@@ -242,6 +242,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     end
     plot_TS_sigma0_contours(ax; levels=sigma0_levels, debug=increment_debug(debug))
     plot_TS_spiciness0_contours(ax; levels=spiciness0_levels, debug=increment_debug(debug))
+    println("FIXME: take limits as a kw? (But do other Makie functions do that?")
     println("FIXME: make scatterlines handle color_by (etc - lots to do)")
     oad(debug, "END plot_TS()")
     return fig
