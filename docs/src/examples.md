@@ -8,6 +8,8 @@ velocity components as a function of time and distance and (2) covariation of
 eastward and northward components, with a red line indicating local coastal
 orientation.
 
+**FIXME: update when converted to Makie plotting.**
+
 ```julia
 using OceanAnalysis, Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
@@ -71,6 +73,8 @@ save("amsr.png", fig)
 
 The following shows how to read an Argo NetCDF file, convert to a [`Ctd`](@ref) object, and then make a summary plot.
 
+**FIXME: update when converted to Makie plotting.**
+
 ```julia
 # Read and plot a built-in Argo file
 using OceanAnalysis, Dates, Measures, Plots, Printf
@@ -105,7 +109,7 @@ analysis procedures. However, sometimes the flags seem to be in error, and so a
 prudent analyst will start by plotting as in the top row.  *Exercise:* add a
 middle row showing just the cleaned-up profiles.
 
-plotting 
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 # Illustrate QC processing of hydrographic data
@@ -142,6 +146,8 @@ savefig("argo_qc.png")
 
 The following shows how to map Argo profile locations made within 200 km of
 Sable Island, during the past year.
+
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 # Show Argo profiles within 200 km of Sable Island in last year
@@ -182,6 +188,8 @@ savefig("argo_search.png")
 
 The following shows how to display a trace of the positions of a single Argo
 float.
+
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 # Plot a float trajectory with colour for sequence number
@@ -224,6 +232,8 @@ Bathymetry files at 10m and 100m resolution are provided for some Canadian
 waters via a somewhat-awkward GUI interface at
 <https://data.chs-shc.ca/dashboard/map>. The following shows how to plot such data, after downloading a dataset.  (This only works for the TIFF form of the data.)
 
+**FIXME: update when converted to Makie plotting.**
+
 
 ```julia
 using OceanAnalysis, Plots
@@ -240,6 +250,8 @@ savefig("nonna.png")
 
 The following downloads topographic data for a domain including southern
 Nova Scotia, and displays the data in three plot styles.
+
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 using OceanAnalysis, Plots, TiffImages
@@ -260,10 +272,10 @@ savefig("topography.png")
 The following produces a world map in Cartesian coordinates, with aspect ratio set so that shapes and relative sizes are appropriate at the equator.
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis, CairoMakie
 c = coastline()
-plot_coastline(c)
-savefig("coastline.png")
+fig = plot_coastline(c)
+save("coastline.png", fig)
 ```
 
 ![Coastline diagram](coastline.png)
@@ -274,6 +286,8 @@ savefig("coastline.png")
 The following shows how to read a built-in CTD file, and plot some hydrographic diagrams.
 
 ### CTD profiles
+
+**FIXME: update when I learn how to do layout like this in Makie**
 
 ```julia
 # Read and plot a built-in CTD file
@@ -298,6 +312,8 @@ savefig("ctd_profiles.png")
 The following shows how to grid CTD data in 1-dbar intervals; note that the
 mean spacing of the data is 0.24 dbar. Note the trick of using uniform `y` values, so that `interpolate_barnes()` will effectively do a one-dimensional
 analysis of the variation of Absolute Salinity with sea pressure.
+
+**FIXME: update 
 
 ```julia
 using OceanAnalysis, Plots
@@ -380,12 +396,12 @@ This uses a private data file acquired using a Biosonics scientific echosounder.
 
 ```julia
 # This uses a private file
-using OceanAnalysis, Plots
+using OceanAnalysis, CairoMakie
 f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4"
 if isfile(f)
     e = read_echosounder(f)
-    plot_echosounder(e)
-    savefig("echosounder.png")
+    fig = plot_echosounder(e)
+    save("echosounder.png", fig)
 end
 ```
 
@@ -401,6 +417,8 @@ OceanAnalysis package.) Then it reads the data, and isolates a subset that runs
 roughly orthogonal to the mean path of the Gulf Stream. Finally, it plots a
 chart of sampling locations, along with cross-section diagrams of salinity and
 temperature.
+
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 using OceanAnalysis, Plots
@@ -431,6 +449,7 @@ represent non-permanent tide gauges, while red dots represent permanent tide
 gauges.  (As an exercise, restrict `i` according to latitude and longitude
 criteria, and then examine `i.name` to see the tide gauges in that region.)
 
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 using OceanAnalysis, Plots
@@ -457,6 +476,8 @@ tide gauge, and plot it as a timeseries. (As an exercise, repeat the call to
 `get_tide_gauge_file()` with a specific `times` value. If you ask for too long
 an interval, the CHS server may report an error, in which case you ought to try
 increasing the value of `resolution`.)
+
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
 using OceanAnalysis, Plots, CSV, DataFrames

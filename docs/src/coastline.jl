@@ -1,4 +1,4 @@
-using OceanAnalysis, Plots
+using OceanAnalysis, CairoMakie
 c = coastline()
-plot_coastline(c)
-savefig("coastline.png")
+fig = plot_coastline(c)
+save("coastline.png", fig)

@@ -165,6 +165,7 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         title=title,
         xlabel=xlab,
         ylabel=ylab,
+        yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     xlims = pop!(kwargs_dict, :xlims, extend_extrema(skipmissing(x)))
