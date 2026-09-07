@@ -1,8 +1,10 @@
-""" The OceanAnalysis module is intended to help with the analysis of
-oceanographic data. It is in a preliminary form, providing help with only four
-file types: (1) Argo NetCDF files, (2) CTD files in the Seabird CNV format, (3)
-AMSR satellite NetCDF files and (4) coastline files.  In each case, the
-capabilities are quite limited, reflecting the early stage of the package.
+"""
+
+The OceanAnalysis module is intended to help with the analysis of oceanographic
+data. It is in a preliminary form, providing help with the following data
+types: ADP (RDI) files, AMSR satellite NetCDF files, Argo NetCDF files, CTD
+files in the Seabird CNV format, and coastline files.
+In each case, the capabilities are quite limited, reflecting the early stage of the package.
 Users who need more powerful tools for reading and analysing oceanographic
 data, ought consider using the `oce` package in the R language, which has more
 capabilities and has been in wide use for over a decade.
@@ -25,9 +27,26 @@ be used to calculate some information that can be inferred from what is
 actually stored in the object, e.g. Conservative Temperature and Absolute
 Salinity.
 
-FIXME: discuss `[` here.  I think maybe we ought to cause `[` to call
-`get_element` regardless of the object class. But, in that case, is there any
-need for [`get_element`](@ref) at all?
+Plotting was done with the `Plots` system in the earliest days of this
+package, but a switch to `Makie` was made in the autumn of 2026.  The reason
+was that `Plots` imposes limitations on work that the author commonly wants
+to do, e.g. putting depth contours on SST satellite image. For a gentle
+introduction to Makie, see Ref 1. More context, in a journal
+format, is provided in Ref 2. Full details of the system are
+provided in Ref 3.
+
+# References
+
+1. https://docs.makie.org/stable/ - A blog item introducting Makie
+   https://medium.com/coffee-in-a-klein-bottle/visualizing-data-with-julia-using-makie-7685d7850f06
+
+2. Danisch, Simon, and Julius Krumbiegel. “Makie.Jl: Flexible High-Performance
+   Data Visualization for Julia.” Journal of Open Source Software 6, no. 65
+   (2021): 3349. https://doi.org/10.21105/joss.03349.
+
+3. MakieOrg. “Makie Interactive Data Visualizations and Plotting in Julia.”
+   2026. https://docs.makie.org/stable/.
+
 """
 module OceanAnalysis
 

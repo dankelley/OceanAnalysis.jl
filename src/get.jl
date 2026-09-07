@@ -22,19 +22,19 @@ function get_file(url::String=""; file=:default, destdir::String=".", age::Real=
         file = replace(url, r".*/" => "")
     end
     file = expanduser(joinpath(destdir, file))
-    oad(debug, "  url: \"", url, "\"")
-    oad(debug, "  file: \"", file, "\"")
+    oad(debug, "    url: \"", url, "\"")
+    oad(debug, "    file: \"", file, "\"")
     if isfile(file)
         file_age = convert(Dates.Millisecond, now(UTC) - Dates.unix2datetime(mtime(file))) / Dates.Millisecond(1000) / 86400.0
         if file_age > age
-            oad(debug, "  downloading file, since the existing version is ",
+            oad(debug, "    downloading file, since the existing version is ",
                 round(file_age, digits=4), " days old, exceeding threshold of ", age, " days")
             Downloads.download(url, file)
         else
-            oad(debug, "  using the cached version of the file, since it is less than ", age, " days old")
+            oad(debug, "    using the cached version of the file, since it is less than ", age, " days old")
         end
     else
-        oad(debug, "  downloading file, since it is not cached in the '$destdir' directory")
+        oad(debug, "    downloading file, since it is not cached in the '$destdir' directory")
         Downloads.download(url, file)
     end
     oad(debug, "END get_file")
@@ -72,25 +72,25 @@ println("Downloaded ", length(readdir(sdir)), " files to '", sdir, "'")
 function get_section(url::String; destdir=".", debug::Integer=0)
     # FIXME: maybe an argument to reset for a fresh download+extraction
     oad(debug, "get_section() START")
-    oad(debug, "  url: \"", url, "\"")
-    oad(debug, "  destdir: \"", destdir, "\" (originally)")
+    oad(debug, "    url: \"", url, "\"")
+    oad(debug, "    destdir: \"", destdir, "\" (originally)")
     destdir = joinpath(destdir, replace(url, r".*/(.*_ct[0-9]*).zip" => s"\1"))
-    oad(debug, "  destdir: \"", destdir, "\" (after modification)")
+    oad(debug, "    destdir: \"", destdir, "\" (after modification)")
     zip = replace(url, r".*/" => "")
     if isfile(zip)
-        oad(debug, "  using existing zipfile ", zip)
+        oad(debug, "    using existing zipfile ", zip)
     else
-        oad(debug, "  downloading zipfile from ", url)
+        oad(debug, "    downloading zipfile from ", url)
         Downloads.download(url, zip)
     end
     archive = ZipFile.Reader(zip)
     if isdir(destdir)
-        oad(debug, "  using existing directory ", destdir)
+        oad(debug, "    using existing directory ", destdir)
     else
-        oad(debug, "  creating directory ", destdir)
+        oad(debug, "    creating directory ", destdir)
         mkpath(destdir)
     end
-    oad(debug, "  saving ", length(archive.files), " files in ", destdir)
+    oad(debug, "    saving ", length(archive.files), " files in ", destdir)
     # show a progress bar, but typically the work completes before it even appears.
     #<> progress = Progress(length(archive.files), enabled=debug == 1 ? true : false)
     for file in archive.files
@@ -123,39 +123,39 @@ function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
     oad(debug, "get_element([OA object], element=$(repr(element))) START")
     if element isa Symbol
         element = String(element)
-        oad(debug, "  convert element from a symbol to the string \"$element\"")
+        oad(debug, "    convert element from a symbol to the string \"$element\"")
     end
     # If element is in metadata, return that
-    oad(debug, "  check whether it is in metadata")
+    oad(debug, "    check whether it is in metadata")
     if element in keys(x.metadata)
-        oad(debug, "  return value from metadata")
+        oad(debug, "    return value from metadata")
         oad(debug, "END get_element()")
         return x.metadata[element]
     end
-    oad(debug, "  not in metadata, so check whether it is in data")
+    oad(debug, "    not in metadata, so check whether it is in data")
     # If element is in data (and if data is a DataFrame), return that
     if isa(x.data, DataFrame) && element in names(x.data)
-        oad(debug, "  return value from data")
+        oad(debug, "    return value from data")
         oad(debug, "END get_element()")
         return copy(x.data[:, element])
     end
     # If this is a Ctd object, we can return certain computed things
-    oad(debug, "  not metadata or in data, so check whether it is computable")
+    oad(debug, "    not metadata or in data, so check whether it is computable")
     if typeof(x) == Ctd || typeof(x) == Argo
-        oad(debug, "  the object is either of Ctd or Argo type, so check for some known things like N2, z, depth, SA, C, sigma0 and spiciness0")
+        oad(debug, "    object is Ctd or Argo, so check for e.g. N2, z, depth, SA, C, sigma0 and spiciness0")
         if element == "N2"
-            oad(debug, "  calculating N2 using N2()")
+            oad(debug, "    calculating N2 using N2()")
             oad(debug, "END get_element()")
             return copy(N2(x, debug=increment_debug(debug)))
         end
         p = x.data.pressure
         if element == "z"
-            oad(debug, "  calculating z using gsw_z_from_p()")
+            oad(debug, "    calculating z using gsw_z_from_p()")
             oad(debug, "END get_element()")
             return gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
         end
         if element == "depth"
-            oad(debug, "  calculating depth using -gsw_z_from_p()")
+            oad(debug, "    calculating depth using -gsw_z_from_p()")
             oad(debug, "END get_element()")
             return -gsw_z_from_p.(p, x.metadata["latitude"], 0.0, 0.0)
         end
@@ -165,42 +165,42 @@ function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
         latitude = x.metadata["latitude"]
         local SA = gsw_sa_from_sp.(SP, p, longitude, latitude) |> fix_gsw_bad_code!
         if element == "SA"
-            oad(debug, "  calculating SA using gsw_sa_from_sp.(SP,p,longitude,latitude)")
+            oad(debug, "    calculating SA using gsw_sa_from_sp.(SP,p,longitude,latitude)")
             oad(debug, "END get_element()")
             return copy(SA)
         end
         local CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
         if element == "CT"
-            oad(debug, "  calculating CT using gsw_ct_from_t.(SA,T,p)")
+            oad(debug, "    calculating CT using gsw_ct_from_t.(SA,T,p)")
             oad(debug, "END get_element()")
             return copy(CT)
         end
         if element == "sigma0"
-            oad(debug, "  calculating sigma0 using gsw_sigma0.(SA,CT)")
+            oad(debug, "    calculating sigma0 using gsw_sigma0.(SA,CT)")
             oad(debug, "END get_element()")
             return copy(gsw_sigma0.(SA, CT)) |> fix_gsw_bad_code!
         end
         if element == "spiciness0"
-            oad(debug, "  calculating spiciness using gsw_spiciness.(SA,CT)")
+            oad(debug, "    calculating spiciness using gsw_spiciness.(SA,CT)")
             oad(debug, "END get_element()")
             return copy(gsw_spiciness0.(SA, CT)) |> fix_gsw_bad_code!
         end
     elseif x isa Adp || x isa Echosounder
-        oad(debug, "  object is an Adp or Echosounder ... FIXME: this is a placeholder; nothing special is done")
+        oad(debug, "    object is an Adp or Echosounder ... FIXME: this is a placeholder; nothing special is done")
         if element in keys(x.metadata)
-            oad(debug, "  found element in metadata")
+            oad(debug, "    found element in metadata")
             oad(debug, "END get_element()")
             return x.metadata[element]
         elseif element in keys(x.data)
-            oad(debug, "  found element in data")
+            oad(debug, "    found element in data")
             oad(debug, "END get_element()")
             return x.data[element]
         end
     elseif typeof(x) == Section
-        oad(debug, "  object is a Section ... FIXME: not checked")
+        oad(debug, "    object is a Section ... FIXME: not checked")
         # assume all CTDs have same metadata names
         if element in keys(x.data[1].metadata)
-            oad(debug, "  found element in metadata")
+            oad(debug, "    found element in metadata")
             oad(debug, "END get_element()")
             return copy(map(ctd -> get_element(ctd, element), x.data))
         end

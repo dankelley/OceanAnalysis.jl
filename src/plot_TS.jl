@@ -22,18 +22,17 @@ export plot_freezing_curve
 
 
 """
-    plot_TS(d, sigma0_levels=[], spiciness0_levels=0,
+    plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         plot_freezing=true, abbreviate=false, fontsize::Integer=8,
-        color=:black, color_by=false, debug::Integer=0; kwargs...)
+        color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
 Whether contours of density and spiciness are drawn depends on values of the
 `sigma0_levels` and `spiciness0_levels`. By default, a freezing-point line is
 drawn (if it is within the range of the data) by calling
-[`plot_freezing_curve`](@ref). If customization of line width, color, etc., is
-required, uses `plot_freezing=false` and then call
-[`plot_freezing_curve`](@ref) directly.
+[`plot_freezing_curve`](@ref), but if customization is required,
+use `plot_freezing=false` and call [`plot_freezing_curve!`](@ref) directly.
 
 By default, axis names are written in long form; set `abbreviate=true` for
 shorter versions.
@@ -69,10 +68,6 @@ Information about the analysis is printed if `debug` exceeds 0.
 - `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`,
   `guidefontsize` and `titlefontsize`. Note that any of these values may also be
   supplied as named arguments within `kwargs...`.
-
-- `color` the colour to be used for lines and possibly markers. This
-  is used for both if `color_by` (see next) is false. However, if
-  `color_by` is a NamedTuple, then `color` only applies to the lines.
 
 - `color_by` a control on whether points on the plot are to be colorized
   individually according to some specified value. Four choices are
@@ -163,13 +158,13 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
             oad(debug, "    color_by: \"", color_by, "\"")
             if color_by in names(d.data)
                 color_by = decode_color_by(d[color_by])
-                oad(debug, "    ... decoded palette details with decode_color_by()")
+                #oad(debug, "    ... decoded palette details with decode_color_by()")
                 cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-                oad(debug, "    ... computed cindex")
+                #oad(debug, "    ... computed cindex")
                 colormap = cgrad(color_by.colorscheme)
-                oad(debug, "    ... computed colormap")
+                #oad(debug, "    ... computed colormap")
                 color = colormap[cindex]
-                oad(debug, "    ... computed color")
+                #oad(debug, "    ... computed color")
             elseif color_by == ""
                 oad(debug, "    no palette will be drawn, since color_by=\"\"")
             else
@@ -207,6 +202,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     if using_color_by
         oad(debug, "    will use colormap :$colormap for color_by")
+        typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
     else
         color = pop!(kwargs_dict, :color, :black)
         oad(debug, "    set color=$color")
@@ -224,10 +220,11 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "    calling lines!()")
         lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
-        oad(debug, "    calling scatter!()")
+        oad(debug, "    calling scatter!() with typeof(color): $(typeof(color))")
         scatter!(ax, SA, CT, marker=marker, markersize=markersize, color=color)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!()")
+        # FIXME: mixed up on markercolor vs color etc (see :scatter case)
         scatterlines!(ax, SA, CT, marker=marker, markersize=markersize, markercolor=markercolor,
             linewidth=linewidth, color=color)
     else

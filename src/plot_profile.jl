@@ -104,11 +104,11 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         error("plot_profile() only works on Argo and Ctd objects")
     end
     # For all cases, we need to set up the vertical axis, so do that first
-    oad(debug, "  setting up coordinate system for vertical axis")
+    oad(debug, "    setting up coordinate system for vertical axis")
     # Catch a problematic call
-    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-        @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
-    end
+    #<defunct>if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
+    #<defunct>    @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
+    #<defunct>end
     if vertical == :pressure
         y = d["pressure"]
         ylabel = label_from_varname("p", abbreviate)
@@ -125,12 +125,18 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     using_color_by = false
     if color_by != false
         if isa(color_by, String)
-            oad(debug, "  color_by: \"", color_by, "\"")
+            oad(debug, "    color_by: \"", color_by, "\"")
             if color_by in names(d.data)
                 color_by = decode_color_by(d[color_by])
-                oad(debug, "  decoded palette details with decode_color_by()")
+                #oad(debug, "    ... decoded palette details with decode_color_by()")
+                cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+                #oad(debug, "    ... computed cindex")
+                colormap = cgrad(color_by.colorscheme)
+                #oad(debug, "    ... computed colormap")
+                color = colormap[cindex]
+                #oad(debug, "    ... computed color")
             elseif color_by == ""
-                oad(debug, "  no palette will be drawn, since color_by=\"\"")
+                oad(debug, "    no palette will be drawn, since color_by=\"\"")
             else
                 error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
             end
@@ -143,13 +149,16 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         end
         using_color_by = true
     end
+    if using_color_by
+        oad(debug, "    set up color_by vector")
+    else
+        color = pop!(kwargs_dict, :color, :black)
+    end
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     title = pop!(kwargs_dict, :title, "")
     xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
     ylab = pop!(kwargs_dict, :ylab, ylabel)
-    xlims = pop!(kwargs_dict, :xlims, extend_extrema(skipmissing(x)))
-    ylims = pop!(kwargs_dict, :ylims, reverse(extend_extrema(skipmissing(y))))
-    color = pop!(kwargs_dict, :color, :black)
+    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     fig = Figure()
     ax = Axis(fig[1, 1],
         xaxisposition=:top,
@@ -158,41 +167,47 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         ylabel=ylab,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
+    xlims = pop!(kwargs_dict, :xlims, extend_extrema(skipmissing(x)))
+    ylims = pop!(kwargs_dict, :ylims, reverse(extend_extrema(skipmissing(y))))
     limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
-    lines!(ax, x, y; color=color)
-    println("FIXME: handle color_by (TOP PRIORITY)")
-    println("FIXME: permit scatter or lines")
+    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
+    oad(debug, "    set linewidth=$linewidth")
+    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    if using_color_by
+        oad(debug, "    will use colormap :$colormap for color_by")
+        typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
+    else
+        color = pop!(kwargs_dict, :color, :black)
+        oad(debug, "    set color=$color")
+    end
+    marker = pop!(kwargs_dict, :marker, :circle)
+    oad(debug, "    set marker=$marker")
+    markercolor = pop!(kwargs_dict, :markercolor, :black)
+    oad(debug, "    set markercolor=$markercolor")
+    markersize = pop!(kwargs_dict, :markersize, 5.0)
+    oad(debug, "    set markersize=$markersize")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
+    oad(debug, "    set seriestype=$seriestype")
+    seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
+    if seriestype == :lines
+        oad(debug, "    calling lines!()")
+        lines!(ax, x, y, color=color, linewidth=linewidth)
+    elseif seriestype == :scatter
+        oad(debug, "    calling scatter!() with typeof(color): $(typeof(color))")
+        scatter!(ax, x, y, marker=marker, markersize=markersize, color=color)
+    elseif seriestype == :scatterlines
+        oad(debug, "    calling scatterlines!()")
+        # FIXME: mixed up on markercolor vs color etc (see :scatter case)
+        scatterlines!(ax, x, y, marker=marker, markersize=markersize, markercolor=markercolor,
+            linewidth=linewidth, color=color)
+    else
+        error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
+    end
+    if using_color_by
+        oad(debug, "    drawing colorbar")
+        Colorbar(fig[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+    end
     return fig
-    #<disabled>     p_profile = plot(x, y,
-    #<disabled>         xlabel=label_from_varname(which), ylabel=ylabel,
-    #<disabled>         yaxis=:flip, xmirror=true, framestyle=:box, legend=false,
-    #<disabled>         color=color, tickdirection=:out,
-    #<disabled>         seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-    #<disabled>         tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize,
-    #<disabled>         yrot=90; kwargs...)
-    #<disabled>     if using_color_by
-    #<disabled>         if color_by == ""
-    #<disabled>             oad(debug, "  not plotting symbols with individual colours, but leaving palette space")
-    #<disabled>             p_cbar = plot(ticks=nothing, border=:none)
-    #<disabled>             l = grid(1, 2, widths=[0.88, 0.12])
-    #<disabled>             p_profile = plot(p_profile, p_cbar, layout=l)
-    #<disabled>         else
-    #<disabled>             oad(debug, "  plotting symbols with individual colours")
-    #<disabled>             cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-    #<disabled>             colormap = cgrad(color_by.colorscheme)
-    #<disabled>             markercolor = colormap[cindex]
-    #<disabled>             plot!(x, y,
-    #<disabled>                 seriestype=:scatter,
-    #<disabled>                 linecolor=color, markercolor=markercolor,
-    #<disabled>                 linewidth=1.0, marker=:circle, markersize=1.4;
-    #<disabled>                 kwargs...)
-    #<disabled>             p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
-    #<disabled>             l = grid(1, 2, widths=[0.88, 0.12])
-    #<disabled>             p_profile = plot(p_profile, p_cbar, layout=l)
-    #<disabled>         end
-    #<disabled>     end
-    #<disabled>     oad(debug, "END plot_profile()")
-    #<disabled>     return p_profile
 end
 export plot_profile
 
