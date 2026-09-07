@@ -1,6 +1,6 @@
 """
     plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
-        abbreviate::Symbol=:long, fontsize=8, color=:black, color_by=false,
+        color_by=false, abbreviate::Symbol=:long, fontsize=8,
         debug::Integer=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `d`, showing how the
@@ -27,10 +27,6 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
 - `vertical` a Symbol specifying what to plot on the y axis. The default is
   `:pressure`, but `:density` is also permitted.
 
-- `color` the colour to be used for lines and possibly markers. This
-  is used for both if `color_by` (see next) is false. However, if
-  `color_by` is a NamedTuple, then `color` only applies to the lines.
-
 - `color_by` a control on whether points on the plot are to be colorized
   individually according to some specified value. Four choices are
   possible. (1) If `color_by=false`, then all the data points are painted
@@ -49,15 +45,19 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
   determining how to label the axes. The valid choices are `:short`, `:medium`,
   and `:long`.
 
-- `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`,
-  `guidefontsize` and `titlefontsize`. Note that any of these values may also be
-  supplied as named arguments within `kwargs...`.
+- `fontsize` size of fonts to be supplied to [plot] for the various
+  textual elements.
 
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
 
-- `kwargs...` is passed to `plot()`, to permit further customization; see
-  https://docs.juliaplots.org/stable/ for more information on possibilities.
+- `kwargs...` extra arguments that are parsed and handled accordingly. If
+  `seriestype` is supplied, it controls how the data are indicated.  Possible
+  values are `:scatter` (the default), `:lines` and `:scatterlines`. Each
+  of these is handled in a different way, and may be customized by specifying
+  other `kwargs...` entries. To see the possible entries, call this function
+  with `debug=1` and it will display the entries (and values) that it
+  is using.
 
 # Return value
 
@@ -92,7 +92,7 @@ plot_profile(ctd, which="CT", markerstrokewidth=0.1, markersize=3, color_by="sal
 ```
 """
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
-    abbreviate::Symbol=:long, fontsize=8, color=:black, color_by=false,
+    abbreviate::Symbol=:long, fontsize=8, color_by=false,
     debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
@@ -149,12 +149,12 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         end
         using_color_by = true
     end
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
     if using_color_by
         oad(debug, "    set up color_by vector")
     else
         color = pop!(kwargs_dict, :color, :black)
     end
-    kwargs_dict = Dict{Symbol,Any}(kwargs)
     title = pop!(kwargs_dict, :title, "")
     xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
     ylab = pop!(kwargs_dict, :ylab, ylabel)
@@ -190,14 +190,36 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     oad(debug, "    set seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
     if seriestype == :lines
-        oad(debug, "    calling lines!()")
-        lines!(ax, x, y, color=color, linewidth=linewidth)
+        oad(debug, "    calling lines!() with extra arguments as follows")
+        oad(debug, "      • linewidth=$linewidth")
+        if isa(color, Symbol) || isa(color, String)
+            oad(debug, "      • color=$color")
+        else
+            oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
+        end
+        lines!(ax, x, y, linewidth=linewidth, color=color)
     elseif seriestype == :scatter
-        oad(debug, "    calling scatter!() with typeof(color): $(typeof(color))")
+        oad(debug, "    calling scatter!() with extra arguments as follows")
+        oad(debug, "      • marker=$marker")
+        oad(debug, "      • markersize=$markersize")
+        oad(debug, "      • markercolor=$markercolor")
+        if isa(color, Symbol) || isa(color, String)
+            oad(debug, "      • color=$color")
+        else
+            oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
+        end
         scatter!(ax, x, y, marker=marker, markersize=markersize, color=color)
     elseif seriestype == :scatterlines
-        oad(debug, "    calling scatterlines!()")
-        # FIXME: mixed up on markercolor vs color etc (see :scatter case)
+        oad(debug, "    calling scatterlines!() with extra arguments as follows")
+        oad(debug, "      • marker=$marker")
+        oad(debug, "      • markersize=$markersize")
+        oad(debug, "      • markercolor=$markercolor")
+        oad(debug, "      • linewidth=$linewidth")
+        if isa(color, Symbol) || isa(color, String)
+            oad(debug, "      • color=$color")
+        else
+            oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
+        end
         scatterlines!(ax, x, y, marker=marker, markersize=markersize, markercolor=markercolor,
             linewidth=linewidth, color=color)
     else
