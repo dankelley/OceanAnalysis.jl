@@ -4,13 +4,15 @@ Release notes:
 
 ## Changed
 
-- none
+- various `plot_*!()` functions, to make it easy to produce multi-panel figures
+  in the `Makie` plotting system.
 
 - BREAKING none
 
 ## Added
 
-- none
+- shift to the `Makie` plotting system
+
 
 
 # Changelog from version 0.2.16 to version 0.2.17

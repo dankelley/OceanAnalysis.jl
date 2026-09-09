@@ -12,7 +12,8 @@ The initial version of this package used the `Plots` package for graphics,
 but a switch to `Makie` was made in the autumn of 2026 to
 overcome some limitations of `Plots` for the author's applications,
 and to let users employ the very wide possibilities offered
-by `Makie`.
+by `Makie`.  See the documentation for `plot_profile()` for
+examples of how to plot multiple panels with the `Makie` system
 
 This README file is just a landing page for GitHub perusal. The full
 documentation is available

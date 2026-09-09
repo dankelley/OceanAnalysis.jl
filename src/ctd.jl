@@ -3,7 +3,7 @@ using Dierckx: Spline1D
 using Statistics: mean
 
 """
-    as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
+    as_ctd(a::Argo; add_teos::Bool=true, debug::Integer=0)
 
 Convert an Argo object into a Ctd object.
 
@@ -18,13 +18,14 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 # Keywords
 
 - `add_teos` a logical value indicating whether to add TEOS-10 items (e.g.
-  `SA`) to the `data` portion of the return value.
+  `SA`) to the `data` portion of the return value. The default
+  is to add these.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging
   output should be printed during processing.
 
 """
-function as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
+function as_ctd(a::Argo; add_teos::Bool=true, debug::Integer=0)
     oad(debug, "as_ctd(Argo, ...)")
     oad(debug, "  add_teos: $(add_teos)")
     rval = Ctd(deepcopy(a.metadata), deepcopy(a.data))

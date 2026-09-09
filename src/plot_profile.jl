@@ -3,12 +3,28 @@
         color_by=false, abbreviate::Symbol=:long, fontsize=8,
         debug::Integer=0, kwargs...)
 
+    plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressure,
+        color_by=false, abbreviate::Symbol=:long, fontsize=8,
+        debug::Integer=0, kwargs...)
+
+FIXME: discuss two forms here. Also, in examples, show both
+a single-panel case and a S(z), T(z) two-panel case.
+
 Plot an oceanographic profile for data contained in `d`, showing how the
 variable named by `which` depends on either pressure or density.  The variable
 is drawn on the x axis and either sigma0 or pressure on the y axis; in both
 cases, the waters nearer the surface are shown nearer the top of the plot.
 
+The `plot_profile()` function creates a single plot. The `plot_profile!()`
+function adds to an existing plot.  See the Examples section
+for illustrations of both cases.
+
+
 # Arguments
+
+- `fig_pos` a Figure object created with the Makie function
+  [`Figure`](@ref). This is used for mutating case, i.e. a
+  case using `plot_profile!() as opposed to `plot_profile()`.
 
 - `d` either an Argo object or a Ctd object.
 
@@ -61,8 +77,12 @@ cases, the waters nearer the surface are shown nearer the top of the plot.
 
 # Return value
 
-`plot_profile` returns a `Makie.Figure`, which can be displayed directly or
-saved with `save("filename.png", fig)`.
+The `plot_profile` form returns a `Makie.Figure`, which can be displayed
+directly or saved with `save("filename.png", fig)`.
+
+The `plot_profile!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
+`plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (colorbar,
+which will be of type Nothing if `color_by=false` or `color_by=""`).
 
 # Examples
 ```julia
@@ -73,33 +93,47 @@ pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
 ctd = read_argo(f) |> as_ctd;
 
-# Example 1: overview of an Argo profile.
+# Example 1: Conservative Temperature profile for Argo data.
 # Plot profiles of Conservative Temperature, Absolute Salinity, and potential
 # density anomaly with respect to surface pressure.
 p1 = plot_profile(ctd; which="CT")
-p2 = plot_profile(ctd; which="SA")
-p3 = plot_profile(ctd; which="sigma0")
-plot(p1, p2, p3, layout=(1, 3), size=(800, 400))
 
-# Example 2: add a new variable to the profile, then plot it.
-using GibbsSeaWater
-ctd.data.conductivity = gsw_c_from_sp.(ctd["salinity"], ctd["temperature"], ctd["pressure"]);
-plot_profile(ctd, which="conductivity", xlab="Conductivity [mS/cm]")
-
-# Example 3: colourize Conservative Temperature to indicate salinity.
-# The markers are drawn without borders, to avoid black overpainting.
-plot_profile(ctd, which="CT", markerstrokewidth=0.1, markersize=3, color_by="salinity")
+# Example 2: Two-panels, showing as above, but also a second
+# panel in which dots are coloured to indicate Absolute
+# Salinity.  The first argument in these calls indicates
+# where to place things; `1,1` means row 1 and column 1,
+# and `1,2` means row 1 and column 2. Thus, this plots
+# a black-dot panel on the left and a coloured-dot panel
+# on the right.
+fig = Figure()
+plot_profile!(fig[1,1], ctd; which="CT")
+plot_profile!(fig[1,2], ctd; which="CT", color_by="SA")
+fig # display the result
 ```
 """
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
+    color_by=false, abbreviate::Symbol=:long, fontsize=8,
+    debug::Integer=0, kwargs...)
+    oad(debug, "plot_profile() BEGIN (this calls plot_profile!() directly")
+    fig = Figure()
+    plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
+        color_by=color_by, abbreviate=abbreviate, fontsize=fontsize,
+        debug=debug, kwargs...)
+    oad(debug, "END plot_profile()")
+    return fig
+end
+export plot_profile
+
+
+function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressure,
     abbreviate::Symbol=:long, fontsize=8, color_by=false,
     debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
-        oad(debug, "plot_profile(::Argo; which='$which', ...) START")
+        oad(debug, "plot_profile!(::Argo; which='$which', ...) START")
     elseif isa(d, Ctd)
-        oad(debug, "plot_profile(::Ctd; which='$which', ...) START")
+        oad(debug, "plot_profile!(::Ctd; which='$which', ...) START")
     else
         error("plot_profile() only works on Argo and Ctd objects")
     end
@@ -159,8 +193,8 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
     ylab = pop!(kwargs_dict, :ylab, ylabel)
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    fig = Figure()
-    ax = Axis(fig[1, 1],
+    #fig = Figure()
+    ax = Axis(fig_pos[1, 1],
         xaxisposition=:top,
         title=title,
         xlabel=xlab,
@@ -190,6 +224,12 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
     oad(debug, "    set seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The only recognized keywords are: color, colormap, linewidth, marker, markercolor, ",
+            "markersize, seriestype, title, xlab, xlims, ylab, ylims.")
+    end
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
         oad(debug, "      • linewidth=$linewidth")
@@ -198,7 +238,7 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         else
             oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
         end
-        lines!(ax, x, y, linewidth=linewidth, color=color)
+        plt = lines!(ax, x, y, linewidth=linewidth, color=color)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
         oad(debug, "      • marker=$marker")
@@ -209,7 +249,7 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         else
             oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
         end
-        scatter!(ax, x, y, marker=marker, markersize=markersize, color=color)
+        plt = scatter!(ax, x, y, marker=marker, markersize=markersize, color=color)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
         oad(debug, "      • marker=$marker")
@@ -221,16 +261,18 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
         else
             oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
         end
-        scatterlines!(ax, x, y, marker=marker, markersize=markersize, markercolor=markercolor,
+        plt = scatterlines!(ax, x, y, marker=marker, markersize=markersize, markercolor=markercolor,
             linewidth=linewidth, color=color)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
     end
+    cb = nothing
     if using_color_by
         oad(debug, "    drawing colorbar")
-        Colorbar(fig[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+        cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
     end
-    return fig
+    oad(debug, "END plot_profile!()")
+    return (ax=ax, plt=plt, cb=cb)
 end
-export plot_profile
+export plot_profile!
 

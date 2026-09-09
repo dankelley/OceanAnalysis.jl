@@ -63,6 +63,7 @@ OceanAnalysis.plot_dem
 OceanAnalysis.plot_echosounder
 OceanAnalysis.plot_freezing_curve!
 OceanAnalysis.plot_profile
+OceanAnalysis.plot_profile!
 OceanAnalysis.plot_section
 OceanAnalysis.plot_stations
 OceanAnalysis.plot_TS
