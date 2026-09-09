@@ -161,14 +161,14 @@ function get_amsr(date::Date=Dates.today(); type::String="3day", destdir::String
     oad(debug, "  server=\"$server\"")
     if type == "daily"
         if date == Dates.today()
-            date = date - Dates.Day(3) # FIXME: will 3 days always work, at any time of day?
+            date = date - Dates.Day(3)
         end
         # https://data.remss.com/amsr2/ocean/L3/v08.2/daily/2026/RSS_AMSR2_ocean_L3_daily_2026-08-20_v08.2.nc
         destfile = "RSS_AMSR2_ocean_L3_$(type)_$(year(date))-$(lpad(month(date), 2, '0'))-$(lpad(day(date), 2, '0'))_v08.2.nc"
         url = "$(server)/$(type)/$(year(date))/$destfile"
     elseif type == "3day"
         if date == Dates.today()
-            date = date - Dates.Day(4) # FIXME: will 4 days always work, at any time of day?
+            date = date - Dates.Day(4)
         end
         # https://data.remss.com/amsr2/ocean/L3/v08.2/3day/2026/RSS_AMSR2_ocean_L3_3day_2026-08-20_v08.2.nc
         destfile = @sprintf(
