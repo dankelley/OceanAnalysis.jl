@@ -7,9 +7,6 @@
         color_by=false, abbreviate::Symbol=:long, fontsize=8,
         debug::Integer=0, kwargs...)
 
-FIXME: discuss two forms here. Also, in examples, show both
-a single-panel case and a S(z), T(z) two-panel case.
-
 Plot an oceanographic profile for data contained in `d`, showing how the
 variable named by `which` depends on either pressure or density.  The variable
 is drawn on the x axis and either sigma0 or pressure on the y axis; in both
@@ -19,6 +16,9 @@ The `plot_profile()` function creates a single plot. The `plot_profile!()`
 function adds to an existing plot.  See the Examples section
 for illustrations of both cases.
 
+These functions require a Makie backend to be loaded and activated by
+the caller (e.g. `using CairoMakie` or `using GLMakie`) before they
+are called.
 
 # Arguments
 
@@ -81,8 +81,9 @@ The `plot_profile` form returns a `Makie.Figure`, which can be displayed
 directly or saved with `save("filename.png", fig)`.
 
 The `plot_profile!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
-`plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (colorbar,
-which will be of type Nothing if `color_by=false` or `color_by=""`).
+`plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (a
+`Colorbar` object if `color_by` is a String, or Nothing if `color_by=false` or
+`color_by=""`).
 
 # Examples
 ```julia
@@ -114,11 +115,11 @@ fig # display the result
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     color_by=false, abbreviate::Symbol=:long, fontsize=8,
     debug::Integer=0, kwargs...)
-    oad(debug, "plot_profile() BEGIN (this calls plot_profile!() directly")
+    oad(debug, "plot_profile() BEGIN (this calls plot_profile!() after creating a Figure")
     fig = Figure()
     plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
         color_by=color_by, abbreviate=abbreviate, fontsize=fontsize,
-        debug=debug, kwargs...)
+        debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_profile()")
     return fig
 end
@@ -189,6 +190,8 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     else
         color = pop!(kwargs_dict, :color, :black)
     end
+    # FIXME: do limits correctly (busy with plot_amsr right now... look there)
+    limits = pop!(kwargs_dict, :limits, (nothing, nothing, nothing, nothing))
     title = pop!(kwargs_dict, :title, "")
     xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
     ylab = pop!(kwargs_dict, :ylab, ylabel)
@@ -202,6 +205,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
+    # FIXME: do not use xlims and ylims; limits doe that
     xlims = pop!(kwargs_dict, :xlims, extend_extrema(skipmissing(x)))
     ylims = pop!(kwargs_dict, :ylims, reverse(extend_extrema(skipmissing(y))))
     limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
@@ -227,7 +231,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
-            ". The only recognized keywords are: color, colormap, linewidth, marker, markercolor, ",
+            ". The permitted keywords are: color, colormap, linewidth, marker, markercolor, ",
             "markersize, seriestype, title, xlab, xlims, ylab, ylims.")
     end
     if seriestype == :lines

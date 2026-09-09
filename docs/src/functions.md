@@ -57,6 +57,7 @@ OceanAnalysis.oad
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp
 OceanAnalysis.plot_amsr
+OceanAnalysis.plot_amsr!
 OceanAnalysis.plot_coastline
 OceanAnalysis.plot_coastline!
 OceanAnalysis.plot_dem

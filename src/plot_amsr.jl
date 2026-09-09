@@ -3,14 +3,30 @@
         draw_coastline=true, draw_contours=:none,
         fontsize=8, debug::Integer=0, kwargs...)
 
+    plot_amsr!(fig_posamsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
+        draw_coastline=true, draw_contours=:none,
+        fontsize=8, debug::Integer=0, kwargs...)
+
 Plot a heatmap of a field in an [`Amsr`](@ref) object, using Makie.jl. By
 default, SST is shown using the `:turbo` colorscheme, and the view is of the
 whole earth. For "daily" datasets (see the `type` argument of the
 [`get_amsr`](@ref) function), the ascending and descending swaths are
 averaged.
 
-This function requires a Makie backend to be loaded and activated by
+These functions require a Makie backend to be loaded and activated by
 the caller (e.g. `using CairoMakie` or `using GLMakie`) before it is called.
+
+# Return value
+
+The `plot_amsr` form returns a `Makie.Figure`, which can be displayed
+directly or saved with `save("filename.png", fig)`.
+
+The `plot_amsr!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
+`plt` (a Makie `Heatmap` object) and `cb` (a Colorbar object).
+
+These functions require a Makie backend to be loaded and activated by
+the caller (e.g. `using CairoMakie` or `using GLMakie`) before they
+are called.
 
 # Arguments
 
@@ -41,9 +57,10 @@ the caller (e.g. `using CairoMakie` or `using GLMakie`) before it is called.
   some printing.
 
 - `kwargs...` optional other arguments to customize the heatmap plot, passed
-  through to `Makie.heatmap!`. For example, specify a value for `colormap` to
-  change the palette. An overall title for the plot may be specified with e.g.
-  `title="Sea-Surface Temperature"`.
+  through to `Makie.heatmap!`, e.g. set `colormap` and/or
+  `colorrange` to control the palette; set `limits` to control the plot
+  longitude and latitude limits; set `title` for the title, and set
+  `xlab` and `ylab` to specify axis names.
 
 # Return value
 
@@ -79,22 +96,50 @@ fig
 function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
     draw_coastline=true, draw_contours=:none,
     fontsize=8, debug::Integer=0, kwargs...)
-    oad(debug, "plot_amsr() START")
+    oad(debug, "plot_amsr() BEGIN (this calls plot_amsr!() after creating a Figure")
+    fig = Figure()
+    plot_amsr!(fig[1, 1], amsr; limits=limits,
+        draw_coastline=draw_coastline, draw_contours=draw_contours,
+        fontsize=fontsize, debug=increment_debug(debug), kwargs...)
+    oad(debug, "END plot_amsr()")
+    return fig
+end
+export plot_amsr
+
+function plot_amsr!(fig_pos, amsr::Amsr;
+    draw_coastline=true, draw_contours=:none,
+    fontsize=8, debug::Integer=0, kwargs...)
+    oad(debug, "plot_amsr!() START")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
+    limits = pop!(kwargs_dict, :limits, (0.0, 360, -90.0, 90.0))
     oad(debug, "    limits: $limits")
-    longitude = amsr.metadata["longitude"]
-    latitude = amsr.metadata["latitude"]
-    oad(debug, "    plotting a heatmap of ", amsr.metadata["field"])
     # Set the aspect ratio (different in Makie compared with Plots)
     aspect_ratio = 1.0 / cos(pi * 0.5 * (limits[3] + limits[4]) / 180.0)
     box_aspect = (limits[2] - limits[1]) / ((limits[4] - limits[3]) * aspect_ratio)
     oad(debug, "    aspect_ratio=$aspect_ratio, box_aspect=$box_aspect")
-    # Get some other properties
+    # get the data
+    longitude = amsr.metadata["longitude"]
+    latitude = amsr.metadata["latitude"]
+    z = amsr.data'
+    # Finally, get remaining keywords
+    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    oad(debug, "    colormap: $colormap")
+    colorrange = pop!(kwargs_dict, :colorrange,
+        extrema(zz for zz in skipmissing(z) if !isnan(zz)))
+    oad(debug, "    colorrange: $colorrange")
     title = pop!(kwargs_dict, :title, "")
+    oad(debug, "    title: $title")
     xlab = pop!(kwargs_dict, :xlab, "")
+    oad(debug, "    xlab: $xlab")
     ylab = pop!(kwargs_dict, :ylab, "")
-    fig = Figure()
-    ax = Axis(fig[1, 1],
+    oad(debug, "    ylab: $ylab")
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: colormap, colorrange, ",
+            "limits, title, xlab, and ylab.")
+    end
+    ax = Axis(fig_pos[1, 1],
         title=title,
         xlabel=xlab,
         ylabel=ylab,
@@ -103,11 +148,9 @@ function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, limits...)
     # Transpose amsr.data for Makie (not done for Plots).
-    colormap = pop!(kwargs_dict, :colormap, :turbo)
-    colorrange = pop!(kwargs_dict, :colorrange, (-5.0, 35.0))
-    hm = heatmap!(ax, longitude, latitude, permutedims(amsr.data);
+    oad(debug, "    plotting a heatmap of ", amsr.metadata["field"], " with colormap=:$colormap and colorrange=$colorrange")
+    plt = heatmap!(ax, longitude, latitude, permutedims(amsr.data);
         colormap=colormap, colorrange=colorrange, kwargs_dict...)
-    Colorbar(fig[1, 2], hm, ticklabelsize=fontsize)
 
     # Possibly draw the land
     if draw_coastline
@@ -145,9 +188,9 @@ function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
             @warn "draw_contours ($draw_contours) cannot be handled; try :none, :auto, or a numeric vector"
         end
     end
-
-    oad(debug, "END plot_amsr()")
-    return fig
+    cb = Colorbar(fig_pos[1, 2], plt, ticklabelsize=fontsize)
+    oad(debug, "END plot_amsr!()")
+    return (ax=ax, plt=plt, cb=cb)
 end
-export plot_amsr
+export plot_amsr!
 
