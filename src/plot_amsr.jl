@@ -71,24 +71,25 @@ a depth contour to the image created by `plot_amsr`.
 # Examples
 ```julia
 using OceanAnalysis, CairoMakie
+using Dates # for time format
 
 file = get_amsr()
 sst = read_amsr(file, "SST");
 
 # 1. SST heatmap of Northwest Atlantic.
-plot_amsr(sst; limits=(260, 360, 20, 60))
+plot_amsr(sst; limits=(260, 360, 20, 60), title="SST")
 
 # 2. As example 1, but also showing the 1km isobath
-fig = plot_amsr(sst; limits=(260, 360, 20, 60))
-ax = fig[1, 1]
+fig = Figure(size=(600,310))
+plot_amsr!(fig, sst; limits=(260, 360, 20, 60), title="SST")
 tf = get_topography()
 t = read_topography(tf);
 # NB: transpose data (needed for Makie), and draw twice,
 # since -180<=longitude<=180 for topographic data,
 # as opposed to 0<=longitude<=360 for AMSR data.
-contour!(ax, t["longitude"], t["latitude"], t.data',
+contour!(fig[1,1], t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
-contour!(ax, 360.0 .+ t["longitude"], t["latitude"], t.data',
+contour!(fig[1,1], 360.0 .+ t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
 fig
 ```
