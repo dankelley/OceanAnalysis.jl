@@ -82,7 +82,7 @@ directly or saved with `save("filename.png", fig)`.
 
 The `plot_profile!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
 `plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (a
-`Colorbar` object if `color_by` is a String, or Nothing if `color_by=false` or
+`Colorbar` object if `color_by` is a String, or `nothing` if `color_by=false` or
 `color_by=""`).
 
 # Examples
@@ -197,7 +197,6 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     ylabel = pop!(kwargs_dict, :ylabel, ylabel)
     oad(debug, "    ylabel: $ylabel")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    #fig = Figure()
     ax = Axis(fig_pos[1, 1],
         xaxisposition=:top,
         title=title,

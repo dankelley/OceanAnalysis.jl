@@ -1,14 +1,14 @@
 using GibbsSeaWater: gsw_ct_freezing, gsw_ct_from_t, gsw_sa_from_sp, gsw_sigma0, gsw_spiciness0
 
 """
-    plot_freezing_curve(ax; color=:darkgray, linewidth=1, n=50, debug=0)
+    plot_freezing_curve!(ax; color=:darkgray, linewidth=1, n=50, debug=0)
 
 Draw a freezing-point curve on an existing CT-SA plot. This is called by
 [`plot_TS`](@ref), but can also be called by the user, if customization of line
 color and width is required.
 """
-function plot_freezing_curve(ax; color=:darkgray, linewidth=1.8, n=50, debug=0)
-    oad(debug, "plot_freezing_curve() START")
+function plot_freezing_curve!(ax; color=:darkgray, linewidth=1.8, n=50, debug=0)
+    oad(debug, "plot_freezing_curve!() START")
     axlims = ax.finallimits[]
     SAmin = minimum(axlims)[1]
     SAmax = maximum(axlims)[1]
@@ -16,14 +16,18 @@ function plot_freezing_curve(ax; color=:darkgray, linewidth=1.8, n=50, debug=0)
     SA = range(SAmin, SAmax, length=n)
     CT = gsw_ct_freezing.(SA, 0.0, 1.0) # SA, p, saturation_fraction
     lines!(ax, SA, CT, color=color, linewidth=linewidth)
-    oad(debug, "END plot_freezing_curve()")
+    oad(debug, "END plot_freezing_curve!()")
 end
-export plot_freezing_curve
+export plot_freezing_curve!
 
 
 """
     plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-        plot_freezing=true, abbreviate=false, fontsize::Integer=8,
+        plot_freezing=true, abbreviate=false,
+        color_by=false, debug::Integer=0, kwargs...)
+
+    plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
+        plot_freezing=true, abbreviate=false,
         color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
@@ -31,7 +35,7 @@ Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 Whether contours of density and spiciness are drawn depends on values of the
 `sigma0_levels` and `spiciness0_levels`. By default, a freezing-point line is
 drawn (if it is within the range of the data) by calling
-[`plot_freezing_curve`](@ref), but if customization is required,
+[`plot_freezing_curve!`](@ref), but if customization is required,
 use `plot_freezing=false` and call [`plot_freezing_curve!`](@ref) directly.
 
 By default, axis names are written in long form; set `abbreviate=true` for
@@ -65,9 +69,6 @@ Information about the analysis is printed if `debug` exceeds 0.
 
 - `abbreviate` a Bool indicating whether to abbreviate the axis labels.
 
-- `fontsize` size of fonts to be supplied to [plot] for the various
-  textual elements.
-
 - `color_by` a control on whether points on the plot are to be colorized
   individually according to some specified value. Four choices are
   possible. (1) If `color_by=false`, then all the data points are painted
@@ -87,9 +88,11 @@ Information about the analysis is printed if `debug` exceeds 0.
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
   `seriestype` is supplied, it controls how the data are indicated.  Possible
-  values are `:scatter` (the default), `:lines` and `:scatterlines`. Each
-  of these is handled in a different way, and may be customized by specifying
-  other `kwargs...` entries. To see the possible entries, call this function
+  values are `:scatter` (the default), `:lines` and `:scatterlines`. Each of
+  these is handled in a different way, and may be customized by specifying other
+  `kwargs...` entries. As with other functions in the package, you may use
+  `fontsize` to set the sizes of text being displayed. To see the possible
+  elements provided withing `kwargs`, call this function
   with `debug=1` and it will display the entries (and values) that it
   is using.
 
@@ -97,6 +100,15 @@ Information about the analysis is printed if `debug` exceeds 0.
 
 `plot_TS` returns a `Makie.Figure`, which can be displayed directly or
 saved with `save("filename.png", fig)`.
+
+The `plot_TS` form returns a `Makie.Figure`, which can be displayed
+directly or saved with `save("filename.png", fig)`.
+
+The `plot_TS!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
+`plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (a
+`Colorbar` object if `color_by` is a String, or `nothing` if `color_by=false` or
+`color_by=""`).
+
 
 # Examples
 
@@ -124,20 +136,60 @@ plot_TS(ctd; seriestype=:scatter, markersize=6, color_by="pressure")
 ```
 """
 function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-    plot_freezing=true, abbreviate=false, fontsize::Integer=8,
+    plot_freezing=true, abbreviate=false,
+    color_by=false, debug::Integer=0, kwargs...)
+    oad(debug, "plot_TS() START")
+    fig = Figure()
+    plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+        plot_freezing=plot_freezing, abbreviate=abbreviate,
+        color_by=color_by, debug=increment_debug(debug), kwargs...)
+    oad(debug, "END plot_TS()")
+    return fig
+end
+export plot_TS
+
+
+function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
+    plot_freezing=true, abbreviate=false,
     color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
-        oad(debug, "plot_TS(::Argo) START")
+        oad(debug, "plot_TS!(::Argo) START")
     elseif isa(d, Ctd)
-        oad(debug, "plot_TS(::Ctd) START")
+        oad(debug, "plot_TS!(::Ctd) START")
     else
-        error("plot_TS() only works on Argo and Ctd objects")
+        error("plot_TS!() only works on Argo and Ctd objects")
     end
     oad(debug, "    sigma0_levels: $sigma0_levels")
     oad(debug, "    spiciness0_levels: $spiciness0_levels")
     oad(debug, "    plot_freezing: $plot_freezing")
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    oad(debug, "    keys in kwargs_dict: $(collect(keys(kwargs_dict)))")
+    color = pop!(kwargs_dict, :color, :turbo)
+    oad(debug, "    color=$color (set within kwargs...)")
+    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    oad(debug, "    colormap=$colormap (set within kwargs...)")
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    oad(debug, "    fontsize=$fontsize (set within kwargs...)")
+    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
+    oad(debug, "    linewidth=$linewidth (set within kwargs...)")
+    marker = pop!(kwargs_dict, :marker, :circle)
+    oad(debug, "    marker=$marker (set within kwargs...)")
+    markercolor = pop!(kwargs_dict, :markercolor, :black)
+    oad(debug, "    markercolor=$markercolor (set within kwargs...)")
+    markersize = pop!(kwargs_dict, :markersize, 5.0)
+    oad(debug, "    markersize=$markersize (set within kwargs...)")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
+    oad(debug, "    seriestype=$seriestype (set within kwargs...)")
+    title = pop!(kwargs_dict, :title, "")
+    oad(debug, "    title=$title (set within kwargs...)")
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: color, colormap, fontsize, linewidth, ",
+            "marker, markercolor, markersize, seriestype, and title")
+    end
     local S = d.data.salinity
     local T = d.data.temperature
     local p = d.data.pressure
@@ -179,43 +231,26 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         using_color_by = true
     end
     kwargs_dict = Dict{Symbol,Any}(kwargs)
-    if using_color_by
-        oad(debug, "    set up color_by vector")
-    else
-        color = pop!(kwargs_dict, :color, :black)
-    end
-    oad(debug, "    keys in kwargs_dict: $(collect(keys(kwargs_dict)))")
-    title = pop!(kwargs_dict, :title, "")
     xlabel = abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]"
     ylabel = abbreviate ? "CT [°C]" : "Conservative Temperature [°C]"
-    fig = Figure()
-    ax = Axis(fig[1, 1],
+    ax = Axis(fig_pos[1, 1],
         title=title,
         xlabel=xlabel,
         ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    xlims = pop!(kwargs_dict, :xlims, extend_extrema(SA))
-    ylims = pop!(kwargs_dict, :ylims, extend_extrema(CT))
-    limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
-    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    oad(debug, "    set linewidth=$linewidth")
-    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    lims = pop!(kwargs_dict, :limits,
+        (extend_extrema(skipmissing(SA))...,
+            extend_extrema(skipmissing(CT))...))
+    oad(debug, "    limits: $lims")
+    limits!(ax, lims...)
+    color = pop!(kwargs_dict, :color, :black)
+    oad(debug, "    color: $color (set within kwargs...)")
     if using_color_by
         oad(debug, "    will use colormap :$colormap for color_by")
         typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
-    else
-        color = pop!(kwargs_dict, :color, :black)
-        oad(debug, "    set color=$color")
+        oad(debug, "    overriding color, given color_by argument")
     end
-    marker = pop!(kwargs_dict, :marker, :circle)
-    oad(debug, "    set marker=$marker")
-    markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "    set markercolor=$markercolor")
-    markersize = pop!(kwargs_dict, :markersize, 5.0)
-    oad(debug, "    set markersize=$markersize")
-    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
-    oad(debug, "    set seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
@@ -225,7 +260,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         else
             oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
         end
-        lines!(ax, SA, CT, color=color, linewidth=linewidth)
+        plt = lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
         oad(debug, "      • marker=$marker")
@@ -236,7 +271,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         else
             oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
         end
-        scatter!(ax, SA, CT, marker=marker, markersize=markersize, color=color)
+        plt = scatter!(ax, SA, CT, marker=marker, markersize=markersize, color=color)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
         oad(debug, "      • marker=$marker")
@@ -248,26 +283,25 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         else
             oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
         end
-        scatterlines!(ax, SA, CT, marker=marker, markersize=markersize, markercolor=markercolor,
+        plt = scatterlines!(ax, SA, CT, marker=marker, markersize=markersize, markercolor=markercolor,
             linewidth=linewidth, color=color)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
     end
     if plot_freezing
-        plot_freezing_curve(ax; debug=increment_debug(debug))
-    end
-    if using_color_by
-        oad(debug, "    drawing colorbar")
-        Colorbar(fig[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+        plot_freezing_curve!(ax; debug=increment_debug(debug))
     end
     plot_TS_sigma0_contours(ax; levels=sigma0_levels, debug=increment_debug(debug))
     plot_TS_spiciness0_contours(ax; levels=spiciness0_levels, debug=increment_debug(debug))
-    println("FIXME: take limits as a kw? (But do other Makie functions do that?")
-    println("FIXME: make scatterlines handle color_by (etc - lots to do)")
-    oad(debug, "END plot_TS()")
-    return fig
+    cb = nothing
+    if using_color_by
+        oad(debug, "    drawing colorbar")
+        cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+    end
+    oad(debug, "END plot_TS!()")
+    return (ax=ax, plt=plt, cb=cb)
 end
-export plot_TS
+export plot_TS!
 
 
 
@@ -354,7 +388,8 @@ function plot_TS_spiciness0_contours(ax; levels=[],
     SAmax = maximum(axlims)[1]
     CTmin = minimum(axlims)[2]
     CTmax = maximum(axlims)[2]
-    oad(debug, "    SAmin=$SAmin, SAmax=$SAmax, CTmin=$CTmin, CTmax=$CTmax")
+    oad(debug, "    SAmin=$SAmin, SAmax=$SAmax")
+    oad(debug, "    CTmin=$CTmin, CTmax=$CTmax")
     SAc = range(SAmin, SAmax, length=100)
     CTc = range(CTmin, CTmax, length=300)
     spiciness0c = gsw_spiciness0.(SAc, CTc') |> fix_gsw_bad_code!
