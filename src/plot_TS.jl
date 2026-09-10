@@ -300,11 +300,11 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
             cb.ticksvisible = false
             cb.ticklabelsvisible = false
             cb.labelvisible = false
-            cb.topspinevisible = false
-            cb.rightspinevisible = false
-            cb.leftspinevisible = false
-            cb.bottomspinevisible = false
-            #cb.colormap = Makie.to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
+            cb.spinewidth = 0
+            #cb.topspinevisible = false
+            #cb.rightspinevisible = false
+            #cb.leftspinevisible = false
+            #cb.bottomspinevisible = false
             cb.colormap = to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
         end
     end
