@@ -61,19 +61,19 @@ are called.
   determining how to label the axes. The valid choices are `:short`, `:medium`,
   and `:long`.
 
-- `fontsize` size of fonts to be supplied to [plot] for the various
-  textual elements.
-
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
-  `seriestype` is supplied, it controls how the data are indicated.  Possible
-  values are `:scatter` (the default), `:lines` and `:scatterlines`. Each
-  of these is handled in a different way, and may be customized by specifying
-  other `kwargs...` entries. To see the possible entries, call this function
-  with `debug=1` and it will display the entries (and values) that it
-  is using.
+  `seriestype` is supplied, it controls how the data are illustrated; the
+  possible values are `:scatter` (the default), `:lines` and `:scatterlines`. As
+  with other functions in the package, you may use `fontsize` to set the sizes of
+  text being displayed.  The other entries for `kwargs` follow Makie conventions,
+  apart from a slight variation to `limits`, which here defaults to showing
+  a little whitespace around the data span. To learn about `kwargs`
+  entries that apply to the plot you're trying to make, call the
+  functions with `debug=1`, which will print out entries as they
+  are extracted from `kwargs`.
 
 # Return value
 
@@ -97,7 +97,9 @@ ctd = read_argo(f) |> as_ctd;
 # Example 1: Conservative Temperature profile for Argo data.
 # Plot profiles of Conservative Temperature, Absolute Salinity, and potential
 # density anomaly with respect to surface pressure.
-p1 = plot_profile(ctd; which="CT")
+fig = plot_profile(ctd; which="CT")
+fig # display the results
+# save("plot_profile_example_1.png", fig)
 
 # Example 2: Two-panels, showing as above, but also a second
 # panel in which dots are coloured to indicate Absolute
@@ -110,15 +112,15 @@ fig = Figure()
 plot_profile!(fig[1,1], ctd; which="CT")
 plot_profile!(fig[1,2], ctd; which="CT", color_by="SA")
 fig # display the result
+# save("plot_profile_example_2.png", fig)
 ```
 """
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
-    color_by=false, abbreviate::Symbol=:long, fontsize=8,
-    debug::Integer=0, kwargs...)
+    color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
     oad(debug, "plot_profile() BEGIN (this calls plot_profile!() after creating a Figure")
     fig = Figure()
     plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
-        color_by=color_by, abbreviate=abbreviate, fontsize=fontsize,
+        color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_profile()")
     return fig
@@ -127,7 +129,7 @@ export plot_profile
 
 
 function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressure,
-    abbreviate::Symbol=:long, fontsize=8, color_by=false,
+    abbreviate::Symbol=:long, color_by=false,
     debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
@@ -140,10 +142,6 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     end
     # For all cases, we need to set up the vertical axis, so do that first
     oad(debug, "    setting up coordinate system for vertical axis")
-    # Catch a problematic call
-    #<defunct>if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-    #<defunct>    @warn "It is a *very* bad idea to use seriestype=:line in profile plots; use :path instead"
-    #<defunct>end
     if vertical == :pressure
         y = d["pressure"]
         ylabel = label_from_varname("p", abbreviate)
@@ -185,33 +183,36 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         using_color_by = true
     end
     kwargs_dict = Dict{Symbol,Any}(kwargs)
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    oad(debug, "    fontsize: $fontsize")
     if using_color_by
         oad(debug, "    set up color_by vector")
     else
         color = pop!(kwargs_dict, :color, :black)
     end
-    # FIXME: do limits correctly (busy with plot_amsr right now... look there)
-    #limits = pop!(kwargs_dict, :limits, (nothing, nothing, nothing, nothing))
     title = pop!(kwargs_dict, :title, "")
-    xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
-    ylab = pop!(kwargs_dict, :ylab, ylabel)
+    oad(debug, "    title: $title")
+    xlabel = pop!(kwargs_dict, :xlabel, label_from_varname(which))
+    oad(debug, "    xlabel: $xlabel")
+    ylabel = pop!(kwargs_dict, :ylabel, ylabel)
+    oad(debug, "    ylabel: $ylabel")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     #fig = Figure()
     ax = Axis(fig_pos[1, 1],
         xaxisposition=:top,
         title=title,
-        xlabel=xlab,
-        ylabel=ylab,
+        xlabel=xlabel,
+        ylabel=ylabel,
         yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     lims = pop!(kwargs_dict, :limits,
-        extend_extrema(skipmissing(x))...,
-        extend_extrema(skipmissing(y))...)
-    oad(debug, "    limits: $limits")
-    limits!(ax, lims[1], lims[2], lims[1], lims[2])
+        (extend_extrema(skipmissing(x))...,
+            reverse(extend_extrema(skipmissing(y)))...))
+    oad(debug, "    limits: $lims")
+    limits!(ax, lims...)
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    oad(debug, "    set linewidth=$linewidth")
+    oad(debug, "    linewidth=$linewidth")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     if using_color_by
         oad(debug, "    will use colormap :$colormap for color_by")
@@ -221,19 +222,19 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         oad(debug, "    set color=$color")
     end
     marker = pop!(kwargs_dict, :marker, :circle)
-    oad(debug, "    set marker=$marker")
+    oad(debug, "    marker=$marker")
     markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "    set markercolor=$markercolor")
+    oad(debug, "    markercolor=$markercolor")
     markersize = pop!(kwargs_dict, :markersize, 5.0)
-    oad(debug, "    set markersize=$markersize")
+    oad(debug, "    markersize=$markersize")
     seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
-    oad(debug, "    set seriestype=$seriestype")
+    oad(debug, "    seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
-            ". The permitted keywords are: color, colormap, linewidth, marker, markercolor, ",
-            "markersize, seriestype, title, xlab, xlims, ylab, ylims.")
+            ". The permitted keywords are: color, colormap, fontsize, linewidth, ",
+            "marker, markercolor, markersize, seriestype, title, xlabel, ylabel.")
     end
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
