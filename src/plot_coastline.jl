@@ -77,7 +77,7 @@ central latitude of the plot view.
 The `plot_coastline` form returns a `Makie.Figure`, which can be displayed
 directly or saved with `save("filename.png", fig)`.
 
-The `plot_coatline!` form returns a NamedTuple containing `ax` (a
+The `plot_coastline!` form returns a NamedTuple containing `ax` (a
 `Makie.Axis`), `plt` (a Makie object) and `cb` (a `Colorbar` object set to
 nothing, present here only so all functions in the package return a
 three-component NameTuple).
@@ -213,28 +213,28 @@ plot_coastline(cl, limits=(-70, -60, 42, 48))
 scale_bar(100.0)
 ```
 """
-function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=1.8, fontsize::Real=8,
-    style=:Ibeam)
-    error("FIXME: recode scale_bar() for Makie; also call it scale_bar!")
+function scale_bar!(ax; distance::Real=100.0, x=:left, y=:top,
+    linewidth::Real=1.8, fontsize::Real=8, style=:Ibeam)
+    limits = ax.finallimits
+    println("scale_bar() limits: $limits")
     distance > 0.0 || throw(ArgumentError("distance must be a positive number, but it is $distance"))
-    xlim, ylim = xlims(), ylims() # need these to avoid changing view in the existing plot
-    ymid = (ylim[1] + ylim[2]) / 2.0
-    km_per_degree_lon = geod_distance(xlim[1] - 0.5, ymid, xlim[1] + 0.5, ymid)
-    dx = (xlim[2] - xlim[1]) / 20 # FIXME: may need to adjust the divisor to look nice
-    dy = (ylim[2] - ylim[1]) / 15
+    ymid = (limits[4] - limits[3]) / 2.0
+    km_per_degree_lon = geod_distance(limits[1] - 0.5, ymid, limits[1] + 0.5, ymid)
+    dx = (limits[2] - limits[1]) / 20.0 # FIXME: may need to adjust the divisor to look nice
+    dy = (limits[4] - limimits[3]) / 15.0
     if x == :left
-        X = xlim[1] + dx .+ [0.0, distance / km_per_degree_lon]
+        X = limits[1] + dx .+ [0.0, distance / km_per_degree_lon]
     elseif x == :right
-        X = xlim[2] - dx .- [0.0, distance / km_per_degree_lon]
+        X = limits[2] - dx .- [0.0, distance / km_per_degree_lon]
     elseif isa(x, Number)
         X = x .+ [0.0, distance / km_per_degree_lon]
     else
         throw(ArgumentError("x must be :left, :right, or a number, but it is $(repr(x))"))
     end
     if y == :top
-        y0 = ylim[2] - 1.5 * dy
+        y0 = limits[4] - 1.5 * dy
     elseif y == :bottom
-        y0 = ylim[1] + dy
+        y0 = limits[3] + dy
     elseif isa(y, Number)
         y0 = y
     else
@@ -253,5 +253,5 @@ function scale_bar(distance::Real=100.0; x=:left, y=:top, linewidth::Real=1.8, f
     annotate!((X[1] + X[end]) / 2.0, y0 + 2.0 * dy / 3.0,
         Plots.text("$(trunc(Int, distance)) km", fontsize))
 end
-export scale_bar
+export scale_bar!
 
