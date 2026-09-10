@@ -191,7 +191,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         color = pop!(kwargs_dict, :color, :black)
     end
     # FIXME: do limits correctly (busy with plot_amsr right now... look there)
-    limits = pop!(kwargs_dict, :limits, (nothing, nothing, nothing, nothing))
+    #limits = pop!(kwargs_dict, :limits, (nothing, nothing, nothing, nothing))
     title = pop!(kwargs_dict, :title, "")
     xlab = pop!(kwargs_dict, :xlab, label_from_varname(which))
     ylab = pop!(kwargs_dict, :ylab, ylabel)
@@ -205,10 +205,11 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    # FIXME: do not use xlims and ylims; limits doe that
-    xlims = pop!(kwargs_dict, :xlims, extend_extrema(skipmissing(x)))
-    ylims = pop!(kwargs_dict, :ylims, reverse(extend_extrema(skipmissing(y))))
-    limits!(ax, xlims[1], xlims[2], ylims[1], ylims[2])
+    lims = pop!(kwargs_dict, :limits,
+        extend_extrema(skipmissing(x))...,
+        extend_extrema(skipmissing(y))...)
+    oad(debug, "    limits: $limits")
+    limits!(ax, lims[1], lims[2], lims[1], lims[2])
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     oad(debug, "    set linewidth=$linewidth")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
