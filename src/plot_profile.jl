@@ -275,6 +275,9 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     if using_color_by
         oad(debug, "    drawing colorbar")
         cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+        if color_by == ""
+            cb.visible = false
+        end
     end
     oad(debug, "END plot_profile!()")
     return (ax=ax, plt=plt, cb=cb)

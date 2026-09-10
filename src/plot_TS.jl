@@ -1,5 +1,4 @@
 using GibbsSeaWater: gsw_ct_freezing, gsw_ct_from_t, gsw_sa_from_sp, gsw_sigma0, gsw_spiciness0
-
 """
     plot_freezing_curve!(ax; color=:darkgray, linewidth=1, n=50, debug=0)
 
@@ -292,8 +291,22 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     plot_TS_spiciness0_contours(ax; levels=spiciness0_levels, debug=increment_debug(debug))
     cb = nothing
     if using_color_by
-        oad(debug, "    drawing colorbar")
-        cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+        if color_by != ""
+            oad(debug, "    drawing colorbar")
+            cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+        else
+            oad(debug, "    drawing whitespace at colorbar position")
+            cb = Colorbar(fig_pos[1, 2])              # dummy, panel 2 — same block, hidden
+            cb.ticksvisible = false
+            cb.ticklabelsvisible = false
+            cb.labelvisible = false
+            cb.topspinevisible = false
+            cb.rightspinevisible = false
+            cb.leftspinevisible = false
+            cb.bottomspinevisible = false
+            #cb.colormap = Makie.to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
+            cb.colormap = to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
+        end
     end
     oad(debug, "END plot_TS!()")
     return (ax=ax, plt=plt, cb=cb)
