@@ -165,7 +165,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     oad(debug, "    plot_freezing: $plot_freezing")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     oad(debug, "    keys in kwargs_dict: $(collect(keys(kwargs_dict)))")
-    color = pop!(kwargs_dict, :color, :turbo)
+    color = pop!(kwargs_dict, :color, :black)
     oad(debug, "    color=$color (set within kwargs...)")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     oad(debug, "    colormap=$colormap (set within kwargs...)")
@@ -296,7 +296,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
             cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
         else
             oad(debug, "    drawing whitespace at colorbar position")
-            cb = Colorbar(fig_pos[1, 2])              # dummy, panel 2 — same block, hidden
+            cb = Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
             cb.ticksvisible = false
             cb.ticklabelsvisible = false
             cb.labelvisible = false
