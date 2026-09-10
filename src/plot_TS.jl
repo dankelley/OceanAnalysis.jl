@@ -209,13 +209,13 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
             oad(debug, "    color_by: \"", color_by, "\"")
             if color_by in names(d.data)
                 color_by = decode_color_by(d[color_by])
-                #oad(debug, "    ... decoded palette details with decode_color_by()")
+                oad(debug, "    ... decoded palette details with decode_color_by()")
                 cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-                #oad(debug, "    ... computed cindex")
+                oad(debug, "    ... computed cindex")
                 colormap = cgrad(color_by.colorscheme)
-                #oad(debug, "    ... computed colormap")
+                oad(debug, "    ... computed colormap")
                 color = colormap[cindex]
-                #oad(debug, "    ... computed color")
+                oad(debug, "    ... computed color_from_color_by")
             elseif color_by == ""
                 oad(debug, "    no palette will be drawn, since color_by=\"\"")
             else
@@ -244,12 +244,9 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
             extend_extrema(skipmissing(CT))...))
     oad(debug, "    limits: $lims")
     limits!(ax, lims...)
-    color = pop!(kwargs_dict, :color, :black)
-    oad(debug, "    color: $color (set within kwargs...)")
-    if using_color_by
-        oad(debug, "    will use colormap :$colormap for color_by")
-        typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
-        oad(debug, "    overriding color, given color_by argument")
+    if !using_color_by
+        color = pop!(kwargs_dict, :color, :black)
+        oad(debug, "  DAN  color=$color (set within kwargs...)")
     end
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
     if seriestype == :lines
