@@ -440,3 +440,23 @@ function extend_extrema(x, percent=4.0)
     return (xmin - percent * xrange, xmax + percent * xrange)
 end
 export extend_extrema
+
+"""
+    oad_val(x)
+
+Return a string representation of `x`.  This is used in some debugging
+statements, to show variables that might be numbers, symbols, or
+things like vectors and arrays.
+"""
+function oad_val(x)
+    if isa(x, Symbol)
+        return repr(x)
+    elseif isa(x, String)
+        return x
+    elseif isa(x, Number)
+        return "$x"
+    else
+        return "a $(typeof(x))"
+    end
+end
+export oad_val
