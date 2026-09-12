@@ -134,11 +134,13 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
     fig = Figure()
-    plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+    ax = Axis(fig[1, 1])
+    #plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+    plt = plot_TS!(ax, d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
         plot_freezing=plot_freezing, abbreviate=abbreviate,
         color_by=color_by, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
-    return fig
+    return (ax=ax, fig=fig, plt=plt)
 end
 export plot_TS
 
@@ -161,9 +163,9 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     oad(debug, "    keys in kwargs_dict: $(collect(keys(kwargs_dict)))")
     color = pop!(kwargs_dict, :color, :black)
-    oad(debug, "    color=$color (can be set within kwargs...)")
+    oad(debug, "    color=$(oad_val(color)) (can be set within kwargs...)")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
-    oad(debug, "    colormap=$colormap (can be set within kwargs...)")
+    oad(debug, "    colormap=$(oad_val(colormap)) (can be set within kwargs...)")
     fontsize = pop!(kwargs_dict, :fontsize, 8)
     oad(debug, "    fontsize=$fontsize (can be set within kwargs...)")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
@@ -171,7 +173,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     marker = pop!(kwargs_dict, :marker, :circle)
     oad(debug, "    marker=$marker (can be set within kwargs...)")
     markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "    markercolor=$markercolor (can be set within kwargs...)")
+    oad(debug, "    markercolor=$(oad_val(markercolor)) (can be set within kwargs...)")
     markersize = pop!(kwargs_dict, :markersize, 5.0)
     oad(debug, "    markersize=$markersize (can be set within kwargs...)")
     seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)

@@ -85,15 +85,14 @@ three-component NameTuple).
 # Examples
 
 ```julia
-using OceanAnalysis, CairoMakie
+using OceanAnalysis, GLMakie # or CairoMakie
 
-# 1. Coarse-resolution world view
+# Example 1. world
 plot_coastline(coastline(:global_coarse))
 
-# 2. Nova Scotia view, with land coloured a light gray
-plot_coastline(coastline(:global_fine); color=:gray85,
-    xlabel="Longitude", ylabel="Latitude", title="Study Region",
-    limits=(-70.0, -55.0, 43.0, 48.0))
+# Example 2. Maritime provinces, light-gray, with a scale-bar
+fig = plot_coastline(coastline(), color=:lightgray, limits=(-67, -60, 43, 47))
+scale_bar!(fig, 100.0, linewidth=1)
 ```
 """
 function plot_coastline(coastline::Coastline; debug=0, kwargs...)
@@ -121,7 +120,7 @@ function plot_coastline!(fig_pos, coastline::Coastline;
     ylabel = pop!(kwargs_dict, :ylabel, "")
     oad(debug, "    ylabel=$ylabel")
     color = pop!(kwargs_dict, :color, "bisque3")
-    oad(debug, "    color=$color")
+    oad(debug, "    color=$(oad_val(color))")
     lims = pop!(kwargs_dict, :limits, (-180.0, 180.0, -90.0, 90.0))
     oad(debug, "    limits=$lims")
     mid_latitude = 0.5 * (lims[3] + lims[4])
@@ -141,7 +140,7 @@ function plot_coastline!(fig_pos, coastline::Coastline;
     plt = draw_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"],
         color=color, debug=increment_debug(debug))
     oad(debug, "END plot_coastline()")
-    return (ax=ax, plt=plt, cb=nothing)
+    return (ax=ax, plt=plt)
 end
 export plot_coastline!
 
@@ -184,57 +183,75 @@ export plot_coastline!
 
 
 """
-    scale_bar(distance::Real=100.0; x=:left, y=:top,
-        linewidth::Real=1.8, fontsize::Real=8)
+    scale_bar!(fig, distance::Real=100.0;
+        x=:left, y=:top, style=:Ibeam, debug=0, kwargs...)
 
 Add a horizontal scalebar to a plot made with [`plot_coastline`]@ref).
 
-The length of the scalebar, in km, is given by `distance`, at a position
-dictated by `x` and `y`. The value of `x` must be `:left`, `:right` or a number
-(for longitude), and the value of `y` must be `:bottom`, `:top` or a number
-(for latitude).  The default is to place the scale bar at the top-left.
-If none of the corners are suitable, e.g. if the label covers important
-parts of the plot, use numeric values for `x` and `y` as the longitude
-and latitude of the beginning of the line indicating the scale.
+# Arguments
 
-With `style=:Ibeam` (the default), a rotated Ibeam shape is drawn, with 2/3 of
-the indicated thickness. With `style=:line`, distance is represented by a
-single line that is drawn at the indicated thickness. An error is reported if
-any other `style` value is given.
+- `ax` FIXME
+- `distance` distance to be indicated, in km.
 
-In both cases, `fontsize` dictates the size of the label.
+# Keywords
+
+- `x` a Symbol (either `:left` or `:right`), or a number indicating longitude.
+- `y` a Symbol (either `:bottom` or `:top`), or a number indicating latitude.
+- `style` a Symbol indicating the desired way to represent the distance bar.
+  With `style=:Ibeam` (the default), an Ibeam shape is drawn, with 2/3 of
+  `linewidth`. With `style=:line`, distance is represented by a single line that
+  is drawn at the `linewidth`.
+- `kwargs` other arguments used in plotting. The only possibilities are
+  `linewidth` (which defaults to 1.8) and `color` (which defaults to `:black`).
 
 # Examples
 
 ```julia
 using OceanAnalysis, Plots
 cl = coastline();
-plot_coastline(cl, limits=(-70, -60, 42, 48))
-scale_bar(100.0)
+fig = plot_coastline(cl, limits=(-70, -60, 42, 48))
+scale_bar!(fig, 100.0)
 ```
 """
-function scale_bar!(ax; distance::Real=100.0, x=:left, y=:top,
-    linewidth::Real=1.8, fontsize::Real=8, style=:Ibeam)
-    limits = ax.finallimits
-    println("scale_bar() limits: $limits")
+function scale_bar!(fig, distance::Real=100.0;
+    x=:left, y=:top, style=:Ibeam, debug=0, kwargs...)
+    oad(debug, "scale_bar!() START")
     distance > 0.0 || throw(ArgumentError("distance must be a positive number, but it is $distance"))
-    ymid = (limits[4] - limits[3]) / 2.0
-    km_per_degree_lon = geod_distance(limits[1] - 0.5, ymid, limits[1] + 0.5, ymid)
-    dx = (limits[2] - limits[1]) / 20.0 # FIXME: may need to adjust the divisor to look nice
-    dy = (limits[4] - limimits[3]) / 15.0
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    color = pop!(kwargs_dict, :color, :black)
+    linewidth = pop!(kwargs_dict, :linewidth, 1.8)
+    oad(debug, "    color: $(oad_val(color)) (can be set in kwargs)")
+    oad(debug, "    linewidth: $linewidth (can be set in kwargs)")
+    if !isempty(kwargs_dict)
+        error("scale_bar!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: color and linewidth")
+    end
+    ax = current_axis(fig) # FIXME: make plot_coasline() return ax,fig,plt???
+    A = ax.finallimits[]
+    xmin, ymin = minimum(A)
+    xmax, ymax = maximum(A)
+    oad(debug, "    xmin=$xmin, xmax=$xmax")
+    oad(debug, "    ymin=$ymin, ymax=$ymax")
+    xmid = (xmin + xmax) / 2.0
+    ymid = (ymin + ymax) / 2.0
+    km_per_degree_lon = geod_distance(xmid - 0.5, ymid, xmid + 0.5, ymid)
+    oad(debug, "    km_per_degree_lon: $km_per_degree_lon")
+    dx = (xmax - xmin) / 20.0 # FIXME: may need to adjust the divisor to look nice
+    dy = (ymax - ymin) / 15.0
     if x == :left
-        X = limits[1] + dx .+ [0.0, distance / km_per_degree_lon]
+        X = xmin + dx .+ [0.0, distance / km_per_degree_lon]
     elseif x == :right
-        X = limits[2] - dx .- [0.0, distance / km_per_degree_lon]
+        X = xmax - dx .- [0.0, distance / km_per_degree_lon]
     elseif isa(x, Number)
         X = x .+ [0.0, distance / km_per_degree_lon]
     else
         throw(ArgumentError("x must be :left, :right, or a number, but it is $(repr(x))"))
     end
     if y == :top
-        y0 = limits[4] - 1.5 * dy
+        y0 = ymax - dy
     elseif y == :bottom
-        y0 = limits[3] + dy
+        y0 = ymin + dy
     elseif isa(y, Number)
         y0 = y
     else
@@ -249,9 +266,12 @@ function scale_bar!(ax; distance::Real=100.0, x=:left, y=:top,
     elseif style != :line
         error("style $(repr(style)) not handled; try :line or :Ibeam")
     end
-    plot!(X, Y, color=:black, linewidth=linewidth, label=false, xlim=xlim, ylim=ylim)
-    annotate!((X[1] + X[end]) / 2.0, y0 + 2.0 * dy / 3.0,
-        Plots.text("$(trunc(Int, distance)) km", fontsize))
+    oad(debug, "    X: $X")
+    oad(debug, "    Y: $Y")
+    lines!(ax, X, Y, color=color, linewidth=linewidth)
+    text!(ax, "$(trunc(Int, distance)) km", align=(:center, :center),
+        position=((X[1] + X[end]) / 2.0, y0 + dy / 3.0), color=color)
+    oad(debug, "END scale_bar!()")
 end
 export scale_bar!
 
