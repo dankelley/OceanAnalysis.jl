@@ -144,43 +144,6 @@ function plot_coastline!(fig_pos, coastline::Coastline;
 end
 export plot_coastline!
 
-#<> """
-#<>     plot_coastline!(coastline::Coastline; color=:bisque3, debug::Integer=0, kwargs...)
-#<> 
-#<> Add a coastline to an existing plot.
-#<> 
-#<> This shares several arguments with [`plot_coastline`](@ref), but not those
-#<> that could alter the geometry.  Note that the plot limits are inherited
-#<> from the existing plot, so `xlim` and `ylim` should not be supplied
-#<> in the `kwargs...` grouping.
-#<> 
-#<> # Arguments
-#<> 
-#<> - `coastline` a [`Coastline`](@ref) object, as constructed using [`coastline`](@ref) or [`Coastline`](@ref).
-#<> 
-#<> # Keywords
-#<> 
-#<> - `color` a color specification, with default being a light brown.
-#<> 
-#<> - `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
-#<> 
-#<> - `kwargs...` other arguments, passed to `plot`, e.g. `xlim` and `ylim` to control the plot view, `color` for the land colour, etc.
-#<> """
-#<> function plot_coastline!(coastline::Coastline; color=:bisque3, debug::Integer=0, kwargs...)
-#<>     error("FIXME: recode plot_coastline!() for Makie")
-#<>     oad(debug, "plot_coastline!() START")
-#<>     oad(debug, "  kwargs...: $(kwargs...)")
-#<>     rval = plot!(coastline["longitude"], coastline["latitude"];
-#<>         xlims=xlims(), ylims=ylims(), # inherit from previous plot
-#<>         legend=false, seriestype=:shape,
-#<>         color=color, linecolor=:black, linewidth=0.5,
-#<>         kwargs...)
-#<>     oad(debug, "END plot_coastline!()")
-#<>     rval
-#<> end
-#<> export plot_coastline!
-
-
 
 """
     scale_bar!(fig, distance::Real=100.0;
