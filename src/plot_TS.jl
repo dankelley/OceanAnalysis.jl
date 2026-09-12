@@ -136,11 +136,14 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     fig = Figure()
     ax = Axis(fig[1, 1])
     #plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
-    plt = plot_TS!(ax, d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+    plt = plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
         plot_freezing=plot_freezing, abbreviate=abbreviate,
         color_by=color_by, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
-    return (ax=ax, fig=fig, plt=plt)
+    # return fig FAILS
+    # return plt FAILS
+    #return (ax=ax, fig=fig, plt=plt) works but no display
+    return Makie.FigureAxisPlot(fig, ax, plt)
 end
 export plot_TS
 

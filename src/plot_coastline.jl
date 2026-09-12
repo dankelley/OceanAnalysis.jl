@@ -30,20 +30,21 @@ function draw_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     oad(debug, "    plotting the assembled polygons")
     if !isempty(polygons)
         if color == :white
-            poly!(ax, polygons, strokewidth=linewidth, strokecolor=:black)
+            rval = poly!(ax, polygons, strokewidth=linewidth, strokecolor=:black)
         else
-            poly!(ax, polygons, color=color, strokewidth=linewidth, strokecolor=:black)
+            rval = poly!(ax, polygons, color=color, strokewidth=linewidth, strokecolor=:black)
         end
+        oad(debug, "END draw_coastline_polygons!()")
+        return rval
+    else
+        error("this coastline object contains no polygons")
     end
-    oad(debug, "END draw_coastline_polygons!()")
 end
 # not exported
 
 
 """
-    plot_coastline(coastline::Coastline; debug=0, kwargs...)
-
-    plot_coastline!(fig_pos, coastline::Coastline; debug=0, kwargs...)
+    plot_coastline(coastline::Coastline; scalebar=false, debug=0, kwargs...)
 
 Plot a coastline with cartesian longitude and latitude axes (i.e. without a map
 projection).
@@ -53,14 +54,20 @@ central latitude of the plot view.
 
 # Arguments
 
-- `fig_pos` a Figure object created with the Makie function [`Figure`](@ref).
-  This is used for mutating case, i.e. a case using `plot_coastline!() as
-  opposed to `plot_coastline()`.
-
 - `coastline` a [`Coastline`](@ref) object, as constructed using
   [`coastline`](@ref) or [`Coastline`](@ref).
 
 # Keywords
+
+- `scalebar` either a Bool value or a NamedTuple. If `scalebar` is a Bool
+  value, then false means not to draw a scale-bar, and true means to draw a
+  default one (showing distance 101km with an I-beam shape at the top-left of the
+  plot panel). If `scalebar` is a Tuple, then it must hold 4 values: `distance`
+  for the length (in km) to be shown; `x` to indicate the horizontal location on
+  the diagram (which may be `:left`, `:right`, or a numerical value
+  specifying longitude); `y` (which may be `:bottom`, `:top` or a numerical
+  value specifying latitude); `linewidth` (which defaults to 1.8); and
+  `style`, which in this version must be `:Ibeam`.
 
 - `debug` an integer indicating whether to print information during processing.
   The default value of 0 means to work quietly, and any larger integer indicates
@@ -68,7 +75,7 @@ central latitude of the plot view.
 
 - `kwargs...` other named arguments. Use `limits` to set the plot domain (with
   default `(-180.0,180.0,-90.0,90.0)` to show the whole world.  Use `color` to
-  set the land colour (with default `bisque3`). Use `linewidth` (default 1) to
+  set the land color (with default `bisque3`). Use `linewidth` (default 1) to
   set the width of coastlines). Use `xlabel`, `ylabel` and `title` in the usual
   way for Makie plots. Use `fontsize` to set the font size for axes and titles.
 
@@ -95,34 +102,54 @@ fig = plot_coastline(coastline(), color=:lightgray, limits=(-67, -60, 43, 47))
 scale_bar!(fig, 100.0, linewidth=1)
 ```
 """
-function plot_coastline(coastline::Coastline; debug=0, kwargs...)
+function plot_coastline(coastline::Coastline; scalebar=false, debug=0, kwargs...)
     oad(debug, "plot_coastline() START")
     fig = Figure()
-    plot_coastline!(fig[1, 1], coastline;
+    ax, plt = plot_coastline!(fig[1, 1], coastline; scalebar=scalebar,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_coastline()")
     return fig
 end
 export plot_coastline
 
-function plot_coastline!(fig_pos, coastline::Coastline;
+function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     debug::Integer=0, kwargs...)
     oad(debug, "plot_coastline!() START")
+    oad(debug, "    scalebar=$scalebar (originally)")
+    # Check scalebar (used near the end of this function)
+    gave_scalebar = false
+    if scalebar == true
+        scalebar = (distance=100.0, x=:left, y=:top, style=:Ibeam, linewidth=1.8)
+        oad(debug, "    scalebar=$scalebar (after expansion)")
+        gave_scalebar = true
+    end
+    if gave_scalebar
+        isa(scalebar, NamedTuple) || error("scalebar, if given, must be a NamedTuple")
+        (:distance in keys(scalebar)) || error("scalebar must have an entry called `distance`")
+    end
+    # Process kwargs...
     kwargs_dict = Dict{Symbol,Any}(kwargs)
-    fontsize = pop!(kwargs_dict, :linewidth, 8)
+    color = pop!(kwargs_dict, :color, :bisque3)
+    oad(debug, "    color=$color")
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
     oad(debug, "    fontsize=$fontsize")
-    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
+    linewidth = pop!(kwargs_dict, :linewidth, 8)
     oad(debug, "    linewidth=$linewidth")
+    lims = pop!(kwargs_dict, :limits, (-180.0, 180.0, -90.0, 90.0))
+    oad(debug, "    limits=$lims")
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "    title=$title")
     xlabel = pop!(kwargs_dict, :xlabel, "")
     oad(debug, "    xlabel=$xlabel")
     ylabel = pop!(kwargs_dict, :ylabel, "")
     oad(debug, "    ylabel=$ylabel")
-    color = pop!(kwargs_dict, :color, "bisque3")
-    oad(debug, "    color=$(oad_val(color))")
-    lims = pop!(kwargs_dict, :limits, (-180.0, 180.0, -90.0, 90.0))
-    oad(debug, "    limits=$lims")
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: color, fontsize, linewidth, ",
+            "limits, title, xlabel, and ylabel")
+    end
+
     mid_latitude = 0.5 * (lims[3] + lims[4])
     oad(debug, "    computed mid_latitude=$mid_latitude")
     aspect_ratio = 1.0 / cos(mid_latitude * pi / 180.0)
@@ -137,10 +164,69 @@ function plot_coastline!(fig_pos, coastline::Coastline;
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, lims...)
-    plt = draw_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"],
+    land_plt = draw_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"],
         color=color, debug=increment_debug(debug))
+    if gave_scalebar
+        # distance=100.0, x=:left, y=:top, style=:Ibeam
+        distance = scalebar.distance
+        style = scalebar.style
+        (distance > 0.0) || error("scalebar.distance must be > 0, but it is $distance")
+        color = (:color in keys(scalebar)) ? scalebar.color : :black
+        x = (:x in keys(scalebar)) ? scalebar.x : :left
+        y = (:y in keys(scalebar)) ? scalebar.y : :top
+        style == :Ibeam || error("style must be :Ibeam, but it is $(repr(style))")
+        linewidth = (:linewidth in keys(scalebar)) ? scalebar.linewidth : 3.0 / 2.0
+        oad(debug, "    scalebar parameters: distance=$distance, x=$(repr(x)), y=$(repr(y)), style=$(repr(style)), linewidth=$scalebar.linewidth")
+        A = ax.finallimits[]
+        xmin, ymin = minimum(A)
+        xmax, ymax = maximum(A)
+        oad(debug, "    xmin=$xmin, xmax=$xmax")
+        oad(debug, "    ymin=$ymin, ymax=$ymax")
+        xmid = (xmin + xmax) / 2.0
+        ymid = (ymin + ymax) / 2.0
+        oad(debug, "    xmid=$xmid, ymid=$ymid")
+        km_per_degree_lon = geod_distance(xmid - 0.5, ymid, xmid + 0.5, ymid)
+        oad(debug, "    km_per_degree_lon: $km_per_degree_lon")
+        dx = (xmax - xmin) / 20.0 # FIXME: may need to adjust the divisor to look nice
+        dy = (ymax - ymin) / 15.0
+        if x == :left
+            X = xmin + dx .+ [0.0, distance / km_per_degree_lon]
+        elseif x == :right
+            X = xmax - dx .- [0.0, distance / km_per_degree_lon]
+        elseif isa(x, Number)
+            X = x .+ [0.0, distance / km_per_degree_lon]
+        else
+            throw(ArgumentError("x must be :left, :right, or a number, but it is $(repr(x))"))
+        end
+        if y == :top
+            y0 = ymax - dy
+        elseif y == :bottom
+            y0 = ymin + dy
+        elseif isa(y, Number)
+            y0 = y
+        else
+            throw(ArgumentError("y must be :top, :bottom, or a number, but it is $(repr(y))"))
+        end
+        Y = [y0, y0]
+        oad(debug, "    Y=$Y")
+        if style == :Ibeam
+            DY = (X[2] - X[1]) / 30
+            X = [X[1], X[1], X[1], X[2], X[2], X[2]]
+            Y = [Y[1] + DY, Y[1] - DY, Y[1], Y[2], Y[2] + DY, Y[2] - DY]
+        elseif style != :line
+            error("style $(repr(style)) not handled; try :line or :Ibeam")
+        end
+        oad(debug, "    X: $X")
+        oad(debug, "    Y: $Y")
+        sb_lines_plt = lines!(ax, X, Y, color=color, linewidth=linewidth)
+        sb_text_plt = text!(ax, "$(trunc(Int, distance)) km", align=(:center, :center),
+            position=((X[1] + X[end]) / 2.0, y0 + dy / 3.0), color=color)
+    else
+        sb_lines_plt = nothing
+        sb_text_plt = nothing
+    end
     oad(debug, "END plot_coastline()")
-    return (ax=ax, plt=plt)
+    return ax, (land=land_plt, scalebar_lines=sb_lines_plt, scalebar_text=sb_text_plt)
 end
 export plot_coastline!
 
