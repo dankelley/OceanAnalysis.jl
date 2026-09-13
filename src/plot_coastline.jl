@@ -77,7 +77,8 @@ central latitude of the plot view.
   default `(-180.0,180.0,-90.0,90.0)` to show the whole world.  Use `color` to
   set the land color (with default `bisque3`). Use `linewidth` (default 1) to
   set the width of coastlines). Use `xlabel`, `ylabel` and `title` in the usual
-  way for Makie plots. Use `fontsize` to set the font size for axes and titles.
+  way for Makie plots. Use `fontsize` (which defaults to 8) to set the font
+  size for axes and titles.
 
 # Return value
 
@@ -105,8 +106,7 @@ scale_bar!(fig, 100.0, linewidth=1)
 function plot_coastline(coastline::Coastline; scalebar=false, debug=0, kwargs...)
     oad(debug, "plot_coastline() START")
     fig = Figure()
-    ax, plt = plot_coastline!(fig[1, 1], coastline; scalebar=scalebar,
-        debug=increment_debug(debug), kwargs...)
+    plot_coastline!(fig[1, 1], coastline; scalebar=scalebar, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_coastline()")
     return fig
 end
@@ -127,7 +127,7 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         isa(scalebar, NamedTuple) || error("scalebar, if given, must be a NamedTuple")
         (:distance in keys(scalebar)) || error("scalebar must have an entry called `distance`")
     end
-    # Process kwargs...
+    oad(debug, "    processing kwargs...")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     color = pop!(kwargs_dict, :color, :bisque3)
     oad(debug, "    color=$color")
