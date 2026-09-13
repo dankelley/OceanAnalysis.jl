@@ -97,10 +97,7 @@ Information about the analysis is printed if `debug` exceeds 0.
 
 # Return value
 
-`plot_TS` returns a `Makie.Figure`, which can be displayed directly or
-saved with `save("filename.png", fig)`.
-
-The `plot_TS` form returns a `Makie.Figure`, which can be displayed
+The `plot_TS` form returns a Makie `Figure`, which can be displayed
 directly or saved with `save("filename.png", fig)`.
 
 The `plot_TS!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
@@ -134,16 +131,16 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
     fig = Figure()
-    ax = Axis(fig[1, 1])
+    #ax = Axis(fig[1, 1])
     #plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
-    plt = plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+    plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
         plot_freezing=plot_freezing, abbreviate=abbreviate,
         color_by=color_by, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
     # return fig FAILS
     # return plt FAILS
     #return (ax=ax, fig=fig, plt=plt) works but no display
-    return Makie.FigureAxisPlot(fig, ax, plt)
+    return fig
 end
 export plot_TS
 
