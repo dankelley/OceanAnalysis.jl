@@ -1,4 +1,4 @@
-using Downloads, TiffImages, NCDatasets, Plots, ColorSchemes, Printf
+using Downloads, TiffImages, NCDatasets, ColorSchemes, Printf
 using DataStructures: OrderedDict
 using Interpolations: interpolate, scale
 
@@ -54,7 +54,7 @@ with [`get_topography`](@ref).
 
 ```julia
 # Plot world view of ocean depth
-using OceanAnalysis, Plots
+using OceanAnalysis, Plots # FIXME: eliminate Plots
 topo_file = get_topography(:global_coarse);
 topo = read_topography(topo_file);
 water_depth = -topo.data / 1000.0; # depth (i.e. negative height) in km
@@ -295,7 +295,7 @@ of the `topo` object).
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis, Plots # FIXME: eliminate Plots
 file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
     "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
 topo = read_topography(file)

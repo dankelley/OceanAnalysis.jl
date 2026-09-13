@@ -22,10 +22,11 @@ directly, again with NaN values to indicate breaks in the coastline.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis, GLMakie
+using DataFrames, CSV
 # Method 1
 cl = coastline(:global_fine);
-plot_coastline(cl, xlims=(-68, -58), ylims=(43, 48))
+plot_coastline(cl, limits=(-68, -58, 43, 48))
 # Method 2
 dir = dirname(dirname(pathof(OceanAnalysis)))
 file = joinpath(dir, "data", "coastline_coarse.csv.gz")
@@ -88,7 +89,7 @@ and also computing the span across the stations.  The maximum of these
 two distances is multiplied by `scale`, and from this the x and y
 limits of the plot are set.  Altering the value of `scale` is thus
 the way a user can control the view. The station locations
-are drawn by calling `scatter` from the `Plots` package, to which
+are drawn by calling `scatter`, to which
 the `kwargs...` elements are passed directly; the example
 shows how to use this fact to alter the station symbols.
 
@@ -98,7 +99,7 @@ using the `GMT` package.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis, Plots # FIXME: eliminate 'Plots'
 # Red circle marks a station south of due east of Fort Louisbourg
 # and due south of Saint Pierre and Miquelon.
 p1 = station_map(-56.33, 45.90)
