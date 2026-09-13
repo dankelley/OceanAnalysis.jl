@@ -97,7 +97,7 @@ fig
 function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
     draw_coastline=true, draw_contours=:none,
     fontsize=8, debug::Integer=0, kwargs...)
-    oad(debug, "plot_amsr() BEGIN (this calls plot_amsr!() after creating a Figure")
+    oad(debug, "plot_amsr() BEGIN")
     fig = Figure()
     plot_amsr!(fig[1, 1], amsr; limits=limits,
         draw_coastline=draw_coastline, draw_contours=draw_contours,
