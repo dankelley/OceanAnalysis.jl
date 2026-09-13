@@ -1,17 +1,13 @@
-# 1. put fontsize in kwargs...
-# FIXME: rewrite as Makie
 """
     plot_topography(topo::Topography;
-        xlims=:auto, ylims=:auto, tickdirection=:out,
-        domain=:sea, color=:land_sea, clim=:auto,
-        draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-        debug::Integer=0, kwargs...)
+        domain=:sea, land_color=:bisque3, sea_color=:lightblue,
+        draw_coastline=true, debug::Integer=0, kwargs...)
+
+    plot_topography!(fig_pos, topo::Topography;
+        domain=:sea, land_color=:bisque3, sea_color=:lightblue,
+        draw_coastline=true, debug::Integer=0, kwargs...)
 
 Draw a `heatmap` image of topography.
-
-The `domain` argument tells whether to display both land and sea values, or
-just land, or just sea. The default is to plot just the sea, with land a light
-brown color.
 
 # Arguments
 
@@ -19,27 +15,25 @@ brown color.
 
 # Keywords
 
-- `domain` indicates whether to display both land and sea values, or
-just land, or just sea. The default is to plot just the sea, with land a light
-brown color.
+- `domain` a Symbol that indicates what to display with a heatmap. The valid
+  choices are `:land`, `:sea` and `:land_and_sea`.
 
-- `color` ??? 
+- `draw_coastline` Bool value indicating whether to draw the coastline (true by
+  default)
 
-- `clim` ??? 
+- `land_color` color used to fill the land -- FIXME, as not coded yet.
 
-- `draw_coastline` non-function FIXME
-
-- `land_color` FIXME
-
-- `sea_color` FIXME
+- `sea_color` color used to fill the land -- FIXME, as not coded yet.
 
 - `debug` an integer indicating whether to print information during processing.
   The default value of 0 means to work quietly, and any larger integer indicates
   to print some information.
 
-- `kwargs` Other keyword arguments. Use `fontsize` (which defaults to 8) to set
-  the font size for axes and titles. Use `title` (which defaults to an empty
-  string) to set the title of the plot.
+  - `kwargs` Other keyword arguments. You may use `colorrange` to set the range
+  for the values being coloured (which defaults to the data range). Use
+  `fontsize` (which defaults to 8) to set the font size for axes and
+  titles. Use `title` (which defaults to an empty string) to set the
+  title of the plot.
 
 # Examples
 
@@ -52,29 +46,35 @@ plot_topography(topo)
 ```
 """
 function plot_topography(topo::Topography;
-    domain=:sea, color=:land_sea, clim=:auto,
-    draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-    debug::Integer=0, kwargs...)
+    domain=:sea, land_color=:bisque3, sea_color=:lightblue,
+    draw_coastline=true, debug::Integer=0, kwargs...)
     fig = Figure()
-    plot_topography!(fig[1, 1], topo, domain=domain, color=color, clim=clim,
-        draw_coastline=draw_coastline, land_color=land_color, sea_color=sea_color,
-        debug=increment_debug(debug), kwargs...)
-    return fig
+    plot_topography!(fig[1, 1], topo;
+        domain=domain, land_color=land_color, sea_color=sea_color,
+        draw_coastline=draw_coastline, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_topography()")
+    return fig
 end
 export plot_topography
 
 function plot_topography!(fig_pos, topo::Topography;
-    domain=:sea, color=:land_sea, clim,
-    draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-    debug::Integer=0, kwargs...)
+    domain=:sea, land_color=:bisque3, sea_color=:lightblue,
+    draw_coastline=true, debug::Integer=0, kwargs...)
     oad(debug, "plot_topography!() BEGIN")
-    domain in (:sea, :land, :both) || throw(ArgumentError("domain $(repr(domain)) not permited; use :sea, :land, or :both"))
+    domain in (:sea, :land, :land_and_sea) || throw(ArgumentError("domain $(repr(domain)) not permited; use :sea, :land, or :land_and_sea"))
     oad(debug, "    domain= :", domain)
     oad(debug, "    land_color= :", land_color)
     oad(debug, "    sea_color= :", sea_color)
     oad(debug, "    processing kwargs...")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
+    #<not user-controlled in this version> colormap = pop!(kwargs_dict, :colormap, :inferno)
+    #<not user-controlled in this version> oad(debug, "        • colormap= :$colormap")
+    colorrange = pop!(kwargs_dict, :colorrange, :auto)
+    if colorrange == :auto
+        oad(debug, "        • colorrange=$colorrange (i.e., will use data range)")
+    else
+        oad(debug, "        • colorrange=$colorrange")
+    end
     fontsize = pop!(kwargs_dict, :fontsize, 8)
     oad(debug, "        • fontsize=$fontsize")
     title = pop!(kwargs_dict, :title, "")
@@ -82,14 +82,14 @@ function plot_topography!(fig_pos, topo::Topography;
     if !isempty(kwargs_dict)
         error("plot_topography!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
-            ". The permitted keywords are: fontsize and title")
+            ". The permitted keywords are: colorrange, fontsize and title")
     end
-    longitude = copy(topo["longitude"]) # FIXME: do we need to copy?
-    latitude = copy(topo["latitude"]) # FIXME: do we need to copy?
-    data = copy(topo.data) # FIXME: do we need to copy?
-    aspect_ratio = 1.0 / cos(0.5 * (latitude[1] + latitude[end]) * pi / 180.0)
+    longitude = copy(topo["longitude"]) # no need to copy, but it's small
+    latitude = copy(topo["latitude"]) # no need to copy, but it's small
+    data = copy(topo.data) # we may multiply by -1 here, so must copy
     xlim = extrema(longitude)
     ylim = extrema(latitude)
+    aspect_ratio = 1.0 / cos(0.5 * sum(ylim) * pi / 180.0)
     box_aspect = (xlim[2] - xlim[1]) / ((ylim[2] - ylim[1]) * aspect_ratio)
     oad(debug, "    aspect_ratio=$aspect_ratio, box_aspect=$box_aspect")
     # FIXME: fix as for coastline and amsr
@@ -100,33 +100,28 @@ function plot_topography!(fig_pos, topo::Topography;
 
     oad(debug, "    data extrema: ", extrema(filter(!isnan, data)))
     if domain == :sea
-        data .= -data
-        data[data.<0.0] .= NaN
         oad(debug, "    setting land values to NaN")
-        if color == :land_sea
-            oad(debug, "    setting colorscheme to reversed first half of :topo")
-            color = [get(ColorSchemes.topo, i) for i in 0.5:-0.6/1000:0.0]
-        end
+        data[data.>0.0] .= NaN
+        data .= -data
+        oad(debug, "    setting colorscheme to reversed first half of ColorSchemes.topo")
+        colormap = [get(ColorSchemes.topo, i) for i in 0.5:-0.6/1000:0.0]
     elseif domain == :land
-        data[data.<0.0] .= NaN
         oad(debug, "    setting sea values to NaN")
-        if color == :land_sea
-            oad(debug, "    setting colorscheme to second half of :topo")
-            color = [get(ColorSchemes.topo, i) for i in 0.5:0.6/1000:1.0]
-        end
-    elseif domain == :both
-        if color == :land_sea
-            oad(debug, "    setting colorscheme to :topo")
-            color = :topo
-        end
+        data[data.<0.0] .= NaN
+        oad(debug, "    setting colorscheme to second half of ColorSchemes.topo")
+        colormap = [get(ColorSchemes.topo, i) for i in 0.5:0.6/1000:1.0]
+    elseif domain == :land_and_sea
+        oad(debug, "    setting colorscheme to ColorSchemes.topo")
+        colormap = ColorSchemes.topo
     end
-    if clim == :auto
-        if domain == :both
-            clim = maximum(abs.(filter(!isnan, data))) .* (-1.0, 1.0)
+    if colorrange == :auto
+        if domain == :land_and_sea
+            colorrange = maximum(abs.(filter(!isnan, data))) .* (-1.0, 1.0)
+            oad(debug, "    colorrange defaulting to ", colorrange, " domain == :land_and_sea")
         else
-            clim = extrema(filter(!isnan, data))
+            colorrange = extrema(filter(!isnan, data))
+            oad(debug, "    colorrange defaulting to ", colorrange, " domain != :land_and_sea")
         end
-        oad(debug, "    clim defaulting to ", clim)
     end
     if domain == :sea
         background_color_inside = land_color
@@ -135,14 +130,28 @@ function plot_topography!(fig_pos, topo::Topography;
     else
         background_color_inside = :transparent
     end
-    hm_plt = heatmap!(ax, longitude, latitude, permutedims(data)) # FIXME:use colormap etc
-    cb_plt = Colorbar(fig_pos[1, 2], hm_plt, ticklabelsize=fontsize)
-    if draw_coastline == "FIXME"
-        # FIXME: this is definitely wrong
-        oad(debug, "    plotting the coastline")
-        cl = coastline()
-        plot!(p, cl.data.longitude, cl.data.latitude, lw=0.5, seriestype=:path, color=:black, legend=false; kwargs...)
+    oad(debug, "    drawing the heatmap")
+    if domain == :land_and_sea
+        nan_color = :white
+    elseif domain == :sea
+        nan_color = land_color
+    elseif domain == :land
+        nan_color = sea_color
     end
+    hm_plt = heatmap!(ax, longitude, latitude, permutedims(data),
+        colormap=colormap, colorrange=colorrange,
+        nan_color=nan_color)
+    if draw_coastline
+        lims = ax.finallimits[]   # a Rect2 with the current computed limits
+        limits!(ax,
+            lims.origin[1], lims.origin[1] + lims.widths[1],
+            lims.origin[2], lims.origin[2] + lims.widths[2])
+        oad(debug, "    drawing coastline")
+        cl = coastline()
+        lines!(ax, cl["longitude"], cl["latitude"], color=:black)
+    end
+    oad(debug, "    drawing the Colorbar")
+    cb_plt = Colorbar(fig_pos[1, 2], hm_plt, ticklabelsize=fontsize)
     oad(debug, "END plot_topography!()")
     return (ax=ax, plt=hm_plt, cb=cb_plt)
 end
