@@ -330,7 +330,8 @@ export gravity
 
 
 """
-    decode_color_by(x)
+    decode_color_by(levels::Vector{Float64};
+        colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
 
 Create a NamedTuple for use as the `color_by` argument of [`plot_TS`](@ref)
 and [`plot_profile`](@ref).
@@ -370,7 +371,7 @@ decode_color_by(l, :inferno, (0,5), (0.88, 0.12)) # as above, but tighten panel 
 ```
 
 """
-function decode_color_by(levels::Vector{Float64}, colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
+function decode_color_by(levels::Vector{Float64}; colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
     if clims == :auto
         clims = extrema(levels)
     end
@@ -452,7 +453,7 @@ function oad_val(x)
     if isa(x, Symbol)
         return repr(x)
     elseif isa(x, String)
-        return x
+        return "\"$x\""
     elseif isa(x, Number)
         return "$x"
     else

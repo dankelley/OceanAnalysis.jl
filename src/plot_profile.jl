@@ -65,15 +65,18 @@ are called.
   printed during processing.
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
-  `seriestype` is supplied, it controls how the data are illustrated; the
-  possible values are `:scatter` (the default), `:lines` and `:scatterlines`. As
-  with other functions in the package, you may use `fontsize` to set the sizes of
-  text being displayed.  The other entries for `kwargs` follow Makie conventions,
-  apart from a slight variation to `limits`, which here defaults to showing
-  a little whitespace around the data span. To learn about `kwargs`
-  entries that apply to the plot you're trying to make, call the
-  functions with `debug=1`, which will print out entries as they
-  are extracted from `kwargs`.
+  `seriestype` is supplied, it controls how the data are illustrated. The
+  possible values for `seriestype` are `:scatter` (the default), `:lines` and
+  `:scatterlines`. As with other functions in the package, you may use
+  `fontsize` to set the sizes of text being displayed.  The other entries for
+  `kwargs` follow Makie conventions, apart from a slight variation to
+  `limits`, which here defaults to showing a little whitespace around the
+  data span. To learn about `kwargs` entries that apply to the plot
+  you're trying to make, call the functions with `debug=1`, which will
+  cause it to print out entries as they are extracted from `kwargs`
+  or set up as defaults, in addition to the arguments
+  that are being passed to the Makie functions `scatter!`,
+  `lines!` or `scatterlines!`.
 
 # Return value
 
@@ -86,38 +89,29 @@ The `plot_profile!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
 `color_by=""`).
 
 # Examples
+
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis, GLMakie
 
 # Get data used in examples.
 pkgdir = dirname(dirname(pathof(OceanAnalysis)))
 f = joinpath(pkgdir, "data", "D4902911_095.nc")
 ctd = read_argo(f) |> as_ctd;
 
-# Example 1: Conservative Temperature profile for Argo data.
-# Plot profiles of Conservative Temperature, Absolute Salinity, and potential
-# density anomaly with respect to surface pressure.
+# Example 1: non-mutating case (single panel for each plot)
 fig = plot_profile(ctd; which="CT")
-fig # display the results
-# save("plot_profile_example_1.png", fig)
+fig = plot_profile(ctd; which="SA")
+fig = plot_profile(ctd; which="CT", color_by="SA")
 
-# Example 2: Two-panels, showing as above, but also a second
-# panel in which dots are coloured to indicate Absolute
-# Salinity.  The first argument in these calls indicates
-# where to place things; `1,1` means row 1 and column 1,
-# and `1,2` means row 1 and column 2. Thus, this plots
-# a black-dot panel on the left and a coloured-dot panel
-# on the right.
+# Example 2: mutating case (two-panel diagram)
 fig = Figure()
 plot_profile!(fig[1,1], ctd; which="CT")
 plot_profile!(fig[1,2], ctd; which="CT", color_by="SA")
-fig # display the result
-# save("plot_profile_example_2.png", fig)
 ```
 """
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
-    oad(debug, "plot_profile() BEGIN (this calls plot_profile!() after creating a Figure")
+    oad(debug, "plot_profile() BEGIN")
     fig = Figure()
     plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
         color_by=color_by, abbreviate=abbreviate,
@@ -155,19 +149,55 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     if isnothing(x)
         error("plot_profile() cannot find (or compute a value for) \"$which\"")
     end
+    # infer keyword arguments
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    oad(debug, "    inferred the following from kwargs (or from defaults):")
+    color = pop!(kwargs_dict, :color, :black)
+    oad(debug, "    • color:       $(oad_val(color))")
+    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    oad(debug, "    • colormap:    $(oad_val(colormap))")
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    oad(debug, "    • fontsize:    $(oad_val(fontsize))")
+    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
+    oad(debug, "    • linewidth:   $(oad_val(linewidth))")
+    lims = pop!(kwargs_dict, :limits,
+        (extend_extrema(skipmissing(x))...,
+            reverse(extend_extrema(skipmissing(y)))...))
+    oad(debug, "    • limits: $(round.(lims, digits=4))")
+    marker = pop!(kwargs_dict, :marker, :circle)
+    oad(debug, "    • marker:      $(oad_val(marker))")
+    markercolor = pop!(kwargs_dict, :markercolor, :black)
+    oad(debug, "    • markercolor: $(oad_val(markercolor))")
+    markersize = pop!(kwargs_dict, :markersize, 5.0)
+    oad(debug, "    • markersize:  $markersize")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatter)
+    oad(debug, "    • seriestype:  $(oad_val(seriestype))")
+    title = pop!(kwargs_dict, :title, "")
+    oad(debug, "    • title:       $(oad_val(title))")
+    xlabel = pop!(kwargs_dict, :xlabel, label_from_varname(which))
+    oad(debug, "    • xlabel:      $(oad_val(xlabel))")
+    ylabel = pop!(kwargs_dict, :ylabel, "(to be inferred)")
+    oad(debug, "    • ylabel:      $(oad_val(ylabel))")
+    # Check for unhandled keywords
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: color, colormap, fontsize, ",
+            "linewidth, limits, ",
+            "marker, markercolor, markersize, seriestype, title, ",
+            "xlabel and ylabel")
+    end
+
+    oad(debug, "    drawing the data")
     using_color_by = false
-    if color_by != false
+    if color_by !== false
         if isa(color_by, String)
             oad(debug, "    color_by: \"", color_by, "\"")
             if color_by in names(d.data)
-                color_by = decode_color_by(d[color_by])
-                #oad(debug, "    ... decoded palette details with decode_color_by()")
+                color_by = decode_color_by(d[color_by]; colorscheme=colormap)
                 cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-                #oad(debug, "    ... computed cindex")
                 colormap = cgrad(color_by.colorscheme)
-                #oad(debug, "    ... computed colormap")
-                color = colormap[cindex]
-                #oad(debug, "    ... computed color")
+                markercolor = colormap[cindex]
             elseif color_by == ""
                 oad(debug, "    no palette will be drawn, since color_by=\"\"")
             else
@@ -182,101 +212,73 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         end
         using_color_by = true
     end
-    kwargs_dict = Dict{Symbol,Any}(kwargs)
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
-    oad(debug, "    fontsize: $fontsize")
-    if using_color_by
-        oad(debug, "    set up color_by vector")
-    else
-        color = pop!(kwargs_dict, :color, :black)
-    end
-    title = pop!(kwargs_dict, :title, "")
-    oad(debug, "    title: $title")
-    xlabel = pop!(kwargs_dict, :xlabel, label_from_varname(which))
-    oad(debug, "    xlabel: $xlabel")
-    ylabel = pop!(kwargs_dict, :ylabel, ylabel)
-    oad(debug, "    ylabel: $ylabel")
-    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     ax = Axis(fig_pos[1, 1],
-        xaxisposition=:top,
-        title=title,
-        xlabel=xlabel,
-        ylabel=ylabel,
-        yreversed=true,
+        xaxisposition=:top, yreversed=true,
+        title=title, xlabel=xlabel, ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    lims = pop!(kwargs_dict, :limits,
-        (extend_extrema(skipmissing(x))...,
-            reverse(extend_extrema(skipmissing(y)))...))
-    oad(debug, "    limits: $lims")
     limits!(ax, lims...)
-    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    oad(debug, "    linewidth=$linewidth")
-    colormap = pop!(kwargs_dict, :colormap, :turbo)
-    if using_color_by
-        oad(debug, "    will use colormap :$colormap for color_by")
-        typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
-    else
-        color = pop!(kwargs_dict, :color, :black)
-        oad(debug, "    set color=$color")
-    end
-    marker = pop!(kwargs_dict, :marker, :circle)
-    oad(debug, "    marker=$marker")
-    markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "    markercolor=$markercolor")
-    markersize = pop!(kwargs_dict, :markersize, 5.0)
-    oad(debug, "    markersize=$markersize")
-    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
-    oad(debug, "    seriestype=$seriestype")
+    #<?> if using_color_by
+    #<?>     oad(debug, "    will use colormap :$colormap for color_by")
+    #<?>     typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
+    #<?> else
+    #<?>     color = pop!(kwargs_dict, :color, :black)
+    #<?>     oad(debug, "    set color=$color")
+    #<?> end
+    #marker = pop!(kwargs_dict, :marker, :circle)
+    #oad(debug, "    marker=$marker")
+    #markercolor = pop!(kwargs_dict, :markercolor, :black)
+    #oad(debug, "    markercolor=$markercolor")
+    #markersize = pop!(kwargs_dict, :markersize, 5.0)
+    #oad(debug, "    markersize=$markersize")
+    #seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
+    #oad(debug, "    seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
-    if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
-            join(string.(keys(kwargs_dict)), ", "),
-            ". The permitted keywords are: color, colormap, fontsize, linewidth, ",
-            "marker, markercolor, markersize, seriestype, title, xlabel, ylabel.")
-    end
+    #<...> if !isempty(kwargs_dict)
+    #<...>     error("plot_profile!() does not recognize keywords: ",
+    #<...>         join(string.(keys(kwargs_dict)), ", "),
+    #<...>         ". The permitted keywords are: color, colormap, fontsize, linewidth, ",
+    #<...>         "marker, markercolor, markersize, seriestype, title, xlabel, ylabel.")
+    #<...> end
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
-        oad(debug, "      • linewidth=$linewidth")
-        if isa(color, Symbol) || isa(color, String)
-            oad(debug, "      • color=$color")
-        else
-            oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
-        end
-        plt = lines!(ax, x, y, linewidth=linewidth, color=color)
+        oad(debug, "      • color:       $(oad_val(color))")
+        oad(debug, "      • linewidth:   $(oad_val(linewidth))")
+
+        plt = lines!(ax, x, y, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
-        oad(debug, "      • marker=$marker")
-        oad(debug, "      • markersize=$markersize")
-        oad(debug, "      • markercolor=$markercolor")
-        if isa(color, Symbol) || isa(color, String)
-            oad(debug, "      • color=$color")
-        else
-            oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
-        end
-        plt = scatter!(ax, x, y, marker=marker, markersize=markersize, color=color)
+        oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
+        oad(debug, "      • marker:      $(oad_val(marker))")
+        oad(debug, "      • markersize:  $(oad_val(markersize))")
+        plt = scatter!(ax, x, y,
+            color=markercolor, marker=marker, markersize=markersize)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
-        oad(debug, "      • marker=$marker")
-        oad(debug, "      • markersize=$markersize")
-        oad(debug, "      • markercolor=$markercolor")
-        oad(debug, "      • linewidth=$linewidth")
-        if isa(color, Symbol) || isa(color, String)
-            oad(debug, "      • color=$color")
-        else
-            oad(debug, "      • color: an object of type $(typeof(color))) and length $(length(color))")
-        end
-        plt = scatterlines!(ax, x, y, marker=marker, markersize=markersize, markercolor=markercolor,
-            linewidth=linewidth, color=color)
+        oad(debug, "      • color:       $(oad_val(color))")
+        oad(debug, "      • marker:      $(oad_val(marker))")
+        oad(debug, "      • markercolor: $(oad_val(markercolor))")
+        oad(debug, "      • markersize:  $(oad_val(markersize))")
+        oad(debug, "      • linewidth:   $(oad_val(linewidth))")
+        plt = scatterlines!(ax, x, y, color=color, linewidth=linewidth,
+            marker=marker, markercolor=markercolor, markersize=markersize)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
     end
+    # Draw colorbar
     cb = nothing
     if using_color_by
-        oad(debug, "    drawing colorbar")
-        cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
-        if color_by == ""
-            cb.visible = false
+        if color_by != ""
+            oad(debug, "    drawing colorbar")
+            cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+        else
+            oad(debug, "    drawing whitespace at colorbar position")
+            cb = Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
+            cb.ticksvisible = false
+            cb.ticklabelsvisible = false
+            cb.labelvisible = false
+            cb.spinewidth = 0
+            cb.colormap = to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
         end
     end
     oad(debug, "END plot_profile!()")

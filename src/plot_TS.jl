@@ -86,14 +86,18 @@ Information about the analysis is printed if `debug` exceeds 0.
   printed during processing.
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
-  `seriestype` is supplied, it controls how the data are indicated.  Possible
-  values are `:scatter` (the default), `:lines` and `:scatterlines`. Each of
-  these is handled in a different way, and may be customized by specifying other
+  `seriestype` is supplied, it controls how the data are indicated.  The
+  permitted values for `seriestype` are `:scatter` (the default),
+  `:lines` and `:scatterlines`. Each of these is handled in a
+  different way, and may be customized by specifying other
   `kwargs...` entries. As with other functions in the package, you may use
   `fontsize` to set the sizes of text being displayed. To see the possible
-  elements provided withing `kwargs`, call this function
-  with `debug=1` and it will display the entries (and values) that it
-  is using.
+  elements provided within `kwargs`, call this function
+  with `debug=1`, which will cause it will print out entries as they
+  are extracted from `kwargs` or set up as defaults, in addition
+  to the arguments that are being passed to the
+  Makie functions `scatter!`, `lines!` or `scatterlines!`.
+
 
 # Return value
 
@@ -112,15 +116,13 @@ The `plot_TS!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
 using OceanAnalysis, GLMakie # or CairoMakie
 ctd = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc") |> read_argo |> as_ctd;
 
-# Non-mutating cases (single panel each)
+# Example 1: non-mutating cases (single panel each plot)
 plot_TS(ctd)
-plot_TS(ctd; seriestype=:scatter, markersize=6)
+plot_TS(ctd; seriestype=:scatter, markersize=4)
 plot_TS(ctd; seriestype=:scatter, markersize=6,
-    colormap=:inferno, color_by="pressure")
-plot_TS(ctd; seriestype=:scatterlines, markersize=6,
-    color=:magenta, linewidth=2, colormap=:inferno, color_by="pressure")
+    color=:gray, colormap=:inferno, color_by="pressure")
 
-# mutating cases (two panels)
+# Example 2: mutating cases (two panels)
 fig = Figure()
 figa = plot_TS!(fig[1, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="pressure", debug=0)
 figb = plot_TS!(fig[2, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="", debug=1)
@@ -131,15 +133,12 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
     fig = Figure()
-    #ax = Axis(fig[1, 1])
-    #plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
-    plot_TS!(fig[1, 1], d; sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
-        plot_freezing=plot_freezing, abbreviate=abbreviate,
-        color_by=color_by, debug=increment_debug(debug), kwargs...)
+    plot_TS!(fig[1, 1], d;
+        sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+        plot_freezing=plot_freezing,
+        color_by=color_by, abbreviate=abbreviate,
+        debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
-    # return fig FAILS
-    # return plt FAILS
-    #return (ax=ax, fig=fig, plt=plt) works but no display
     return fig
 end
 export plot_TS
@@ -157,45 +156,54 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     else
         error("plot_TS!() only works on Argo and Ctd objects")
     end
-    oad(debug, "    sigma0_levels: $sigma0_levels")
-    oad(debug, "    spiciness0_levels: $spiciness0_levels")
-    oad(debug, "    plot_freezing: $plot_freezing")
-    kwargs_dict = Dict{Symbol,Any}(kwargs)
-    oad(debug, "    keys in kwargs_dict: $(collect(keys(kwargs_dict)))")
-    color = pop!(kwargs_dict, :color, :black)
-    oad(debug, "    color=$(oad_val(color)) (can be set within kwargs...)")
-    colormap = pop!(kwargs_dict, :colormap, :turbo)
-    oad(debug, "    colormap=$(oad_val(colormap)) (can be set within kwargs...)")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
-    oad(debug, "    fontsize=$fontsize (can be set within kwargs...)")
-    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    oad(debug, "    linewidth=$linewidth (can be set within kwargs...)")
-    marker = pop!(kwargs_dict, :marker, :circle)
-    oad(debug, "    marker=$marker (can be set within kwargs...)")
-    markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "    markercolor=$(oad_val(markercolor)) (can be set within kwargs...)")
-    markersize = pop!(kwargs_dict, :markersize, 5.0)
-    oad(debug, "    markersize=$markersize (can be set within kwargs...)")
-    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
-    oad(debug, "    seriestype=$seriestype (can be set within kwargs...)")
-    title = pop!(kwargs_dict, :title, "")
-    oad(debug, "    title=$title (can be set within kwargs...)")
-    if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
-            join(string.(keys(kwargs_dict)), ", "),
-            ". The permitted keywords are: color, colormap, fontsize, linewidth, ",
-            "marker, markercolor, markersize, seriestype, and title")
-    end
+    oad(debug, "    extracting salinity, temperature and pressure data")
     local S = d.data.salinity
     local T = d.data.temperature
     local p = d.data.pressure
+    oad(debug, "    extracting longitude and latitude metadata")
     local lon = d.metadata["longitude"]
     local lat = d.metadata["latitude"]
+    oad(debug, "    computing SA and CT values")
     SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     ok = isfinite.(SA) .& isfinite.(CT)
     if 0 == sum(ok)
         @warn "plot_TS!(): no good SA,CT pairs, so plotting an aphysical default"
+    end
+    oad(debug, "    sigma0_levels: $sigma0_levels")
+    oad(debug, "    spiciness0_levels: $spiciness0_levels")
+    oad(debug, "    plot_freezing: $plot_freezing")
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    oad(debug, "    inferred the following from kwargs (or from defaults):")
+    color = pop!(kwargs_dict, :color, :black)
+    oad(debug, "    • color:       $(oad_val(color))")
+    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    oad(debug, "    • colormap:    $(oad_val(colormap))")
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    oad(debug, "    • fontsize:    $(oad_val(fontsize))")
+    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
+    oad(debug, "    • linewidth:   $(oad_val(linewidth))")
+    lims = pop!(kwargs_dict, :limits,
+        (extend_extrema(skipmissing(SA))...,
+            extend_extrema(skipmissing(CT))...))
+    oad(debug, "    • limits:      $(round.(lims, digits=4))")
+    marker = pop!(kwargs_dict, :marker, :circle)
+    oad(debug, "    • marker:      $(oad_val(marker))")
+    markercolor = pop!(kwargs_dict, :markercolor, :black)
+    oad(debug, "    • markercolor: $(oad_val(markercolor))")
+    markersize = pop!(kwargs_dict, :markersize, 5.0)
+    oad(debug, "    • markersize:  $markersize")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
+    oad(debug, "    • seriestype:  $(oad_val(seriestype))")
+    title = pop!(kwargs_dict, :title, "")
+    oad(debug, "    • title:       $(oad_val(title))")
+    # Check for unhandled keywords
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: color, colormap, fontsize, ",
+            "linewidth, limits, ",
+            "marker, markercolor, markersize, seriestype, and title")
     end
     # Draw the data.
     oad(debug, "    drawing the data")
@@ -204,7 +212,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         if isa(color_by, String)
             oad(debug, "    color_by: \"", color_by, "\"")
             if color_by in names(d.data)
-                color_by = decode_color_by(d[color_by])
+                color_by = decode_color_by(d[color_by]; colorscheme=colormap)
                 cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
                 colormap = cgrad(color_by.colorscheme)
                 markercolor = colormap[cindex]
@@ -223,19 +231,12 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         end
         using_color_by = true
     end
-    kwargs_dict = Dict{Symbol,Any}(kwargs)
     xlabel = abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]"
     ylabel = abbreviate ? "CT [°C]" : "Conservative Temperature [°C]"
     ax = Axis(fig_pos[1, 1],
-        title=title,
-        xlabel=xlabel,
-        ylabel=ylabel,
+        title=title, xlabel=xlabel, ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    lims = pop!(kwargs_dict, :limits,
-        (extend_extrema(skipmissing(SA))...,
-            extend_extrema(skipmissing(CT))...))
-    oad(debug, "    limits: $lims")
     limits!(ax, lims...)
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype=$(repr(seriestype)) unknown; try :line, :scatter or :scatterline")
     if seriestype == :lines
@@ -245,16 +246,11 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         plt = lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
-        if using_color_by
-            oad(debug, "      • color:       $(oad_val(markercolor)) ... may be controlled by color_by")
-            oad(debug, "      • marker:      $(oad_val(marker))")
-            oad(debug, "      • markersize:  $(oad_val(markersize))")
-        else
-            oad(debug, "      • marker:      $(oad_val(marker))")
-            oad(debug, "      • markercolor: $(oad_val(markercolor))")
-            oad(debug, "      • markersize:  $(oad_val(markersize))")
-        end
-        plt = scatter!(ax, SA, CT, color=markercolor, marker=marker, markersize=markersize)
+        oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
+        oad(debug, "      • marker:      $(oad_val(marker))")
+        oad(debug, "      • markersize:  $(oad_val(markersize))")
+        plt = scatter!(ax, SA, CT;
+            color=markercolor, marker=marker, markersize=markersize)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(color))")
@@ -272,6 +268,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     end
     plot_TS_sigma0_contours!(ax; levels=sigma0_levels, debug=increment_debug(debug))
     plot_TS_spiciness0_contours!(ax; levels=spiciness0_levels, debug=increment_debug(debug))
+    # Draw colorbar
     cb = nothing
     if using_color_by
         if color_by != ""
