@@ -33,91 +33,135 @@ profiler ([`Adp`](@ref)) object.
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000")
-adp_beam = read_adp_rdi(file);
-plot_adp(adp_beam)
-adp_xyz = beam_to_xyz(adp_beam);
-plot_adp(adp_xyz)
+using OceanAnalysis
+using GLMakie # or CairoMakie
+adp = joinpath(dirname(dirname(pathof(OceanAnalysis))),
+    "data", "adp_rdi.000") |> read_adp_rdi
+plot_adp(adp)
 ```
 """
 function plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
-    error("plot_adp() disabled, pending convertion from Plots to Makie")
-    #<disabled>     oad(debug, "plot_adp() START")
-    #<disabled>     if adp["coordinate_system"] == :beam
-    #<disabled>         titles = ["beam 1", "beam 2", "beam 3", "beam 4"]
-    #<disabled>     elseif adp["coordinate_system"] == :xyz
-    #<disabled>         titles = ["ũ", "ṽ", "w̃", "ẽ"]
-    #<disabled>     elseif adp["coordinate_system"] == :enu
-    #<disabled>         titles = ["u", "v", "w", "e"]
-    #<disabled>     end
-    #<disabled>     t = adp["time"]
-    #<disabled>     if which in (:velocity1, :velocity2, :velocity3, :velocity4)
-    #<disabled>         oad(debug, "  handling which=$(repr(which))")
-    #<disabled>         beam = parse(Int, string(which)[end])
-    #<disabled>         y = adp["distance"]
-    #<disabled>         z = transpose(adp["velocity"][:, :, beam])
-    #<disabled>         c = cgrad(:RdBu, rev=true)
-    #<disabled>         clim = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)])) # centre colours on z=0
-    #<disabled>         rval = heatmap(t, y, z,
-    #<disabled>             title=titles[beam], titlelocation=:right,
-    #<disabled>             framestyle=:box, tickdirection=:out,
-    #<disabled>             guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
-    #<disabled>             ylab="Distance [m]", background_color_inside=:gray70, c=c, clim=clim; kwargs...)
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return (rval)
-    #<disabled>     elseif which == :velocities
-    #<disabled>         oad(debug, "  handling which=$(repr(which))")
-    #<disabled>         p1 = plot_adp(adp; which=:velocity1, debug=increment_debug(debug), kwargs...)
-    #<disabled>         p2 = plot_adp(adp; which=:velocity2, debug=increment_debug(debug), kwargs...)
-    #<disabled>         p3 = plot_adp(adp; which=:velocity3, debug=increment_debug(debug), kwargs...)
-    #<disabled>         p4 = plot_adp(adp; which=:velocity4, debug=increment_debug(debug), kwargs...)
-    #<disabled>         rval = plot(p1, p2, p3, p4, layout=@layout[a; b; c; d])
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return (rval)
-    #<disabled>     elseif which == :heading
-    #<disabled>         oad(debug, "  handling which=$(repr(which))")
-    #<disabled>         rval = scatter(t, adp["heading"], ylab="Heading [°]",
-    #<disabled>             label=false, framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
-    #<disabled>             kwargs...)
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return (rval)
-    #<disabled>     elseif which == :pitch
-    #<disabled>         oad(debug, "  handling which=$(repr(which))")
-    #<disabled>         rval = scatter(t, adp["pitch"], ylab="Pitch [°]",
-    #<disabled>             label=false, framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
-    #<disabled>             kwargs...)
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return (rval)
-    #<disabled>     elseif which == :roll
-    #<disabled>         oad(debug, "  handling which=$(repr(which))")
-    #<disabled>         rval = scatter(t, adp["roll"], ylab="Roll [°]",
-    #<disabled>             label=false, framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
-    #<disabled>             kwargs...)
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return (rval)
-    #<disabled>     elseif which == :angles
-    #<disabled>         oad(debug, "  handling which=$(repr(which))")
-    #<disabled>         p1 = plot_adp(adp; which=:heading, debug=increment_debug(debug), kwargs...)
-    #<disabled>         p2 = plot_adp(adp; which=:pitch, debug=increment_debug(debug), kwargs...)
-    #<disabled>         p3 = plot_adp(adp; which=:roll, debug=increment_debug(debug), kwargs...)
-    #<disabled>         rval = plot(p1, p2, p3, layout=@layout[a; b; c])
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return (rval)
-    #<disabled>     elseif which == :uv
-    #<disabled>         adp["coordinate_system"] == :enu || error(":$(which) requires :enu coordinates")
-    #<disabled>         oad(debug, "  handling which=$(repr(which)) for :enu coordinates")
-    #<disabled>         velocity = adp["velocity"]
-    #<disabled>         j = Int64(round(0.5 * size(velocity)[2]))
-    #<disabled>         U = velocity[:, j, 1]
-    #<disabled>         V = velocity[:, j, 2]
-    #<disabled>         rval = scatter(U, V, aspect_ratio=1.0, label=false, framestyle=:box,
-    #<disabled>             xlab="u [m/s]", ylab="v [m/s]", kwargs...)
-    #<disabled>         oad(debug, "END plot_adp()")
-    #<disabled>         return rval
-    #<disabled>     else
-    #<disabled>         error("unrecognized value of which ($(repr(which)))")
-    #<disabled>     end
+    oad(debug, "plot_adp() START")
+    fig = Figure()
+    plot_adp!(fig[1, 1], adp; which=which, debug=increment_debug(debug), kwargs...)
+    oad(debug, "END plot_adp()")
+    return fig
 end
 export plot_adp
+
+function plot_adp!(fig_pos, adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
+    oad(debug, "plot_adp!() START")
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    oad(debug, "    inferred the following from kwargs (or from defaults):")
+    colormap = pop!(kwargs_dict, :colormap, :inferno)
+    oad(debug, "      • colormap:    $(oad_val(colormap))")
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    oad(debug, "      • fontsize:    $(oad_val(fontsize))")
+    title = pop!(kwargs_dict, :title, "")
+    oad(debug, "      • title:       $(oad_val(title))")
+    xlabel = pop!(kwargs_dict, :xlabel, "x")
+    oad(debug, "      • xlabel:      $(oad_val(xlabel))")
+    ylabel = pop!(kwargs_dict, :ylabel, "y")
+    oad(debug, "      • ylabel:      $(oad_val(ylabel))")
+    # Check for unhandled keywords
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: colormap, fontsize, title, xlabel, and ylabel")
+    end
+    ax = Axis(fig_pos[1, 1], xlabel=xlabel, ylabel=ylabel,
+        xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
+        xticklabelsize=fontsize, yticklabelsize=fontsize)
+    if adp["coordinate_system"] == :beam
+        titles = ["beam 1", "beam 2", "beam 3", "beam 4"]
+    elseif adp["coordinate_system"] == :xyz
+        titles = ["ũ", "ṽ", "w̃", "ẽ"]
+    elseif adp["coordinate_system"] == :enu
+        titles = ["u", "v", "w", "e"]
+    end
+    t = adp["time"]
+    if which in (:velocity1, :velocity2, :velocity3, :velocity4)
+        oad(debug, "    handling which=$(repr(which))")
+        beam = parse(Int, string(which)[end])
+        println("DAN 1")
+        y = adp["distance"]
+        println("DAN 2")
+        #z = transpose(adp["velocity"][:, :, beam])
+        println("beam: $beam")
+        z = adp["velocity"][:, :, beam]
+        println("DAN 3")
+        #c = cgrad(:RdBu, rev=true)
+        println("DAN 4")
+        colorrange = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)])) # centre colours on z=0
+        println("DAN 5 (colorrange: $colorrange")
+        println("DAN 6 length(t): $(length(t))")
+        println("DAN 7 length(y): $(length(y))")
+        println("DAN 8 size(z): $(size(z))")
+        @assert size(z) == (length(t), length(y)) "z is $(size(z)), expected $((length(t), length(y)))"
+        # FIXME: do a trick to plot elapsed time on the x axis, but labelling it with DateTime
+        # values.  I'll write a code to do that, since we may want this elsewhere ... and
+        # since I imagine Makie will do this in a few weeks, given the active work
+        # on a bug at https://github.com/MakieOrg/Makie.jl/issues/5193
+        plt = heatmap!(ax, t, y, z)#, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
+        println("draw Colorbar ...")
+        cb = Colorbar(fig_pos[1, 2], plt, ticklabelsize=fontsize)
+        oad(debug, "END plot_adp()")
+        return (ax=ax, plt=plt, cb=cb)
+    elseif which == :velocities
+        oad(debug, "  handling which=$(repr(which))")
+        error("FIXME: handle :velocities")
+        #<> p1 = plot_adp(adp; which=:velocity1, debug=increment_debug(debug), kwargs...)
+        #<> p2 = plot_adp(adp; which=:velocity2, debug=increment_debug(debug), kwargs...)
+        #<> p3 = plot_adp(adp; which=:velocity3, debug=increment_debug(debug), kwargs...)
+        #<> p4 = plot_adp(adp; which=:velocity4, debug=increment_debug(debug), kwargs...)
+        #<> rval = plot(p1, p2, p3, p4, layout=@layout[a; b; c; d])
+        #<> oad(debug, "END plot_adp()")
+        #<> return (rval)
+    elseif which == :heading
+        oad(debug, "    handling the which=:heading case")
+        plt = scatter(t, adp["heading"], ylab="Heading [°]")
+        #<>    label=false, framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
+        #<>    kwargs...)
+        oad(debug, "END plot_adp!()")
+        return plt
+    elseif which == :pitch
+        oad(debug, "    handling the which=:pitch case")
+        plt = scatter!(ax, t, adp["pitch"], ylab="Pitch [°]")
+        #<> label=false, framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
+        #<< kwargs...)
+        oad(debug, "END plot_adp!()")
+        return plt
+    elseif which == :roll
+        oad(debug, "    handling the which=:roll case")
+        plt = scatter!(ax, t, adp["roll"], ylab="Roll [°]")
+        #label=false, framestyle=:box, guidefontsize=8, tickfontsize=8, titlefontsize=8, size=(800, 600),
+        #kwargs...)
+        oad(debug, "END plot_adp!()")
+        return plt
+    elseif which == :angles
+        oad(debug, "    handling the which=:angles case")
+        error("FIXME: handle :angles")
+        #<> p1 = plot_adp(adp; which=:heading, debug=increment_debug(debug), kwargs...)
+        #<> p2 = plot_adp(adp; which=:pitch, debug=increment_debug(debug), kwargs...)
+        #<> p3 = plot_adp(adp; which=:roll, debug=increment_debug(debug), kwargs...)
+        #<> rval = plot(p1, p2, p3, layout=@layout[a; b; c])
+        #<> oad(debug, "END plot_adp()")
+        #<> return (rval)
+    elseif which == :uv
+        oad(debug, "    handling the which=:uv case")
+        error("FIXME: handle :uv")
+        #<> adp["coordinate_system"] == :enu || error(":$(which) requires :enu coordinates")
+        #<> oad(debug, "  handling which=$(repr(which)) for :enu coordinates")
+        #<> velocity = adp["velocity"]
+        #<> j = Int64(round(0.5 * size(velocity)[2]))
+        #<> U = velocity[:, j, 1]
+        #<> V = velocity[:, j, 2]
+        #<> rval = scatter(U, V, aspect_ratio=1.0, label=false, framestyle=:box,
+        #<>     xlab="u [m/s]", ylab="v [m/s]", kwargs...)
+        #<> oad(debug, "END plot_adp()")
+        #<> return rval
+    else
+        error("unrecognized value of which ($(repr(which)))")
+    end
+end
+export plot_adp!
