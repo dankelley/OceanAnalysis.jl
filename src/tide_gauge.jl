@@ -19,11 +19,14 @@ Hydrographic Service (CHS) website.
 
 # Keywords
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
 # Return
 
-This returns a DataFrame with one row per tide-gauge match in the database.
+This returns a DataFrame with one row per tide-gauge match in the database. The
+column names in the DataFrame are `"id"`, `"code"`, `"name"`, `"longitude"`,
+`"latitude"`, and `"type"`.
 
 # References
 
@@ -35,36 +38,36 @@ https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
 ```julia
 # Show tide-gauge locations (red for permanent, blue otherwise)
 # near Nova Scotia.
-using OceanAnalysis
-using GLMakie # or CairoMakie
-i = get_tide_gauge_index(:all); # downloads from internet
-elon = [-67.0, -59.0]
-elat = [43.5, 47.5]
-midlat = 0.5 * sum(elat)
-cl=coastline()
-
-fig = Figure()
-ax = Axis(fig[1, 1],
-    aspect = AxisAspect((elon[2]-elon[1]) * cosd(midlat) / (elat[2]-elat[1])),
-    xlabel = "Longitude", ylabel = "Latitude")
-limits!(ax, elon[1], elon[2], elat[1], elat[2])
-lines!(ax, cl["longitude"], cl["latitude"], color=:bisque3, linewidth=3)
-scatter!(ax, i.longitude, i.latitude, markersize=8, color=:blue)
-permanent = i.type .== "PERMANENT"
-scatter!(ax, i.longitude[permanent], i.latitude[permanent], markersize=15, color=:red)
+#<FIXME: broken> using OceanAnalysis
+#<FIXME: broken> using GLMakie # or CairoMakie
+#<FIXME: broken> i = get_tide_gauge_index(:all); # downloads from internet
+#<FIXME: broken> elon = [-67.0, -59.0]
+#<FIXME: broken> elat = [43.5, 47.5]
+#<FIXME: broken> midlat = 0.5 * sum(elat)
+#<FIXME: broken> cl=coastline()
+#<FIXME: broken> 
+#<FIXME: broken> fig = Figure()
+#<FIXME: broken> ax = Axis(fig[1, 1],
+#<FIXME: broken>     aspect = AxisAspect((elon[2]-elon[1]) * cosd(midlat) / (elat[2]-elat[1])),
+#<FIXME: broken>     xlabel = "Longitude", ylabel = "Latitude")
+#<FIXME: broken> limits!(ax, elon[1], elon[2], elat[1], elat[2])
+#<FIXME: broken> lines!(ax, cl["longitude"], cl["latitude"], color=:bisque3, linewidth=3)
+#<FIXME: broken> scatter!(ax, i.longitude, i.latitude, markersize=8, color=:blue)
+#<FIXME: broken> permanent = i.type .== "PERMANENT"
+#<FIXME: broken> scatter!(ax, i.longitude[permanent], i.latitude[permanent], markersize=15, color=:red)
 ```
 """
 function get_tide_gauge_index(search=:all; debug::Integer=0)
     oad(debug, "get_tide_gauge_index() START")
     url = "https://api-iwls.dfo-mpo.gc.ca/api/v1/stations"
-    oad(debug, "  url: $url")
+    oad(debug, "    url: $url")
     response = HTTP.get(url; status_exception=false)
     if response.status != 200
         error("cannot access tide gauge index at $url")
     end
-    oad(debug, "  got response from server")
+    oad(debug, "    got response from server")
     r = JSON3.read(response.body)
-    oad(debug, "  decoded the response")
+    oad(debug, "    decoded the response")
     n = length(r)
     id = Vector{String}(undef, n)
     official_name = Vector{String}(undef, n)
