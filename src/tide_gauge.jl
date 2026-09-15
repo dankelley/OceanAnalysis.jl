@@ -33,19 +33,25 @@ https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
 # Examples
 
 ```julia
-# Show Nova Scotian stations, in red if permanent
-using OceanAnalysis, Plots
-i = get_tide_gauge_index(:all);
-scatter(i.longitude, i.latitude,
-    aspect_ratio=1.0 / cos(48.0 * pi / 180),
-    framestyle=:box, tickdirection=:out, label=false, ms=0,
-    xlim=(-67, -59), ylim=(43.3, 47.2))
-plot_coastline!(coastline(:global_fine), fillcolor=:gray95)
-scatter!(i.longitude, i.latitude, color=:blue, ms=2,
-    markerstrokewidth=0.2)
-look = i.type .== "PERMANENT"
-scatter!(i.longitude[look], i.latitude[look],
-    color=:red, ms=4, markerstrokewidth=0.2)
+# Show tide-gauge locations (red for permanent, blue otherwise)
+# near Nova Scotia.
+using OceanAnalysis
+using GLMakie # or CairoMakie
+i = get_tide_gauge_index(:all); # downloads from internet
+elon = [-67.0, -59.0]
+elat = [43.5, 47.5]
+midlat = 0.5 * sum(elat)
+cl=coastline()
+
+fig = Figure()
+ax = Axis(fig[1, 1],
+    aspect = AxisAspect((elon[2]-elon[1]) * cosd(midlat) / (elat[2]-elat[1])),
+    xlabel = "Longitude", ylabel = "Latitude")
+limits!(ax, elon[1], elon[2], elat[1], elat[2])
+lines!(ax, cl["longitude"], cl["latitude"], color=:bisque3, linewidth=3)
+scatter!(ax, i.longitude, i.latitude, markersize=8, color=:blue)
+permanent = i.type .== "PERMANENT"
+scatter!(ax, i.longitude[permanent], i.latitude[permanent], markersize=15, color=:red)
 ```
 """
 function get_tide_gauge_index(search=:all; debug::Integer=0)

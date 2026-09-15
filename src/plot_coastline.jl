@@ -44,7 +44,11 @@ end
 
 
 """
-    plot_coastline(coastline::Coastline; scalebar=false, debug=0, kwargs...)
+    plot_coastline(coastline::Coastline; scalebar=false,
+        debug=0, kwargs...)
+
+    plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
+        debug::Integer=0, kwargs...)
 
 Plot a coastline with cartesian longitude and latitude axes (i.e. without a map
 projection).
