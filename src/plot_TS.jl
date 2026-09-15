@@ -97,6 +97,9 @@ Information about the analysis is printed if `debug` exceeds 0.
   are extracted from `kwargs` or set up as defaults, in addition
   to the arguments that are being passed to the
   Makie functions `scatter!`, `lines!` or `scatterlines!`.
+  The colors of the (optional) density and spiciness contour
+  lines are set by `sigma0_contour_color` and
+  `spiciness0_contour_color`, respectively.
 
 
 # Return value
@@ -176,27 +179,29 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     oad(debug, "    inferred the following from kwargs (or from defaults):")
     color = pop!(kwargs_dict, :color, :black)
-    oad(debug, "      • color:       $(oad_val(color))")
+    oad(debug, "      • color:                    $(oad_val(color))")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
-    oad(debug, "      • colormap:    $(oad_val(colormap))")
+    oad(debug, "      • colormap:                 $(oad_val(colormap))")
     fontsize = pop!(kwargs_dict, :fontsize, 8)
-    oad(debug, "      • fontsize:    $(oad_val(fontsize))")
+    oad(debug, "      • fontsize:                 $(oad_val(fontsize))")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-    lims = pop!(kwargs_dict, :limits,
-        (extend_extrema(skipmissing(SA))...,
-            extend_extrema(skipmissing(CT))...))
-    oad(debug, "      • limits:      $(round.(lims, digits=4))")
+    oad(debug, "      • linewidth:                $(oad_val(linewidth))")
+    lims = pop!(kwargs_dict, :limits, (extend_extrema(skipmissing(SA))..., extend_extrema(skipmissing(CT))...))
+    oad(debug, "      • limits:                   $(round.(lims, digits=4))")
     marker = pop!(kwargs_dict, :marker, :circle)
-    oad(debug, "      • marker:      $(oad_val(marker))")
+    oad(debug, "      • marker:                   $(oad_val(marker))")
     markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "      • markercolor: $(oad_val(markercolor))")
+    oad(debug, "      • markercolor:              $(oad_val(markercolor))")
     markersize = pop!(kwargs_dict, :markersize, 5.0)
-    oad(debug, "      • markersize:  $markersize")
+    oad(debug, "      • markersize:               $markersize")
     seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
-    oad(debug, "      • seriestype:  $(oad_val(seriestype))")
+    oad(debug, "      • seriestype:               $(oad_val(seriestype))")
+    sigma0_contour_color = pop!(kwargs_dict, :sigma0_contour_color, :darkgray)
+    oad(debug, "      • sigma0_contour_color:     $(oad_val(sigma0_contour_color))")
+    spiciness0_contour_color = pop!(kwargs_dict, :spiciness0_contour_color, :darkgray)
+    oad(debug, "      • spiciness0_contour_color: $(oad_val(spiciness0_contour_color))")
     title = pop!(kwargs_dict, :title, "")
-    oad(debug, "      • title:       $(oad_val(title))")
+    oad(debug, "      • title:                    $(oad_val(title))")
     # Check for unhandled keywords
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
@@ -266,8 +271,8 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     if plot_freezing
         plot_freezing_curve!(ax; debug=increment_debug(debug))
     end
-    plot_TS_sigma0_contours!(ax; levels=sigma0_levels, debug=increment_debug(debug))
-    plot_TS_spiciness0_contours!(ax; levels=spiciness0_levels, debug=increment_debug(debug))
+    plot_TS_sigma0_contours!(ax; levels=sigma0_levels, color=sigma0_contour_color, debug=increment_debug(debug))
+    plot_TS_spiciness0_contours!(ax; levels=spiciness0_levels, color=spiciness0_contour_color, debug=increment_debug(debug))
     # Draw colorbar
     cb = nothing
     if using_color_by
@@ -293,7 +298,7 @@ export plot_TS!
 
 """
     plot_TS_sigma0_contours!(ax; levels=[],
-        color=:gray75, linewidth=2.0, debug::Integer=0)
+        color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
@@ -301,25 +306,31 @@ have been drawn by other means.
 
 # Arguments
 
-- `levels` a vector of the desired contour levels. There are three choices for
-  this. (1) If this has zero length (which is the default) then levels are
-  computed based on density, using `pretty()`, is used to compute levels based
-  on the span of sigma0 in the existing plot. (2) If `levels` is a single
-  integer, then again `pretty()` is used, but here with the second argument
-  given as `levels`. (3) Otherwise, `levels` sets the contour levels directly.
+- `ax` an axis.
 
 # Keywords
 
-- `color` the colour of the contours.
+- `levels` an indication of the desired contour levels. There are three choices for
+  `levels`. (1) If this has zero length (which is the default) then levels are
+  computed based on on the span of contoured quantity (using [`pretty`](@ref)
+  to get a simple contour interval). (2) If `levels` is a single
+  integer, then again `pretty()` is used, but here with the second argument
+  given as `levels`. (3) Otherwise, `levels` defines the contour levels directly.
 
-- `linewidth` the width of contour lines.
+- `color` the colour of the contour lines.
+
+- `alpha` the alpha level (transparency) of the contour lines.
+
+- `linewidth` the width of the contour lines.
+
+- `linestyle` the style of the contour lines.
 
 - `debug` an integer controlling the amount of information printed during
    processing.
 
 """
 function plot_TS_sigma0_contours!(ax; levels=[],
-    color=:gray75, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
+    color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours!() START")
     oad(debug, "  levels: ", levels)
     if levels == 0
@@ -357,7 +368,7 @@ end
 
 """
     plot_TS_spiciness0_contours!(ax; levels=[],
-        color=:gray75, linewidth=2.0, debug::Integer=0)
+        color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
 
 Add contours of spiciness0 to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
@@ -366,7 +377,7 @@ arguments and keywords, see the documentation for
 [`plot_TS_sigma0_contours`](@ref).
 """
 function plot_TS_spiciness0_contours!(ax; levels=[],
-    color=:gray75, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
+    color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
     oad(debug, "plot_TS_spiciness0_contours!() START")
     oad(debug, "    levels: ", levels)
     if levels == 0
