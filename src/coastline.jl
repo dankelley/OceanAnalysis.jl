@@ -19,24 +19,7 @@ NaN values to indicate breaks in the coastline.
 And, in the third method, the arguments specify `longitude` and `latitude`
 directly, again with NaN values to indicate breaks in the coastline.
 
-# Examples
-
-```julia
-using OceanAnalysis, GLMakie
-using DataFrames, CSV
-# Method 1
-cl = coastline(:global_fine);
-plot_coastline(cl, limits=(-68, -58, 43, 48))
-# Method 2
-dir = dirname(dirname(pathof(OceanAnalysis)))
-file = joinpath(dir, "data", "coastline_coarse.csv.gz")
-cl = coastline(file, 1)
-# Method 3
-dir = dirname(dirname(pathof(OceanAnalysis)));
-file = joinpath(dir, "data", "coastline_fine.csv.gz");
-data = CSV.read(file, DataFrame, header=1);
-cl = coastline(data.longitude, data.latitude);
-```
+For examples, see [`plot_coastline`](@ref).
 """
 function coastline(name::Symbol=:global_fine)
     #println("coastline(name) BEGIN")

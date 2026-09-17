@@ -280,13 +280,25 @@ save("topography_2.png", fig, px_per_unit=2)
 
 ## Coastline Data
 
-The following produces a world map in Cartesian coordinates, with aspect ratio set so that shapes and relative sizes are appropriate at the equator.
+The following produces a Canada-wide view on the left, with a red inset marker
+for Nova Scotia, and then a Nova Scotia view on the right. Thin lines are used
+    to show details of the wiggly coastlines.
 
 ```julia
-using OceanAnalysis, CairoMakie
-c = coastline()
-fig = plot_coastline(c)
-save("coastline.png", fig)
+using OceanAnalysis
+using GLMakie # or CairoMakie
+cl = coastline();
+
+fig = Figure()
+L = (-140, -50, 43, 76) # plot limits: east, west, south, north
+l = (-67, -58, 43, 47.5)
+# Left panel
+plot_coastline!(fig[1, 1], cl, limits=L, linewidth=0.2) # thin lines are prettier
+lines!([l[1], l[1], l[2], l[2], l[1]], [l[3], l[4], l[4], l[3], l[3]], color=:red)
+# Right panel
+plot_coastline!(fig[1, 2], cl, limits=l, scalebar=true)
+
+save("coastline.png", fig, px_per_unit=5)
 ```
 
 ![Coastline diagram](coastline.png)

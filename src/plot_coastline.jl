@@ -13,6 +13,7 @@ the vectors on `NaN` and fills each ring separately with `poly!`.
 function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     color=:bisque3, debug=0)
     oad(debug, "plot_coastline_polygons!() START")
+    oad(debug, "    linewidth=$linewidth")
     oad(debug, "    color=:$color")
     polygons = Polygon{2,Float32}[]
     start = 1
@@ -97,22 +98,30 @@ three-component NameTuple).
 # Examples
 
 ```julia
-using OceanAnalysis, GLMakie # or CairoMakie
+# Show waters near Nova Scotia, with Station 3 of the Halifax Line
+# indicated as HL3.
+using OceanAnalysis
+using GLMakie # or CairoMakie
 
-# Example 1. world
-plot_coastline(coastline(:global_coarse))
+# This function (perhaps extended) could be useful more generally.
+function show_place(longitude, latitude, text;
+    color=:blue, align=(:center, :top), offset=(0, -4))
+    scatter!(longitude, latitude, color=color)
+    text!(longitude, latitude, text=text, align=align, offset=offset, color=color)
+end
 
-# Example 2. Maritime provinces, light-gray, with a scale-bar
-fig = plot_coastline(coastline(), color=:lightgray, limits=(-67, -60, 43, 47))
-scale_bar!(fig, 100.0, linewidth=1)
+cl = coastline();
+fig = plot_coastline(cl, limits=(-67, -58, 43, 47.5))
+show_place(-62.883, 43.883, "HL3")
+#save("plot_coastline_example.png", fig, px_per_unit=4)
 ```
 """
 function plot_coastline(coastline::Coastline; scalebar=false, debug=0, kwargs...)
     oad(debug, "plot_coastline() START")
     fig = Figure()
-    plot_coastline!(fig[1, 1], coastline; scalebar=scalebar, debug=increment_debug(debug), kwargs...)
+    ax, plots = plot_coastline!(fig[1, 1], coastline; scalebar=scalebar, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_coastline()")
-    return fig
+    return FigureAxisPlot(fig, ax, plots.land)
 end
 export plot_coastline
 
@@ -134,19 +143,19 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     oad(debug, "    processing kwargs...")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     color = pop!(kwargs_dict, :color, :bisque3)
-    oad(debug, "    color=$color")
+    oad(debug, "      • color:     $(oad_val(color))")
     fontsize = pop!(kwargs_dict, :fontsize, 8)
-    oad(debug, "    fontsize=$fontsize")
-    linewidth = pop!(kwargs_dict, :linewidth, 8)
-    oad(debug, "    linewidth=$linewidth")
+    oad(debug, "      • fontsize: $(oad_val(fontsize))")
+    linewidth = pop!(kwargs_dict, :linewidth, 0.5)
+    oad(debug, "      • linewidth: $(oad_val(linewidth))")
     lims = pop!(kwargs_dict, :limits, (-180.0, 180.0, -90.0, 90.0))
-    oad(debug, "    limits=$lims")
+    oad(debug, "      • limits:    $(oad_val(lims))")
     title = pop!(kwargs_dict, :title, "")
-    oad(debug, "    title=$title")
+    oad(debug, "      • title:     $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, "")
-    oad(debug, "    xlabel=$xlabel")
+    oad(debug, "      • xlabel:    $(oad_val(xlabel))")
     ylabel = pop!(kwargs_dict, :ylabel, "")
-    oad(debug, "    ylabel=$ylabel")
+    oad(debug, "      • ylabel:    $(oad_val(ylabel))")
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
@@ -168,10 +177,9 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, lims...)
-    land_plt = plot_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"],
-        color=color, debug=increment_debug(debug))
+    land_plt = plot_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"];
+        color=color, linewidth=linewidth, debug=increment_debug(debug))
     if gave_scalebar # FIXME: possibly (re)make this as a function
-        # distance=100.0, x=:left, y=:top, style=:Ibeam
         distance = scalebar.distance
         style = scalebar.style
         (distance > 0.0) || error("scalebar.distance must be > 0, but it is $distance")
@@ -179,13 +187,13 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         x = (:x in keys(scalebar)) ? scalebar.x : :left
         y = (:y in keys(scalebar)) ? scalebar.y : :top
         style == :Ibeam || error("style must be :Ibeam, but it is $(repr(style))")
-        linewidth = (:linewidth in keys(scalebar)) ? scalebar.linewidth : 3.0 / 2.0
+        linewidth = (:linewidth in keys(scalebar)) ? scalebar.linewidth : 1
         oad(debug, "    scalebar parameters: distance=$distance, x=$(repr(x)), y=$(repr(y)), style=$(repr(style)), linewidth=$scalebar.linewidth")
         A = ax.finallimits[]
         xmin, ymin = minimum(A)
         xmax, ymax = maximum(A)
-        oad(debug, "    xmin=$xmin, xmax=$xmax")
-        oad(debug, "    ymin=$ymin, ymax=$ymax")
+        #oad(debug, "    xmin=$xmin, xmax=$xmax")
+        #oad(debug, "    ymin=$ymin, ymax=$ymax")
         xmid = (xmin + xmax) / 2.0
         ymid = (ymin + ymax) / 2.0
         oad(debug, "    xmid=$xmid, ymid=$ymid")
@@ -214,7 +222,7 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         Y = [y0, y0]
         oad(debug, "    Y=$Y")
         if style == :Ibeam
-            DY = (X[2] - X[1]) / 30
+            DY = (X[2] - X[1]) / 20
             X = [X[1], X[1], X[1], X[2], X[2], X[2]]
             Y = [Y[1] + DY, Y[1] - DY, Y[1], Y[2], Y[2] + DY, Y[2] - DY]
         elseif style != :line
@@ -224,7 +232,8 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         oad(debug, "    Y: $Y")
         sb_lines_plt = lines!(ax, X, Y, color=color, linewidth=linewidth)
         sb_text_plt = text!(ax, "$(trunc(Int, distance)) km", align=(:center, :center),
-            position=((X[1] + X[end]) / 2.0, y0 + dy / 3.0), color=color)
+            position=((X[1] + X[end]) / 2.0, y0 + 0.5 * dy), color=color,
+            fontsize=fontsize)
     else
         sb_lines_plt = nothing
         sb_text_plt = nothing
