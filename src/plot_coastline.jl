@@ -1,5 +1,5 @@
 """
-    draw_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
+    plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
         color=:bisque3, debug=0)
 
 Draw a coastline as a group of polygons.
@@ -10,9 +10,9 @@ separating individual land-mass rings (this is the convention Plots'
 `seriestype=:shape` relied on). Makie has no direct equivalent, so this splits
 the vectors on `NaN` and fills each ring separately with `poly!`.
 """
-function draw_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
+function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     color=:bisque3, debug=0)
-    oad(debug, "draw_coastline_polygons!() START")
+    oad(debug, "plot_coastline_polygons!() START")
     oad(debug, "    color=:$color")
     polygons = Polygon{2,Float32}[]
     start = 1
@@ -34,7 +34,7 @@ function draw_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
         else
             rval = poly!(ax, polygons, color=color, strokewidth=linewidth, strokecolor=:black)
         end
-        oad(debug, "END draw_coastline_polygons!()")
+        oad(debug, "END plot_coastline_polygons!()")
         return rval
     else
         error("this coastline object contains no polygons")
@@ -168,9 +168,9 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, lims...)
-    land_plt = draw_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"],
+    land_plt = plot_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"],
         color=color, debug=increment_debug(debug))
-    if gave_scalebar
+    if gave_scalebar # FIXME: possibly (re)make this as a function
         # distance=100.0, x=:left, y=:top, style=:Ibeam
         distance = scalebar.distance
         style = scalebar.style
