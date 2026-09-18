@@ -472,20 +472,21 @@ criteria, and then examine `i.name` to see the tide gauges in that region.)
 **FIXME: update when converted to Makie plotting.**
 
 ```julia
-using OceanAnalysis, Plots
-i = get_tide_gauge_index(:all);
-scatter(i.longitude, i.latitude,
-    aspect_ratio=1.0 / cos(45.0 * pi / 180),
-    framestyle=:box, tickdirection=:out, label=false, ms=0,
-    xlim=(-67, -59), ylim=(43.3, 47.2))
-plot_coastline!(coastline(:global_fine), fillcolor=:gray95)
-scatter!(i.longitude, i.latitude, color=:blue, ms=3,
-    markerstrokewidth=0.2)
+using OceanAnalysis
+using GLMakie # or CairoMakie
+cl = coastline()
+i = get_tide_gauge_index(:all); # requires internet access
+
+limits = (-67, -59, 43.3, 47.2)
+fig = plot_coastline(cl, limits=limits, scalebar=true, fontsize=12,
+    title="Tide gauges (red for permanent stations)")
+scatter!(i.longitude, i.latitude, color=:blue, markersize=8)
 look = i.type .== "PERMANENT"
-scatter!(i.longitude[look], i.latitude[look],
-    color=:red, ms=4, markerstrokewidth=0.2)
-savefig("tide_gauge_locations.png")
+scatter!(i.longitude[look], i.latitude[look], color=:red, markersize=18)
+
+save("tide_gauge_locations.png", fig, px_per_unit=5)
 ```
+
 
 ![Tide gauge locations](tide_gauge_locations.png)
 
@@ -497,19 +498,21 @@ tide gauge, and plot it as a timeseries. (As an exercise, repeat the call to
 an interval, the CHS server may report an error, in which case you ought to try
 increasing the value of `resolution`.)
 
-**FIXME: update when converted to Makie plotting.**
-
 ```julia
-using OceanAnalysis, Plots, CSV, DataFrames
+```
+using OceanAnalysis, CSV, DataFrames
+using GLMakie # or CairoMakie
+
 search = "Bedford" # full name is "Bedford Institute"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
-xlim = extrema(data.time)
-plot(data.time, data.value, xlim=xlim, label=false,
-    framestyle=:box, tickdirection=:out, ylab="Elevation [m]",
-    title=name, labelfontsize=8, titlefontsize=8)
-savefig("tide_gauge_timeseries.png")
-```
+
+fig = Figure()
+ax = Axis(fig[1, 1], ylabel="Elevation [m]", title="Sea Level at $name")
+lines!(data.time, data.value)
+
+save("tide_gauge_timeseries.png", fig, px_per_unit=5)
+
 
 ![Tide gauge timeseries](tide_gauge_timeseries.png)
 
