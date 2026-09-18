@@ -80,13 +80,13 @@ are called.
 
 # Return value
 
-The `plot_profile` form returns a `Makie.Figure`, which can be displayed
+The `plot_profile` form returns a Makie `FigureAxisPlot`, which can be displayed
 directly or saved with `save("filename.png", fig)`.
 
-The `plot_profile!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
-`plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (a
-`Colorbar` object if `color_by` is a String, or `nothing` if `color_by=false` or
-`color_by=""`).
+The `plot_profile!` form returns the Makie-style plot axis, as well as a
+NamedTuple containing `main` (a Makie `Lines`, `Scatter` or `Scatterlines`
+object) and `cb` (a `Colorbar` object if `color_by` is a String, or `nothing`
+if `color_by=false` or `color_by=""`).
 
 # Examples
 
@@ -113,11 +113,11 @@ function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
     oad(debug, "plot_profile() BEGIN")
     fig = Figure()
-    plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
+    ax, plot = plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
         color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_profile()")
-    return fig
+    return FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_profile
 
@@ -218,40 +218,18 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     limits!(ax, lims...)
-    #<?> if using_color_by
-    #<?>     oad(debug, "    will use colormap :$colormap for color_by")
-    #<?>     typeof(color) == Vector{ColorTypes.RGBA{Float64}} || error("programming error: color_by did not set 'color' correctly")
-    #<?> else
-    #<?>     color = pop!(kwargs_dict, :color, :black)
-    #<?>     oad(debug, "    set color=$color")
-    #<?> end
-    #marker = pop!(kwargs_dict, :marker, :circle)
-    #oad(debug, "    marker=$marker")
-    #markercolor = pop!(kwargs_dict, :markercolor, :black)
-    #oad(debug, "    markercolor=$markercolor")
-    #markersize = pop!(kwargs_dict, :markersize, 5.0)
-    #oad(debug, "    markersize=$markersize")
-    #seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
-    #oad(debug, "    seriestype=$seriestype")
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
-    #<...> if !isempty(kwargs_dict)
-    #<...>     error("plot_profile!() does not recognize keywords: ",
-    #<...>         join(string.(keys(kwargs_dict)), ", "),
-    #<...>         ". The permitted keywords are: color, colormap, fontsize, linewidth, ",
-    #<...>         "marker, markercolor, markersize, seriestype, title, xlabel, ylabel.")
-    #<...> end
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(color))")
         oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-
-        plt = lines!(ax, x, y, color=color, linewidth=linewidth)
+        main = lines!(ax, x, y, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
-        plt = scatter!(ax, x, y,
+        main = scatter!(ax, x, y,
             color=markercolor, marker=marker, markersize=markersize)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
@@ -260,7 +238,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         oad(debug, "      • markercolor: $(oad_val(markercolor))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
         oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-        plt = scatterlines!(ax, x, y, color=color, linewidth=linewidth,
+        main = scatterlines!(ax, x, y, color=color, linewidth=linewidth,
             marker=marker, markercolor=markercolor, markersize=markersize)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
@@ -282,7 +260,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         end
     end
     oad(debug, "END plot_profile!()")
-    return (ax=ax, plt=plt, cb=cb)
+    return ax = ax, (main=main, cb=cb)
 end
 export plot_profile!
 

@@ -1,7 +1,9 @@
 """
     plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
 
-Plot the data stored in an [`Adp`](@ref) object.
+    plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs...)
+
+Plot aspects of the data stored in an [`Adp`](@ref) object.
 
 This function provides some basic plots of the contents of an acoustic-Doppler
 profiler ([`Adp`](@ref)) object.
@@ -12,32 +14,56 @@ profiler ([`Adp`](@ref)) object.
 
 - `which` a Symbol indicating what to plot.  If `which` is `:velocity1` then a
   [`heatmap`] plot is made of the first component of velocity.  It will be
-  labelled as `"beam 1"`, `"ũ"` or `"u"`, according to whether
-  `adp["coordinate_system"]` is `:beam`, `:xyz` or `:enu`. Similar results are
-  obtained for `:velocity2` etc., where the fourth element is called `"ẽ"` or
-  `"e"`, designating an error estimate.  If `which` is `velocities`, then the
-  result is a multi-panel plot, with one panel per velocity component. If `which`
-  is `:heading` then a time-series plot is made of heading, with analogous
-  results for `:pitch` and `:roll`. If `which` is `:angles` then a three-panel
-  plot is made, showing these three angles.  If `which` is `:uv` and
-  `adp["coordinate_system"]` is `:enu`, then mid-distance east and north
-  components of velocity are computed and then plotted in a scatterplot.
+  entitled `"Beam 1"` or similar, according to the coordinate system
+  (as stored in `adp["coordinate_system"]`).  A similar pattern
+  holds for the other beams.  It also holds for `echo_intensity1`
+  and so forth. There are also scatterplot diagrams, provided
+  with `which` set to `:heading`, `:pitch`, `:roll` for instrument
+  angles, and `:uv` for the Northward velocity component
+  versus the Eastward velocity component.
 
 # Keywords
 
 - `debug`: an optional integer value that, if it exceeds 0, indicates that
   debugging output should be printed during processing.
 
-- `kwargs`: optional items, passed to `heatmap` for velocity fields, or to
-  `scatter` for time-series and other x-y plots.
+- `kwargs`: optional items, used variously.  The possibilities are
+  `"colormap"`, `colorrange"`, `"fontsize"`, `"markersize"`, `"title"`,
+  `"xlabel"`, and `"ylabel"`.
+
+# Return value
+
+The `plot_adp` form returns a Makie `FigureAxisPlot`, which can be displayed
+directly or saved with `save("filename.png", fig)`.
+
+The `plot_adp!` form returns the Makie-style plot axis, as well as a NamedTuple
+holding `main` (the main plot) for scatterplot varieties such as `:heading`,
+`:pitch`, `:roll`, `:uv` etc, as well as (for heatmap cases like
+`velocity1`, etc), the Colorbar `cb`.
 
 # Examples
 ```julia
 using OceanAnalysis
 using GLMakie # or CairoMakie
-adp = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000") |> read_adp_rdi
-plot_adp(adp)
+# The data are in beam coordinates, so we transform to xyz, then enu
+file= joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
+beam = read_adp_rdi(file);
+xyz = beam_to_xyz(beam);
+enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
+
+# Single panel (beam 1)
+plot_adp(beam, which=:velocity1)
+
+# Single panel (east-north velocity)
+plot_adp(enu, which=:uv)
+
+# Four panel (uniform colourscale)
+fig = Figure()
+cr = (-1.5, 1.5)
+plot_adp!(fig[1,1], enu, which=:velocity1, colorrange=cr, title="Eastward Upward Velocitym/s]")
+plot_adp!(fig[1,2], enu, which=:velocity2, colorrange=cr, title="Northward Upward Velocitym/s]")
+plot_adp!(fig[2,1], enu, which=:velocity3, colorrange=cr, title="Upward Velocity [m/s]")
+plot_adp!(fig[2,2], enu, which=:velocity4, colorrange=cr, title="Error Velocity [m/s]")
 ```
 """
 function plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
