@@ -87,13 +87,30 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         titles = ["u", "v", "w", "e"]
     end
     t = adp["time"]
-    if which in (:velocity1, :velocity2, :velocity3, :velocity4)
+    if which in (:echo_intensity1, :echo_intensity2, :echo_intensity3, :echo_intensity4,
+        :velocity1, :velocity2, :velocity3, :velocity4)
         oad(debug, "    handling which=$(repr(which))")
         beam = parse(Int, string(which)[end])
+        is_echo = occursin(r"echo", String(which))
+        is_velo = occursin(r"velocity", String(which))
+        oad(debug, "    is_echo=$is_echo")
+        oad(debug, "    is_velo=$is_velo")
+        (is_echo || is_velo) || error("which must be of the form :velocityN or :echo_intensityN, where N is an integer in 1:nbeam")
+        beam = parse(Int, string(which)[end])
         y = adp["distance"]
-        z = adp["velocity"][:, :, beam]
+        if is_echo
+            z = adp["echo_intensity"][:, :, beam]
+        elseif is_velo
+            z = adp["velocity"][:, :, beam]
+        else
+            error("FIXME: handle more than :velocityN and :echo_intensityN")
+        end
         if colorrange == :auto
-            colorrange = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)])) # centre colours on z=0
+            if is_echo
+                colorrange = extrema(abs.(z[.!isnan.(z)]))
+            elseif is_velo
+                colorrange = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)])) # centre colours on z=0
+            end
         end
         @assert size(z) == (length(t), length(y)) "z is $(size(z)), expected $((length(t), length(y)))"
         # FIXME: do a trick to plot elapsed time on the x axis, but labelling it with DateTime
