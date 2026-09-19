@@ -260,7 +260,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         end
     end
     oad(debug, "END plot_profile!()")
-    return ax = ax, (main=main, cb=cb)
+    return ax, (main=main, cb=cb)
 end
 export plot_profile!
 

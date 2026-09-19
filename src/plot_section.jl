@@ -1,8 +1,13 @@
 using FileIO, JLD2
 
 """
-    plot_section(section::Section, which="salinity";
-        type=:contourf, xvar=:latitude, yvar=:pressure, debug::Integer=0, kwargs...)
+    plot_section(section::Section; which="salinity",
+        type=:contour, xvar=:latitude, yvar=:pressure, show_stations=true,
+        debug=0, kwargs...)
+
+    plot_section!(fig_pos, section::Section; which="salinity",
+        type=:contour, xvar=:latitude, yvar=:pressure, show_stations=true,
+        debug=0, kwargs...)
 
 # Arguments
 
@@ -39,144 +44,148 @@ using FileIO, JLD2
 - `debug`: an optional integer value that, if it exceeds 0, indicates that
   debugging output should be printed during processing.
 
-- `kwargs`: optional items, passed down to lower-level plotting functions. For
-  example, `size` controls the size of the plot, `xlim` and `ylim` control the
-  viewing window, and `color` controls the colour.
+- `kwargs`: optional items, passed down to lower-level plotting functions.
 
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);
 s = read_section(dir);
 s.data = s.data[s["longitude"].< (-68.0)];
-p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
-scale_bar(500);
 # Note that we must grid to get the cross-section diagrams
 sg = grid_section(s);
-p2 = plot_section(sg, "salinity", ylim=(0, 2000));
-p3 = plot_section(sg, "salinity", ylim=(0, 2000), xvar=("Time", sg["time"]));
-l = @layout [a; b c];
-plot(p1, p2, p3, layout=l, dpi=300, size=(800, 500))
+plot_section(sg, "salinity", ylim=(0, 2000));
 ```
 """
-function plot_section(section::Section, which::String="salinity";
-    type::Symbol=:contourf,
-    xvar::Union{Symbol,Tuple}=:latitude,
-    yvar=:pressure, show_stations::Bool=false,
-    debug::Integer=0, kwargs...)
-    error("plot_section() disabled, pending convertion from Plots to Makie")
-    #<disabled>    oad(debug, "plot_section(which=\"$which\") BEGIN")
-    #<disabled>    oad(debug, "  see if section is gridded")
-    #<disabled>    section_is_gridded(section) || error("must use grid_section() on the section before plotting it")
-    #<disabled>    # assume all CTDs have the same data-column names
-    #<disabled>    fields = names(section.data[1].data)
-    #<disabled>    which in fields || error("which=\"$which\" not allowed; try one of the following: ", fields)
-    #<disabled>    type in (:contour, :contourf, :heatmap) || throw(ArgumentError("type=$(repr(type)) not allowed; try using :contour, :contourf or :heatmap"))
-    #<disabled>    if xvar isa Symbol
-    #<disabled>        oad(debug, "  xvar is a Symbol")
-    #<disabled>        if xvar == :longitude
-    #<disabled>            xlab = "Longitude [°E]"
-    #<disabled>            x = section["longitude"]
-    #<disabled>        elseif xvar == :latitude
-    #<disabled>            xlab = "Latitude [°N]"
-    #<disabled>            x = section["latitude"]
-    #<disabled>        elseif xvar == :distance
-    #<disabled>            xlab = "Distance [km]"
-    #<disabled>            x = geod_distance.(section["longitude"], section["latitude"],
-    #<disabled>                section["longitude"][1], section["latitude"][1])
-    #<disabled>        else
-    #<disabled>            error("xvar=$(repr(xvar)) not allowed; try :distance, :Latitude or :Longitude")
-    #<disabled>        end
-    #<disabled>    elseif xvar isa Tuple
-    #<disabled>        oad(debug, "  xvar is a Tuple")
-    #<disabled>        2 == length(xvar) || error("xvar is a Tuple, but its length is not 2")
-    #<disabled>        x = xvar[2]
-    #<disabled>        xlab = xvar[1]
-    #<disabled>    else
-    #<disabled>        error("xvar must be a Symbol or a Tuple")
-    #<disabled>    end
-    #<disabled>    if yvar == :depth
-    #<disabled>        ylab = "Depth [m]"
-    #<disabled>        y = section.data[1]["z"]
-    #<disabled>    elseif yvar == :pressure
-    #<disabled>        ylab = "Pressure [dbar]"
-    #<disabled>        y = section.data[1]["pressure"]
-    #<disabled>    elseif yvar == :z
-    #<disabled>        ylab = "Vertical Coordinate [m]"
-    #<disabled>        y = section.data[1]["depth"]
-    #<disabled>    else
-    #<disabled>        error("yvar=$(repr(yvar)) not allowed; try :depth, :pressure or :z")
-    #<disabled>    end
-    #<disabled>    oad(debug, "  set x=$(first(x,3)) (+ more) for yvar=$xvar")
-    #<disabled>    oad(debug, "  set y=$(first(y,3)) (+ more) for yvar=$yvar")
-    #<disabled>    oad(debug, "  assemble field for plotting")
-    #<disabled>    nrows, ncols = length(section.data[1]["pressure"]), length(section.data)
-    #<disabled>    z = zeros(nrows, ncols)
-    #<disabled>    #println("size(z): $(size(z))")
-    #<disabled>    for i in 1:ncols
-    #<disabled>        rval = section.data[i][which]
-    #<disabled>        #println("i=4i, size(rval): $(size(rval))")
-    #<disabled>        z[:, i] = rval
-    #<disabled>    end
-    #<disabled>    levels = pretty(z, 12)
-    #<disabled>    oad(debug, "  levels: $levels")
-    #<disabled>    oad(debug, "  putting x and y (and z) in ascending order")
-    #<disabled>    ix = sortperm(x)
-    #<disabled>    iy = sortperm(y)
-    #<disabled>    x = x[ix]
-    #<disabled>    y = y[iy]
-    #<disabled>    z = z[iy, ix]
-    #<disabled>    # Kludge required for Julia as of 2025-12-30 (see link in the debug message)
-    #<disabled>    # (Actually, I think this is only needed for heatmap.)
-    #<disabled>    oad(debug, "  applying a patch to avoid a heatmap problem")
-    #<disabled>    kw = (; kwargs...)
-    #<disabled>    if haskey(kwargs, :ylim)
-    #<disabled>        oad(debug, "  Avoiding heatmap() error handling ylim together with yflip=true; see")
-    #<disabled>        oad(debug, "    https://discourse.julialang.org/t/heatmap-how-do-ylim-and-yflip-interact/134804/4")
-    #<disabled>        oad(debug, "  for discussion.")
-    #<disabled>        keep_y = kw[:ylim][1] .<= y .<= kw[:ylim][2]
-    #<disabled>    else
-    #<disabled>        keep_y = y .< Inf
-    #<disabled>    end
-    #<disabled>    y = y[keep_y]
-    #<disabled>    z = z[keep_y, :]
-    #<disabled>    # ok, now can plot
-    #<disabled>
-    #<disabled>    if type == :contour
-    #<disabled>        oad(debug, "  using contour()")
-    #<disabled>        pl = contour(x, y, z;
-    #<disabled>            contourlabels=true, color=:black, cbar=false, levels=levels,
-    #<disabled>            yflip=yvar == :pressure || yvar == :depth ? true : false,
-    #<disabled>            xlab=xlab, ylab=ylab, framestyle=:box, tickdirection=:out,
-    #<disabled>            titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
-    #<disabled>            kwargs...)
-    #<disabled>    elseif type == :contourf
-    #<disabled>        oad(debug, "  using contourf()")
-    #<disabled>        jldsave("dan.jld2"; x, y, z)
-    #<disabled>        pl = contourf(x, y, z;
-    #<disabled>            contourlabels=true, color=:turbo, cbar=false, levels=levels,
-    #<disabled>            yflip=yvar == :pressure || yvar == :depth ? true : false,
-    #<disabled>            xlab=xlab, ylab=ylab, framestyle=:box, tickdirection=:out,
-    #<disabled>            titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
-    #<disabled>            kwargs...)
-    #<disabled>    elseif type == :heatmap
-    #<disabled>        oad(debug, "  using heatmap()")
-    #<disabled>        pl = heatmap(x, y, z;
-    #<disabled>            yflip=yvar == :pressure || yvar == :depth ? true : false,
-    #<disabled>            xlab=xlab, ylab=ylab, framestyle=:box, color=:turbo, tickdirection=:out,
-    #<disabled>            titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
-    #<disabled>            kwargs...)
-    #<disabled>    else
-    #<disabled>        error("type=$(repr(type)) not allowed; try :contour, :contourf or :heatmap")
-    #<disabled>    end
-    #<disabled>    if show_stations
-    #<disabled>        oad(debug, "  drawing stations")
-    #<disabled>        vline!(x, color=RGBA(0.5, 0.5, 0.5, 0.7), linewidth=1, linestyle=:dot, label=false)
-    #<disabled>    end
-    #<disabled>    oad(debug, "END plot_section()")
-    #<disabled>    pl
+function plot_section(section::Section; which="salinity",
+    type=:contour, xvar=:latitude, yvar=:pressure, show_stations=true,
+    debug=0, kwargs...)
+    oad(debug, "plot_section() BEGIN")
+    fig = Makie.Figure()
+    ax, plot = plot_section!(fig[1, 1], section; which=which,
+        type=type, xvar=xvar, yvar=yvar, show_stations=show_stations,
+        debug=increment_debug(debug), kwargs=kwargs)
+    oad(debug, "END plot_section()")
+    return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_section
 
+function plot_section!(fig_pos, section::Section; which="salinity",
+    type=:contour, xvar=:longitude, yvar=:pressure, show_stations=true,
+    debug::Integer=0, kwargs...)
+    oad(debug, "plot_section!() BEGIN")
+    oad(debug, "    see if section is gridded")
+    section_is_gridded(section) || error("must use grid_section() on the section before plotting it")
+    # assume all CTDs have the same data-column names
+    fields = names(section.data[1].data)
+    which in fields || error("which=\"$which\" not allowed; try one of the following: ", fields)
+    type in (:contour, :contourf, :heatmap) || throw(ArgumentError("type=$(repr(type)) not allowed; try using :contour, :contourf or :heatmap"))
+    if xvar isa Symbol
+        oad(debug, "    xvar is a Symbol")
+        if xvar == :longitude
+            xlab = "Longitude [°E]"
+            x = section["longitude"]
+        elseif xvar == :latitude
+            xlab = "Latitude [°N]"
+            x = section["latitude"]
+        elseif xvar == :distance
+            xlab = "Distance [km]"
+            x = geod_distance.(section["longitude"], section["latitude"],
+                section["longitude"][1], section["latitude"][1])
+        else
+            error("xvar=$(repr(xvar)) not allowed; try :distance, :Latitude or :Longitude")
+        end
+    elseif xvar isa Tuple
+        oad(debug, "    xvar is a Tuple")
+        2 == length(xvar) || error("xvar is a Tuple, but its length is not 2")
+        x = xvar[2]
+        xlab = xvar[1]
+    else
+        error("xvar must be a Symbol or a Tuple")
+    end
+    if yvar == :depth
+        ylab = "Depth [m]"
+        y = section.data[1]["z"]
+    elseif yvar == :pressure
+        ylab = "Pressure [dbar]"
+        y = section.data[1]["pressure"]
+    elseif yvar == :z
+        ylab = "Vertical Coordinate [m]"
+        y = section.data[1]["depth"]
+    else
+        error("yvar=$(repr(yvar)) not allowed; try :depth, :pressure or :z")
+    end
+    # FIXME: process kwargs properly (and document)
+    # FIXME: add fontsizes to ax
+    ax = Makie.Axis(fig_pos[1, 1], xlabel=xlab, ylabel=ylab, yreversed=true)
+    oad(debug, "    set x=$(first(x,3)) (+ more) for yvar=$xvar")
+    oad(debug, "    set y=$(first(y,3)) (+ more) for yvar=$yvar")
+    oad(debug, "    assemble field for plotting")
+    nrows, ncols = length(section.data[1]["pressure"]), length(section.data)
+    z = zeros(nrows, ncols)
+    #println("size(z): $(size(z))")
+    for i in 1:ncols
+        rval = section.data[i][which]
+        z[:, i] = rval
+    end
+    levels = pretty(z, 12)
+    oad(debug, "    levels: $levels")
+    oad(debug, "    putting x and y (and z) in ascending order")
+    ix = sortperm(x)
+    iy = sortperm(y)
+    x = x[ix]
+    y = y[iy]
+    z = z[iy, ix]
+    kw = (; kwargs...)
+    if haskey(kwargs, :ylim)
+        oad(debug, "    avoiding heatmap() error handling ylim together with yflip=true; see")
+        oad(debug, "      https://discourse.julialang.org/t/heatmap-how-do-ylim-and-yflip-interact/134804/4")
+        oad(debug, "    for discussion.")
+        keep_y = kw[:ylim][1] .<= y .<= kw[:ylim][2]
+    else
+        keep_y = y .< Inf
+    end
+    y = y[keep_y]
+    oad(debug, "    set up y")
+    z = z[keep_y, :]
+    oad(debug, "    set up z")
+    # ok, now can plot
+    oad(debug, "    about to plot main with type=$(repr(type))")
+    if type == :contour
+        oad(debug, "    using contour() length(x)=$(length(x)), length(y)=$(length(y)), size(z)=$(size(z))")
+        main = Makie.contour!(ax, x, y, z')
+        #contourlabels=true, color=:black, cbar=false, levels=levels,
+        #yflip=yvar == :pressure || yvar == :depth ? true : false,
+        #xlab=xlab, ylab=ylab, framestyle=:box, tickdirection=:out,
+        #titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
+        #kwargs...)
+    elseif type == :contourf
+        oad(debug, "    FIXME: using contourf()")
+        main = Makie.contourf!(ax, x, y, z')
+        #contourlabels=true, color=:turbo, cbar=false, levels=levels,
+        #yflip=yvar == :pressure || yvar == :depth ? true : false,
+        #xlab=xlab, ylab=ylab, framestyle=:box, tickdirection=:out,
+        #titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
+        #kwargs...)
+    elseif type == :heatmap
+        oad(debug, "    : using heatmap()")
+        main = Makie.heatmap!(ax, x, y, z')
+        #yflip=yvar == :pressure || yvar == :depth ? true : false,
+        #xlab=xlab, ylab=ylab,
+        #color=:turbo,
+        #titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
+        #kwargs...)
+    else
+        error("type=$(repr(type)) not allowed; try :contour, :contourf or :heatmap")
+    end
+    if show_stations
+        oad(debug, "    drawing stations")
+        #FIXME: vline!(x, color=RGBA(0.5, 0.5, 0.5, 0.7), linewidth=1, linestyle=:dot, label=false)
+    end
+    oad(debug, "END plot_section!()")
+    return ax, (main=main,)
+end
+export plot_section!
