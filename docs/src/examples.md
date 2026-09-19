@@ -43,23 +43,26 @@ temperature, which may be plotted as follows. In addition to the SST field, the
 1-km isobath is also shown.
 
 ```julia
-using OceanAnalysis, CairoMakie
+using OceanAnalysis
+using GLMakie # or CairoMakie
 file = get_amsr()
 sst = read_amsr(file, "SST");
-fig = plot_amsr(sst; xlims=(275.0, 350.0),
-    ylims=(20.0, 65.0), colorrange=(-2.0, 30.0),
-    title="Sea-surface Temperature [°C] with 1-km isobath");
-# Add 1-km isobath. Note the transposition of the data (for Makie)
-# and the redrawing, to handle the fact that AMSR has 0<=lon<=360
-# whereas topography has -180<=lon<=180.
-ax = fig[1, 1]
+
+title = "SST " * sst["time_coverage_start"][1:10] *
+        " to " * sst["time_coverage_end"][1:10] *
+        " (with 1-km isobath shown)"
+fig = plot_amsr(sst; limits=(275.0, 350.0, 20.0, 65.0), title=title)
+
+# Add 1-km isobath. Note the transposition of the data (needed for Makie) and
+# the redrawing, required because AMSR has 0<=lon<=360 whereas topography
+# has -180<=lon<=180.
 tf = get_topography()
 t = read_topography(tf);
-contour!(ax, t["longitude"], t["latitude"], t.data',
+contour!(t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
-contour!(ax, 360.0 .+ t["longitude"], t["latitude"], t.data',
+contour!(360.0 .+ t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
-save("amsr.png", fig)
+save("amsr.png", fig, px_per_unit=2)
 ```
 
 ![AMSR-derived sea-surface temperature](amsr.png)
@@ -109,34 +112,34 @@ analysis procedures. However, sometimes the flags seem to be in error, and so a
 prudent analyst will start by plotting as in the top row.  *Exercise:* add a
 middle row showing just the cleaned-up profiles.
 
-**FIXME: update when converted to Makie plotting.**
-
 ```julia
 # Illustrate QC processing of hydrographic data
-using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4901076_139.nc")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+f = joinpath(pkgdir(OceanAnalysis), "data", "D4901076_139.nc")
 argo = read_argo(f);
 ctd = as_ctd(argo);
 ctd_clean = handle_qc(ctd);
+summarize(ctd)
+summarize(ctd_clean)
 
-ul = plot_profile(ctd; which="salinity", dpi=200, fontsize=6)
-badS = ctd["salinity_qc"] .!= '1'
+fig = Figure() # will fill with 4 panels
+
+plot_profile!(fig[1, 1], ctd; which="salinity")
+badS = ctd["salinity_qc"] .!= '1';
 scatter!(ctd["salinity"][badS], ctd["pressure"][badS], color=:red, markersize=2)
 
-ur = plot_profile(ctd; which="temperature", dpi=200, fontsize=6)
-badT = ctd["temperature_qc"] .!= '1'
+plot_profile!(fig[1, 2], ctd; which="temperature")
+badT = ctd["temperature_qc"] .!= '1';
 scatter!(ctd["temperature"][badT], ctd["pressure"][badT], color=:red, markersize=2)
 
-ll = plot_TS(ctd, fontsize=6)
-bad = badS .| badT
+plot_TS!(fig[2, 1], ctd)
+bad = badS .| badT;
 scatter!(ctd["SA"][bad], ctd["CT"][bad], color=:red, markersize=2)
 
-lr = plot_TS(ctd_clean, fontsize=6)
+plot_TS!(fig[2, 2], ctd_clean)
 
-plot(ul, ur, ll, lr, layout=(2, 2))
-savefig("argo_qc.png")
-
-
+save("argo_qc.png", fig, px_per_unit=2)
 ```
 
 ![Argo search results](argo_qc.png)
@@ -307,22 +310,18 @@ The following shows how to read a built-in CTD file, and plot some hydrographic 
 
 ### CTD profiles
 
-**FIXME: update when I learn how to do layout like this in Makie**
 
 ```julia
 # Read and plot a built-in CTD file
-using OceanAnalysis, Measures, Plots, Printf
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "ctd.cnv")
+using OceanAnalysis, Printf
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
-p1 = plot_profile(ctd; which="CT");
-p2 = plot_profile(ctd; which="SA");
-p3 = plot_profile(ctd; which="sigma0");
-title = @sprintf("CTD observations at %.3fN and %.3fE",
-    ctd["latitude"], ctd["longitude"])
-plot(p1, p2, p3, layout=(1, 3), size=(800, 600), margin=0.25cm,
-    dpi=150, plot_title=title, plot_titlefontsize=11)
-savefig("ctd_profiles.png")
+fig = Figure()
+plot_profile!(fig[1, 1], ctd; which="CT");
+plot_profile!(fig[1, 2], ctd; which="SA");
+plot_profile!(fig[1, 3], ctd; which="sigma0");
+save("ctd_profiles.png", fig, px_per_unit=2)
 ```
 
 ![CTD profiles](ctd_profiles.png)
@@ -330,14 +329,15 @@ savefig("ctd_profiles.png")
 ### CTD smoothing
 
 The following shows how to grid CTD data in 1-dbar intervals; note that the
-mean spacing of the data is 0.24 dbar. Note the trick of using uniform `y` values, so that `interpolate_barnes()` will effectively do a one-dimensional
+mean spacing of the data is 0.24 dbar. Note the trick of using uniform `y`
+values, so that `interpolate_barnes()` will effectively do a one-dimensional
 analysis of the variation of Absolute Salinity with sea pressure.
 
-**FIXME: update 
-
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+# Smooth to 1-dbar grid; note that mean(diff(p))=0.24 dbar.
+using OceanAnalysis
+using GLMakie # or CairoMakie
+file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(file);
 p = ctd["pressure"];
 y = repeat([1], length(p)); # fake y data, with arbitrary value
@@ -345,9 +345,9 @@ SA = ctd["SA"];
 dp = 1.0;
 pg = range(0.0, maximum(p), step=dp);
 g = interpolate_barnes(p, y, SA; xg=pg, xr=dp);
-plot_profile(ctd, which="SA", seriestype=:scatter)
-plot!(g["zg"][:], g["xg"][:], color=:red, label=false)
-savefig("ctd_smooth.png")
+fig = plot_profile(ctd, which="SA", seriestype=:scatter)
+lines!(g["zg"][:], g["xg"][:], color=:red, label=false)
+save("ctd_smooth.png", fig, px_per_unit=2)
 ```
 
 ![Smoothing a CTD profile](ctd_smooth.png)
@@ -361,13 +361,15 @@ marker borders are used to avoid having black ink obscuring the colours.
 
 ```julia
 # Read and plot a built-in CTD file
-using OceanAnalysis, Measures, Plots, Printf
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+using OceanAnalysis
+using Printf
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 title = @sprintf("CTD observations at %.3fN and %.3fE",
     ctd["latitude"], ctd["longitude"])
-plot_TS(ctd, ms=3, title=title, markerstrokewidth=0, color_by="pressure")
-savefig("ctd_TS.png")
+fig = plot_TS(ctd, title=title)
+save("ctd_TS.png", fig, px_per_unit=2)
 ```
 
 ![CTD TS](ctd_TS.png)

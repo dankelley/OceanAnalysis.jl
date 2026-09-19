@@ -141,7 +141,7 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
-    return FigureAxisPlot(fig, fig, plot.main)
+    return FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_TS
 
@@ -176,7 +176,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     oad(debug, "    spiciness0_levels: $spiciness0_levels")
     oad(debug, "    plot_freezing: $plot_freezing")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
-    oad(debug, "    inferred the following from kwargs (or from defaults):")
+    oad(debug, "    inferred the following from kwargs (or from defaults, or the data):")
     color = pop!(kwargs_dict, :color, :black)
     oad(debug, "      • color:                    $(oad_val(color))")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
@@ -185,7 +185,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     oad(debug, "      • fontsize:                 $(oad_val(fontsize))")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     oad(debug, "      • linewidth:                $(oad_val(linewidth))")
-    lims = pop!(kwargs_dict, :limits, (extend_extrema(skipmissing(SA))..., extend_extrema(skipmissing(CT))...))
+    lims = pop!(kwargs_dict, :limits, (extend_extrema(SA)..., extend_extrema(CT)...))
     oad(debug, "      • limits:                   $(round.(lims, digits=4))")
     marker = pop!(kwargs_dict, :marker, :circle)
     oad(debug, "      • marker:                   $(oad_val(marker))")

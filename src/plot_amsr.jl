@@ -18,15 +18,12 @@ the caller (e.g. `using CairoMakie` or `using GLMakie`) before it is called.
 
 # Return value
 
-The `plot_amsr` form returns a `Makie.Figure`, which can be displayed
-directly or saved with `save("filename.png", fig)`.
+The `plot_amsr` form returns a Makie `FigureAxisPlot`, which can be displayed
+directly or saved with the FileIO's `save`.
 
-The `plot_amsr!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
-`plt` (a Makie `Heatmap` object) and `cb` (a Colorbar object).
-
-These functions require a Makie backend to be loaded and activated by
-the caller (e.g. `using CairoMakie` or `using GLMakie`) before they
-are called.
+The `plot_amsr!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
+item, and a NamedTuple as the second. The latter contains an element named
+`main` that holds the main plot, plus potentially `cb` that holds a Colorbar.
 
 # Arguments
 
@@ -70,28 +67,27 @@ a depth contour to the image created by `plot_amsr`.
 
 # Examples
 ```julia
-using OceanAnalysis, CairoMakie
-using Dates # for time format
+using OceanAnalysis
+using GLMakie # or CairoMakie
 
 file = get_amsr()
 sst = read_amsr(file, "SST");
 
 # 1. SST heatmap of Northwest Atlantic.
-plot_amsr(sst; limits=(260, 360, 20, 60), title="SST")
+title = "Sea Surface Temperature " * sst["time_coverage_start"][1:10] * " to " * sst["time_coverage_end"][1:10]
+plot_amsr(sst; limits=(260, 360, 20, 60), title=title)
 
 # 2. As example 1, but also showing the 1km isobath
-fig = Figure(size=(600,310))
-plot_amsr!(fig, sst; limits=(260, 360, 20, 60), title="SST")
+plot_amsr(sst; limits=(260, 360, 20, 60), title=title* " Showing 1km isobath")
 tf = get_topography()
 t = read_topography(tf);
 # NB: transpose data (needed for Makie), and draw twice,
 # since -180<=longitude<=180 for topographic data,
 # as opposed to 0<=longitude<=360 for AMSR data.
-contour!(fig[1,1], t["longitude"], t["latitude"], t.data',
+contour!(t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
-contour!(fig[1,1], 360.0 .+ t["longitude"], t["latitude"], t.data',
+contour!(360.0 .+ t["longitude"], t["latitude"], t.data',
     levels=[-1000.0], color=:black, linewidth=1)
-fig
 ```
 """
 function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
@@ -99,11 +95,11 @@ function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
     fontsize=8, debug::Integer=0, kwargs...)
     oad(debug, "plot_amsr() BEGIN")
     fig = Figure()
-    plot_amsr!(fig[1, 1], amsr; limits=limits,
+    ax, plot = plot_amsr!(fig[1, 1], amsr; limits=limits,
         draw_coastline=draw_coastline, draw_contours=draw_contours,
         fontsize=fontsize, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_amsr()")
-    return fig
+    return FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_amsr
 
@@ -150,23 +146,26 @@ function plot_amsr!(fig_pos, amsr::Amsr;
     limits!(ax, limits...)
     # Transpose amsr.data for Makie (not done for Plots).
     oad(debug, "    plotting a heatmap of ", amsr.metadata["field"], " with colormap=:$colormap and colorrange=$colorrange")
-    plt = heatmap!(ax, longitude, latitude, permutedims(amsr.data);
+    main = heatmap!(ax, longitude, latitude, permutedims(amsr.data);
         colormap=colormap, colorrange=colorrange, kwargs_dict...)
 
     # Possibly draw the land
     if draw_coastline
         oad(debug, "    drawing the land and coastline")
         if limits[4] - limits[3] > 50
-            oad(debug, "    defaulting to coastline(:global_coarse)")
+            oad(debug, "    defaulting to coastline(:global_coarse) since latitude span > 50°")
             cl = coastline(:global_coarse)
         else
-            oad(debug, "    defaulting to coastline(:global_fine)")
+            oad(debug, "    defaulting to coastline(:global_coarse) since latitude span <= 50°")
             cl = coastline(:global_fine)
         end
-        draw_coastline_polygons!(ax, cl.data.longitude, cl.data.latitude,
+        longitude = cl["longitude"]
+        latitude = cl["latitude"]
+        plot_coastline_polygons!(ax, longitude, latitude;
             debug=increment_debug(debug))
         if any(limits[1:2] .> 180.0)
-            draw_coastline_polygons!(ax, cl.data.longitude .+ 360, cl.data.latitude,
+            oad(debug, "    drawing a second coastline because some data have longitude > 180°")
+            plot_coastline_polygons!(ax, longitude .+ 360.0, latitude;
                 debug=increment_debug(debug))
         end
     else
@@ -189,9 +188,9 @@ function plot_amsr!(fig_pos, amsr::Amsr;
             @warn "draw_contours ($draw_contours) cannot be handled; try :none, :auto, or a numeric vector"
         end
     end
-    cb = Colorbar(fig_pos[1, 2], plt, ticklabelsize=fontsize)
+    cb = Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
     oad(debug, "END plot_amsr!()")
-    return (ax=ax, plt=plt, cb=cb)
+    return ax, (main=main, cb=cb)
 end
 export plot_amsr!
 

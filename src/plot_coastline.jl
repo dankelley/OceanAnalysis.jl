@@ -13,11 +13,12 @@ the vectors on `NaN` and fills each ring separately with `poly!`.
 function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     color=:bisque3, debug=0)
     oad(debug, "plot_coastline_polygons!() START")
-    oad(debug, "    linewidth=$linewidth")
-    oad(debug, "    color=:$color")
+    oad(debug, "    linewidth: $linewidth")
+    oad(debug, "    color:     $(repr(color))")
     polygons = Polygon{2,Float32}[]
     start = 1
     n = length(longitude)
+    oad(debug, "    length(longitude): $n")
     oad(debug, "    assembling polygons")
     for i in 1:n+1
         if i == n + 1 || isnan(longitude[i]) || isnan(latitude[i])
@@ -28,6 +29,7 @@ function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
             start = i + 1
         end
     end
+    oad(debug, "    aassembled $(length(polygons)) polygons")
     oad(debug, "    plotting the assembled polygons")
     if !isempty(polygons)
         if color == :white
@@ -87,13 +89,12 @@ central latitude of the plot view.
 
 # Return value
 
-The `plot_coastline` form returns a `Makie.Figure`, which can be displayed
-directly or saved with `save("filename.png", fig)`.
+The `plot_coastline` form returns a Makie `FigureAxisPlot`, which can be displayed
+directly or saved with the FileIO's `save`.
 
-The `plot_coastline!` form returns a NamedTuple containing `ax` (a
-`Makie.Axis`), `plt` (a Makie object) and `cb` (a `Colorbar` object set to
-nothing, present here only so all functions in the package return a
-three-component NameTuple).
+The `plot_coastline!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
+item, and a NamedTuple as the second. The latter contains an element named
+`main` that holds the main plot.
 
 # Examples
 
@@ -130,11 +131,12 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     oad(debug, "plot_coastline!() START")
     oad(debug, "    scalebar=$scalebar (originally)")
     # Check scalebar (used near the end of this function)
-    gave_scalebar = false
     if scalebar == true
         scalebar = (distance=100.0, x=:left, y=:top, style=:Ibeam, linewidth=1.8)
         oad(debug, "    scalebar=$scalebar (after expansion)")
         gave_scalebar = true
+    else
+        gave_scalebar = false
     end
     if gave_scalebar
         isa(scalebar, NamedTuple) || error("scalebar, if given, must be a NamedTuple")

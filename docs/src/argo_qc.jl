@@ -1,24 +1,28 @@
 # Illustrate QC processing of hydrographic data
-using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4901076_139.nc")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+f = joinpath(pkgdir(OceanAnalysis), "data", "D4901076_139.nc")
 argo = read_argo(f);
 ctd = as_ctd(argo);
 ctd_clean = handle_qc(ctd);
+summarize(ctd)
+summarize(ctd_clean)
 
-ul = plot_profile(ctd; which="salinity", dpi=200, fontsize=6)
-badS = ctd["salinity_qc"] .!= '1'
+fig = Figure() # will fill with 4 panels
+
+plot_profile!(fig[1, 1], ctd; which="salinity")
+badS = ctd["salinity_qc"] .!= '1';
 scatter!(ctd["salinity"][badS], ctd["pressure"][badS], color=:red, markersize=2)
 
-ur = plot_profile(ctd; which="temperature", dpi=200, fontsize=6)
-badT = ctd["temperature_qc"] .!= '1'
+plot_profile!(fig[1, 2], ctd; which="temperature")
+badT = ctd["temperature_qc"] .!= '1';
 scatter!(ctd["temperature"][badT], ctd["pressure"][badT], color=:red, markersize=2)
 
-ll = plot_TS(ctd, fontsize=6)
-bad = badS .| badT
+plot_TS!(fig[2, 1], ctd)
+bad = badS .| badT;
 scatter!(ctd["SA"][bad], ctd["CT"][bad], color=:red, markersize=2)
 
-lr = plot_TS(ctd_clean, fontsize=6)
+plot_TS!(fig[2, 2], ctd_clean)
 
-plot(ul, ur, ll, lr, layout=(2, 2))
-savefig("argo_qc.png")
+save("argo_qc.png", fig, px_per_unit=2)
 

@@ -1,13 +1,10 @@
 # Read and plot a built-in CTD file
-using OceanAnalysis, Measures, Plots, Printf
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "ctd.cnv")
+using OceanAnalysis, Printf
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
-p1 = plot_profile(ctd; which="CT");
-p2 = plot_profile(ctd; which="SA");
-p3 = plot_profile(ctd; which="sigma0");
-title = @sprintf("CTD observations at %.3fN and %.3fE",
-    ctd["latitude"], ctd["longitude"])
-plot(p1, p2, p3, layout=(1, 3), size=(800, 600), margin=0.25cm,
-    dpi=150, plot_title=title, plot_titlefontsize=11)
-savefig("ctd_profiles.png")
+fig = Figure()
+plot_profile!(fig[1, 1], ctd; which="CT");
+plot_profile!(fig[1, 2], ctd; which="SA");
+plot_profile!(fig[1, 3], ctd; which="sigma0");
+save("ctd_profiles.png", fig, px_per_unit=2)
