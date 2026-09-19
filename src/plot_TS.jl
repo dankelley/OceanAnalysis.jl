@@ -104,13 +104,13 @@ Information about the analysis is printed if `debug` exceeds 0.
 
 # Return value
 
-The `plot_TS` form returns a Makie `Figure`, which can be displayed
-directly or saved with `save("filename.png", fig)`.
+The `plot_TS` form returns a Makie `FigureAxisPlot`, which can be displayed
+directly or saved with the FileIO's `save`.
 
-The `plot_TS!` form returns a NamedTuple containing `ax` (a `Makie.Axis`),
-`plt` (a Makie `Lines`, `Scatter` or `Scatterlines` object) and `cb` (a
-`Colorbar` object if `color_by` is a String, or `nothing` if `color_by=false` or
-`color_by=""`).
+The `plot_TS!` form returns a Tuple with `ax` (a Makie `Axis`) as the
+first item, and a NamedTuple as the second. The latter contains elements named
+`main`, which holds the main plot, and `cb` which is `nothing` if `colorby` is
+false, or a Colorbar otherwise.
 
 
 # Examples
@@ -136,13 +136,13 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
     fig = Figure()
-    plot_TS!(fig[1, 1], d;
+    ax, plot = plot_TS!(fig[1, 1], d;
         sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
         plot_freezing=plot_freezing,
         color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
-    return fig
+    return FigureAxisPlot(fig, fig, plot.main)
 end
 export plot_TS
 
@@ -248,13 +248,13 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "    calling lines!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(color))")
         oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-        plt = lines!(ax, SA, CT, color=color, linewidth=linewidth)
+        main = lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
-        plt = scatter!(ax, SA, CT;
+        main = scatter!(ax, SA, CT;
             color=markercolor, marker=marker, markersize=markersize)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
@@ -263,7 +263,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markercolor: $(oad_val(markercolor))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
-        plt = scatterlines!(ax, SA, CT, color=color, linewidth=linewidth,
+        main = scatterlines!(ax, SA, CT, color=color, linewidth=linewidth,
             marker=marker, markercolor=markercolor, markersize=markersize)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
@@ -290,7 +290,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         end
     end
     oad(debug, "END plot_TS!()")
-    return (ax=ax, plt=plt, cb=cb)
+    return ax, (main=main, cb=cb)
 end
 export plot_TS!
 

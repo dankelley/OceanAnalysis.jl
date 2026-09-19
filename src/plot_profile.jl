@@ -80,13 +80,14 @@ are called.
 
 # Return value
 
-The `plot_profile` form returns a Makie `FigureAxisPlot`, which can be displayed
-directly or saved with `save("filename.png", fig)`.
+The `plot_profile` form returns a Makie `FigureAxisPlot`, which can be
+displayed directly or saved with the FileIO's `save`.
 
-The `plot_profile!` form returns the Makie-style plot axis, as well as a
-NamedTuple containing `main` (a Makie `Lines`, `Scatter` or `Scatterlines`
-object) and `cb` (a `Colorbar` object if `color_by` is a String, or `nothing`
-if `color_by=false` or `color_by=""`).
+The `plot_profile!` form returns a Tuple with `ax` (a Makie `Axis`) as the
+first item, and a NamedTuple as the second. The latter contains elements named
+`main`, which holds the main plot, and `cb` which is `nothing` if `colorby` is
+false, or a Colorbar otherwise.
+
 
 # Examples
 
