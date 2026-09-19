@@ -34,12 +34,12 @@ profiler ([`Adp`](@ref)) object.
 # Return value
 
 The `plot_adp` form returns a Makie `FigureAxisPlot`, which can be displayed
-directly or saved with `save("filename.png", fig)`.
+directly or saved with the FileIO's `save`.
 
-The `plot_adp!` form returns the Makie-style plot axis, as well as a NamedTuple
-holding `main` (the main plot) for scatterplot varieties such as `:heading`,
-`:pitch`, `:roll`, `:uv` etc, as well as (for heatmap cases like
-`velocity1`, etc), the Colorbar `cb`.
+The `plot_adp!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
+item, and a NamedTuple as the second. The latter contains an element named
+`main` that holds the main plot, plus potentially `cb` that holds a Colorbar.
+
 
 # Examples
 ```julia
@@ -158,7 +158,6 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         cb = Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main, cb=cb)
-        # return ax, (main=hm, cb=cb)
     elseif which == :velocities
         oad(debug, "  handling which=$(repr(which))")
         error("FIXME: deprecate :velocities")

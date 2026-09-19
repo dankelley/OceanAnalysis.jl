@@ -83,10 +83,9 @@ are called.
 The `plot_profile` form returns a Makie `FigureAxisPlot`, which can be
 displayed directly or saved with the FileIO's `save`.
 
-The `plot_profile!` form returns a Tuple with `ax` (a Makie `Axis`) as the
-first item, and a NamedTuple as the second. The latter contains elements named
-`main`, which holds the main plot, and `cb` which is `nothing` if `colorby` is
-false, or a Colorbar otherwise.
+The `plot_profile!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
+item, and a NamedTuple as the second. The latter contains an element named
+`main` that holds the main plot, plus potentially `cb` that holds a Colorbar.
 
 
 # Examples
