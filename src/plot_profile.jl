@@ -104,7 +104,7 @@ fig = plot_profile(ctd; which="SA")
 fig = plot_profile(ctd; which="CT", color_by="SA")
 
 # Example 2: mutating case (two-panel diagram)
-fig = Figure()
+fig = Makie.Figure()
 plot_profile!(fig[1,1], ctd; which="CT")
 plot_profile!(fig[1,2], ctd; which="CT", color_by="SA")
 ```
@@ -112,12 +112,12 @@ plot_profile!(fig[1,2], ctd; which="CT", color_by="SA")
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
     oad(debug, "plot_profile() BEGIN")
-    fig = Figure()
+    fig = Makie.Figure()
     ax, plot = plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
         color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_profile()")
-    return FigureAxisPlot(fig, ax, plot.main)
+    return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_profile
 
@@ -136,12 +136,13 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     end
     # For all cases, we need to set up the vertical axis, so do that first
     oad(debug, "    setting up coordinate system for vertical axis")
+    ylabel_default = ""
     if vertical == :pressure
         y = d["pressure"]
-        ylabel = label_from_varname("p", abbreviate)
+        ylabel_default = label_from_varname("p", abbreviate)
     elseif vertical == :density
         y = d["sigma0"]
-        ylabel = label_from_varname("sigma0", abbreviate)
+        ylabel_default = label_from_varname("sigma0", abbreviate)
     else
         error("vertical must be either :pressure or :density")
     end
@@ -151,33 +152,33 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     end
     # infer keyword arguments
     kwargs_dict = Dict{Symbol,Any}(kwargs)
-    oad(debug, "    inferred the following from kwargs (or from defaults):")
+    oad(debug, "    inferred the following from kwargs (or from defaults, or from the data):")
     color = pop!(kwargs_dict, :color, :black)
-    oad(debug, "    • color:       $(oad_val(color))")
+    oad(debug, "      • color:       $(oad_val(color))")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
-    oad(debug, "    • colormap:    $(oad_val(colormap))")
+    oad(debug, "      • colormap:    $(oad_val(colormap))")
     fontsize = pop!(kwargs_dict, :fontsize, 8)
-    oad(debug, "    • fontsize:    $(oad_val(fontsize))")
+    oad(debug, "      • fontsize:    $(oad_val(fontsize))")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
-    oad(debug, "    • linewidth:   $(oad_val(linewidth))")
+    oad(debug, "      • linewidth:   $(oad_val(linewidth))")
     lims = pop!(kwargs_dict, :limits,
         (extend_extrema(skipmissing(x))...,
             reverse(extend_extrema(skipmissing(y)))...))
-    oad(debug, "    • limits: $(round.(lims, digits=4))")
+    oad(debug, "      • limits: $(round.(lims, digits=4))")
     marker = pop!(kwargs_dict, :marker, :circle)
-    oad(debug, "    • marker:      $(oad_val(marker))")
+    oad(debug, "      • marker:      $(oad_val(marker))")
     markercolor = pop!(kwargs_dict, :markercolor, :black)
-    oad(debug, "    • markercolor: $(oad_val(markercolor))")
+    oad(debug, "      • markercolor: $(oad_val(markercolor))")
     markersize = pop!(kwargs_dict, :markersize, 5.0)
-    oad(debug, "    • markersize:  $markersize")
+    oad(debug, "      • markersize:  $markersize")
     seriestype = pop!(kwargs_dict, :seriestype, :scatter)
-    oad(debug, "    • seriestype:  $(oad_val(seriestype))")
+    oad(debug, "      • seriestype:  $(oad_val(seriestype))")
     title = pop!(kwargs_dict, :title, "")
-    oad(debug, "    • title:       $(oad_val(title))")
+    oad(debug, "      • title:       $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, label_from_varname(which))
-    oad(debug, "    • xlabel:      $(oad_val(xlabel))")
-    ylabel = pop!(kwargs_dict, :ylabel, "(to be inferred)")
-    oad(debug, "    • ylabel:      $(oad_val(ylabel))")
+    oad(debug, "      • xlabel:      $(oad_val(xlabel))")
+    ylabel = pop!(kwargs_dict, :ylabel, ylabel_default)
+    oad(debug, "      • ylabel:      $(oad_val(ylabel))")
     # Check for unhandled keywords
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
@@ -212,24 +213,24 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         end
         using_color_by = true
     end
-    ax = Axis(fig_pos[1, 1],
+    ax = Makie.Axis(fig_pos[1, 1],
         xaxisposition=:top, yreversed=true,
         title=title, xlabel=xlabel, ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    limits!(ax, lims...)
+    Makie.limits!(ax, lims...)
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype is '$seriestype', but it must be :line, :scatter or :scatterline")
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(color))")
         oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-        main = lines!(ax, x, y, color=color, linewidth=linewidth)
+        main = Makie.lines!(ax, x, y, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
-        main = scatter!(ax, x, y,
+        main = Makie.scatter!(ax, x, y,
             color=markercolor, marker=marker, markersize=markersize)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
@@ -238,7 +239,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
         oad(debug, "      • markercolor: $(oad_val(markercolor))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
         oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-        main = scatterlines!(ax, x, y, color=color, linewidth=linewidth,
+        main = Makie.scatterlines!(ax, x, y, color=color, linewidth=linewidth,
             marker=marker, markercolor=markercolor, markersize=markersize)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
@@ -248,15 +249,15 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     if using_color_by
         if color_by != ""
             oad(debug, "    drawing colorbar")
-            cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+            cb = Makie.Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
         else
             oad(debug, "    drawing whitespace at colorbar position")
-            cb = Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
+            cb = Makie.Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
             cb.ticksvisible = false
             cb.ticklabelsvisible = false
             cb.labelvisible = false
             cb.spinewidth = 0
-            cb.colormap = to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
+            cb.colormap = Makie.to_colormap([Makie.RGBAf(0, 0, 0, 0), Makie.RGBAf(0, 0, 0, 0)])
         end
     end
     oad(debug, "END plot_profile!()")

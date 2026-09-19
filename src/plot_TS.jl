@@ -14,7 +14,7 @@ function plot_freezing_curve!(ax; color=:darkgray, linewidth=1.8, n=50, debug=0)
     oad(debug, "    SAmin=$SAmin, SAmax=$SAmax")
     SA = range(SAmin, SAmax, length=n)
     CT = gsw_ct_freezing.(SA, 0.0, 1.0) # SA, p, saturation_fraction
-    lines!(ax, SA, CT, color=color, linewidth=linewidth)
+    Makie.lines!(ax, SA, CT, color=color, linewidth=linewidth)
     oad(debug, "END plot_freezing_curve!()")
 end
 export plot_freezing_curve!
@@ -125,7 +125,7 @@ plot_TS(ctd; seriestype=:scatter, markersize=6,
     color=:gray, colormap=:inferno, color_by="pressure")
 
 # Example 2: mutating cases (two panels)
-fig = Figure()
+fig = Makie.Figure()
 figa = plot_TS!(fig[1, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="pressure", debug=0)
 figb = plot_TS!(fig[2, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="", debug=1)
 ```
@@ -134,14 +134,14 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
     plot_freezing=true, abbreviate=false,
     color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
-    fig = Figure()
+    fig = Makie.Figure()
     ax, plot = plot_TS!(fig[1, 1], d;
         sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
         plot_freezing=plot_freezing,
         color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_TS()")
-    return FigureAxisPlot(fig, ax, plot.main)
+    return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_TS
 
@@ -176,7 +176,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     oad(debug, "    spiciness0_levels: $spiciness0_levels")
     oad(debug, "    plot_freezing: $plot_freezing")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
-    oad(debug, "    inferred the following from kwargs (or from defaults, or the data):")
+    oad(debug, "    inferred the following from kwargs (or from defaults, or from the data):")
     color = pop!(kwargs_dict, :color, :black)
     oad(debug, "      • color:                    $(oad_val(color))")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
@@ -237,23 +237,23 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     end
     xlabel = abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]"
     ylabel = abbreviate ? "CT [°C]" : "Conservative Temperature [°C]"
-    ax = Axis(fig_pos[1, 1],
+    ax = Makie.Axis(fig_pos[1, 1],
         title=title, xlabel=xlabel, ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    limits!(ax, lims...)
+    Makie.limits!(ax, lims...)
     seriestype in (:lines, :scatter, :scatterlines) || error("seriestype=$(repr(seriestype)) unknown; try :line, :scatter or :scatterline")
     if seriestype == :lines
         oad(debug, "    calling lines!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(color))")
         oad(debug, "      • linewidth:   $(oad_val(linewidth))")
-        main = lines!(ax, SA, CT, color=color, linewidth=linewidth)
+        main = Makie.lines!(ax, SA, CT, color=color, linewidth=linewidth)
     elseif seriestype == :scatter
         oad(debug, "    calling scatter!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
-        main = scatter!(ax, SA, CT;
+        main = Makie.scatter!(ax, SA, CT;
             color=markercolor, marker=marker, markersize=markersize)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
@@ -262,7 +262,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markercolor: $(oad_val(markercolor))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
-        main = scatterlines!(ax, SA, CT, color=color, linewidth=linewidth,
+        main = Makie.scatterlines!(ax, SA, CT, color=color, linewidth=linewidth,
             marker=marker, markercolor=markercolor, markersize=markersize)
     else
         error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
@@ -277,15 +277,15 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
     if using_color_by
         if color_by != ""
             oad(debug, "    drawing colorbar")
-            cb = Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
+            cb = Makie.Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
         else
             oad(debug, "    drawing whitespace at colorbar position")
-            cb = Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
+            cb = Makie.Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
             cb.ticksvisible = false
             cb.ticklabelsvisible = false
             cb.labelvisible = false
             cb.spinewidth = 0
-            cb.colormap = to_colormap([RGBAf(0, 0, 0, 0), RGBAf(0, 0, 0, 0)])
+            cb.colormap = Makie.to_colormap([Makie.RGBAf(0, 0, 0, 0), Makie.RGBAf(0, 0, 0, 0)])
         end
     end
     oad(debug, "END plot_TS!()")
@@ -358,7 +358,7 @@ function plot_TS_sigma0_contours!(ax; levels=[],
     end
     if length(levels) > 0
         oad(debug, "    contouring sigma0")
-        contour!(ax, SAc, CTc, sigma0c, levels=levels, labels=true,
+        Makie.contour!(ax, SAc, CTc, sigma0c, levels=levels, labels=true,
             linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
     end
     oad(debug, "END plot_TS_sigma0_contours!()")
@@ -405,7 +405,7 @@ function plot_TS_spiciness0_contours!(ax; levels=[],
     end
     if length(levels) > 0
         oad(debug, "    contouring spiciness0")
-        contour!(ax, SAc, CTc, spiciness0c, levels=levels, labels=true,
+        Makie.contour!(ax, SAc, CTc, spiciness0c, levels=levels, labels=true,
             linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
     end
     oad(debug, "END plot_TS_spiciness0_contours!()")
