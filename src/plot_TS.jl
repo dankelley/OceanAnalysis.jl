@@ -294,7 +294,6 @@ end
 export plot_TS!
 
 
-
 """
     plot_TS_sigma0_contours!(ax; levels=[],
         color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
@@ -305,7 +304,7 @@ have been drawn by other means.
 
 # Arguments
 
-- `ax` an axis.
+- `ax` a Makie Axis.
 
 # Keywords
 
@@ -326,7 +325,6 @@ have been drawn by other means.
 
 - `debug` an integer controlling the amount of information printed during
    processing.
-
 """
 function plot_TS_sigma0_contours!(ax; levels=[],
     color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
@@ -363,7 +361,7 @@ function plot_TS_sigma0_contours!(ax; levels=[],
     end
     oad(debug, "END plot_TS_sigma0_contours!()")
 end
-
+export plot_TS_sigma0_contours!
 
 """
     plot_TS_spiciness0_contours!(ax; levels=[],
@@ -373,7 +371,7 @@ Add contours of spiciness0 to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
 have been drawn by other means.  For the meanings of the
 arguments and keywords, see the documentation for
-[`plot_TS_sigma0_contours`](@ref).
+[`plot_TS_sigma0_contours!`](@ref).
 """
 function plot_TS_spiciness0_contours!(ax; levels=[],
     color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
