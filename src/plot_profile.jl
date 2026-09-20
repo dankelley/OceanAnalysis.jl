@@ -94,9 +94,8 @@ item, and a NamedTuple as the second. The latter contains an element named
 using OceanAnalysis, GLMakie
 
 # Get data used in examples.
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "D4902911_095.nc")
-ctd = read_argo(f) |> as_ctd;
+file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
+ctd = read_argo(file) |> as_ctd;
 
 # Example 1: non-mutating case (single panel for each plot)
 fig = plot_profile(ctd; which="CT")

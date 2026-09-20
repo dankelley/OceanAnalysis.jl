@@ -93,7 +93,7 @@ interpolated at the data coordinates). In addition to these, it has elements
 using OceanAnalysis, CSV, DataFrames, Statistics, Plots
 
 # 1. Two-dimensional example, using data from references 1,2 and 3.
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "wind.csv")
+file = joinpath(pkgdir(OceanAnalysis), "data", "wind.csv")
 data = CSV.read(file, DataFrame);
 w = repeat([1.0], nrow(data));
 xg = range(0.0, 11.0, step=0.2);
@@ -107,7 +107,7 @@ contour!(res["xg"], res["yg"], res["zg"],
 
 # 2. One-dimensional example, smoothing Absolute Salinity to
 # a 1-dbar grid (note: mean(diff(p))=0.24 dbar).
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(file);
 p = ctd["pressure"];
 y = repeat([1], length(p)); # fake y data, with arbitrary value

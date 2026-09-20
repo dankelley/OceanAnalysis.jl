@@ -21,7 +21,7 @@ more details.
 
 ```julia
 using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 d = read_ctd_cnv(f);
 scatter(d["timeS"], d["pressure"], xlab="Time [s]", ylab="Pressure [dbar]",
     legend=false, markersize=1)
@@ -256,7 +256,7 @@ Print a table of contents for an [`OA`](@ref) object.
 ```julia
 julia> using OceanAnalysis
 
-julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+julia> f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 
 julia> d = read_ctd_cnv(f);
 

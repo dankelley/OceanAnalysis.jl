@@ -197,7 +197,7 @@ function cannot handle.
 using OceanAnalysis, Plots
 
 # Load a sample file provided with the package
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000");
 adp = read_adp_rdi(file);
 
 # Plot a timeseries of heading
@@ -481,8 +481,7 @@ This is done by using the `transformation_matrix` that is stored within `adp`.  
 
 ```julia
 using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000")
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
 adp = read_adp_rdi(file);
 adp_xyz = beam_to_xyz(adp);
 v = adp.data["velocity"];
@@ -546,8 +545,7 @@ object, and [`beam_to_xyz`](@ref) for how to convert it from beam to xyz coordin
 
 ```julia
 using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000")
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
 beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz);

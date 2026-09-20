@@ -191,8 +191,7 @@ named `data` that has elements stored in the data file.
 # Examples
 ```julia
 using OceanAnalysis
-pkgdir = dirname(dirname(pathof(OceanAnalysis)));
-f = joinpath(pkgdir, "data", "D4902911_095.nc");
+f = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc");
 d = read_argo(f);
 d.metadata["time"] # 2019-10-14T23:43:44.003
 d.metadata["latitude"] # 40.45216

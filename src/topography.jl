@@ -19,9 +19,8 @@ See also [`read_topography`](@ref).
 """
 function get_topography(name::Symbol=:global_coarse; debug::Integer=0)
     oad(debug, "get_topography(name) BEGIN")
-    dir = dirname(dirname(pathof(OceanAnalysis)))
     if name == :global_coarse
-        rval = joinpath(dir, "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
+        rval = joinpath(pkgdir(OceanAnalysis), "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
     else
         throw(ArgumentError("expecting 'name' to be :global_coarse, but it is $(repr(name))"))
     end
@@ -296,8 +295,7 @@ of the `topo` object).
 
 ```julia
 using OceanAnalysis, Plots # FIXME: eliminate Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
+file = joinpath(pkgdir(OceanAnalysis), "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
 topo = read_topography(file)
 A = plot_topography(topo, xlab="Longitude [°E]", ylab="Latitude [°N]")
 vline!([-63], c=:magenta)

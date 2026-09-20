@@ -138,9 +138,9 @@ have been performed on the dataset before inclusion in the archive.
 
 ```julia
 using OceanAnalysis
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc");
-a = read_argo(f);
-summarize(a)
+file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc");
+argo = read_argo(file);
+summarize(argo)
 ```
 """
 function summarize(x::Argo)
@@ -169,9 +169,9 @@ Print a summary of some of the contents of a Ctd object.
 
 ```julia
 using OceanAnalysis
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-d = read_ctd_cnv(f, add_teos=false);
-summarize(d)
+file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
+ctd = read_ctd_cnv(file, add_teos=false);
+summarize(ctd)
 ```
 """
 function summarize(x::Ctd)

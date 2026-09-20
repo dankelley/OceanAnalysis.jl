@@ -126,7 +126,7 @@ that is closest to the estimated mixed-layer depth.
 
 ```julia
 using OceanAnalysis, Plots, Printf
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 c = read_ctd_cnv(f);
 MLD = MLD_CF(c);
 plot_profile(c, which="temperature")

@@ -25,7 +25,7 @@ to the `data` portion of the return value.
 ```jldoctest
 julia> using OceanAnalysis
 
-julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+julia> f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 
 julia> d = read_ctd_cnv(f, add_teos=false);
 

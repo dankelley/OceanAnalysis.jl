@@ -11,9 +11,8 @@ the logical vector `keep_levels`.
 
 ```julia
 using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
-"D4902911_095.nc")
-argo = read_argo(f)
+file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
+argo = read_argo(file)
 ctd = as_ctd(argo)
 a = plot_TS(ctd, title="Original")
 ctd_top = subset_ctd(ctd, ctd["pressure"] .< 300)
@@ -43,9 +42,8 @@ the original Ctd is altered in-place.
 
 ```julia
 using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
-"D4902911_095.nc")
-argo = read_argo(f)
+file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
+argo = read_argo(file)
 ctd = as_ctd(argo)
 a = plot_TS(ctd, title="Original")
 subset_ctd!(ctd, ctd["pressure"] .< 300)

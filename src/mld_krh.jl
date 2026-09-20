@@ -26,7 +26,7 @@ layer depth (MLD).  An alternative estimate of MLD is provided by
 # Examples
 ```julia
 using OceanAnalysis, Plots, Printf
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 c = read_ctd_cnv(f);
 ILD = ILD_KRH(c);
 plot_profile(c, which="temperature")
@@ -97,7 +97,7 @@ depth (ILD).
 # Examples
 ```julia
 using OceanAnalysis, Plots, Printf
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 c = read_ctd_cnv(f);
 MLD = MLD_KRH(c);
 plot_profile(c, which="temperature")

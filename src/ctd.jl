@@ -234,7 +234,7 @@ the value exceeds the maximum pressure in `ctd`.
 
 ```julia
 using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 ctd = read_ctd_cnv(f);
 # Using double the data resolution, given mean Δp 0.237 and median 0.238
 ctd2 = grid_ctd(ctd, pressure_step=0.1);
@@ -333,7 +333,7 @@ within `data.ctd`.
 # Examples
 ```julia
 using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 ctd = read_ctd_cnv(file);
 salinity_smoothed = smooth_ctd_variable(ctd);
 # Compare visually

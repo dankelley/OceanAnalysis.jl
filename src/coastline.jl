@@ -23,12 +23,11 @@ For examples, see [`plot_coastline`](@ref).
 """
 function coastline(name::Symbol=:global_fine)
     #println("coastline(name) BEGIN")
-    dir = dirname(dirname(pathof(OceanAnalysis)))
     if name == :global_fine
-        rval = coastline(joinpath(dir, "data", "coastline_fine.csv.gz"), 1)
+        rval = coastline(joinpath(pkgdir(OceanAnalysis), "data", "coastline_fine.csv.gz"), 1)
         rval.metadata["name"] = name
     elseif name == :global_coarse
-        rval = coastline(joinpath(dir, "data", "coastline_coarse.csv.gz"), 1)
+        rval = coastline(joinpath(pkgdir(OceanAnalysis), "data", "coastline_coarse.csv.gz"), 1)
         rval.metadata["name"] = name
     else
         error("    the only choices for 'name' are :global_coarse and :global_fine, but :", name, " was given")

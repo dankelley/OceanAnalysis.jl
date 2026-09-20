@@ -1,6 +1,6 @@
 using Dates, Plots, OceanAnalysis, Test
 # The tests are against values from R/oce.
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000");
 beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz);

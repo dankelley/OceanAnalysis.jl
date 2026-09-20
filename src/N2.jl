@@ -35,18 +35,16 @@ This function returns a vector of N² values.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "D4902911_095.nc")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
 ctd = filename |> read_argo |> drop_qc |> as_ctd;
 ctd_gridded = grid_ctd(ctd, pressure_step=1.0);
 N2_fd = N2_first_difference(ctd_gridded);
-panel_left = plot_profile(ctd, which="sigma0", ylim=(0, 500),
-    markersize=1.2)
-panel_right = plot_profile(ctd, which="N2", ylim=(0, 500),
-    color=:blue, markersize=0, label="Spline method", legend=:bottomright)
-plot!(N2_fd, ctd_gridded["pressure"], label="Smoothing method")
-plot(panel_left, panel_right, layout=(1, 2))
+fig = Figure()
+plot_profile!(fig[1,1], ctd, which="sigma0")
+plot_profile!(fig[1,2], ctd, which="N2", color=:blue) # FIXME: why is this so wiggly
+lines!(N2_fd, ctd_gridded["pressure"])
 ```
 """
 function N2(ctd::Ctd; method::Symbol=:spline, debug::Integer=0, kwargs...)::Vector{Float64}
@@ -125,11 +123,11 @@ user-specified `bc` to control behaviour near top and bottom, along with `s`
 
 ```julia
 # Demonstrate N2_spline()
-using OceanAnalysis, Plots
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "ctd.cnv")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
-histogram(N2_spline(ctd), label="N²")
+hist(N2_spline(ctd))
 ```
 """
 function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, bc::String="nearest", debug::Integer=0)::Vector{Float64}
@@ -212,22 +210,6 @@ first-differences of smoothed density.
 # Return value
 
 This function returns a vector of N² values.
-
-# Examples
-
-```julia
-using OceanAnalysis, Plots
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-filename = joinpath(pkgdir, "data", "D4902911_095.nc")
-ctd = filename |> read_argo |> drop_qc |> as_ctd;
-ctd_gridded = grid_ctd(ctd, pressure_step=1.0);
-N2 = N2_first_difference(ctd_gridded);
-panel_left = plot_profile(ctd, which="sigma0", ylim=(0, 500), fontsize=7, markersize=1.2)
-panel_right = plot_profile(ctd, which="N2", ylim=(0, 500), fontsize=7, color=:blue, markersize=0,
-    label="Spline method", legend=:bottomright)
-plot!(N2, ctd_gridded["pressure"], label="Smoothing method")
-plot(panel_left, panel_right, layout=(1, 2))
-```
 """
 function N2_first_difference(ctd; M::Integer=50, order::Integer=4, debug::Integer=0)::Vector{Float64}
     oad(debug, "N2_first_difference() START")

@@ -27,7 +27,7 @@ reports an error if it is provided with a file in 'WOCE' format.)
 # Examples
 
 ```julia
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ar07_74JC20140606_00234_00001_ct1.csv");
+f = joinpath(pkgdirname(OceanAnalysis), "data", "ar07_74JC20140606_00234_00001_ct1.csv");
 d = read_ctd_exchange(f);
 println(keys(d.metadata))
 #["latitude", "time", "header", "section", "longitude", "bottom_depth", "station", "expocode", "cast"]
