@@ -1,26 +1,17 @@
 # Plot a float trajectory with colour for sequence number
-using OceanAnalysis, Plots, Printf, Statistics
+using OceanAnalysis, Printf, Statistics
+using GLMakie # CairoMakie
 ID = r"D4902911" # focus on this ID
 index_file = get_argo_index("~/data/argo");
 index_all = read_argo_index(index_file) # 3.2e6 profiles
 index = index_all[occursin.(ID, index_all.file), :]
 sort!(index, :time) # this lets us join dots in time order
 lon, lat = index.longitude, index.latitude
-plot(lon, lat,
-    aspect_ratio=1.0 / cos(mean(lat) * pi / 180),
-    framestyle=:box, color=:gray, dpi=200,
-    title=@sprintf("Argo float %s coloured by cycle index", ID.pattern),
-    titlefontsize=9)
-colors = cgrad(:turbo)
-scatter!(lon, lat, marker_z=1:length(lon),
-    markersize=3, markerstyle=:circle, color=colors)
-# Add land and 1km isobath
-plot_coastline!(coastline())
-topo_file = get_topography(-110.0, -30, 20, 60, resolution=30,
-    destdir="~/data/topo")
-topo = read_topography(topo_file)
-contour!(topo.metadata["longitude"], topo.metadata["latitude"],
-    topo.data, xlim=xlims(), ylim=ylims(),
-    color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
-scale_bar(500; x=:right, y=:top)
-savefig("argo_trajectory.png")
+lonr = extrema(lon)
+latr = extrema(lat)
+plot_coastline(coastline(),
+    scalebar=(distance=500, x=:right, y=:top),
+    limits=[lonr[1] - 2; lonr[2] + 2; latr[1] - 2; latr[2] + 4])
+scatterlines!(lon, lat)
+
+save("argo_trajectory.png", fig, px_per_unit=2)

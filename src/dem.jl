@@ -145,38 +145,3 @@ function subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real}
 end
 export subset_dem
 
-
-"""
-    plot_dem(dem::Dem; debug::Int=0)
-
-# Arguments
-
-- `dem` a Dem object
-
-# Keywords
-
-- `coordinates` a Symbol that indicates what to put on the axes. If this is
-  `:distance` (the default) then distance (in m) is shown on the axes. Otherwise,
-  if it is `:geographic` then longitude and latitude are used (with aspect ratio
-  set for the middle latitude).
-
-- `kwargs...` other arguments, passed to `heatmap`, which plots the elevation
-  data.
-
-"""
-function plot_dem(dem::Dem; coordinates::Symbol=:distance, kwargs...)
-    println("in plot_dem()")
-    if coordinates == :distance
-        heatmap(dem.metadata["x"], dem.metadata["y"], dem.data,
-            aspect_ratio=1.0, framestyle=:box, tickdirection=:out, kwargs...)
-    elseif coordinates == :geographic
-        middle_lat = dem.metadata["latitude"][div(end + 1, 2)]
-        aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-        heatmap(dem.metadata["longitude"], dem.metadata["latitude"], dem.data,
-            aspect_ratio=aspect_ratio, framestyle=:box, tickdirection=:out, kwargs...)
-    else
-        error("coordinates=$(repr(coordinates)) not permited; try :distance or :geographic")
-    end
-end
-export plot_dem
-

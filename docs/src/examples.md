@@ -150,39 +150,38 @@ save("argo_qc.png", fig, px_per_unit=2)
 The following shows how to map Argo profile locations made within 200 km of
 Sable Island, during the past year.
 
-**FIXME: update when converted to Makie plotting.**
-
 ```julia
-# Show Argo profiles within 200 km of Sable Island in last year
-using OceanAnalysis, CSV, Dates, DataFrames, Plots, Printf
+# Show Argo profiles within 200 km of Sable Island in last 5 years
+using OceanAnalysis, CSV, DataFrames, Dates, Printf
+using GLMakie # or CairoMakie
+radius = 200 # km
+years = 5 # years
+using GLMakie # or CairoMakie
 # Get the index
 index_file = get_argo_index("~/data/argo")
-index_all = read_argo_index(index_file) # 3.2e6 profiles
+index_all = read_argo_index(index_file)
 # Set time subset
 today = now(UTC)
-start = today - Dates.Year(1)
+start = today - Dates.Year(years)
 recent = start .< index_all.time .< today
 # Set distance subset
-SI_lon = -59.915
-SI_lat = 43.934
+lon0 = -59.915
+lat0 = 43.934
 radius = 200.0 # km
-distance = map(i -> geod_distance(SI_lon, SI_lat,
+distance = map(i -> geod_distance(lon0, lat0,
         index_all.longitude[i], index_all.latitude[i]),
     1:nrow(index_all))
 near = distance .< radius
 # Filter by both time and distance
 index = index_all[recent.&near, :]
+
 # Extend region of map to show geographic context
-aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
-scale = radius / 111.0
-plot_stations(index.longitude, index.latitude,
-    xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
-    ylims=SI_lat .+ scale .* (-1.2, 1.2))
-float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
-t = @sprintf("%d profiles of %d floats", length(index.file), length(float_IDs))
-title!(t, titlefontsize=9)
-scale_bar(100; x=:right, y=:top)
-savefig("argo_search.png")
+t = "$(length(index.file)) profiles within $radius km of Sable Island in $years years"
+fig = plot_coastline(coastline(), title=t,
+    limits=[lon0 - 3; lon0 + 3; lat0 - 3; lat0 + 3])
+scatter!(index.longitude, index.latitude)
+
+save("argo_search.png", fig, px_per_unit=2)
 ```
 
 ![Argo search results](argo_search.png)
@@ -196,31 +195,22 @@ float.
 
 ```julia
 # Plot a float trajectory with colour for sequence number
-using OceanAnalysis, Plots, Printf, Statistics
+using OceanAnalysis, Printf, Statistics
+using GLMakie # CairoMakie
 ID = r"D4902911" # focus on this ID
 index_file = get_argo_index("~/data/argo");
 index_all = read_argo_index(index_file) # 3.2e6 profiles
 index = index_all[occursin.(ID, index_all.file), :]
 sort!(index, :time) # this lets us join dots in time order
 lon, lat = index.longitude, index.latitude
-plot(lon, lat,
-    aspect_ratio=1.0 / cos(mean(lat) * pi / 180),
-    framestyle=:box, color=:gray, dpi=200,
-    title=@sprintf("Argo float %s coloured by cycle index", ID.pattern),
-    titlefontsize=9)
-colors = cgrad(:turbo)
-scatter!(lon, lat, marker_z=1:length(lon),
-    markersize=3, markerstyle=:circle, color=colors)
-# Add land and 1km isobath
-plot_coastline!(coastline())
-topo_file = get_topography(-110.0, -30, 20, 60, resolution=30,
-    destdir="~/data/topo")
-topo = read_topography(topo_file)
-contour!(topo.metadata["longitude"], topo.metadata["latitude"],
-    topo.data, xlim=xlims(), ylim=ylims(),
-    color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
-scale_bar(500; x=:right, y=:top)
-savefig("argo_trajectory.png")
+lonr = extrema(lon)
+latr = extrema(lat)
+plot_coastline(coastline(),
+    scalebar=(distance=500, x=:right, y=:top),
+    limits=[lonr[1] - 2; lonr[2] + 2; latr[1] - 2; latr[2] + 4])
+scatterlines!(lon, lat)
+
+save("argo_trajectory.png", fig, px_per_unit=2)
 ```
 
 ![Argo trajectory](argo_trajectory.png)
@@ -235,16 +225,16 @@ Bathymetry files at 10m and 100m resolution are provided for some Canadian
 waters via a somewhat-awkward GUI interface at
 <https://data.chs-shc.ca/dashboard/map>. The following shows how to plot such data, after downloading a dataset.  (This only works for the TIFF form of the data.)
 
-**FIXME: update when converted to Makie plotting.**
-
-
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 filename = expanduser("~/data/nonna/NONNA10_4460N06360W.tiff")
-n = read_nonna(filename);
-heatmap(n["longitude"], n["latitude"], n.data, c=:turbo,
-    size=(400, 400), dpi=300, framestyle=:box, tickdirection=:out)
-savefig("nonna.png")
+if isfile(filename)
+    n = read_nonna(filename)
+    fig = heatmap(n["longitude"], n["latitude"], permutedims(n.data), colormap=:turbo,
+        axis=(aspect=DataAspect(),))
+    save("nonna.png", fig)
+end
 ```
 
 ![NONNA_plot](nonna.png)
@@ -381,28 +371,20 @@ save("ctd_TS.png", fig, px_per_unit=2)
 This example is based on a large file (not provided with this package) that was obtained via a GUI interface at [https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/). The view is of a portion of Halifax, Nova Scotia. The polygonal shape is the Halifax Citadel, a fort built in 1820s for protection against the United States military. The code below produces two diagrams. The first shows elevation, revealing that the Citadel sits atop a hill (which, a broader view would show, overlooks Halifax Harbour), while the second shows more detail on small-scale features of the old fort and the modern roads and building in downtown Halifax.
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 
-file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 
 if isfile(file)
     dem_all = read_dem(file)
     # Focus near the Citadel fort
-    dem = subset_dem(dem_all, lonlim=(-63.589, -63.572), latlim=(44.6426, 44.655))
-    middle_lat = dem["latitude"][div(end + 1, 2)]
-    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-    # Heatmap of elevation
-    p1 = heatmap(dem["longitude"], dem["latitude"], dem.data,
-        color=:inferno, aspect_ratio=aspect_ratio,
-        framestyle=:box, tickdirection=:out)
-    savefig("dem_1.png")
-    # Heatmap of gradient of elevation with respect to northerly distance
-    z = -diff(dem.data, dims=1) / dem["dy"]
-    z = [zeros(1, size(dem.data, 2)); z]
-    heatmap(dem["longitude"], dem["latitude"], z,
-        color=:inferno, aspect_ratio=aspect_ratio,
-        framestyle=:box, tickdirection=:out, clim=(-0.5, 0.5))
-    savefig("dem_2.png")
+    lims = (-63.589, -63.572, 44.6426, 44.655)
+    dem = subset_dem(dem_all, lonlim=lims[1:2], latlim=lims[3:4])
+    fig1 = plot_dem(dem)
+    save("dem_1.png", fig1, px_per_unit=2)
+    fig2 = plot_dem(dem, coordinates=:geographic)
+    save("dem_2.png", fig2, px_per_unit=2)
 end
 ```
 
@@ -440,23 +422,17 @@ roughly orthogonal to the mean path of the Gulf Stream. Finally, it plots a
 chart of sampling locations, along with cross-section diagrams of salinity and
 temperature.
 
-**FIXME: update when converted to Makie plotting.**
-
 ```julia
-using OceanAnalysis, Plots
-url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip";
+using OceanAnalysis
+using GLMakie # or CairoMakie
+url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);
 s = read_section(dir);
-s.data = s.data[s["longitude"].<-68.0];
+s.data = s.data[s["longitude"].<(-68.0)];
+# We must grid to get the cross-section diagrams
 sg = grid_section(s);
-
-p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
-scale_bar(500);
-p2 = plot_section(sg, "salinity", ylim=(0, 2000));
-p3 = plot_section(sg, "temperature", ylim=(0, 2000));
-l = @layout [a; b c]
-plot(p1, p2, p3, layout=l, dpi=200);
-savefig("section.png")
+fig = plot_section(sg, which="salinity", type=:contourf)
+save("section.png", fig, px_per_unit=2)
 ```
 
 ![Section diagram](section.png)

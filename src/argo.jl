@@ -380,6 +380,7 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
     end
     oad(debug, "    filename: ", filename)
     # I tried specifying the type/format for :time, but that slowed the operation from 5.2s to 5.4s.
+    df = nothing
     try
         df = CSV.read(filename, DataFrame, header=header)
     catch e
