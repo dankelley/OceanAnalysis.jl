@@ -72,7 +72,7 @@ using [`as_section`](@ref).
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)
 section = read_section(dir);

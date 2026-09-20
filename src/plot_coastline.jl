@@ -6,9 +6,7 @@ Draw a coastline as a group of polygons.
 
 This is used by [`plot_coastline`](@ref) and possibly other functions.
 Coastline data are stored as `longitude` and `latitude` vectors with `NaN`
-separating individual land-mass rings (this is the convention Plots'
-`seriestype=:shape` relied on). Makie has no direct equivalent, so this splits
-the vectors on `NaN` and fills each ring separately with `poly!`.
+separating individual land-mass rings.
 """
 function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     color=:bisque3, debug=0)

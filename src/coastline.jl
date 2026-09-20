@@ -59,64 +59,69 @@ end
 export coastline
 
 
-"""
-    station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
-
-Using [`plot_coastline`](@ref), draw a map that shows the location of a station
-(or stations) specified by `longitude` and `latitude`, each of which may be a
-single number or a vector of numbers (with longitude in the -180 to +180
-convention). The map span is computed automatically by computing
-the distance between the centroid of the stations and the nearest point of land
-and also computing the span across the stations.  The maximum of these
-two distances is multiplied by `scale`, and from this the x and y
-limits of the plot are set.  Altering the value of `scale` is thus
-the way a user can control the view. The station locations
-are drawn by calling `scatter`, to which
-the `kwargs...` elements are passed directly; the example
-shows how to use this fact to alter the station symbols.
-
-Map projections are not offered by `station_map`; to get such views, consider
-using the `GMT` package.
-
-# Examples
-
-```julia
-using OceanAnalysis, Plots # FIXME: eliminate 'Plots'
-# Red circle marks a station south of due east of Fort Louisbourg
-# and due south of Saint Pierre and Miquelon.
-p1 = station_map(-56.33, 45.90)
-# The same, but with different aesthetics
-p2 = station_map(-56.33, 45.90;
-    markercolor=:gray85, markershape=:diamond, markersize=6)
-plot(p1, p2)
-```
-"""
-function station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
-    oad(debug, "station_map() START")
-    oad(debug, "  kwargs...: $(kwargs...)")
-    length(longitude) == length(latitude) || throw(ArgumentError("longitude and latitude are of unequal lengths ($(length(longitude)) and $(length(latitude)))"))
-    cl = coastline()
-    lon0 = mean(longitude)
-    lat0 = mean(latitude)
-    distance_to_land = geod_distance.(lon0, lat0, cl.data.longitude, cl.data.latitude)
-    distance_to_nearest_land = minimum(x for x in distance_to_land if !isnan(x))
-    oad(debug, "  distance_to_nearest_land: ", distance_to_nearest_land, " km")
-    distance_across_stations = maximum(geod_distance.(lon0, lat0, longitude, latitude))
-    oad(debug, "  distance_across_stations: ", distance_across_stations, " km")
-    # Next approximates 1 degree of latitude as 111 km
-    dlat = scale * maximum([distance_to_nearest_land, distance_across_stations]) / 111.0
-    oad(debug, "  dlat: ", dlat)
-    aspect_ratio = 1.0 / cos(lat0 * pi / 180) # aspect ratio
-    oad(debug, "  aspect_ratio: ", aspect_ratio)
-    map = plot_coastline(cl;
-        xlim=lon0 .+ aspect_ratio .* (-dlat, dlat), ylim=lat0 .+ (-dlat, dlat),
-        aspect_ratio=aspect_ratio,
-        color=:black,
-        debug=increment_debug(debug), kwargs...)
-    #println("kwargs...:", kwargs...)
-    Makie.scatter!(map, [longitude], [latitude], label=false; kwargs...)
-    oad(debug, "END station_map()")
-    map
-end
-export station_map
+#<maybe code later but check other .jl file> """
+#<maybe code later but check other .jl file>     station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
+#<maybe code later but check other .jl file> 
+#<maybe code later but check other .jl file>     station_map!(fig_pos, longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
+#<maybe code later but check other .jl file> 
+#<maybe code later but check other .jl file> Using [`plot_coastline`](@ref), draw a map that shows the location of a station
+#<maybe code later but check other .jl file> (or stations) specified by `longitude` and `latitude`, each of which may be a
+#<maybe code later but check other .jl file> single number or a vector of numbers (with longitude in the -180 to +180
+#<maybe code later but check other .jl file> convention). The map span is computed automatically by computing
+#<maybe code later but check other .jl file> the distance between the centroid of the stations and the nearest point of land
+#<maybe code later but check other .jl file> and also computing the span across the stations.  The maximum of these
+#<maybe code later but check other .jl file> two distances is multiplied by `scale`, and from this the x and y
+#<maybe code later but check other .jl file> limits of the plot are set.  Altering the value of `scale` is thus
+#<maybe code later but check other .jl file> the way a user can control the view. The station locations
+#<maybe code later but check other .jl file> are drawn by calling `scatter`, to which
+#<maybe code later but check other .jl file> the `kwargs...` elements are passed directly; the example
+#<maybe code later but check other .jl file> shows how to use this fact to alter the station symbols.
+#<maybe code later but check other .jl file> 
+#<maybe code later but check other .jl file> Map projections are not offered by `station_map`; to get such views, consider
+#<maybe code later but check other .jl file> using the `GMT` package.
+#<maybe code later but check other .jl file> 
+#<maybe code later but check other .jl file> # Examples
+#<maybe code later but check other .jl file> 
+#<maybe code later but check other .jl file> ```julia
+#<maybe code later but check other .jl file> using OceanAnalysis
+#<maybe code later but check other .jl file> using GLMakie # or CairoMakie
+#<maybe code later but check other .jl file> station_map(-56.33, 45.90, debug=1)
+#<maybe code later but check other .jl file> ```
+#<maybe code later but check other .jl file> """
+#<maybe code later but check other .jl file> function station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwargs...)
+#<maybe code later but check other .jl file>     oad(debug, "station_map() BEGIN")
+#<maybe code later but check other .jl file>     fig = Makie.Figure()
+#<maybe code later but check other .jl file>     ax, plot = station_map!(fig[1, 1], longitude, latitude;
+#<maybe code later but check other .jl file>         scale=scale, debug=increment_debug(debug), kwargs...)
+#<maybe code later but check other .jl file>     oad(debug, "END station_map()")
+#<maybe code later but check other .jl file>     return Makie.FigureAxisPlot(fig, ax, plot.main)
+#<maybe code later but check other .jl file> end
+#<maybe code later but check other .jl file> export station_map
+#<maybe code later but check other .jl file> 
+#<maybe code later but check other .jl file> function station_map!(fig_pos, longitude, latitude;
+#<maybe code later but check other .jl file>     scale::Real=5.0, debug::Integer=0, kwargs...)
+#<maybe code later but check other .jl file>     oad(debug, "station_map() START")
+#<maybe code later but check other .jl file>     oad(debug, "  kwargs...: $(kwargs...)")
+#<maybe code later but check other .jl file>     length(longitude) == length(latitude) || throw(ArgumentError("longitude and latitude are of unequal lengths ($(length(longitude)) and $(length(latitude)))"))
+#<maybe code later but check other .jl file>     cl = coastline()
+#<maybe code later but check other .jl file>     lon0 = mean(longitude)
+#<maybe code later but check other .jl file>     lat0 = mean(latitude)
+#<maybe code later but check other .jl file>     distance_to_land = geod_distance.(lon0, lat0, cl.data.longitude, cl.data.latitude)
+#<maybe code later but check other .jl file>     distance_to_nearest_land = minimum(x for x in distance_to_land if !isnan(x))
+#<maybe code later but check other .jl file>     oad(debug, "  distance_to_nearest_land: ", distance_to_nearest_land, " km")
+#<maybe code later but check other .jl file>     distance_across_stations = maximum(geod_distance.(lon0, lat0, longitude, latitude))
+#<maybe code later but check other .jl file>     oad(debug, "  distance_across_stations: ", distance_across_stations, " km")
+#<maybe code later but check other .jl file>     # Next approximates 1 degree of latitude as 111 km
+#<maybe code later but check other .jl file>     dlat = scale * maximum([distance_to_nearest_land, distance_across_stations]) / 111.0
+#<maybe code later but check other .jl file>     oad(debug, "  dlat: ", dlat)
+#<maybe code later but check other .jl file>     aspect_ratio = 1.0 / cos(lat0 * pi / 180) # aspect ratio
+#<maybe code later but check other .jl file>     oad(debug, "  aspect_ratio: ", aspect_ratio)
+#<maybe code later but check other .jl file>     ax = Makie.Axis(fig_pos[1, 1])
+#<maybe code later but check other .jl file>     cl = coastline()
+#<maybe code later but check other .jl file>     main = plot_coastline!(fig_pos[1, 1], cl; debug=increment_debug(debug))
+#<maybe code later but check other .jl file>     Makie.scatter!([longitude], [latitude])
+#<maybe code later but check other .jl file>     oad(debug, "END station_map()")
+#<maybe code later but check other .jl file>     return ax, (main=main.land,)
+#<maybe code later but check other .jl file> end
+#<maybe code later but check other .jl file> export station_map!
 

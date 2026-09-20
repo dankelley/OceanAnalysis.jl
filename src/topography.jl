@@ -53,16 +53,10 @@ with [`get_topography`](@ref).
 
 ```julia
 # Plot world view of ocean depth
-using OceanAnalysis, Plots # FIXME: eliminate Plots
+using OceanAnalysis
 topo_file = get_topography(:global_coarse);
 topo = read_topography(topo_file);
-water_depth = -topo.data / 1000.0; # depth (i.e. negative height) in km
-water_depth[water_depth .< 0.0] .= NaN; # trim land
-heatmap(topo.metadata["longitude"], topo.metadata["latitude"], water_depth,
-    asp=1.0, framestyle=:box, xlims=[-180,180], ylims=[-90,90],
-    color=cgrad(:deep, rev=false), dpi=300)
-cl = coastline();
-plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
+plot_topography(topo)
 ```
 """
 function read_topography(filename::String; debug::Integer=0)::Topography
@@ -294,17 +288,18 @@ of the `topo` object).
 # Examples
 
 ```julia
-using OceanAnalysis, Plots # FIXME: eliminate Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 file = joinpath(pkgdir(OceanAnalysis), "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
 topo = read_topography(file)
-A = plot_topography(topo, xlab="Longitude [°E]", ylab="Latitude [°N]")
-vline!([-63], c=:magenta)
+plot_topography(topo)
+vlines!([-63], color=:magenta)
+
 lats = range(extrema(topo["latitude"])..., length=100)
 lons = repeat([-63.0], 100)
 z = interpolate_topography(lons, lats, topo)
-B = plot(lats, z, xlab="Latitude [°N]", ylab="Vertical Coordinate [m]", label=false)
-hline!([0.0], label=false)
-plot(A, B, layout=(2,1))
+lines(lats, z, color=:magenta)
+hlines!([0.0])
 ```
 """
 function interpolate_topography(longitude, latitude, topo::Topography)

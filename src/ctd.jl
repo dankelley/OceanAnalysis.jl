@@ -233,13 +233,13 @@ the value exceeds the maximum pressure in `ctd`.
 # Example
 
 ```julia
-using OceanAnalysis, Plots
-f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
-ctd = read_ctd_cnv(f);
+using OceanAnalysis
+using GLMakie # or CairoMakie
+ctd = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv") |> read_ctd_cnv
 # Using double the data resolution, given mean Δp 0.237 and median 0.238
 ctd2 = grid_ctd(ctd, pressure_step=0.1);
 plot_profile(ctd, which="salinity")
-plot!(ctd2["salinity"], ctd2["pressure"], color=:red)
+lines!(ctd2["salinity"], ctd2["pressure"], color=:red)
 ```
 """
 function grid_ctd(ctd::Ctd;
@@ -332,13 +332,13 @@ within `data.ctd`.
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
-ctd = read_ctd_cnv(file);
+using OceanAnalysis
+using GLMakie # or CairoMakie
+ctd= joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv") |> read_ctd_cnv
 salinity_smoothed = smooth_ctd_variable(ctd);
 # Compare visually
-plot_profile(ctd, which="salinity");
-plot!(salinity_smoothed, ctd["pressure"], label="Smoothed");
+plot_profile(ctd, which="salinity")
+lines!(salinity_smoothed, ctd["pressure"], label="Smoothed");
 # Now, check whether mean squared deviation is of order 0.001 (default delta)
 sum((salinity_smoothed .- ctd["salinity"]).^2) / length(ctd["salinity"])
 ```

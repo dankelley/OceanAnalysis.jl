@@ -1,4 +1,4 @@
-using SQLite, DataFrames, Plots, Dates, Printf, Statistics
+using SQLite, DataFrames, Dates, Printf, Statistics
 
 """
     read_ctd_rsk(filename::String; add_teos::Bool=true,
@@ -42,13 +42,10 @@ features are not yet provided in this package.
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 ctd = read_ctd_rsk("~/git/oce/create_data/rsk/060130_20150904_1159.rsk");
-Sp = plot_profile(ctd, which="salinity");
-Tp = plot_profile(ctd, which="temperature");
-TS = plot_TS(ctd);
-pt = plot(ctd.data.time, ctd.data.pressure);
-plot(Sp, Tp, pt, TS, layout=(2,2))
+plot_profile(ctd, which="salinity")
 ```
 """
 function read_ctd_rsk(filename::String; add_teos::Bool=true,

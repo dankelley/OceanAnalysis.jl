@@ -1,4 +1,4 @@
-using OceanAnalysis, Plots, Statistics
+using OceanAnalysis, Statistics
 
 """
     despike(x::Vector{Float64}; k::Int64=7, n::Int64=4, action::Symbol=:replace)
@@ -42,25 +42,23 @@ BitVector (if `action` is `:reveal`).
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 i = 1:40;
 x0 = sin.(2 * pi * i / 40);
 x = x0 .+ (rand(length(x0)) .- 0.5) / 10.0;
 x[10] = x[10] + 1;
 xd = despike(x);
 # Plot 'base' (before noise), 'signal' (base + noise) and 'despiked'
-scatter(i, x, label="signal")
-scatter!(i, xd, label="despiked")
+scatter(i, x, color=:red)
+scatter!(i, xd, color=:blue)
 # Print overview of spikes (show it and nearest neighbours)
 spike_indices = findall(despike(x, action=:flag));
 for j in spike_indices
     println("Spike index ", j, " and its nearest neighbours:")
     println("  ", x[(j-1):(j+1)])
 end
-
-
 ```
-
 """
 function despike(x::Vector{Float64}; k::Int64=7, n::Int64=4, action::Symbol=:replace)
     x_smoothed = running_median(x, k)

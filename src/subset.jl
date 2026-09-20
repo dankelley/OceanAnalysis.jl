@@ -10,14 +10,14 @@ the logical vector `keep_levels`.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
 argo = read_argo(file)
 ctd = as_ctd(argo)
-a = plot_TS(ctd, title="Original")
+plot_profile(ctd, which="SA", seriestype=:scatterlines)
 ctd_top = subset_ctd(ctd, ctd["pressure"] .< 300)
-b = plot_TS(ctd)
-plot(a, b, title="Top 300m")
+plot_profile(ctd_top, which="SA", seriestype=:scatterlines)
 ```
 """
 function subset_ctd(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Integer=0)
@@ -37,20 +37,6 @@ export subset_ctd
 
 This works in the same way as subset_ctd(<Ctd>), except that
 the original Ctd is altered in-place.
-
-# Examples
-
-```julia
-using OceanAnalysis, Plots
-file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
-argo = read_argo(file)
-ctd = as_ctd(argo)
-a = plot_TS(ctd, title="Original")
-subset_ctd!(ctd, ctd["pressure"] .< 300)
-b = plot_TS(ctd, title="Original (altered)")
-plot(a, b)
-```
-
 """
 function subset_ctd!(ctd::Ctd, keep_levels::Union{BitVector,Vector{Bool}}; debug::Integer=0)
     oad(debug, "subset_ctd() START")

@@ -125,13 +125,13 @@ that is closest to the estimated mixed-layer depth.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots, Printf
-f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
-c = read_ctd_cnv(f);
-MLD = MLD_CF(c);
-plot_profile(c, which="temperature")
-hline!([MLD], color=:red)
-title!(@sprintf("MLD %.1f m by Chu-Fanning (2010) method", MLD))
+using OceanAnalysis, Printf
+using GLMakie # or CairoMakie
+ctd = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv") |> read_ctd_cnv
+MLD = MLD_CF(ctd);
+title = @sprintf("MLD %.1f m by Chu-Fan (2010) method", MLD)
+plot_profile(ctd, which="temperature", title=title)
+hlines!([MLD], color=:red)
 ```
 """
 function MLD_CF(ctd::Ctd; variable::String="temperature", n::Int=5)::Float64

@@ -142,7 +142,7 @@ function plot_topography!(fig_pos, topo::Topography;
         colormap=colormap, colorrange=colorrange,
         nan_color=nan_color)
     if draw_coastline
-        lims = Makie.ax.finallimits[]
+        lims = ax.finallimits[]
         Makie.limits!(ax,
             lims.origin[1], lims.origin[1] + lims.widths[1],
             lims.origin[2], lims.origin[2] + lims.widths[2])

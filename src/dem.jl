@@ -1,4 +1,4 @@
-using Plots, Plots.PlotMeasures, Statistics, Printf
+using Statistics, Printf
 using GMT: gmtread, xy2lonlat, grdproject # will only need first 2, later
 
 """
@@ -33,17 +33,13 @@ elevation, in metres.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
 # Data downloaded from https://nsgi.novascotia.ca/datalocator/elevation/
-file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 if isfile(file)
     dem = read_dem(file)
-    dem = subset_dem(dem, (-63.587, -63.552), (44.615, 44.639))
-    middle_lat = dem["latitude"][div(end + 1, 2)]
-    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-    heatmap(dem["longitude"], dem["latitude"], dem.data,
-        color=:turbo, aspect_ratio=aspect_ratio,
-        framestyle=:box, tickdirection=:out)
+    dem = subset_dem(dem, lonlim=(-63.587, -63.552), latlim=(44.615, 44.639))
+    plot_dem(dem)
 end
 ```
 

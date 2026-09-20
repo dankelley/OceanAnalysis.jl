@@ -1,4 +1,4 @@
-using DataFrames, CSV, Test, Plots, Statistics
+using DataFrames, CSV, Test, Statistics
 
 # Interpolate z(x,y) to get zz at location (xx,yy). This works by a
 # weighted-exponential-mean method. When used to predict at a grid point, set
@@ -90,34 +90,19 @@ interpolated at the data coordinates). In addition to these, it has elements
 # Examples
 
 ```julia
-using OceanAnalysis, CSV, DataFrames, Statistics, Plots
-
-# 1. Two-dimensional example, using data from references 1,2 and 3.
+# 2D example (wind data)
+using OceanAnalysis, CSV, DataFrames, Statistics
+using GLMakie # or CairoMakie
 file = joinpath(pkgdir(OceanAnalysis), "data", "wind.csv")
 data = CSV.read(file, DataFrame);
 w = repeat([1.0], nrow(data));
 xg = range(0.0, 11.0, step=0.2);
 yg = range(0.0, 9.0, step=0.2);
 res = interpolate_barnes(data.x, data.y, data.z)
-scatter(data.x, data.y, framestyle=:box, label=false, ms=2, tickdirection=:out,
-    xlab="x", ylab="y", xlim=(0, 11), ylim=(0, 9))
-annotate!(data.x, data.y .+ 0.2, text.(data.z, 8, :blue))
-contour!(res["xg"], res["yg"], res["zg"],
-    levels=10:5:30, cbar=false, clabels=true, c=:black)
-
-# 2. One-dimensional example, smoothing Absolute Salinity to
-# a 1-dbar grid (note: mean(diff(p))=0.24 dbar).
-file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
-ctd = read_ctd_cnv(file);
-p = ctd["pressure"];
-y = repeat([1], length(p)); # fake y data, with arbitrary value
-SA = ctd["SA"];
-dp = 1.0;
-pg = range(0.0, maximum(p), step=dp);
-g = interpolate_barnes(p, y, SA; xg=pg, xr=dp);
-plot_profile(ctd, which="SA", seriestype=:scatter)
-plot!(g["zg"][:], g["xg"][:], color=:red, label=false)
-
+labels = string.(data.z)
+scatter(data.x, data.y)
+text!(data.x, data.y .+ 0.2, text=labels)
+contour!(res["xg"], res["yg"], permutedims(res["zg"]))
 ```
 
 # References
