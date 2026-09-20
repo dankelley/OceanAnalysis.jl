@@ -1,6 +1,5 @@
 using Statistics, Printf
 using GMT: gmtread, xy2lonlat, grdproject
-import GLMakie # or CairoMakie
 
 """
     plot_dem(dem::Dem; coordinates::Symbol=:distance, debug=0, kwargs...)
