@@ -1,6 +1,9 @@
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 filename = expanduser("~/data/nonna/NONNA10_4460N06360W.tiff")
-n = read_nonna(filename);
-heatmap(n["longitude"], n["latitude"], n.data, c=:turbo,
-    size=(400, 400), dpi=300, framestyle=:box, tickdirection=:out)
-savefig("nonna.png")
+if isfile(filename)
+    n = read_nonna(filename)
+    fig = heatmap(n["longitude"], n["latitude"], permutedims(n.data), colormap=:turbo,
+        axis=(aspect=DataAspect(),))
+    save("nonna.png", fig)
+end

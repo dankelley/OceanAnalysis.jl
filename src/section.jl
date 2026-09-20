@@ -23,7 +23,7 @@ the `name` of the section and the `source` of the data.
 ```julia
 julia> using OceanAnalysis
 julia> # Create fake data
-julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+julia> f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 julia> a = read_ctd_cnv(f, add_teos=false);
 julia> b = read_ctd_cnv(f, add_teos=false);
 julia> b.data.salinity = 1.0 .+ b.data.salinity;
@@ -72,7 +72,7 @@ using [`as_section`](@ref).
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
 url = "https://cchdo.ucsd.edu/data/11852/ar07_74JC20140606_ct1.zip"
 dir = get_section(url)
 section = read_section(dir);

@@ -13,7 +13,7 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
 end
 
 using Documenter, OceanAnalysis
-import Plots
+#import Plots
 
 DocMeta.setdocmeta!(OceanAnalysis, :DocTestSetup, :(using OceanAnalysis); recursive=true)
 

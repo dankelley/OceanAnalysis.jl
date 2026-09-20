@@ -27,11 +27,10 @@ names that are a regular-expression match to `pattern` are omitted.
 # Examples
 ```jldoctest
 using OceanAnalysis
-pkgdir = dirname(dirname(pathof(OceanAnalysis)));
-f = joinpath(pkgdir, "data", "D4902911_095.nc");
-a = read_argo(f);
-a2 = drop_qc(a);
-size(a.data)[2], size(a2.data)[2]
+file = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc");
+argo = read_argo(file);
+argo2 = drop_qc(argo);
+size(argo.data)[2], size(argo2.data)[2]
 
 # output
 (15, 9)

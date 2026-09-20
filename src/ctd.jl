@@ -3,7 +3,7 @@ using Dierckx: Spline1D
 using Statistics: mean
 
 """
-    as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
+    as_ctd(a::Argo; add_teos::Bool=true, debug::Integer=0)
 
 Convert an Argo object into a Ctd object.
 
@@ -18,13 +18,14 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 # Keywords
 
 - `add_teos` a logical value indicating whether to add TEOS-10 items (e.g.
-  `SA`) to the `data` portion of the return value.
+  `SA`) to the `data` portion of the return value. The default
+  is to add these.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging
   output should be printed during processing.
 
 """
-function as_ctd(a::Argo; add_teos::Bool=false, debug::Integer=0)
+function as_ctd(a::Argo; add_teos::Bool=true, debug::Integer=0)
     oad(debug, "as_ctd(Argo, ...)")
     oad(debug, "  add_teos: $(add_teos)")
     rval = Ctd(deepcopy(a.metadata), deepcopy(a.data))
@@ -232,13 +233,13 @@ the value exceeds the maximum pressure in `ctd`.
 # Example
 
 ```julia
-using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-ctd = read_ctd_cnv(f);
+using OceanAnalysis
+using GLMakie # or CairoMakie
+ctd = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv") |> read_ctd_cnv
 # Using double the data resolution, given mean Δp 0.237 and median 0.238
 ctd2 = grid_ctd(ctd, pressure_step=0.1);
 plot_profile(ctd, which="salinity")
-plot!(ctd2["salinity"], ctd2["pressure"], color=:red)
+lines!(ctd2["salinity"], ctd2["pressure"], color=:red)
 ```
 """
 function grid_ctd(ctd::Ctd;
@@ -280,7 +281,7 @@ function grid_ctd(ctd::Ctd;
             continue
         end
         # this interpolation is good for ML at top and low variation at bottom
-        itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
+        itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=NaN)
         arr[:, i] = itp.(pressure_grid)
     end
     data = DataFrame(arr, names(ctd.data))
@@ -331,13 +332,13 @@ within `data.ctd`.
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-ctd = read_ctd_cnv(file);
+using OceanAnalysis
+using GLMakie # or CairoMakie
+ctd= joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv") |> read_ctd_cnv
 salinity_smoothed = smooth_ctd_variable(ctd);
 # Compare visually
-plot_profile(ctd, which="salinity");
-plot!(salinity_smoothed, ctd["pressure"], label="Smoothed");
+plot_profile(ctd, which="salinity")
+lines!(salinity_smoothed, ctd["pressure"], label="Smoothed");
 # Now, check whether mean squared deviation is of order 0.001 (default delta)
 sum((salinity_smoothed .- ctd["salinity"]).^2) / length(ctd["salinity"])
 ```

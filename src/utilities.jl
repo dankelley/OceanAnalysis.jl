@@ -20,11 +20,11 @@ more details.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 d = read_ctd_cnv(f);
-scatter(d["timeS"], d["pressure"], xlab="Time [s]", ylab="Pressure [dbar]",
-    legend=false, markersize=1)
+lines(d["time_seconds"], d["pressure"])
 ```
 """
 function Base.getindex(x::OA, name::Union{String,Symbol})
@@ -256,7 +256,7 @@ Print a table of contents for an [`OA`](@ref) object.
 ```julia
 julia> using OceanAnalysis
 
-julia> f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
+julia> f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
 
 julia> d = read_ctd_cnv(f);
 
@@ -330,16 +330,18 @@ export gravity
 
 
 """
-    decode_color_by(x)
+    decode_color_by(levels::Vector{Float64};
+        colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
 
-Create a NamedTuple for use as the `color_by` argument of [`plot_TS`](@ref).
+Create a NamedTuple for use as the `color_by` argument of [`plot_TS`](@ref)
+and [`plot_profile`](@ref).
 
 # Arguments
 
 - `levels` a Vector of numeric values. If the purpose of using `decode_color_by`
-  is to set a value for the `color_by` argument of [`plot_TS`](@ref), then
-  the length of `levels` must match the length of columns in the Ctd or
-  Argo object.
+  is to set a value for the `color_by` argument of [`plot_TS`](@ref)
+  or [`plot_profile`](@ref), then the length of `levels` must match the
+  length of columns in the Ctd or Argo object.
 
 - `colorscheme` a symbol stating the ColorScheme to use, with `:turbo` a the default.
 
@@ -369,7 +371,7 @@ decode_color_by(l, :inferno, (0,5), (0.88, 0.12)) # as above, but tighten panel 
 ```
 
 """
-function decode_color_by(levels::Vector{Float64}, colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
+function decode_color_by(levels::Vector{Float64}; colorscheme=:turbo, clims=:auto, widths=(0.85, 0.15))
     if clims == :auto
         clims = extrema(levels)
     end
@@ -432,3 +434,30 @@ end
 export interpolate_to_time
 
 
+function extend_extrema(x, percent=4.0)
+    xmin, xmax = extrema(xx for xx in skipmissing(x) if !isnan(xx))
+    xrange = xmax - xmin
+    percent /= 100.0
+    return (xmin - percent * xrange, xmax + percent * xrange)
+end
+export extend_extrema
+
+"""
+    oad_val(x)
+
+Return a string representation of `x`.  This is used in some debugging
+statements, to show variables that might be numbers, symbols, or
+things like vectors and arrays.
+"""
+function oad_val(x)
+    if isa(x, Symbol)
+        return repr(x)
+    elseif isa(x, String)
+        return "\"$x\""
+    elseif isa(x, Number)
+        return "$x"
+    else
+        return "a $(typeof(x))"
+    end
+end
+export oad_val

@@ -25,13 +25,13 @@ layer depth (MLD).  An alternative estimate of MLD is provided by
 
 # Examples
 ```julia
-using OceanAnalysis, Plots, Printf
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-c = read_ctd_cnv(f);
-ILD = ILD_KRH(c);
-plot_profile(c, which="temperature")
-hline!([ILD], color=:red)
-title!(@sprintf("ILD %.1f m by Kara-Rochford-Hurlburt (2000) method", ILD))
+using OceanAnalysis, Printf
+using GLMakie # or CairoMakie
+ctd= joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv") |> read_ctd_cnv
+ILD = ILD_KRH(ctd);
+title = @sprintf("ILD %.1f m by Kara-Rochford-Hurlburt (2000) method", ILD)
+plot_profile(ctd, which="temperature", title=title)
+hlines!([ILD], color=:red)
 ```
 """
 function ILD_KRH(c::Ctd; criterion=0.8)::Float64
@@ -96,13 +96,14 @@ depth (ILD).
 
 # Examples
 ```julia
-using OceanAnalysis, Plots, Printf
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv");
-c = read_ctd_cnv(f);
-MLD = MLD_KRH(c);
-plot_profile(c, which="temperature")
-hline!([MLD], color=:red)
-title!(@sprintf("MLD %.1f m by Kara-Rochford-Hurlburt (2000) method", MLD))
+using OceanAnalysis, Printf
+using GLMakie # or CairoMakie
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
+ctd = read_ctd_cnv(f);
+MLD = MLD_KRH(ctd);
+title = @sprintf("MLD %.1f m by Kara-Rochford-Hurlburt (2000) method", MLD)
+plot_profile(ctd, which="temperature", title=title)
+hlines!([MLD], color=:red)
 ```
 """
 function MLD_KRH(c::Ctd; criterion=0.8)::Float64

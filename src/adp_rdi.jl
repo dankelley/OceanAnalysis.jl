@@ -1,4 +1,4 @@
-using Dates, Plots, BenchmarkTools
+using Dates, BenchmarkTools
 
 function key_insert(dict, key)
     if key in keys(dict)
@@ -194,34 +194,22 @@ function cannot handle.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 
 # Load a sample file provided with the package
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "adp_rdi.000");
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000");
 adp = read_adp_rdi(file);
 
-# Plot a timeseries of heading
-plot(adp["time"], adp["heading"],
-    ylab="Heading", label=false, framestyle=:box)
+# Textual overview
+println(keys(adp.metadata))
+println(keys(adp.data))
 
-# Plot a heatmap of velocity in the first ensemble
-heatmap(adp["velocity"][1, :, :], c=cgrad(:RdBu, rev=true))
+# Get for example the beam angle
+adp["beam_angle"]
 
-# Plot a heatmap of velocity in the first bin vs time and distance
-heatmap(adp["time"], adp["distance"], adp["velocity"][:,:,1],
-    size=(800,600), ylab="Distance [m]", c=:RdBu)
-
-# List other data in the 'adp' object
-keys(adp.data)
-
-# See a particular data item
-adp["heading"]
-
-# List the metadata in the 'adp' object
-keys(adp.metadata)
-
-# See a particular metadata item
-adp["frequency"]
+# Plot beam 1 as a heatmap
+plot_adp(adp, which=:velocity1)
 ```
 
 # References
@@ -480,26 +468,14 @@ This is done by using the `transformation_matrix` that is stored within `adp`.  
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
 adp = read_adp_rdi(file);
 adp_xyz = beam_to_xyz(adp);
-v = adp.data["velocity"];
-V = adp_xyz.data["velocity"];
-CM = cgrad(:RdBu, rev=true);
-p1 = heatmap(transpose(v[:, :, 1]), c=CM, title="beam 1", titlefontsize=9);
-p2 = heatmap(transpose(v[:, :, 2]), c=CM, title="beam 2", titlefontsize=9);
-p3 = heatmap(transpose(v[:, :, 3]), c=CM, title="beam 3", titlefontsize=9);
-p4 = heatmap(transpose(v[:, :, 4]), c=CM, title="beam 4", titlefontsize=9);
-pu = heatmap(transpose(V[:, :, 1]), c=CM, title="u", titlefontsize=9);
-pv = heatmap(transpose(V[:, :, 2]), c=CM, title="v", titlefontsize=9);
-pw = heatmap(transpose(V[:, :, 3]), c=CM, title="w", titlefontsize=9);
-pe = heatmap(transpose(V[:, :, 4]), c=CM, title="err", titlefontsize=9);
-plot(p1, p2, p3, p4, layout=(4, 1), size=(1000, 700))
-plot(pu, pv, pw, pe, layout=(4, 1), size=(1000, 700))
+plot_adp(adp, which=:velocity1)
+plot_adp(adp_xyz, which=:velocity1)
 ```
-
 """
 function beam_to_xyz(adp::Adp; debug::Integer=0)
     oad(debug, "beam_to_xyz() BEGIN")
@@ -545,13 +521,14 @@ object, and [`beam_to_xyz`](@ref) for how to convert it from beam to xyz coordin
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
 beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz);
-v = enu["velocity"];
+plot_adp(xyz, which=:velocity1)
+plot_adp(enu, which=:velocity1)
 ```
 """
 function xyz_to_enu(adp::Adp; declination::Float64=0.0, debug::Integer=0)

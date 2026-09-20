@@ -8,78 +8,96 @@ velocity components as a function of time and distance and (2) covariation of
 eastward and northward components, with a red line indicating local coastal
 orientation.
 
+**FIXME: update when converted to Makie plotting.**
+
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "adp_rdi.000")
+using OceanAnalysis
+using GLMakie
+file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
 beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
 
+# 1. Scatterplot of u vs v
+KW = (fontsize=11, markersize=2)
+fig = plot_adp(enu; which=:uv, title="uv", KW...)
+save("adp_rdi_uv.png", fig)
+
 # 1. Heatmap of u, v and w
-plot_adp(enu; size=(800, 700), dpi=150)
-savefig("adp_rdi_heatmap.png")
-
-# 2. U-V scattergraph, with local coastline direction shown
-
-# In R, find angle of coastline for Île-aux-Lièvres
-#   load("/Users/kelley/git/oar_book/data/coastlineSLE.rda")
-#   plot(coastlineSLE,clon=-69.7,clat=47.79,span=100)
-#   ial <- locator(2) # click on ends of IAL
-#   xy <- lonlat2utm(lon=ial$x,lat=ial$y)
-#   a <- diff(xy$northing)/diff(xy$easting)
-plot_adp(enu, which=:uv)
-a = 1.71 # from the R code shown above (private file)
-plot!([-1; 1], [-a; a], color=:red, label=false, dpi=150)
-savefig("adp_rdi_uv.png")
+KW = (fontsize=11, colorrange=(-1.5, 1.5))
+fig = Figure()
+plot_adp!(fig[1, 1], enu; which=:velocity1, title="Eastward velocity [m/s]", KW...)
+plot_adp!(fig[2, 1], enu; which=:velocity2, title="Northward velocity [m/s]", KW...)
+plot_adp!(fig[3, 1], enu; which=:velocity3, title="Upward velocity [m/s]", KW...)
+save("adp_rdi_velocity.png", fig)
 ```
 
-![Acoustic-Doppler Profiler plot](adp_rdi_heatmap.png)
 ![Acoustic-Doppler Profiler plot](adp_rdi_uv.png)
+
+![Acoustic-Doppler Profiler plot](adp_rdi_velocity.png)
 
 ## AMSR Satellite Data
 
 The AMSR satellite provides several data streams, including sea-surface
-temperature, which may be plotted as follows.
+temperature, which may be plotted as follows. In addition to the SST field, the
+1-km isobath is also shown.
 
 ```julia
-# North Atlantic Sea Surface Temperature
-using OceanAnalysis, Plots, Dates
-f = get_amsr(Dates.Date("2025-09-07"));
-a = read_amsr(f, "SST");
-plot_amsr(a, xlims=(290.0, 340.0), ylims=(30.0, 60.0),
-    draw_contours=0.0:2.5:30.0, clim=(0, 30))
-savefig("amsr.png")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+file = get_amsr()
+sst = read_amsr(file, "SST");
+
+title = "SST " * sst["time_coverage_start"][1:10] *
+        " to " * sst["time_coverage_end"][1:10] *
+        " (with 1-km isobath shown)"
+fig = plot_amsr(sst; limits=(275.0, 350.0, 20.0, 65.0), title=title)
+
+# Add 1-km isobath. Note the transposition of the data (needed for Makie) and
+# the redrawing, required because AMSR has 0<=lon<=360 whereas topography
+# has -180<=lon<=180.
+tf = get_topography()
+t = read_topography(tf);
+contour!(t["longitude"], t["latitude"], t.data',
+    levels=[-1000.0], color=:black, linewidth=1)
+contour!(360.0 .+ t["longitude"], t["latitude"], t.data',
+    levels=[-1000.0], color=:black, linewidth=1)
+save("amsr.png", fig, px_per_unit=2)
 ```
 
 ![AMSR-derived sea-surface temperature](amsr.png)
 
 ## Argo Data
 
-### Argo Profile
+### Argo summary plots
 
-The following shows how to read an Argo NetCDF file, convert to a [`Ctd`](@ref) object, and then make a summary plot.
+The following shows how to read an Argo NetCDF file, convert to a [`Ctd`](@ref) object, and then create some summary plots.
 
 ```julia
 # Read and plot a built-in Argo file
-using OceanAnalysis, Dates, Measures, Plots, Printf
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data",
-    "D4902911_095.nc")
-argo = read_argo(filename)
-ctd = as_ctd(argo)
-p1 = plot_profile(ctd; which="CT");
-p2 = plot_profile(ctd; which="SA");
-p3 = plot_profile(ctd; which="sigma0");
-p4 = plot_TS(ctd);
-title = @sprintf("CTD observations at %.3fN and %.3fE, on %s",
-    ctd.metadata["latitude"], ctd.metadata["longitude"],
-    Dates.format(ctd.metadata["time"], "yyyy-mm-dd"))
-plot(p1, p2, p3, p4, layout=(2, 2), size=(800, 600), margin=0.25cm,
-    dpi=200, plot_title=title, plot_titlefontsize=9)
-savefig("argo_profile.png")
+using OceanAnalysis, Dates, Measures, Printf
+using GLMakie # or CairoMakie
+
+# Get data
+ctd = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc") |>
+      read_argo |>
+      as_ctd;
+
+# Non-mutating example (single panel)
+fig = plot_profile(ctd; which="CT")
+save("argo_profile_1.png", fig, px_per_unit=2)
+
+# Mutating example (multiple panels)
+fig = Figure()
+plot_profile!(fig[1, 1], ctd; which="SA");
+plot_profile!(fig[1, 2], ctd; which="sigma0");
+plot_TS!(fig[1, 3], ctd);
+save("argo_profile_2.png", fig, px_per_unit=2)
 ```
 
-![Argo profile](argo_profile.png)
+![Argo profile](argo_profile_1.png)
+
+![Argo profile](argo_profile_2.png)
 
 ### Argo quality-control handling
 
@@ -94,34 +112,34 @@ analysis procedures. However, sometimes the flags seem to be in error, and so a
 prudent analyst will start by plotting as in the top row.  *Exercise:* add a
 middle row showing just the cleaned-up profiles.
 
-plotting 
-
 ```julia
 # Illustrate QC processing of hydrographic data
-using OceanAnalysis, Plots
-f = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4901076_139.nc")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+f = joinpath(pkgdir(OceanAnalysis), "data", "D4901076_139.nc")
 argo = read_argo(f);
 ctd = as_ctd(argo);
 ctd_clean = handle_qc(ctd);
+summarize(ctd)
+summarize(ctd_clean)
 
-ul = plot_profile(ctd; which="salinity", dpi=200, fontsize=6)
-badS = ctd["salinity_qc"] .!= '1'
+fig = Figure() # will fill with 4 panels
+
+plot_profile!(fig[1, 1], ctd; which="salinity")
+badS = ctd["salinity_qc"] .!= '1';
 scatter!(ctd["salinity"][badS], ctd["pressure"][badS], color=:red, markersize=2)
 
-ur = plot_profile(ctd; which="temperature", dpi=200, fontsize=6)
-badT = ctd["temperature_qc"] .!= '1'
+plot_profile!(fig[1, 2], ctd; which="temperature")
+badT = ctd["temperature_qc"] .!= '1';
 scatter!(ctd["temperature"][badT], ctd["pressure"][badT], color=:red, markersize=2)
 
-ll = plot_TS(ctd, fontsize=6)
-bad = badS .| badT
+plot_TS!(fig[2, 1], ctd)
+bad = badS .| badT;
 scatter!(ctd["SA"][bad], ctd["CT"][bad], color=:red, markersize=2)
 
-lr = plot_TS(ctd_clean, fontsize=6)
+plot_TS!(fig[2, 2], ctd_clean)
 
-plot(ul, ur, ll, lr, layout=(2, 2))
-savefig("argo_qc.png")
-
-
+save("argo_qc.png", fig, px_per_unit=2)
 ```
 
 ![Argo search results](argo_qc.png)
@@ -133,36 +151,37 @@ The following shows how to map Argo profile locations made within 200 km of
 Sable Island, during the past year.
 
 ```julia
-# Show Argo profiles within 200 km of Sable Island in last year
-using OceanAnalysis, CSV, Dates, DataFrames, Plots, Printf
+# Show Argo profiles within 200 km of Sable Island in last 5 years
+using OceanAnalysis, CSV, DataFrames, Dates, Printf
+using GLMakie # or CairoMakie
+radius = 200 # km
+years = 5 # years
+using GLMakie # or CairoMakie
 # Get the index
 index_file = get_argo_index("~/data/argo")
-index_all = read_argo_index(index_file) # 3.2e6 profiles
+index_all = read_argo_index(index_file)
 # Set time subset
 today = now(UTC)
-start = today - Dates.Year(1)
+start = today - Dates.Year(years)
 recent = start .< index_all.time .< today
 # Set distance subset
-SI_lon = -59.915
-SI_lat = 43.934
+lon0 = -59.915
+lat0 = 43.934
 radius = 200.0 # km
-distance = map(i -> geod_distance(SI_lon, SI_lat,
+distance = map(i -> geod_distance(lon0, lat0,
         index_all.longitude[i], index_all.latitude[i]),
     1:nrow(index_all))
 near = distance .< radius
 # Filter by both time and distance
 index = index_all[recent.&near, :]
+
 # Extend region of map to show geographic context
-aspect_ratio = 1.0 / cos(SI_lat * pi / 180.0)
-scale = radius / 111.0
-plot_stations(index.longitude, index.latitude,
-    xlims=SI_lon .+ scale .* (-1.2, 1.2) .* aspect_ratio,
-    ylims=SI_lat .+ scale .* (-1.2, 1.2))
-float_IDs = replace.(index.file, r".*/(.*)_.*" => s"\1") |> unique;
-t = @sprintf("%d profiles of %d floats", length(index.file), length(float_IDs))
-title!(t, titlefontsize=9)
-scale_bar(100; x=:right, y=:top)
-savefig("argo_search.png")
+t = "$(length(index.file)) profiles within $radius km of Sable Island in $years years"
+fig = plot_coastline(coastline(), title=t,
+    limits=[lon0 - 3; lon0 + 3; lat0 - 3; lat0 + 3])
+scatter!(index.longitude, index.latitude)
+
+save("argo_search.png", fig, px_per_unit=2)
 ```
 
 ![Argo search results](argo_search.png)
@@ -172,33 +191,26 @@ savefig("argo_search.png")
 The following shows how to display a trace of the positions of a single Argo
 float.
 
+**FIXME: update when converted to Makie plotting.**
+
 ```julia
 # Plot a float trajectory with colour for sequence number
-using OceanAnalysis, Plots, Printf, Statistics
+using OceanAnalysis, Printf, Statistics
+using GLMakie # CairoMakie
 ID = r"D4902911" # focus on this ID
 index_file = get_argo_index("~/data/argo");
 index_all = read_argo_index(index_file) # 3.2e6 profiles
 index = index_all[occursin.(ID, index_all.file), :]
 sort!(index, :time) # this lets us join dots in time order
 lon, lat = index.longitude, index.latitude
-plot(lon, lat,
-    aspect_ratio=1.0 / cos(mean(lat) * pi / 180),
-    framestyle=:box, color=:gray, dpi=200,
-    title=@sprintf("Argo float %s coloured by cycle index", ID.pattern),
-    titlefontsize=9)
-colors = cgrad(:turbo)
-scatter!(lon, lat, marker_z=1:length(lon),
-    markersize=3, markerstyle=:circle, color=colors)
-# Add land and 1km isobath
-plot_coastline!(coastline())
-topo_file = get_topography(-110.0, -30, 20, 60, resolution=30,
-    destdir="~/data/topo")
-topo = read_topography(topo_file)
-contour!(topo.metadata["longitude"], topo.metadata["latitude"],
-    topo.data, xlim=xlims(), ylim=ylims(),
-    color=:gray, linewidth=2, colorbar_entry=false, levels=[-1000.0])
-scale_bar(500; x=:right, y=:top)
-savefig("argo_trajectory.png")
+lonr = extrema(lon)
+latr = extrema(lat)
+fig = plot_coastline(coastline(),
+    scalebar=(distance=500, x=:right, y=:top),
+    limits=[lonr[1] - 2; lonr[2] + 2; latr[1] - 2; latr[2] + 4])
+scatterlines!(lon, lat)
+
+save("argo_trajectory.png", fig, px_per_unit=2)
 ```
 
 ![Argo trajectory](argo_trajectory.png)
@@ -213,14 +225,16 @@ Bathymetry files at 10m and 100m resolution are provided for some Canadian
 waters via a somewhat-awkward GUI interface at
 <https://data.chs-shc.ca/dashboard/map>. The following shows how to plot such data, after downloading a dataset.  (This only works for the TIFF form of the data.)
 
-
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 filename = expanduser("~/data/nonna/NONNA10_4460N06360W.tiff")
-n = read_nonna(filename);
-heatmap(n["longitude"], n["latitude"], n.data, c=:turbo,
-    size=(400, 400), dpi=300, framestyle=:box, tickdirection=:out)
-savefig("nonna.png")
+if isfile(filename)
+    n = read_nonna(filename)
+    fig = heatmap(n["longitude"], n["latitude"], permutedims(n.data), colormap=:turbo,
+        axis=(aspect=DataAspect(),))
+    save("nonna.png", fig)
+end
 ```
 
 ![NONNA_plot](nonna.png)
@@ -230,29 +244,51 @@ savefig("nonna.png")
 The following downloads topographic data for a domain including southern
 Nova Scotia, and displays the data in three plot styles.
 
+**FIXME: update when converted to Makie plotting.**
+
 ```julia
-using OceanAnalysis, Plots, TiffImages
-topo_file = get_topography(-67, -63, 43, 46, resolution=1)
+using OceanAnalysis, GLMakie
+topo_file = get_topography(-67, -62, 43, 46, resolution=1)
 topo = read_topography(topo_file);
-p1 = plot_topography(topo, domain=:both);
-p2 = plot_topography(topo, domain=:sea);
-p3 = plot_topography(topo, domain=:land);
-plot(p1, p2, p3, layout=(1, 3), size=(800, 200), dpi=200)
-savefig("topography.png")
+
+# Single panel
+fig = plot_topography(topo) # domain defaults to :land_and_sea
+save("topography_1.png", fig, px_per_unit=2)
+
+# Multiple panels
+fig = Figure(size=(800, 200))
+plot_topography!(fig[1, 1], topo, domain=:land_and_sea) # same as above
+plot_topography!(fig[1, 2], topo, domain=:sea)
+plot_topography!(fig[1, 3], topo, domain=:land)
+save("topography_2.png", fig, px_per_unit=2)
 ```
 
-![Topography diagram](topography.png)
+![Topography diagram](topography_1.png)
+
+![Topography diagram](topography_2.png)
 
 
 ## Coastline Data
 
-The following produces a world map in Cartesian coordinates, with aspect ratio set so that shapes and relative sizes are appropriate at the equator.
+The following produces a Canada-wide view on the left, with a red inset marker
+for Nova Scotia, and then a Nova Scotia view on the right. Thin lines are used
+    to show details of the wiggly coastlines.
 
 ```julia
-using OceanAnalysis, Plots
-c = coastline()
-plot_coastline(c)
-savefig("coastline.png")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+cl = coastline();
+
+fig = Figure()
+L = (-140, -50, 43, 76) # plot limits: east, west, south, north
+l = (-67, -58, 43, 47.5)
+# Left panel
+plot_coastline!(fig[1, 1], cl, limits=L, linewidth=0.2) # thin lines are prettier
+lines!([l[1], l[1], l[2], l[2], l[1]], [l[3], l[4], l[4], l[3], l[3]], color=:red)
+# Right panel
+plot_coastline!(fig[1, 2], cl, limits=l, scalebar=true)
+
+save("coastline.png", fig, px_per_unit=5)
 ```
 
 ![Coastline diagram](coastline.png)
@@ -264,20 +300,18 @@ The following shows how to read a built-in CTD file, and plot some hydrographic 
 
 ### CTD profiles
 
+
 ```julia
 # Read and plot a built-in CTD file
-using OceanAnalysis, Measures, Plots, Printf
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "ctd.cnv")
+using OceanAnalysis, Printf
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
-p1 = plot_profile(ctd; which="CT");
-p2 = plot_profile(ctd; which="SA");
-p3 = plot_profile(ctd; which="sigma0");
-title = @sprintf("CTD observations at %.3fN and %.3fE",
-    ctd["latitude"], ctd["longitude"])
-plot(p1, p2, p3, layout=(1, 3), size=(800, 600), margin=0.25cm,
-    dpi=150, plot_title=title, plot_titlefontsize=11)
-savefig("ctd_profiles.png")
+fig = Figure()
+plot_profile!(fig[1, 1], ctd; which="CT");
+plot_profile!(fig[1, 2], ctd; which="SA");
+plot_profile!(fig[1, 3], ctd; which="sigma0");
+save("ctd_profiles.png", fig, px_per_unit=2)
 ```
 
 ![CTD profiles](ctd_profiles.png)
@@ -285,12 +319,15 @@ savefig("ctd_profiles.png")
 ### CTD smoothing
 
 The following shows how to grid CTD data in 1-dbar intervals; note that the
-mean spacing of the data is 0.24 dbar. Note the trick of using uniform `y` values, so that `interpolate_barnes()` will effectively do a one-dimensional
+mean spacing of the data is 0.24 dbar. Note the trick of using uniform `y`
+values, so that `interpolate_barnes()` will effectively do a one-dimensional
 analysis of the variation of Absolute Salinity with sea pressure.
 
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+# Smooth to 1-dbar grid; note that mean(diff(p))=0.24 dbar.
+using OceanAnalysis
+using GLMakie # or CairoMakie
+file = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(file);
 p = ctd["pressure"];
 y = repeat([1], length(p)); # fake y data, with arbitrary value
@@ -298,9 +335,9 @@ SA = ctd["SA"];
 dp = 1.0;
 pg = range(0.0, maximum(p), step=dp);
 g = interpolate_barnes(p, y, SA; xg=pg, xr=dp);
-plot_profile(ctd, which="SA", seriestype=:scatter)
-plot!(g["zg"][:], g["xg"][:], color=:red, label=false)
-savefig("ctd_smooth.png")
+fig = plot_profile(ctd, which="SA", seriestype=:scatter)
+lines!(g["zg"][:], g["xg"][:], color=:red, label=false)
+save("ctd_smooth.png", fig, px_per_unit=2)
 ```
 
 ![Smoothing a CTD profile](ctd_smooth.png)
@@ -314,13 +351,15 @@ marker borders are used to avoid having black ink obscuring the colours.
 
 ```julia
 # Read and plot a built-in CTD file
-using OceanAnalysis, Measures, Plots, Printf
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "ctd.cnv")
+using OceanAnalysis
+using Printf
+using GLMakie # or CairoMakie
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 title = @sprintf("CTD observations at %.3fN and %.3fE",
     ctd["latitude"], ctd["longitude"])
-plot_TS(ctd, ms=3, title=title, markerstrokewidth=0, color_by="pressure")
-savefig("ctd_TS.png")
+fig = plot_TS(ctd, title=title)
+save("ctd_TS.png", fig, px_per_unit=2)
 ```
 
 ![CTD TS](ctd_TS.png)
@@ -332,28 +371,20 @@ savefig("ctd_TS.png")
 This example is based on a large file (not provided with this package) that was obtained via a GUI interface at [https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/). The view is of a portion of Halifax, Nova Scotia. The polygonal shape is the Halifax Citadel, a fort built in 1820s for protection against the United States military. The code below produces two diagrams. The first shows elevation, revealing that the Citadel sits atop a hill (which, a broader view would show, overlooks Halifax Harbour), while the second shows more detail on small-scale features of the old fort and the modern roads and building in downtown Halifax.
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 
-file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 
 if isfile(file)
     dem_all = read_dem(file)
     # Focus near the Citadel fort
-    dem = subset_dem(dem_all, lonlim=(-63.589, -63.572), latlim=(44.6426, 44.655))
-    middle_lat = dem["latitude"][div(end + 1, 2)]
-    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-    # Heatmap of elevation
-    p1 = heatmap(dem["longitude"], dem["latitude"], dem.data,
-        color=:inferno, aspect_ratio=aspect_ratio,
-        framestyle=:box, tickdirection=:out)
-    savefig("dem_1.png")
-    # Heatmap of gradient of elevation with respect to northerly distance
-    z = -diff(dem.data, dims=1) / dem["dy"]
-    z = [zeros(1, size(dem.data, 2)); z]
-    heatmap(dem["longitude"], dem["latitude"], z,
-        color=:inferno, aspect_ratio=aspect_ratio,
-        framestyle=:box, tickdirection=:out, clim=(-0.5, 0.5))
-    savefig("dem_2.png")
+    lims = (-63.589, -63.572, 44.6426, 44.655)
+    dem = subset_dem(dem_all, lonlim=lims[1:2], latlim=lims[3:4])
+    fig1 = plot_dem(dem)
+    save("dem_1.png", fig1, px_per_unit=2)
+    fig2 = plot_dem(dem, coordinates=:geographic)
+    save("dem_2.png", fig2, px_per_unit=2)
 end
 ```
 
@@ -369,12 +400,12 @@ This uses a private data file acquired using a Biosonics scientific echosounder.
 
 ```julia
 # This uses a private file
-using OceanAnalysis, Plots
+using OceanAnalysis, CairoMakie
 f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/Biosonics/20080701_163942.dt4"
 if isfile(f)
     e = read_echosounder(f)
-    plot_echosounder(e)
-    savefig("echosounder.png")
+    fig = plot_echosounder(e)
+    save("echosounder.png", fig)
 end
 ```
 
@@ -392,20 +423,16 @@ chart of sampling locations, along with cross-section diagrams of salinity and
 temperature.
 
 ```julia
-using OceanAnalysis, Plots
-url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip";
+using OceanAnalysis
+using GLMakie # or CairoMakie
+url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);
 s = read_section(dir);
-s.data = s.data[s["longitude"].<-68.0];
+s.data = s.data[s["longitude"].<(-68.0)];
+# We must grid to get the cross-section diagrams
 sg = grid_section(s);
-
-p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
-scale_bar(500);
-p2 = plot_section(sg, "salinity", ylim=(0, 2000));
-p3 = plot_section(sg, "temperature", ylim=(0, 2000));
-l = @layout [a; b c]
-plot(p1, p2, p3, layout=l, dpi=200);
-savefig("section.png")
+fig = plot_section(sg, which="salinity", type=:contourf)
+save("section.png", fig, px_per_unit=2)
 ```
 
 ![Section diagram](section.png)
@@ -420,22 +447,24 @@ represent non-permanent tide gauges, while red dots represent permanent tide
 gauges.  (As an exercise, restrict `i` according to latitude and longitude
 criteria, and then examine `i.name` to see the tide gauges in that region.)
 
+**FIXME: update when converted to Makie plotting.**
 
 ```julia
-using OceanAnalysis, Plots
-i = get_tide_gauge_index(:all);
-scatter(i.longitude, i.latitude,
-    aspect_ratio=1.0 / cos(45.0 * pi / 180),
-    framestyle=:box, tickdirection=:out, label=false, ms=0,
-    xlim=(-67, -59), ylim=(43.3, 47.2))
-plot_coastline!(coastline(:global_fine), fillcolor=:gray95)
-scatter!(i.longitude, i.latitude, color=:blue, ms=3,
-    markerstrokewidth=0.2)
+using OceanAnalysis
+using GLMakie # or CairoMakie
+cl = coastline()
+i = get_tide_gauge_index(:all); # requires internet access
+
+limits = (-67, -59, 43.3, 47.2)
+fig = plot_coastline(cl, limits=limits, scalebar=true, fontsize=12,
+    title="Tide gauges (red for permanent stations)")
+scatter!(i.longitude, i.latitude, color=:blue, markersize=8)
 look = i.type .== "PERMANENT"
-scatter!(i.longitude[look], i.latitude[look],
-    color=:red, ms=4, markerstrokewidth=0.2)
-savefig("tide_gauge_locations.png")
+scatter!(i.longitude[look], i.latitude[look], color=:red, markersize=18)
+
+save("tide_gauge_locations.png", fig, px_per_unit=5)
 ```
+
 
 ![Tide gauge locations](tide_gauge_locations.png)
 
@@ -448,16 +477,20 @@ an interval, the CHS server may report an error, in which case you ought to try
 increasing the value of `resolution`.)
 
 ```julia
-using OceanAnalysis, Plots, CSV, DataFrames
+```
+using OceanAnalysis, CSV, DataFrames
+using GLMakie # or CairoMakie
+
 search = "Bedford" # full name is "Bedford Institute"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
-xlim = extrema(data.time)
-plot(data.time, data.value, xlim=xlim, label=false,
-    framestyle=:box, tickdirection=:out, ylab="Elevation [m]",
-    title=name, labelfontsize=8, titlefontsize=8)
-savefig("tide_gauge_timeseries.png")
-```
+
+fig = Figure()
+ax = Axis(fig[1, 1], ylabel="Elevation [m]", title="Sea Level at $name")
+lines!(data.time, data.value)
+
+save("tide_gauge_timeseries.png", fig, px_per_unit=5)
+
 
 ![Tide gauge timeseries](tide_gauge_timeseries.png)
 

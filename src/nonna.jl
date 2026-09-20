@@ -21,12 +21,16 @@ above a nominal sea-level surface.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using ColorSchemes
+using GLMakie # or CairoMakie
 # Region near East Lawrencetown Beach Provincial Park
-n = read_nonna(expanduser("~/data/nonna/NONNA10_4460N06340W.tiff"));
-heatmap(n["longitude"], n["latitude"], n.data, color=:turbo,
-    framestyle=:box, tickdirection=:out, dpi=300,
-    aspect_ratio=1.0, size=(800, 800))
+file = expanduser("~/data/nonna/NONNA10_4460N06340W.tiff")
+if isfile(file)
+    n = read_nonna(file);
+    colormap = [get(ColorSchemes.topo, i) for i in 0.5:-0.6/1000:0.0]
+    heatmap(n["longitude"], n["latitude"], -n.data', colormap=colormap)
+end
 ```
 """
 function read_nonna(filename::String)

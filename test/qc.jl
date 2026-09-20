@@ -2,8 +2,7 @@ using OceanAnalysis, DataFrames, Test
 
 # drop_qc()
 
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "D4902911_095.nc")
+f = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
 a = read_argo(f)
 a2 = drop_qc(a)
 

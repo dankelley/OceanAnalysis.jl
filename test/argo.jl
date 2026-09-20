@@ -1,5 +1,5 @@
 using OceanAnalysis, DataFrames, Test
-filename = joinpath(dirname(dirname(pathof(OceanAnalysis))), "data", "D4902911_095.nc")
+filename = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc")
 argo = read_argo(filename)
 
 @testset "read_argo()" begin

@@ -1,51 +1,46 @@
 using GibbsSeaWater: gsw_ct_freezing, gsw_ct_from_t, gsw_sa_from_sp, gsw_sigma0, gsw_spiciness0
-
 """
-    plot_freezing_curve!(xlim, ylim; kwargs...)
+    plot_freezing_curve!(ax; color=:darkgray, linewidth=1, n=50, debug=0)
 
 Draw a freezing-point curve on an existing CT-SA plot. This is called by
 [`plot_TS`](@ref), but can also be called by the user, if customization of line
-type, etc, is required.
+color and width is required.
 """
-function plot_freezing_curve!(; kwargs...)
-    n = 50 # it is a pretty straight curve
-    xlim = xlims()
-    ylim = ylims()
-    SA = range(xlim[1], xlim[2], length=n)
+function plot_freezing_curve!(ax; color=:darkgray, linewidth=1.8, n=50, debug=0)
+    oad(debug, "plot_freezing_curve!() START")
+    axlims = ax.finallimits[]
+    SAmin = minimum(axlims)[1]
+    SAmax = maximum(axlims)[1]
+    oad(debug, "    SAmin=$SAmin, SAmax=$SAmax")
+    SA = range(SAmin, SAmax, length=n)
     CT = gsw_ct_freezing.(SA, 0.0, 1.0) # SA, p, saturation_fraction
-    plot!(SA, CT, label=false, color=:darkgray, xlim=xlim, ylim=ylim; kwargs...)
+    Makie.lines!(ax, SA, CT, color=color, linewidth=linewidth)
+    oad(debug, "END plot_freezing_curve!()")
 end
 export plot_freezing_curve!
 
 
-
 """
     plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-        plot_freezing=true, abbreviate=false, fontsize::Integer=8,
-        color=:black, color_by=false, debug::Integer=0, kwargs...)
+        plot_freezing=true, abbreviate=false,
+        color_by=false, debug::Integer=0, kwargs...)
+
+    plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
+        plot_freezing=true, abbreviate=false,
+        color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
 Whether contours of density and spiciness are drawn depends on values of the
 `sigma0_levels` and `spiciness0_levels`. By default, a freezing-point line is
 drawn (if it is within the range of the data) by calling
-[`plot_freezing_curve!`](@ref). If customization of line width, color, etc., is
-required, uses `plot_freezing=false` and then call
-[`plot_freezing_curve!`](@ref) directly.
+[`plot_freezing_curve!`](@ref), but if customization is required,
+use `plot_freezing=false` and call [`plot_freezing_curve!`](@ref) directly.
 
 By default, axis names are written in long form; set `abbreviate=true` for
 shorter versions.
 
 Information about the analysis is printed if `debug` exceeds 0.
-
-Apart from that, the other parameters have the usual meanings for Julia plots.
-For example, `color` is set to black, to override the Julia default, etc.
-In addition to those parameters, the `kwargs...` argument represents
-any other argument that is accepted by `plot`.  This is illustrated
-in the Examples.
-
-Note that specifying `seriestype=:line` will yield a warning suggesting
-to use `:path` instead.
 
 # Arguments
 
@@ -73,14 +68,6 @@ to use `:path` instead.
 
 - `abbreviate` a Bool indicating whether to abbreviate the axis labels.
 
-- `fontsize` size of fonts to be supplied to [plot] as `tickfontsize`,
-  `guidefontsize` and `titlefontsize`. Note that any of these values may also be
-  supplied as named arguments within `kwargs...`.
-
-- `color` the colour to be used for lines and possibly markers. This
-  is used for both if `color_by` (see next) is false. However, if
-  `color_by` is a NamedTuple, then `color` only applies to the lines.
-
 - `color_by` a control on whether points on the plot are to be colorized
   individually according to some specified value. Four choices are
   possible. (1) If `color_by=false`, then all the data points are painted
@@ -98,76 +85,144 @@ to use `:path` instead.
 - `debug` indicator of debugging level. If this exceeds 0, some information is
   printed during processing.
 
-- `kwargs...` is passed to `plot()`, to permit further customization; see
-   https://docs.juliaplots.org/stable/ for more information on possibilities.
+- `kwargs...` extra arguments that are parsed and handled accordingly. If
+  `seriestype` is supplied, it controls how the data are indicated.  The
+  permitted values for `seriestype` are `:scatter` (the default),
+  `:lines` and `:scatterlines`. Each of these is handled in a
+  different way, and may be customized by specifying other
+  `kwargs...` entries. As with other functions in the package, you may use
+  `fontsize` to set the sizes of text being displayed. To see the possible
+  elements provided within `kwargs`, call this function
+  with `debug=1`, which will cause it will print out entries as they
+  are extracted from `kwargs` or set up as defaults, in addition
+  to the arguments that are being passed to the
+  Makie functions `scatter!`, `lines!` or `scatterlines!`.
+  The colors of the (optional) density and spiciness contour
+  lines are set by `sigma0_contour_color` and
+  `spiciness0_contour_color`, respectively.
+
+
+# Return value
+
+The `plot_TS` form returns a Makie `FigureAxisPlot`, which can be displayed
+directly or saved with the FileIO's `save`.
+
+The `plot_TS!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
+item, and a NamedTuple as the second. The latter contains an element named
+`main` that holds the main plot, plus potentially `cb` that holds a Colorbar.
+
 
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis, GLMakie # or CairoMakie
+ctd = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc") |> read_argo |> as_ctd;
 
-# Get data for examples
-pkgdir = dirname(dirname(pathof(OceanAnalysis)))
-f = joinpath(pkgdir, "data", "ctd.cnv")
-ctd = read_ctd_cnv(f);
+# Example 1: non-mutating cases (single panel each plot)
+plot_TS(ctd)
+plot_TS(ctd; seriestype=:scatter, markersize=4)
+plot_TS(ctd; seriestype=:scatter, markersize=6,
+    color=:gray, colormap=:inferno, color_by="pressure")
 
-# Example 1: set title.
-plot_TS(ctd, title="Built-in CTD file")
-
-# Example 2: just symbols, with no line.
-plot_TS(ctd, seriestype=:scatter)
-
-# Example 3: just a line, with no symbols.
-plot_TS(ctd, marker=:none)
-
-# Example 4: color_by pressure.
-# The markers are drawn without borders, to avoid black overpainting.
-plot_TS(ctd, markerstrokewidth=0, markersize=3, color_by="pressure")
-
-# Example 5: black/white plot, but with space where a palette would go.
-plot_TS(ctd, color_by="")
+# Example 2: mutating cases (two panels)
+fig = Makie.Figure()
+figa = plot_TS!(fig[1, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="pressure", debug=0)
+figb = plot_TS!(fig[2, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="", debug=1)
 ```
 """
 function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-    plot_freezing=true, abbreviate=false, fontsize::Integer=8,
-    color=:black, color_by=false, debug::Integer=0, kwargs...)
+    plot_freezing=true, abbreviate=false,
+    color_by=false, debug::Integer=0, kwargs...)
+    oad(debug, "plot_TS() START")
+    fig = Makie.Figure()
+    ax, plot = plot_TS!(fig[1, 1], d;
+        sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
+        plot_freezing=plot_freezing,
+        color_by=color_by, abbreviate=abbreviate,
+        debug=increment_debug(debug), kwargs...)
+    oad(debug, "END plot_TS()")
+    return Makie.FigureAxisPlot(fig, ax, plot.main)
+end
+export plot_TS
+
+
+function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
+    plot_freezing=true, abbreviate=false,
+    color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
     # of the package. For now, it simply makes for better debugging output.
     if isa(d, Argo)
-        oad(debug, "plot_TS(::Argo) START")
+        oad(debug, "plot_TS!(::Argo) START")
     elseif isa(d, Ctd)
-        oad(debug, "plot_TS(::Ctd) START")
+        oad(debug, "plot_TS!(::Ctd) START")
     else
-        error("plot_TS() only works on Argo and Ctd objects")
+        error("plot_TS!() only works on Argo and Ctd objects")
     end
-    oad(debug, "  sigma0_levels: $sigma0_levels")
-    oad(debug, "  spiciness0_levels: $spiciness0_levels")
-    oad(debug, "  plot_freezing: $plot_freezing")
+    oad(debug, "    extracting salinity, temperature and pressure data")
     local S = d.data.salinity
     local T = d.data.temperature
     local p = d.data.pressure
+    oad(debug, "    extracting longitude and latitude metadata")
     local lon = d.metadata["longitude"]
     local lat = d.metadata["latitude"]
+    oad(debug, "    computing SA and CT values")
     SA = gsw_sa_from_sp.(S, p, lon, lat) |> fix_gsw_bad_code!
     CT = gsw_ct_from_t.(SA, T, p) |> fix_gsw_bad_code!
     ok = isfinite.(SA) .& isfinite.(CT)
     if 0 == sum(ok)
-        @warn "plot_TS(): no good SA,CT pairs, so plotting an aphysical default"
+        @warn "plot_TS!(): no good SA,CT pairs, so plotting an aphysical default"
+    end
+    oad(debug, "    sigma0_levels: $sigma0_levels")
+    oad(debug, "    spiciness0_levels: $spiciness0_levels")
+    oad(debug, "    plot_freezing: $plot_freezing")
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    oad(debug, "    inferred the following from kwargs (or from defaults, or from the data):")
+    color = pop!(kwargs_dict, :color, :black)
+    oad(debug, "      • color:                    $(oad_val(color))")
+    colormap = pop!(kwargs_dict, :colormap, :turbo)
+    oad(debug, "      • colormap:                 $(oad_val(colormap))")
+    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    oad(debug, "      • fontsize:                 $(oad_val(fontsize))")
+    linewidth = pop!(kwargs_dict, :linewidth, 1.0)
+    oad(debug, "      • linewidth:                $(oad_val(linewidth))")
+    lims = pop!(kwargs_dict, :limits, (extend_extrema(SA)..., extend_extrema(CT)...))
+    oad(debug, "      • limits:                   $(round.(lims, digits=4))")
+    marker = pop!(kwargs_dict, :marker, :circle)
+    oad(debug, "      • marker:                   $(oad_val(marker))")
+    markercolor = pop!(kwargs_dict, :markercolor, :black)
+    oad(debug, "      • markercolor:              $(oad_val(markercolor))")
+    markersize = pop!(kwargs_dict, :markersize, 5.0)
+    oad(debug, "      • markersize:               $markersize")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatterlines)
+    oad(debug, "      • seriestype:               $(oad_val(seriestype))")
+    sigma0_contour_color = pop!(kwargs_dict, :sigma0_contour_color, :darkgray)
+    oad(debug, "      • sigma0_contour_color:     $(oad_val(sigma0_contour_color))")
+    spiciness0_contour_color = pop!(kwargs_dict, :spiciness0_contour_color, :darkgray)
+    oad(debug, "      • spiciness0_contour_color: $(oad_val(spiciness0_contour_color))")
+    title = pop!(kwargs_dict, :title, "")
+    oad(debug, "      • title:                    $(oad_val(title))")
+    # Check for unhandled keywords
+    if !isempty(kwargs_dict)
+        error("plot_profile!() does not recognize keywords: ",
+            join(string.(keys(kwargs_dict)), ", "),
+            ". The permitted keywords are: color, colormap, fontsize, ",
+            "linewidth, limits, ",
+            "marker, markercolor, markersize, seriestype, and title")
     end
     # Draw the data.
-    oad(debug, "  drawing data points")
-    if haskey(kwargs, :seriestype) && kwargs[:seriestype] == :line
-        @warn "It is a *very* bad idea to use seriestype=:line in TS plots; use :path instead"
-    end
+    oad(debug, "    drawing the data")
     using_color_by = false
-    if color_by != false
+    if color_by !== false
         if isa(color_by, String)
-            oad(debug, "  color_by: \"", color_by, "\"")
+            oad(debug, "    color_by: \"", color_by, "\"")
             if color_by in names(d.data)
-                color_by = decode_color_by(d[color_by])
-                oad(debug, "  decoded palette details with decode_color_by()")
+                color_by = decode_color_by(d[color_by]; colorscheme=colormap)
+                cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
+                colormap = Makie.cgrad(color_by.colorscheme)
+                markercolor = colormap[cindex]
+                oad(debug, "    set markercolor based on color_by")
             elseif color_by == ""
-                oad(debug, "  no palette will be drawn, since color_by=\"\"")
+                oad(debug, "    no palette will be drawn, since color_by=\"\"")
             else
                 error("color_by is \"", color_by, "\" which is neither \"\" nor in names(d.data)")
             end
@@ -180,55 +235,69 @@ function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
         end
         using_color_by = true
     end
-    p_TS = plot(SA, CT,
-        xlabel=abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]",
-        ylabel=abbreviate ? "CT [°C]" : "Conservative Temperature [°C]",
-        yrot=90,
-        framestyle=:box, legend=false, color=color, tickdirection=:out,
-        seriestype=:path, linewidth=1.0, marker=:circle, markersize=1.4,
-        tickfontsize=fontsize, guidefontsize=fontsize, titlefontsize=fontsize;
-        kwargs...)
-    # Possibly add freezing-point curve
-    if plot_freezing
-        plot_freezing_curve!()
+    xlabel = abbreviate ? "SA [g/kg]" : "Absolute Salinity [g/kg]"
+    ylabel = abbreviate ? "CT [°C]" : "Conservative Temperature [°C]"
+    ax = Makie.Axis(fig_pos[1, 1],
+        title=title, xlabel=xlabel, ylabel=ylabel,
+        xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
+        xticklabelsize=fontsize, yticklabelsize=fontsize)
+    Makie.limits!(ax, lims...)
+    seriestype in (:lines, :scatter, :scatterlines) || error("seriestype=$(repr(seriestype)) unknown; try :line, :scatter or :scatterline")
+    if seriestype == :lines
+        oad(debug, "    calling lines!() with extra arguments as follows")
+        oad(debug, "      • color:       $(oad_val(color))")
+        oad(debug, "      • linewidth:   $(oad_val(linewidth))")
+        main = Makie.lines!(ax, SA, CT, color=color, linewidth=linewidth)
+    elseif seriestype == :scatter
+        oad(debug, "    calling scatter!() with extra arguments as follows")
+        oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
+        oad(debug, "      • marker:      $(oad_val(marker))")
+        oad(debug, "      • markersize:  $(oad_val(markersize))")
+        main = Makie.scatter!(ax, SA, CT;
+            color=markercolor, marker=marker, markersize=markersize)
+    elseif seriestype == :scatterlines
+        oad(debug, "    calling scatterlines!() with extra arguments as follows")
+        oad(debug, "      • color:       $(oad_val(color))")
+        oad(debug, "      • linewidth:   $(oad_val(linewidth))")
+        oad(debug, "      • marker:      $(oad_val(marker))")
+        oad(debug, "      • markercolor: $(oad_val(markercolor))")
+        oad(debug, "      • markersize:  $(oad_val(markersize))")
+        main = Makie.scatterlines!(ax, SA, CT, color=color, linewidth=linewidth,
+            marker=marker, markercolor=markercolor, markersize=markersize)
+    else
+        error("seriestype=$seriestype not permitted; try :lines, :scatter or :scatterlines")
     end
-    # Possibly add density contours
-    plot_TS_sigma0_contours(sigma0_levels; debug=debug)
-    plot_TS_spiciness0_contours(spiciness0_levels; debug=debug)
-    # Redraw the data, so they appear above other elements such as 
-    # contours and the freezing-point line. Note that the path will be
-    # drawn with the provided the 'color'.
+    if plot_freezing
+        plot_freezing_curve!(ax; debug=increment_debug(debug))
+    end
+    plot_TS_sigma0_contours!(ax; levels=sigma0_levels, color=sigma0_contour_color, debug=increment_debug(debug))
+    plot_TS_spiciness0_contours!(ax; levels=spiciness0_levels, color=spiciness0_contour_color, debug=increment_debug(debug))
+    # Draw colorbar
+    cb = nothing
     if using_color_by
-        if color_by == ""
-            oad(debug, "  not plotting symbols with individual colours, but leaving palette space")
-            p_cbar = plot(ticks=nothing, border=:none)
-            l = grid(1, 2, widths=[0.88, 0.12])
-            p_TS = plot(p_TS, p_cbar, layout=l)
+        if color_by != ""
+            oad(debug, "    drawing colorbar")
+            cb = Makie.Colorbar(fig_pos[1, 2], colormap=colormap, limits=color_by.clims, ticklabelsize=fontsize)
         else
-            oad(debug, "  plotting symbols with individual colours")
-            cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-            colormap = cgrad(color_by.colorscheme)
-            markercolor = colormap[cindex]
-            plot!(SA, CT, seriestype=:scatter,
-                legend=false, linecolor=color, markercolor=markercolor,
-                linewidth=1.0, marker=:circle, markersize=1.4;
-                kwargs...)
-            p_cbar = scatter([1], [NaN], zcolor=[color_by.clims[1]], colormap=colormap, clims=color_by.clims, cbar=true, ticks=false, framestyle=:none, label="")
-            l = grid(1, 2, widths=[0.88, 0.12])
-            p_TS = plot(p_TS, p_cbar, layout=l)
+            oad(debug, "    drawing whitespace at colorbar position")
+            cb = Makie.Colorbar(fig_pos[1, 2], colormap=:inferno, limits=(0, 1), ticklabelsize=fontsize)
+            cb.ticksvisible = false
+            cb.ticklabelsvisible = false
+            cb.labelvisible = false
+            cb.spinewidth = 0
+            cb.colormap = Makie.to_colormap([Makie.RGBAf(0, 0, 0, 0), Makie.RGBAf(0, 0, 0, 0)])
         end
     end
-    oad(debug, "END plot_TS()")
-    return p_TS
+    oad(debug, "END plot_TS!()")
+    return ax, (main=main, cb=cb)
 end
-export plot_TS
+export plot_TS!
 
 
 
 """
-    plot_TS_sigma0_contours(levels=[];
-        color=:gray50, linewidth=1.19*default(:gridlinewidth),
-        debug::Integer=0)
+    plot_TS_sigma0_contours!(ax; levels=[],
+        color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
@@ -236,61 +305,69 @@ have been drawn by other means.
 
 # Arguments
 
-- `levels` a vector of the desired contour levels. There are three choices for
-  this. (1) If this has zero length (which is the default) then levels are
-  computed based on density, using `pretty()`, is used to compute levels based
-  on the span of sigma0 in the existing plot. (2) If `levels` is a single
-  integer, then again `pretty()` is used, but here with the second argument
-  given as `levels`. (3) Otherwise, `levels` sets the contour levels directly.
+- `ax` an axis.
 
 # Keywords
 
-- `color` the colour of the contours.
+- `levels` an indication of the desired contour levels. There are three choices for
+  `levels`. (1) If this has zero length (which is the default) then levels are
+  computed based on on the span of contoured quantity (using [`pretty`](@ref)
+  to get a simple contour interval). (2) If `levels` is a single
+  integer, then again `pretty()` is used, but here with the second argument
+  given as `levels`. (3) Otherwise, `levels` defines the contour levels directly.
 
-- `linewidth` the width of contour lines.
+- `color` the colour of the contour lines.
+
+- `alpha` the alpha level (transparency) of the contour lines.
+
+- `linewidth` the width of the contour lines.
+
+- `linestyle` the style of the contour lines.
 
 - `debug` an integer controlling the amount of information printed during
    processing.
 
 """
-function plot_TS_sigma0_contours(levels=[];
-    color=:gray50, linewidth=1.19 * default(:gridlinewidth),
-    debug::Integer=0)
-    oad(debug, "plot_TS_sigma0_contours() START")
+function plot_TS_sigma0_contours!(ax; levels=[],
+    color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
+    oad(debug, "plot_TS_sigma0_contours!() START")
     oad(debug, "  levels: ", levels)
-    xlim = xlims()
-    ylim = ylims()
-    SAc = range(xlim[1], xlim[2], length=300)
-    CTc = range(ylim[1], ylim[2], length=300)
-    sigma0c = gsw_sigma0.(SAc', CTc) |> fix_gsw_bad_code!
+    if levels == 0
+        oad(debug, "    not contouring, since levels=0")
+        oad(debug, "END plot_TS_sigma_contours!()")
+        return
+    end
+    axlims = ax.finallimits[]
+    SAmin = minimum(axlims)[1]
+    SAmax = maximum(axlims)[1]
+    CTmin = minimum(axlims)[2]
+    CTmax = maximum(axlims)[2]
+    oad(debug, "    SAmin=$SAmin, SAmax=$SAmax")
+    oad(debug, "    CTmin=$CTmin, CTmax=$CTmax")
+    SAc = range(SAmin, SAmax, length=300)
+    CTc = range(CTmin, CTmax, length=300)
+    sigma0c = gsw_sigma0.(SAc, CTc') |> fix_gsw_bad_code!
     if length(levels) == 0
-        oad(debug, "  case 1: levels is empty, so auto-compute sigma0 contour levels")
+        oad(debug, "    case 1: levels is empty, so auto-select contour levels")
         levels = pretty(sigma0c) # returns [] if min=max
     elseif length(levels) == 1 && isa(levels, Integer)
-        if levels > 0
-            oad(debug, "  case 2a: auto-selecting $levels sigma0 levels to contour")
-            levels = pretty(sigma0c, levels)
-        else
-            oad(debug, "  case 2b: will not contour sigma0 levels")
-            levels = []
-        end
+        oad(debug, "    case 2: auto-selecting $levels sigma0 levels to contour")
+        levels = pretty(sigma0c, levels)
     else
-        oad(debug, "  case 3: levels is a vector of sigma0 levels for contouring")
+        oad(debug, "    case 3: levels is a vector of sigma0 values to be contoured")
     end
     if length(levels) > 0
-        contour!(SAc, CTc, sigma0c, xlim=xlim, ylim=ylim, levels=levels,
-            linewidth=linewidth, color=color, cbar=false, clabels=true,
-            foreground_color_axis=:black, foreground_color_border=:black)
+        oad(debug, "    contouring sigma0")
+        Makie.contour!(ax, SAc, CTc, sigma0c, levels=levels, labels=true,
+            linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
     end
-    oad(debug, "END plot_TS_sigma0_contours")
+    oad(debug, "END plot_TS_sigma0_contours!()")
 end
-export plot_TS_sigma0_contours
 
 
 """
-    plot_TS_spiciness0_contours(levels=[];
-        color=:gray50, linewidth=1.19*default(:gridlinewidth),
-        debug::Integer=0)
+    plot_TS_spiciness0_contours!(ax; levels=[],
+        color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
 
 Add contours of spiciness0 to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
@@ -298,38 +375,40 @@ have been drawn by other means.  For the meanings of the
 arguments and keywords, see the documentation for
 [`plot_TS_sigma0_contours`](@ref).
 """
-function plot_TS_spiciness0_contours(levels=[];
-    color=:gray50, linewidth=1.19 * default(:gridlinewidth),
-    debug::Integer=0)
-    oad(debug, "plot_TS_spiciness0_contours() START")
-    oad(debug, "  levels: ", levels)
-    xlim = xlims()
-    ylim = ylims()
-    SAc = range(xlim[1], xlim[2], length=300)
-    CTc = range(ylim[1], ylim[2], length=300)
-    spiciness0c = gsw_spiciness0.(SAc', CTc) |> fix_gsw_bad_code!
+function plot_TS_spiciness0_contours!(ax; levels=[],
+    color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
+    oad(debug, "plot_TS_spiciness0_contours!() START")
+    oad(debug, "    levels: ", levels)
+    if levels == 0
+        oad(debug, "    not contouring, since levels=0")
+        oad(debug, "END plot_TS_sigma0_contours!()")
+        return
+    end
+    axlims = ax.finallimits[]
+    SAmin = minimum(axlims)[1]
+    SAmax = maximum(axlims)[1]
+    CTmin = minimum(axlims)[2]
+    CTmax = maximum(axlims)[2]
+    oad(debug, "    SAmin=$SAmin, SAmax=$SAmax")
+    oad(debug, "    CTmin=$CTmin, CTmax=$CTmax")
+    SAc = range(SAmin, SAmax, length=100)
+    CTc = range(CTmin, CTmax, length=300)
+    spiciness0c = gsw_spiciness0.(SAc, CTc') |> fix_gsw_bad_code!
     if length(levels) == 0
-        oad(debug, "  case 1: spiciness0_levels is empty, so auto-compute spiciness0 contour levels")
-        spiciness0_levels = pretty(spiciness0c) # returns [] if min=max
+        oad(debug, "  case 1: levels is empty, so auto-select contour levels")
+        levels = pretty(spiciness0c) # returns [] if min=max
     elseif length(levels) == 1 && isa(levels, Integer)
-        if levels > 0
-            oad(debug, "  case 2a: auto-selecting $levels spiciness0 levels to contour")
-            levels = pretty(spiciness0c, levels)
-        else
-            oad(debug, "  case 2b: will not contour spiciness0 levels")
-            levels = []
-        end
+        oad(debug, "  case 2: auto-selecting $levels spiciness0 levels to contour")
+        levels = pretty(spiciness0c, levels)
     else
-        oad(debug, "  case 3: levels is a vector of spiciness0 levels for contouring")
+        oad(debug, "  case 3: levels is a vector of spiciness0 values to be contoured")
     end
     if length(levels) > 0
-        oad(debug, "  drawing spiciness0 contours at levels $(levels)")
-        contour!(SAc, CTc, spiciness0c, xlim=xlim, ylim=ylim,
-            linewidth=contour_linewidth, color=:gray50,
-            levels=levels, cbar=false, clabels=true,
-            foreground_color_axis=:black, foreground_color_border=:black)
+        oad(debug, "    contouring spiciness0")
+        Makie.contour!(ax, SAc, CTc, spiciness0c, levels=levels, labels=true,
+            linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
     end
-    oad(debug, "END plot_TS_spiciness0_contours")
+    oad(debug, "END plot_TS_spiciness0_contours!()")
 end
-export plot_TS_spiciness0_contours
+export plot_TS_spiciness0_contours!
 

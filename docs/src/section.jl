@@ -1,15 +1,11 @@
-using OceanAnalysis, Plots
-url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip";
+using OceanAnalysis
+using GLMakie # or CairoMakie
+url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);
 s = read_section(dir);
-s.data = s.data[s["longitude"].<-68.0];
+s.data = s.data[s["longitude"].<(-68.0)];
+# We must grid to get the cross-section diagrams
 sg = grid_section(s);
-
-p1 = plot_stations(s, xlim=(-80, -65), ylim=(35, 43));
-scale_bar(500);
-p2 = plot_section(sg, "salinity", ylim=(0, 2000));
-p3 = plot_section(sg, "temperature", ylim=(0, 2000));
-l = @layout [a; b c]
-plot(p1, p2, p3, layout=l, dpi=200);
-savefig("section.png")
+fig = plot_section(sg, which="salinity", type=:contourf)
+save("section.png", fig, px_per_unit=2)
 

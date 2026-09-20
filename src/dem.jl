@@ -1,4 +1,4 @@
-using Plots, Plots.PlotMeasures, Statistics, Printf
+using Statistics, Printf
 using GMT: gmtread, xy2lonlat, grdproject # will only need first 2, later
 
 """
@@ -33,17 +33,13 @@ elevation, in metres.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
 # Data downloaded from https://nsgi.novascotia.ca/datalocator/elevation/
-file = "/Users/kelley/Downloads/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 if isfile(file)
     dem = read_dem(file)
-    dem = subset_dem(dem, (-63.587, -63.552), (44.615, 44.639))
-    middle_lat = dem["latitude"][div(end + 1, 2)]
-    aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-    heatmap(dem["longitude"], dem["latitude"], dem.data,
-        color=:turbo, aspect_ratio=aspect_ratio,
-        framestyle=:box, tickdirection=:out)
+    dem = subset_dem(dem, lonlim=(-63.587, -63.552), latlim=(44.615, 44.639))
+    plot_dem(dem)
 end
 ```
 
@@ -144,39 +140,4 @@ function subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real}
     rval
 end
 export subset_dem
-
-
-"""
-    plot_dem(dem::Dem; debug::Int=0)
-
-# Arguments
-
-- `dem` a Dem object
-
-# Keywords
-
-- `coordinates` a Symbol that indicates what to put on the axes. If this is
-  `:distance` (the default) then distance (in m) is shown on the axes. Otherwise,
-  if it is `:geographic` then longitude and latitude are used (with aspect ratio
-  set for the middle latitude).
-
-- `kwargs...` other arguments, passed to `heatmap`, which plots the elevation
-  data.
-
-"""
-function plot_dem(dem::Dem; coordinates::Symbol=:distance, kwargs...)
-    println("in plot_dem()")
-    if coordinates == :distance
-        heatmap(dem.metadata["x"], dem.metadata["y"], dem.data,
-            aspect_ratio=1.0, framestyle=:box, tickdirection=:out, kwargs...)
-    elseif coordinates == :geographic
-        middle_lat = dem.metadata["latitude"][div(end + 1, 2)]
-        aspect_ratio = 1.0 / cos(middle_lat * pi / 180.0)
-        heatmap(dem.metadata["longitude"], dem.metadata["latitude"], dem.data,
-            aspect_ratio=aspect_ratio, framestyle=:box, tickdirection=:out, kwargs...)
-    else
-        error("coordinates=$(repr(coordinates)) not permited; try :distance or :geographic")
-    end
-end
-export plot_dem
 

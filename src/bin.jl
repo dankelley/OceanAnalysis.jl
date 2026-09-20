@@ -12,17 +12,13 @@ bin, compute the mean `x`, the mean `y` and the number of points in that bin.
 
 # Examples
 ```julia
-using OceanAnalysis, Plots
-x = 0.0:1.0:180.0
-y = sin.(x * pi / 180);
+using OceanAnalysis
+using GLMakie # or CairoMakie
+x= 0.0:0.5:180.0
+y = sind.(x)
 a = bin_mean(x, y, x[1]-5:10.0:x[end]+5);
-scatter(x, y, ms=1, label="Data", xlab="x", ylab="y",
-    legend=:bottom, framestyle=:box, tickdirection=:out,
-    title="Binning test")
-scatter!(a.bin_center, a.bin_y_mean, ms=4,
-    xlim=xlims(), ylim=ylims(), label="binned y vs bin")
-scatter!(a.bin_x_mean, a.bin_y_mean, ms=2,
-    xlim=xlims(), ylim=ylims(), label="binned y vs binned x")
+lines(x, y, color=:black)
+lines!(a.bin_center, a.bin_y_mean, color=:red)
 ```
 """
 function bin_mean(x, y, bins)

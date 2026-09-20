@@ -191,8 +191,7 @@ named `data` that has elements stored in the data file.
 # Examples
 ```julia
 using OceanAnalysis
-pkgdir = dirname(dirname(pathof(OceanAnalysis)));
-f = joinpath(pkgdir, "data", "D4902911_095.nc");
+f = joinpath(pkgdir(OceanAnalysis), "data", "D4902911_095.nc");
 d = read_argo(f);
 d.metadata["time"] # 2019-10-14T23:43:44.003
 d.metadata["latitude"] # 40.45216
@@ -381,6 +380,7 @@ function read_argo_index(filename::String; trim::Bool=true, header::Integer=9, d
     end
     oad(debug, "    filename: ", filename)
     # I tried specifying the type/format for :time, but that slowed the operation from 5.2s to 5.4s.
+    df = nothing
     try
         df = CSV.read(filename, DataFrame, header=header)
     catch e

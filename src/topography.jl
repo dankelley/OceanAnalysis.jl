@@ -1,4 +1,4 @@
-using Downloads, TiffImages, NCDatasets, Plots, ColorSchemes, Printf
+using Downloads, TiffImages, NCDatasets, ColorSchemes, Printf
 using DataStructures: OrderedDict
 using Interpolations: interpolate, scale
 
@@ -19,9 +19,8 @@ See also [`read_topography`](@ref).
 """
 function get_topography(name::Symbol=:global_coarse; debug::Integer=0)
     oad(debug, "get_topography(name) BEGIN")
-    dir = dirname(dirname(pathof(OceanAnalysis)))
     if name == :global_coarse
-        rval = joinpath(dir, "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
+        rval = joinpath(pkgdir(OceanAnalysis), "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
     else
         throw(ArgumentError("expecting 'name' to be :global_coarse, but it is $(repr(name))"))
     end
@@ -54,16 +53,10 @@ with [`get_topography`](@ref).
 
 ```julia
 # Plot world view of ocean depth
-using OceanAnalysis, Plots
+using OceanAnalysis
 topo_file = get_topography(:global_coarse);
 topo = read_topography(topo_file);
-water_depth = -topo.data / 1000.0; # depth (i.e. negative height) in km
-water_depth[water_depth .< 0.0] .= NaN; # trim land
-heatmap(topo.metadata["longitude"], topo.metadata["latitude"], water_depth,
-    asp=1.0, framestyle=:box, xlims=[-180,180], ylims=[-90,90],
-    color=cgrad(:deep, rev=false), dpi=300)
-cl = coastline();
-plot!(cl.data.longitude, cl.data.latitude, color=:black, legend=false, linewidth=0.5)
+plot_topography(topo)
 ```
 """
 function read_topography(filename::String; debug::Integer=0)::Topography
@@ -275,104 +268,6 @@ function get_topography(west::Real, east::Real,
 end
 export get_topography
 
-"""
-    plot_topography(topo::Topography;
-        xlims=:auto, ylims=:auto, tickdirection=:out,
-        domain=:sea, color=:land_sea, clim=:auto,
-        draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-        debug::Integer=0, kwargs...)
-
-Draw a `heatmap` image of topography.
-
-The `domain` argument tells whether to display both land and sea values, or
-just land, or just sea. The default is to plot just the sea, with land a light
-brown color. The `aspect_ratio` argument should not be specified as part of
-`kwargs...`, because this function sets a reasonable default, based on the latitude
-at the centre of the plot.
-
-```julia
-# Waters near Prince Edward Island, Canada
-using OceanAnalysis
-topo_file = get_topography(-64.8, -61.5, 45.6, 47.2, resolution=1)
-topo = read_topography(topo_file)
-plot_topography(topo)
-```
-"""
-function plot_topography(topo::Topography;
-    xlims=:auto, ylims=:auto, tickdirection=:out,
-    domain=:sea, color=:land_sea, clim=:auto,
-    draw_coastline=true, land_color=:bisque3, sea_color=:lightblue,
-    debug::Integer=0, kwargs...)
-    oad(debug, "plot_topography() BEGIN")
-    domain in (:sea, :land, :both) || throw(ArgumentError("domain $(repr(domain)) not permited; use :sea, :land, or :both"))
-    oad(debug, "    domain: :", domain)
-    oad(debug, "    color: :", color)
-    oad(debug, "    clim: :", clim)
-    longitude = copy(topo["longitude"])
-    latitude = copy(topo["latitude"])
-    data = copy(topo.data)
-    aspect_ratio = 1.0 / cos(0.5 * (latitude[1] + latitude[end]) * pi / 180.0)
-    if xlims == :auto
-        xlims = extrema(longitude)
-    end
-    if ylims == :auto
-        ylims = extrema(latitude)
-    end
-    oad(debug, "    data extrema: ", extrema(filter(!isnan, data)))
-    if domain == :sea
-        data .= -data
-        data[data.<0.0] .= NaN
-        oad(debug, "    setting land values to NaN")
-        if color == :land_sea
-            #color = :deep # [get(ColorSchemes.topo, i) for i in 0.0:0.6/1000:0.4]
-            oad(debug, "    setting colorscheme to reversed first half of :topo")
-            color = [get(ColorSchemes.topo, i) for i in 0.5:-0.6/1000:0.0]
-        end
-    elseif domain == :land
-        data[data.<0.0] .= NaN
-        oad(debug, "    setting sea values to NaN")
-        if color == :land_sea
-            #oad(debug, "    setting colorscheme to cgrad(:turbid,rev=true)")
-            #color = cgrad(:turbid, rev=true)
-            oad(debug, "    setting colorscheme to second half of :topo")
-            color = [get(ColorSchemes.topo, i) for i in 0.5:0.6/1000:1.0]
-        end
-    elseif domain == :both
-        if color == :land_sea
-            oad(debug, "    setting colorscheme to :topo")
-            color = :topo
-        end
-    end
-    if clim == :auto
-        if domain == :both
-            clim = maximum(abs.(filter(!isnan, data))) .* (-1.0, 1.0)
-        else
-            clim = extrema(filter(!isnan, data))
-        end
-        oad(debug, "    clim defaulting to ", clim)
-    end
-    if domain == :sea
-        background_color_inside = land_color
-    elseif domain == :land
-        background_color_inside = sea_color
-    else
-        background_color_inside = :transparent
-    end
-    #println("kwargs... ", kwargs...)
-    p = heatmap(longitude, latitude, data,
-        background_color_inside=background_color_inside,
-        xlims=xlims, ylims=ylims, aspect_ratio=aspect_ratio,
-        color=color, clim=clim, framestyle=:box, tickdirection=tickdirection; kwargs...)
-    if draw_coastline
-        oad(debug, "    plotting the coastline")
-        cl = coastline()
-        plot!(p, cl.data.longitude, cl.data.latitude, lw=0.5, seriestype=:path, color=:black, legend=false; kwargs...)
-    end
-    oad(debug, "END plot_topography()")
-    p
-end
-export plot_topography
-
 
 """
     interpolate_topography(longitude, latitude, topo::Topography)
@@ -393,18 +288,18 @@ of the `topo` object).
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
-file = joinpath(dirname(dirname(pathof(OceanAnalysis))),
-    "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
+using OceanAnalysis
+using GLMakie # or CairoMakie
+file = joinpath(pkgdir(OceanAnalysis), "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
 topo = read_topography(file)
-A = plot_topography(topo, xlab="Longitude [°E]", ylab="Latitude [°N]")
-vline!([-63], c=:magenta)
+plot_topography(topo)
+vlines!([-63], color=:magenta)
+
 lats = range(extrema(topo["latitude"])..., length=100)
 lons = repeat([-63.0], 100)
 z = interpolate_topography(lons, lats, topo)
-B = plot(lats, z, xlab="Latitude [°N]", ylab="Vertical Coordinate [m]", label=false)
-hline!([0.0], label=false)
-plot(A, B, layout=(2,1))
+lines(lats, z, color=:magenta)
+hlines!([0.0])
 ```
 """
 function interpolate_topography(longitude, latitude, topo::Topography)
