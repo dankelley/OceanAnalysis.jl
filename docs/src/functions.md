@@ -62,7 +62,6 @@ OceanAnalysis.plot_dem
 OceanAnalysis.plot_echosounder
 OceanAnalysis.plot_freezing_curve!
 OceanAnalysis.plot_profile
-OceanAnalysis.plot_profile!
 OceanAnalysis.plot_section
 OceanAnalysis.plot_TS
 OceanAnalysis.plot_TS_sigma0_contours!
