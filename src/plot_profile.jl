@@ -196,7 +196,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
             if color_by in names(d.data)
                 color_by = decode_color_by(d[color_by]; colorscheme=colormap)
                 cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-                colormap = cgrad(color_by.colorscheme)
+                colormap = Makie.cgrad(color_by.colorscheme)
                 markercolor = colormap[cindex]
             elseif color_by == ""
                 oad(debug, "    no palette will be drawn, since color_by=\"\"")

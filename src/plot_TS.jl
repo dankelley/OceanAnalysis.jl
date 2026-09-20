@@ -218,7 +218,7 @@ function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
             if color_by in names(d.data)
                 color_by = decode_color_by(d[color_by]; colorscheme=colormap)
                 cindex = (color_by.levels .- color_by.clims[1]) / (color_by.clims[2] - color_by.clims[1])
-                colormap = cgrad(color_by.colorscheme)
+                colormap = Makie.cgrad(color_by.colorscheme)
                 markercolor = colormap[cindex]
                 oad(debug, "    set markercolor based on color_by")
             elseif color_by == ""

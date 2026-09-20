@@ -205,7 +205,7 @@ sort!(index, :time) # this lets us join dots in time order
 lon, lat = index.longitude, index.latitude
 lonr = extrema(lon)
 latr = extrema(lat)
-plot_coastline(coastline(),
+fig = plot_coastline(coastline(),
     scalebar=(distance=500, x=:right, y=:top),
     limits=[lonr[1] - 2; lonr[2] + 2; latr[1] - 2; latr[2] + 4])
 scatterlines!(lon, lat)

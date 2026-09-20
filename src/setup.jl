@@ -8,7 +8,7 @@ using GMT: gmtread
 using Interpolations
 #using Makie: Axis, AxisAspect, Colorbar, DataAspect, Figure, FigureAxisPlot, Point2f, Polygon, RGBAf, contour!, contourf!, current_axis, heatmap!, limits!, lines!, poly!, scatter!, scatterlines!, text!, to_colormap
 import Makie
-using Plots
+#using Plots
 using Printf
 using CSV
 using Dierckx

@@ -1,5 +1,5 @@
 using OceanAnalysis, DataFrames, Test
-filename = joinpath(pkgdirname(OceanAnalysis), "data", "ctd.cnv")
+filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 
 @testset "mixed-layer depth" begin
