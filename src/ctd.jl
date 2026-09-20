@@ -281,7 +281,7 @@ function grid_ctd(ctd::Ctd;
             continue
         end
         # this interpolation is good for ML at top and low variation at bottom
-        itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=Flat())
+        itp = linear_interpolation((pressure_sorted,), col, extrapolation_bc=NaN)
         arr[:, i] = itp.(pressure_grid)
     end
     data = DataFrame(arr, names(ctd.data))
