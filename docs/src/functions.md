@@ -57,17 +57,13 @@ OceanAnalysis.oad
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp
 OceanAnalysis.plot_amsr
-OceanAnalysis.plot_amsr!
 OceanAnalysis.plot_coastline
-OceanAnalysis.plot_coastline!
 OceanAnalysis.plot_dem
 OceanAnalysis.plot_echosounder
 OceanAnalysis.plot_freezing_curve!
 OceanAnalysis.plot_profile
 OceanAnalysis.plot_profile!
-#<disabled>OceanAnalysis.plot_scalebar!
 OceanAnalysis.plot_section
-#<disabled>OceanAnalysis.plot_stations
 OceanAnalysis.plot_TS
 OceanAnalysis.plot_TS_sigma0_contours!
 OceanAnalysis.plot_TS_spiciness0_contours!
@@ -96,7 +92,6 @@ OceanAnalysis.SA
 OceanAnalysis.set_teos
 OceanAnalysis.section_is_gridded
 OceanAnalysis.six_num
-OceanAnalysis.station_map
 OceanAnalysis.smooth_ctd_variable
 OceanAnalysis.subset_amsr
 OceanAnalysis.subset_ctd

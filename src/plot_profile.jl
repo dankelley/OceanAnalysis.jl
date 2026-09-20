@@ -22,9 +22,9 @@ are called.
 
 # Arguments
 
-- `fig_pos` a Figure object created with the Makie function
-  [`Figure`](@ref). This is used for mutating case, i.e. a
-  case using `plot_profile!() as opposed to `plot_profile()`.
+- `fig_pos` a Figure object created with the Makie's
+  `Figure` function. This is used for mutating case, i.e. a
+  case using `plot_profile!()` as opposed to `plot_profile()`.
 
 - `d` either an Argo object or a Ctd object.
 

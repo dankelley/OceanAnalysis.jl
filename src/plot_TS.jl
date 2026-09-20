@@ -54,14 +54,14 @@ Information about the analysis is printed if `debug` exceeds 0.
   `sigma0_levels` equals 0 then no contours are drawn.  If it is a positive
   integer, then it is taken as a suggestion for the number of levels.  And,
   finally, if it is a vector, then it is taken as a specification of the levels
-  to be contoured. The work is done by a call to [`plot_TS_sigma0_contours`](@ref),
+  to be contoured. The work is done by a call to [`plot_TS_sigma0_contours!`](@ref),
   so if customization (of contour line thickness, colour, etc), use
-  `sigma0_levels=0` and then call [`plot_TS_sigma0_contours`](@ref) directly.
+  `sigma0_levels=0` and then call [`plot_TS_sigma0_contours!`](@ref) directly.
 
 - `spiciness0_levels` as `sigma0_levels`, but for spiciness0 contours.
-  The work is done by a call to [`plot_TS_spiciness0_contours`](@ref),
+  The work is done by a call to [`plot_TS_spiciness0_contours!`](@ref),
   so if customization (of contour line thickness, colour, etc), use
-  `spiciness0_levels=0` and then call [`plot_TS_spiciness0_contours`(@ref)
+  `spiciness0_levels=0` and then call [`plot_TS_spiciness0_contours!`](@ref)
   directly.
 
 - `plot_freezing` a Bool indicating whether to draw a freezing-point curve.

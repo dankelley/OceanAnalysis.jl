@@ -32,30 +32,6 @@ column names in the DataFrame are `"id"`, `"code"`, `"name"`, `"longitude"`,
 
 1. The API used by the CHS server is described at
 https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
-
-# Examples
-
-```julia
-# Show tide-gauge locations (red for permanent, blue otherwise)
-# near Nova Scotia.
-#<FIXME: broken> using OceanAnalysis
-#<FIXME: broken> using GLMakie # or CairoMakie
-#<FIXME: broken> i = get_tide_gauge_index(:all); # downloads from internet
-#<FIXME: broken> elon = [-67.0, -59.0]
-#<FIXME: broken> elat = [43.5, 47.5]
-#<FIXME: broken> midlat = 0.5 * sum(elat)
-#<FIXME: broken> cl=coastline()
-#<FIXME: broken> 
-#<FIXME: broken> fig = Figure()
-#<FIXME: broken> ax = Axis(fig[1, 1],
-#<FIXME: broken>     aspect = AxisAspect((elon[2]-elon[1]) * cosd(midlat) / (elat[2]-elat[1])),
-#<FIXME: broken>     xlabel = "Longitude", ylabel = "Latitude")
-#<FIXME: broken> limits!(ax, elon[1], elon[2], elat[1], elat[2])
-#<FIXME: broken> lines!(ax, cl["longitude"], cl["latitude"], color=:bisque3, linewidth=3)
-#<FIXME: broken> scatter!(ax, i.longitude, i.latitude, markersize=8, color=:blue)
-#<FIXME: broken> permanent = i.type .== "PERMANENT"
-#<FIXME: broken> scatter!(ax, i.longitude[permanent], i.latitude[permanent], markersize=15, color=:red)
-```
 """
 function get_tide_gauge_index(search=:all; debug::Integer=0)
     oad(debug, "get_tide_gauge_index() START")
@@ -137,6 +113,7 @@ in early August 2026. Changes to the interface are not unlikely.
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 
 # Examples
+
 ```julia
 # Show past week of sealevel in Bedford Basin, Nova Scotia
 using OceanAnalysis, CSV, DataFrames
@@ -151,7 +128,6 @@ lines(data.time, data.value)
 
 1. The API used by the CHS server is described at
 https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
-
 """
 function get_tide_gauge_file(search; times=:default, variable=:wlo, resolution=3, debug::Integer=0)
     oad(debug, "get_tide_gauge_file() START")
