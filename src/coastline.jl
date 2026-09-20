@@ -115,7 +115,7 @@ function station_map(longitude, latitude; scale::Real=5.0, debug::Integer=0, kwa
         color=:black,
         debug=increment_debug(debug), kwargs...)
     #println("kwargs...:", kwargs...)
-    scatter!(map, [longitude], [latitude], label=false; kwargs...)
+    Makie.scatter!(map, [longitude], [latitude], label=false; kwargs...)
     oad(debug, "END station_map()")
     map
 end

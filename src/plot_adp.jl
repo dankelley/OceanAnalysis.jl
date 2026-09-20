@@ -58,7 +58,7 @@ plot_adp(beam, which=:velocity1)
 plot_adp(enu, which=:uv)
 
 # Four panel (uniform colourscale)
-fig = Figure()
+fig = Makie.Figure()
 cr = (-1.5, 1.5)
 plot_adp!(fig[1,1], enu, which=:velocity1, colorrange=cr, title="Eastward Upward Velocitym/s]")
 plot_adp!(fig[1,2], enu, which=:velocity2, colorrange=cr, title="Northward Upward Velocitym/s]")
@@ -68,10 +68,10 @@ plot_adp!(fig[2,2], enu, which=:velocity4, colorrange=cr, title="Error Velocity 
 """
 function plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp() START")
-    fig = Figure()
+    fig = Makie.Figure()
     ax, plot = plot_adp!(fig[1, 1], adp; which=which, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_adp()")
-    return FigureAxisPlot(fig, ax, plot.main)
+    return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_adp
 
@@ -102,7 +102,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
             ". The permitted keywords are: colormap, colorrange, fontsize, ",
             "markersize, title, xlabel, and ylabel")
     end
-    ax = Axis(fig_pos[1, 1], xlabel=xlabel, ylabel=ylabel,
+    ax = Makie.Axis(fig_pos[1, 1], xlabel=xlabel, ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     if adp["coordinate_system"] == :beam
@@ -154,8 +154,8 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         else
             ax.title = title
         end
-        main = heatmap!(ax, hour, y, z, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
-        cb = Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
+        main = Makie.heatmap!(ax, hour, y, z, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
+        cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main, cb=cb)
     elseif which == :velocities
@@ -170,17 +170,17 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         #<> return (rval)
     elseif which == :heading
         oad(debug, "    handling the which=:heading case")
-        main = scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
+        main = Makie.scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :pitch
         oad(debug, "    handling the which=:pitch case")
-        main = scatter!(ax, t, adp["pitch"], ylab="Pitch [°]", color=color, markersize=markersize)
+        main = Makie.scatter!(ax, t, adp["pitch"], ylab="Pitch [°]", color=color, markersize=markersize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :roll
         oad(debug, "    handling the which=:roll case")
-        main = scatter!(ax, t, adp["roll"], ylab="Roll [°]", color=color, markersize=markersize)
+        main = Makie.scatter!(ax, t, adp["roll"], ylab="Roll [°]", color=color, markersize=markersize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :angles
@@ -200,10 +200,10 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         oad(debug, "    bin: $bin")
         U = vec(velocity[:, :, 1])
         V = vec(velocity[:, :, 2])
-        ax.aspect = DataAspect()
+        ax.aspect = Makie.DataAspect()
         ax.xlabel = "Eastward Velocity [m/s]"
         ax.ylabel = "North Velocity [m/s]"
-        main = scatter!(ax, U, V, markersize=markersize, color=color)
+        main = Makie.scatter!(ax, U, V, markersize=markersize, color=color)
         oad(debug, "END plot_adp()")
         return ax, (main=main,)
     else

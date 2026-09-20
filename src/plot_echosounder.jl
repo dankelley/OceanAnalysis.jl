@@ -52,7 +52,7 @@ end
 """
 function plot_echosounder(e::Echosounder; which=:log_amplitude, debug::Integer=0, kwargs...)
     oad(debug, "plot_echosounder() BEGIN")
-    fig = Figure()
+    fig = Makie.Figure()
     plot_echosounder!(fig[1, 1], e; which=which, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_echosounder()")
     return fig
@@ -77,7 +77,7 @@ function plot_echosounder!(fig_pos, e::Echosounder; which=:log_amplitude, debug:
             ". The permitted keywords are: color, colormap, fontsize, ",
             "and title")
     end
-    ax = Axis(fig_pos[1, 1],
+    ax = Makie.Axis(fig_pos[1, 1],
         title=title, xlabel="Elapsed time [s]", ylabel="Range [m]",
         yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
@@ -92,9 +92,9 @@ function plot_echosounder!(fig_pos, e::Echosounder; which=:log_amplitude, debug:
         sec = (e["time"] .- e["time"][1]) / Dates.Millisecond(1000)
         range = collect(e["range"]) # FIXME: do we need to collect?
         oad(debug, "    drawing heatmap, with elapsed time range $(extrema(sec))")
-        hm_plt = heatmap!(ax, sec, range, z', colormap=colormap, colorrange=colorrange)
+        hm_plt = Makie.heatmap!(ax, sec, range, z', colormap=colormap, colorrange=colorrange)
         oad(debug, "    drawing ColorBar")
-        cb_plt = Colorbar(fig_pos[1, 2], hm_plt, label="Log10(amplitude)",
+        cb_plt = Makie.Colorbar(fig_pos[1, 2], hm_plt, label="Log10(amplitude)",
             labelsize=fontsize, ticklabelsize=fontsize)
         oad(debug, "END plot_echosounder!()")
         return (ax, hm_plt, cb_plt)

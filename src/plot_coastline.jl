@@ -23,7 +23,7 @@ function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     for i in 1:n+1
         if i == n + 1 || isnan(longitude[i]) || isnan(latitude[i])
             if i - start >= 3
-                ring = Point2f.(longitude[start:i-1], latitude[start:i-1])
+                ring = Makie.Point2f.(longitude[start:i-1], latitude[start:i-1])
                 push!(polygons, Polygon(ring))
             end
             start = i + 1
@@ -33,9 +33,9 @@ function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     oad(debug, "    plotting the assembled polygons")
     if !isempty(polygons)
         if color == :white
-            rval = poly!(ax, polygons, strokewidth=linewidth, strokecolor=:black)
+            rval = Makie.poly!(ax, polygons, strokewidth=linewidth, strokecolor=:black)
         else
-            rval = poly!(ax, polygons, color=color, strokewidth=linewidth, strokecolor=:black)
+            rval = Makie.poly!(ax, polygons, color=color, strokewidth=linewidth, strokecolor=:black)
         end
         oad(debug, "END plot_coastline_polygons!()")
         return rval
@@ -107,8 +107,8 @@ using GLMakie # or CairoMakie
 # This function (perhaps extended) could be useful more generally.
 function show_place(longitude, latitude, text;
     color=:blue, align=(:center, :top), offset=(0, -4))
-    scatter!(longitude, latitude, color=color)
-    text!(longitude, latitude, text=text, align=align, offset=offset, color=color)
+    Makie.scatter!(longitude, latitude, color=color)
+    Makie.text!(longitude, latitude, text=text, align=align, offset=offset, color=color)
 end
 
 cl = coastline();
@@ -119,10 +119,10 @@ show_place(-62.883, 43.883, "HL3")
 """
 function plot_coastline(coastline::Coastline; scalebar=false, debug=0, kwargs...)
     oad(debug, "plot_coastline() START")
-    fig = Figure()
+    fig = Makie.Figure()
     ax, plots = plot_coastline!(fig[1, 1], coastline; scalebar=scalebar, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_coastline()")
-    return FigureAxisPlot(fig, ax, plots.land)
+    return Makie.FigureAxisPlot(fig, ax, plots.land)
 end
 export plot_coastline
 
@@ -174,14 +174,14 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     oad(debug, "    computed aspect_ratio=$aspect_ratio")
     box_aspect = (lims[2] - lims[1]) / ((lims[4] - lims[3]) * aspect_ratio)
     oad(debug, "    computed box_aspect=$box_aspect")
-    ax = Axis(fig_pos[1, 1],
+    ax = Makie.Axis(fig_pos[1, 1],
         title=title,
         xlabel=xlabel,
         ylabel=ylabel,
-        aspect=AxisAspect(box_aspect),
+        aspect=Makie.AxisAspect(box_aspect),
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    limits!(ax, lims...)
+    Makie.limits!(ax, lims...)
     land_plt = plot_coastline_polygons!(ax, coastline["longitude"], coastline["latitude"];
         color=color, linewidth=linewidth, debug=increment_debug(debug))
     if gave_scalebar # FIXME: possibly (re)make this as a function
@@ -239,8 +239,8 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
         end
         oad(debug, "    X: $X")
         oad(debug, "    Y: $Y")
-        sb_lines_plt = lines!(ax, X, Y, color=scalebar_color, linewidth=scalebar_linewidth)
-        sb_text_plt = text!(ax, "$(trunc(Int, distance)) km", align=(:center, :center),
+        sb_lines_plt = Makie.lines!(ax, X, Y, color=scalebar_color, linewidth=scalebar_linewidth)
+        sb_text_plt = Makie.text!(ax, "$(trunc(Int, distance)) km", align=(:center, :center),
             position=((X[1] + X[end]) / 2.0, y0 + 0.5 * dy), color=scalebar_color,
             fontsize=fontsize)
     else

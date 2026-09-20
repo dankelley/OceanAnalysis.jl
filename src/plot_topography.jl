@@ -48,7 +48,7 @@ plot_topography(topo)
 function plot_topography(topo::Topography;
     domain=:sea, land_color=:bisque3, sea_color=:lightblue,
     draw_coastline=true, debug::Integer=0, kwargs...)
-    fig = Figure()
+    fig = Makie.Figure()
     plot_topography!(fig[1, 1], topo;
         domain=domain, land_color=land_color, sea_color=sea_color,
         draw_coastline=draw_coastline, debug=increment_debug(debug), kwargs...)
@@ -93,8 +93,8 @@ function plot_topography!(fig_pos, topo::Topography;
     box_aspect = (xlim[2] - xlim[1]) / ((ylim[2] - ylim[1]) * aspect_ratio)
     oad(debug, "    aspect_ratio=$aspect_ratio, box_aspect=$box_aspect")
     # FIXME: fix as for coastline and amsr
-    ax = Axis(fig_pos[1, 1],
-        aspect=AxisAspect(box_aspect),
+    ax = Makie.Axis(fig_pos[1, 1],
+        aspect=Makie.AxisAspect(box_aspect),
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
 
@@ -138,20 +138,20 @@ function plot_topography!(fig_pos, topo::Topography;
     elseif domain == :land
         nan_color = sea_color
     end
-    hm_plt = heatmap!(ax, longitude, latitude, permutedims(data),
+    hm_plt = Makie.heatmap!(ax, longitude, latitude, permutedims(data),
         colormap=colormap, colorrange=colorrange,
         nan_color=nan_color)
     if draw_coastline
-        lims = ax.finallimits[]   # a Rect2 with the current computed limits
-        limits!(ax,
+        lims = Makie.ax.finallimits[]
+        Makie.limits!(ax,
             lims.origin[1], lims.origin[1] + lims.widths[1],
             lims.origin[2], lims.origin[2] + lims.widths[2])
         oad(debug, "    drawing coastline")
         cl = coastline()
-        lines!(ax, cl["longitude"], cl["latitude"], color=:black)
+        Makie.lines!(ax, cl["longitude"], cl["latitude"], color=:black)
     end
     oad(debug, "    drawing the Colorbar")
-    cb_plt = Colorbar(fig_pos[1, 2], hm_plt, ticklabelsize=fontsize)
+    cb_plt = Makie.Colorbar(fig_pos[1, 2], hm_plt, ticklabelsize=fontsize)
     oad(debug, "END plot_topography!()")
     return (ax=ax, plt=hm_plt, cb=cb_plt)
 end

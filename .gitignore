@@ -9,6 +9,7 @@
 gmt.history
 [0-9]*.jl
 [0-9]*.R
+[0-9]*.sh
 docs/build
 docs/Manifest.toml
 Manifest.toml

@@ -94,12 +94,12 @@ function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
     draw_coastline=true, draw_contours=:none,
     fontsize=8, debug::Integer=0, kwargs...)
     oad(debug, "plot_amsr() BEGIN")
-    fig = Figure()
+    fig = Makie.Figure()
     ax, plot = plot_amsr!(fig[1, 1], amsr; limits=limits,
         draw_coastline=draw_coastline, draw_contours=draw_contours,
         fontsize=fontsize, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_amsr()")
-    return FigureAxisPlot(fig, ax, plot.main)
+    return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_amsr
 
@@ -136,17 +136,17 @@ function plot_amsr!(fig_pos, amsr::Amsr;
             ". The permitted keywords are: colormap, colorrange, ",
             "limits, title, xlab, and ylab.")
     end
-    ax = Axis(fig_pos[1, 1],
+    ax = Makie.Axis(fig_pos[1, 1],
         title=title,
         xlabel=xlab,
         ylabel=ylab,
-        aspect=AxisAspect(box_aspect),
+        aspect=Makie.AxisAspect(box_aspect),
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
-    limits!(ax, limits...)
+    Makie.limits!(ax, limits...)
     # Transpose amsr.data for Makie (not done for Plots).
     oad(debug, "    plotting a heatmap of ", amsr.metadata["field"], " with colormap=:$colormap and colorrange=$colorrange")
-    main = heatmap!(ax, longitude, latitude, permutedims(amsr.data);
+    main = Makie.heatmap!(ax, longitude, latitude, permutedims(amsr.data);
         colormap=colormap, colorrange=colorrange, kwargs_dict...)
 
     # Possibly draw the land
@@ -176,19 +176,19 @@ function plot_amsr!(fig_pos, amsr::Amsr;
     if draw_contours != :none
         if draw_contours == :auto
             oad(debug, "    adding auto-selected contours")
-            contour!(ax, longitude, latitude, permutedims(amsr.data),
+            Makie.contour!(ax, longitude, latitude, permutedims(amsr.data),
                 levels=range(-5.0, 35.0, step=5.0), color=:black,
                 linewidth=0.75)
         elseif isa(draw_contours, AbstractVector) && eltype(draw_contours) <: Real
             oad(debug, "    adding user-specified contours")
-            contour!(ax, longitude, latitude, permutedims(amsr.data),
+            Makie.contour!(ax, longitude, latitude, permutedims(amsr.data),
                 levels=draw_contours, color=:black,
                 linewidth=0.75)
         else
             @warn "draw_contours ($draw_contours) cannot be handled; try :none, :auto, or a numeric vector"
         end
     end
-    cb = Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
+    cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
     oad(debug, "END plot_amsr!()")
     return ax, (main=main, cb=cb)
 end
