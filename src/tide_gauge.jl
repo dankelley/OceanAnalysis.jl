@@ -139,13 +139,12 @@ in early August 2026. Changes to the interface are not unlikely.
 # Examples
 ```julia
 # Show past week of sealevel in Bedford Basin, Nova Scotia
-using OceanAnalysis, Plots, CSV, DataFrames
+using OceanAnalysis, CSV, DataFrames
+using GLMakie # or CairoMakie
 search = "Bedford"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
-plot(data.time, data.value, label=false,
-    framestyle=:box, tickdirection=:out, ylab="Elevation [m]",
-    title=name, labelfontsize=8, titlefontsize=8)
+lines(data.time, data.value)
 ```
 
 # References

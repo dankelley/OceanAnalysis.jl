@@ -20,11 +20,11 @@ more details.
 # Examples
 
 ```julia
-using OceanAnalysis, Plots
+using OceanAnalysis
+using GLMakie # or CairoMakie
 f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 d = read_ctd_cnv(f);
-scatter(d["timeS"], d["pressure"], xlab="Time [s]", ylab="Pressure [dbar]",
-    legend=false, markersize=1)
+lines(d["time_seconds"], d["pressure"])
 ```
 """
 function Base.getindex(x::OA, name::Union{String,Symbol})

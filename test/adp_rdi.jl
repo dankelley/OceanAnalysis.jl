@@ -1,4 +1,4 @@
-using Dates, Plots, OceanAnalysis, Test
+using Dates, OceanAnalysis, Test
 # The tests are against values from R/oce.
 file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000");
 beam = read_adp_rdi(file);
