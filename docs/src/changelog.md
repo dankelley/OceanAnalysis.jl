@@ -4,14 +4,13 @@ Release notes:
 
 ## Changed
 
-- various `plot_*!()` functions, to make it easy to produce multi-panel figures
-  in the `Makie` plotting system.
-
-- BREAKING none
+- All plotting functions (and documentation) has been moved from `Plots` to
+  `Makie`, to increase usability for some important Oceanographic tasks,
+-
 
 ## Added
 
-- shift to the `Makie` plotting system
+-
 
 
 
