@@ -40,4 +40,4 @@ jobs:
       #- uses: julia-actions/julia-runtest@v1
       - uses: coactions/setup-xvfb@v1
         with:
-          run: julia --project=. -e 'using Pkg; Pkg.test(; coverage=true)'
+          run: julia --project=. -e "using Pkg; Pkg.test(; coverage=true)"
