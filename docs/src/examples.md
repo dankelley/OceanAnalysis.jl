@@ -477,7 +477,6 @@ an interval, the CHS server may report an error, in which case you ought to try
 increasing the value of `resolution`.)
 
 ```julia
-```
 using OceanAnalysis, CSV, DataFrames
 using GLMakie # or CairoMakie
 
@@ -490,6 +489,7 @@ ax = Axis(fig[1, 1], ylabel="Elevation [m]", title="Sea Level at $name")
 lines!(data.time, data.value)
 
 save("tide_gauge_timeseries.png", fig, px_per_unit=5)
+```
 
 
 ![Tide gauge timeseries](tide_gauge_timeseries.png)
