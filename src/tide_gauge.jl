@@ -252,17 +252,27 @@ r = get_tide_gauge_metadata("Bedford")
 function get_tide_gauge_metadata(search::String; debug::Integer=0)
     oad(debug, "get_tide_gauge_metadata() START")
     i = get_tide_gauge_index(search)
+    nr = nrow(i)
+    nr > 0 || error("no match to search string \"$search\"")
+    # check for exact match
+    exact_match = search .== i.name
+    if sum(exact_match) == 1
+        i = i[exact_match, :]
+        oad(debug, "    Exact match to search=\"$search\"")
+    else
+        error("'search' is too broad, yielding $nr partial matches : $(i.name)")
+    end
     nr = size(i, 1)
     if nr > 1
         error("'search' must be narrowed; the following are partial matches: $(i.name)")
     end
     url = "https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/$(i.id[1])/metadata"
-    oad(debug, "  About to access $url")
+    oad(debug, "    About to access $url")
     response = HTTP.get(url; status_exception=false)
     if response.status != 200
         error("cannot access tide gauge metadata at $url")
     end
-    oad(debug, "  Decoding the downloaded information")
+    oad(debug, "    Decoding the downloaded information")
     rval = JSON3.read(response.body)
     oad(debug, "END get_tide_gauge_metadata()")
     return rval
