@@ -8,8 +8,6 @@ velocity components as a function of time and distance and (2) covariation of
 eastward and northward components, with a red line indicating local coastal
 orientation.
 
-**FIXME: update when converted to Makie plotting.**
-
 ```julia
 using OceanAnalysis
 using GLMakie
@@ -71,7 +69,8 @@ save("amsr.png", fig, px_per_unit=2)
 
 ### Argo summary plots
 
-The following shows how to read an Argo NetCDF file, convert to a [`Ctd`](@ref) object, and then create some summary plots.
+The following shows how to read an Argo NetCDF file, convert to a [`Ctd`](@ref)
+object, and then create some summary plots.
 
 ```julia
 # Read and plot a built-in Argo file
@@ -156,7 +155,6 @@ using OceanAnalysis, CSV, DataFrames, Dates, Printf
 using GLMakie # or CairoMakie
 radius = 200 # km
 years = 5 # years
-using GLMakie # or CairoMakie
 # Get the index
 index_file = get_argo_index("~/data/argo")
 index_all = read_argo_index(index_file)
@@ -190,8 +188,6 @@ save("argo_search.png", fig, px_per_unit=2)
 
 The following shows how to display a trace of the positions of a single Argo
 float.
-
-**FIXME: update when converted to Makie plotting.**
 
 ```julia
 # Plot a float trajectory with colour for sequence number
@@ -243,8 +239,6 @@ end
 
 The following downloads topographic data for a domain including southern
 Nova Scotia, and displays the data in three plot styles.
-
-**FIXME: update when converted to Makie plotting.**
 
 ```julia
 using OceanAnalysis, GLMakie
@@ -447,8 +441,6 @@ represent non-permanent tide gauges, while red dots represent permanent tide
 gauges.  (As an exercise, restrict `i` according to latitude and longitude
 criteria, and then examine `i.name` to see the tide gauges in that region.)
 
-**FIXME: update when converted to Makie plotting.**
-
 ```julia
 using OceanAnalysis
 using GLMakie # or CairoMakie
@@ -465,8 +457,8 @@ scatter!(i.longitude[look], i.latitude[look], color=:red, markersize=18)
 save("tide_gauge_locations.png", fig, px_per_unit=5)
 ```
 
-
 ![Tide gauge locations](tide_gauge_locations.png)
+
 
 ### Plot elevation record
 
@@ -490,7 +482,6 @@ lines!(data.time, data.value)
 
 save("tide_gauge_timeseries.png", fig, px_per_unit=5)
 ```
-
 
 ![Tide gauge timeseries](tide_gauge_timeseries.png)
 
