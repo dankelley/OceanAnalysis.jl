@@ -179,7 +179,7 @@ function get_tide_gauge_file(search; times=:default, variable=:wlo, resolution=3
         i = i[exact_match, :]
         oad(debug, "    Exact match to search=\"$search\"")
     else
-        error("'search' is too broad, yielding $nr partial matches : $(i.name)")
+        nr == 1 || error("'search' is too broad, yielding $nr partial matches : $(i.name)")
     end
     fmt = "yyyy-mm-ddTHH%3AMM%3A00Z"
     url = @sprintf("https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/%s/data?time-series-code=%s&from=%s&to=%s&resolution=%s", i[1, :id], String(variable), Dates.format(times[1], fmt), Dates.format(times[2], fmt), resolution_string)
@@ -256,11 +256,12 @@ function get_tide_gauge_metadata(search::String; debug::Integer=0)
     nr > 0 || error("no match to search string \"$search\"")
     # check for exact match
     exact_match = search .== i.name
+    oad(debug, "   sum(exact_match) = $(sum(exact_match))")
     if sum(exact_match) == 1
         i = i[exact_match, :]
         oad(debug, "    Exact match to search=\"$search\"")
     else
-        error("'search' is too broad, yielding $nr partial matches : $(i.name)")
+        nr == 1 || error("'search' is too broad, yielding $nr partial matches : $(i.name)")
     end
     nr = size(i, 1)
     if nr > 1
