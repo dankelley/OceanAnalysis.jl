@@ -19,6 +19,7 @@ OceanAnalysis.CT
 OceanAnalysis.decode_color_by
 OceanAnalysis.depth_from_pressure
 OceanAnalysis.despike
+OceanAnalysis.differentiate_dem
 OceanAnalysis.drop_qc
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!

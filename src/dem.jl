@@ -35,14 +35,14 @@ elevation, in metres.
 ```julia
 using OceanAnalysis
 # Data downloaded from https://nsgi.novascotia.ca/datalocator/elevation/
-file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+file = "/Users/kelley/data/lidar" *
+    "/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 if isfile(file)
     dem = read_dem(file)
     dem = subset_dem(dem, lonlim=(-63.587, -63.552), latlim=(44.615, 44.639))
     plot_dem(dem)
 end
 ```
-
 """
 function read_dem(file::String; lonlat_method::Symbol=:interpolated, debug::Int=0)
     g = gmtread(file; grid=true)
@@ -140,4 +140,73 @@ function subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real}
     rval
 end
 export subset_dem
+
+"""
+    differentiate_dem(dem::Dem, by=:y; debug=0)
+
+Differientate a DEM matrix with respect to a variable indicated
+by the value of `by`.
+
+# Arguments
+
+- `dem` a Dem object, as read with [`read_dem`](@ref).
+
+- `by` a symbol indicating the variable by which differentiation
+  is done.  If this is `:x` then differentiation is done with
+  respect to the easting coordinate, with analogous results for
+  `:y`. Note that the first row or column is duplicated, in
+  order to maintain the dimensions of the array.
+
+# Keywords
+
+- `debug` an integer that, if it exceeds 0, indicates that the function is to
+  print out some intermediate steps.
+
+# Examples
+
+```julia
+file = "/Users/kelley/data/lidar" *
+    "/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+if isfile(file)
+    dem = read_dem(file)
+    dem = subset_dem(dem, lonlim=(-63.587, -63.552), latlim=(44.615, 44.639))
+    dem_slope = differentiate_dem(dem)
+end
+```
+"""
+function differentiate_dem(dem::Dem, by::Symbol=:x; debug=0)
+    oad(debug, "differentiate_dem() START")
+    oad(debug, "    by=:$by")
+    isa(by, Symbol) || error("by must be a symbol")
+    D = 1.0
+    if "dx" in keys(dem.metadata)
+        dx = dem.metadata["dx"]
+    else
+        @warn "\"dx\" not found in dem.metadata; assuming $D m"
+        dx = D
+    end
+    if "dy" in keys(dem.metadata)
+        dy = dem.metadata["dy"]
+    else
+        @warn "\"dy\" not found in dem.metadata; assuming $D m"
+        dy = D
+    end
+    oad(debug, "    using dx=$dx and dy=$dy")
+    z = copy(dem.data)
+    oad(debug, "    size(dem.data)=$(size(z)) originally")
+    if by == :x
+        z = diff(z, dims=2) ./ dx
+        z = hcat(z, z[:, end])
+    elseif by == :y
+        z = diff(z, dims=1) ./ dy
+        z = vcat(z, z[end, :])
+    else
+        error("by must be :x or :y, not :$by")
+    end
+    oad(debug, "    size(dem.data)=$(size(z)) later")
+    rval = Dem(dem.metadata, z)
+    oad(debug, "END differentiate_dem()")
+    return rval
+end
+export differentiate_dem
 

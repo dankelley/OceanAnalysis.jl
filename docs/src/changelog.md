@@ -1,83 +1,98 @@
+# Changelog
+
 Release notes:
 
-# Changelog from version 0.2.17 to version 0.2.18
+## Changelog from version 0.2.18 to version 0.2.19
 
-## Changed
+### Changed
+
+- non-breaking: None
+
+- breaking: None
+
+### Added
+
+- `differentiate_dem()` to differentiate digital-elevation-model data.
+
+
+## Changelog from version 0.2.17 to version 0.2.18
+
+### Changed
 
 - All plotting functions (and documentation) has been moved from `Plots` to
   `Makie`, to increase usability for some important Oceanographic tasks,
 -
 
-## Added
+### Added
 
 -
 
 
 
-# Changelog from version 0.2.16 to version 0.2.17
+## Changelog from version 0.2.16 to version 0.2.17
 
-## Changed
+### Changed
 
 - none
 
 - BREAKING none
 
-## Added
+### Added
 
 - `prune_glider_profiles()`
 
 
 
-# Changelog from version 0.2.15 to version 0.2.16
+## Changelog from version 0.2.15 to version 0.2.16
 
-## Changed
+### Changed
 
 - none
 
 - BREAKING none
 
-## Added
+### Added
 
 - `magnetic_field()`
 
 
 
-# Changelog from version 0.2.14 to version 0.2.15
+## Changelog from version 0.2.14 to version 0.2.15
 
-## Changed
+### Changed
 
 - `plot_amsr()` gains `fontsize` argument
 - `summarize()` handles erroneous `_qc` values (i.e. neither Char nor Integer)
 
 - BREAKING none
 
-## Added
+### Added
 
 - none
 
 
 
-# Changelog from version 0.2.13 to version 0.2.14
+## Changelog from version 0.2.13 to version 0.2.14
 
 Release notes:
 
-## Changed
+### Changed
 
 - `get_amsr()` and `plot_amsr()` now handle all 4 data types (`daily`, `3day`, `weekly` and `monthly`)
 
 - BREAKING none
 
-## Added
+### Added
 
  
 
 
 
-# Changelog from version 0.2.11 to version 0.2.12
+## Changelog from version 0.2.11 to version 0.2.12
 
 Release notes:
 
-## Changed
+### Changed
 
 - `get_file()` gains a new argument named `file`.
 
@@ -90,7 +105,7 @@ Release notes:
   `draw_freezing` argument as `plot_freezing`. Rename `draw_freezing_curve!()`
   as `plot_freezing_curve!()`, and remove its `xlim` and `ylim` arguments.
 
-## Added
+### Added
 
 - `OceanAnalysis.get_tide_gauge_file`
 - `OceanAnalysis.get_tide_gauge_index`
@@ -98,28 +113,28 @@ Release notes:
 
 
 
-# Changelog from version 0.2.10 to version 0.2.11
+## Changelog from version 0.2.10 to version 0.2.11
 
 Release notes:
 
-## Changed
+### Changed
 
 - `plot_ts()` can handle `color_by=""`.
 - `plot_profile()` can handle `color_by=""`.
 
 - BREAKING none yet
 
-## Added
+### Added
 
 -
 
 
 
-# Changelog from version 0.2.9 to version 0.2.10
+## Changelog from version 0.2.9 to version 0.2.10
 
 Release notes:
 
-## Changed
+### Changed
 
 - `as_ctd()` accepts vector values of `longitude` and `latitude`.
 
@@ -129,39 +144,39 @@ Release notes:
 
 - BREAKING none yet
 
-## Added
+### Added
 
 - `decode_color_by()`.
 
 
 
-# Changelog from version 0.2.7 to version 0.2.8
+## Changelog from version 0.2.7 to version 0.2.8
 
 Release notes:
 
-## Changed
+### Changed
 
 - `plot_amsr` improvements, with new `draw_contours` argument.
 
 - BREAKING none yet
 
-## Added
+### Added
 
 - Add `add_freezing_curve!`.
 - Add `get_erddap_index`.
 
 
-# Changelog from version 0.2.6 to version 0.2.7
+## Changelog from version 0.2.6 to version 0.2.7
 
 Release notes:
 
-## Changed
+### Changed
 
 - none yet
 
 - BREAKING none yet
 
-## Added
+### Added
 
 - `plot_TS_isopycnals` and `plot_TS_spiciness`, to add density and spiciness
 contours to an existing TS plot. These are now used by `plot_TS`, but it can be

@@ -362,29 +362,38 @@ save("ctd_TS.png", fig, px_per_unit=2)
 
 ## Digital Elevation Model Data
 
-This example is based on a large file (not provided with this package) that was obtained via a GUI interface at [https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/). The view is of a portion of Halifax, Nova Scotia. The polygonal shape is the Halifax Citadel, a fort built in 1820s for protection against the United States military. The code below produces two diagrams. The first shows elevation, revealing that the Citadel sits atop a hill (which, a broader view would show, overlooks Halifax Harbour), while the second shows more detail on small-scale features of the old fort and the modern roads and building in downtown Halifax.
+This example is based on a large file (not provided with this package) that was
+obtained via a GUI interface at
+[https://nsgi.novascotia.ca/datalocator/elevation/](https://nsgi.novascotia.ca/datalocator/elevation/).
+The view is of a portion of Halifax, Nova Scotia. The first diagram shows
+elevation itself, with light yellow for high elevation (where the Fort is
+located) and darker red for low elevation (towards the harbour, which the Fort
+protects).  The second view shows the results of differentiating the elevation
+with respect to the horizontal coordinate. Note that a `colorrange` is provided
+in making this plot, so as to provide enough contrast to make out many features
+of the Fort and surrounding roads and buildings.
 
 ```julia
 using OceanAnalysis
 using GLMakie # or CairoMakie
 
-file = "/Users/kelley/data/lidar/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
-
+file = "/Users/kelley/data/lidar" *
+       "/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
 if isfile(file)
-    dem_all = read_dem(file)
-    # Focus near the Citadel fort
-    lims = (-63.589, -63.572, 44.6426, 44.655)
-    dem = subset_dem(dem_all, lonlim=lims[1:2], latlim=lims[3:4])
-    fig1 = plot_dem(dem)
-    save("dem_1.png", fig1, px_per_unit=2)
-    fig2 = plot_dem(dem, coordinates=:geographic)
-    save("dem_2.png", fig2, px_per_unit=2)
+    dem = read_dem(file)
+    lims = (-63.587, -63.575, 44.6426, 44.655)
+    dem = subset_dem(dem, lonlim=lims[1:2], latlim=lims[3:4])
+    fig = plot_dem(dem, coordinates=:geographic)
+    save("dem_1.png", fig, px_per_unit=4)
+    dem_slope = differentiate_dem(dem)
+    fig = plot_dem(dem_slope, coordinates=:geographic, colorrange=(-0.5, 0.5))
+    save("dem_2.png", fig, px_per_unit=4)
 end
 ```
 
-![DEM figure 1: topography near the Halifax Citadel fort](dem_1.png)
+![DEM figure 1: differentiated topography (x-y coordinates)](dem_1.png)
 
-![DEM figure 2: derivative of topography](dem_2.png)
+![DEM figure 2: differentiated topography (lon-lat coordinates)](dem_2.png)
 
 
 
