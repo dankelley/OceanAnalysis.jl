@@ -369,9 +369,10 @@ The view is of a portion of Halifax, Nova Scotia. The first diagram shows
 elevation itself, with light yellow for high elevation (where the Fort is
 located) and darker red for low elevation (towards the harbour, which the Fort
 protects).  The second view shows the results of differentiating the elevation
-with respect to the horizontal coordinate. Note that a `colorrange` is provided
-in making this plot, so as to provide enough contrast to make out many features
-of the Fort and surrounding roads and buildings.
+with respect to the "easting" coordinate, i.e. it is ∂η/∂x, where η is the
+elevation and x is eastward distance, both in metres. Note that a `colorrange`
+is provided in making this plot, to increase the contrast enough reveal
+features of the Fort and surrounding roads and buildings.
 
 ```julia
 using OceanAnalysis
