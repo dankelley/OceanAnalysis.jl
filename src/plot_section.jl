@@ -189,8 +189,17 @@ function plot_section!(fig_pos, section::Section; which="salinity",
         rval = section.data[i][which]
         z[:, i] = rval
     end
-    levels = pretty(z, 12)
-    oad(debug, "    levels: $levels")
+    # Set up levels
+    oad(debug, "    Note: levels=$levels FIXME: delete this line")
+    if levels == :auto
+        levels = pretty(z)
+        oad(debug, "    automatically set levels to $levels")
+    elseif length(levels) == 1 && isa(levels, Integer)
+        levels = pretty(z, levels)
+        oad(debug, "    automatically set levels to $levels (using provided request for number of levels)")
+    else
+        oad(debug, "    using user-supplied levels")
+    end
     oad(debug, "    putting x and y (and z) in ascending order")
     ix = sortperm(x)
     iy = sortperm(y)
@@ -214,18 +223,10 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     if colorrange == :auto && type == :heatmap
         colorrange = extend_extrema(z, 0.0)
     end
-    # ok, now can plot
     oad(debug, "    about to plot main with type=$(repr(type))")
-    if levels == :auto
-        levels = pretty(z)
-        oad(debug, "    automatically set levels to $levels")
-    elseif length(levels) == 1 && isa(levels, Integer)
-        levels = pretty(z, levels)
-        oad(debug, "    automatically set levels to $levels (using provided request for number of levels)")
-    end
     if type == :contour
         oad(debug, "    using contour() length(x)=$(length(x)), length(y)=$(length(y)), size(z)=$(size(z))")
-        main = Makie.contour!(ax, x, y, z', color=color, linewidth=linewidth, levels=levels)
+        main = Makie.contour!(ax, x, y, z', color=color, linewidth=linewidth, levels=levels, labels=true)
     elseif type == :contourf
         oad(debug, "    FIXME: using contourf()")
         main = Makie.contourf!(ax, x, y, z', levels=levels, colormap=colormap)
