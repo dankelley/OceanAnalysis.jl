@@ -8,7 +8,10 @@ Release notes:
 
 - non-breaking: None
 
-- breaking: None
+- breaking: `plot_TS()` handles contouring levels better, with `:none` now
+  replacing the value `0` and with `:auto` replacing the value `[]`.  This
+  addresses issue 106 on the development website. NB. the default actions
+  remain unchanged.
 
 ### Added
 
