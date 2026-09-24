@@ -106,7 +106,7 @@ see if the data format (or URL/API structure) had changed since autum
 # Keywords
 
 - `times` an indication of the start and end times for which data are sought.
-  This may be either a Tuple holding two DateTime values or the symbol
+  This may be either a Tuple holding two DateTime values or the Symbol
   `:default`. In the `:default` case, `times` will be constructed
   automatically, depending on the value of `resolution`. For all
   `resolution` values, `time[2]` is set to the present time.
@@ -114,7 +114,7 @@ see if the data format (or URL/API structure) had changed since autum
   If `resolution=3`, `times[1]` is set to 3 weeks ago. For all
   other `resolution` values, `times[1]` is set to 1 month ago.
 
-- `variable` a symbol indicating what data are sought, with `:wlo` for
+- `variable` a Symbol indicating what data are sought, with `:wlo` for
   water-level observations of `:wlp` for water-level predictions.
 
 - `resolution` an integer giving the number of minutes data samples.
@@ -147,7 +147,7 @@ https://www.tides.gc.ca/en/web-services-offered-canadian-hydrographic-service
 """
 function get_tide_gauge_file(search; times=:default, variable=:wlo, resolution=3, debug::Integer=0)
     oad(debug, "get_tide_gauge_file() START")
-    isa(variable, Symbol) || error("variable must be a symbol, not a ", typeof(variable))
+    isa(variable, Symbol) || error("variable must be a Symbol, not a ", typeof(variable))
     variable in (:wlo, :wlp, :metadata) || error("variable must be :wlo or :wlp, but it is :$variable")
     # FIXME: if add NOAA, then resolution must be in (1,6,60)
     resolution in (1, 3, 5, 15, 60) || error("resolution must be 1, 3, 5, 15 or 60, but it is $resolution")

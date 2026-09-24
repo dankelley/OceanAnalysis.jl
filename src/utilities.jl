@@ -343,7 +343,7 @@ and [`plot_profile`](@ref).
   or [`plot_profile`](@ref), then the length of `levels` must match the
   length of columns in the Ctd or Argo object.
 
-- `colorscheme` a symbol stating the ColorScheme to use, with `:turbo` a the default.
+- `colorscheme` a Symbol stating the ColorScheme to use, with `:turbo` a the default.
 
 - `clims` a two-element numeric Vector or Tuple that sets the limits of the
   color palette. If not provided, this defaults to `extrema(levels)`.

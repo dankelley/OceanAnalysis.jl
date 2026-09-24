@@ -21,13 +21,15 @@ export plot_freezing_curve!
 
 
 """
-    plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-        plot_freezing=true, abbreviate=false,
-        color_by=false, debug::Integer=0, kwargs...)
+    plot_TS(d;
+        sigma0_levels::Union{Symbol,Integer,AbstractVector}=:auto,
+        spiciness0_levels::Union{Symbol,Integer,AbstractVector}=:none,
+        plot_freezing=true, abbreviate=false, color_by=false, debug::Integer=0, kwargs...)
 
-    plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
-        plot_freezing=true, abbreviate=false,
-        color_by=false, debug::Integer=0, kwargs...)
+    plot_TS(fig_pos, d;
+        sigma0_levels::Union{Symbol,Integer,AbstractVector}=:auto,
+        spiciness0_levels::Union{Symbol,Integer,AbstractVector}=:none,
+        plot_freezing=true, abbreviate=false, color_by=false, debug::Integer=0, kwargs...)
 
 Plot an oceanographic TS diagram, with the Gibbs Seawater equation of state.
 
@@ -49,20 +51,17 @@ Information about the analysis is printed if `debug` exceeds 0.
 # Keywords
 
 - `sigma0_levels` a specification of sigma0 values to be contoured. If this is
-  an empty vector (which is the default) then the levels are selected
-  automatically by providing [`pretty`](@ref) with values inferred from `ctd`. If
-  `sigma0_levels` equals 0 then no contours are drawn.  If it is a positive
-  integer, then it is taken as a suggestion for the number of levels.  And,
-  finally, if it is a vector, then it is taken as a specification of the levels
-  to be contoured. The work is done by a call to [`plot_TS_sigma0_contours!`](@ref),
-  so if customization (of contour line thickness, colour, etc), use
-  `sigma0_levels=0` and then call [`plot_TS_sigma0_contours!`](@ref) directly.
+  `:none` then no contours are shown.  If it is `:auto` then contours are shown
+  at levels determined automatically by calling [`pretty`](@ref) with density
+  values inferred from `ctd`. If it is an integer, then [`pretty`](@ref)
+  is used, with its second argument set to equal `sigma_levels`.  And,
+  finally, if this is a vector of numeric values, then those values
+  will be contoured. All of this work is done by calling
+  [`plot_TS_sigma0_contours!`](@ref), which the user can also
+  call directly, if desired.
 
-- `spiciness0_levels` as `sigma0_levels`, but for spiciness0 contours.
-  The work is done by a call to [`plot_TS_spiciness0_contours!`](@ref),
-  so if customization (of contour line thickness, colour, etc), use
-  `spiciness0_levels=0` and then call [`plot_TS_spiciness0_contours!`](@ref)
-  directly.
+- `spiciness0_levels` as `sigma0_levels`, but for spiciness0 contours,
+  and the work is done by a call to [`plot_TS_spiciness0_contours!`](@ref).
 
 - `plot_freezing` a Bool indicating whether to draw a freezing-point curve.
 
@@ -130,9 +129,10 @@ figa = plot_TS!(fig[1, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inf
 figb = plot_TS!(fig[2, 1], ctd; seriestype=:scatter, markersize=6, colormap=:inferno, color_by="", debug=1)
 ```
 """
-function plot_TS(d; sigma0_levels=[], spiciness0_levels=0,
-    plot_freezing=true, abbreviate=false,
-    color_by=false, debug::Integer=0, kwargs...)
+function plot_TS(d;
+    sigma0_levels::Union{Symbol,Integer,AbstractVector}=:auto,
+    spiciness0_levels::Union{Symbol,Integer,AbstractVector}=:none,
+    plot_freezing=true, abbreviate=false, color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
     fig = Makie.Figure()
     ax, plot = plot_TS!(fig[1, 1], d;
@@ -146,7 +146,8 @@ end
 export plot_TS
 
 
-function plot_TS!(fig_pos, d; sigma0_levels=[], spiciness0_levels=0,
+function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector}=:auto,
+    spiciness0_levels::Union{Symbol,Integer,AbstractVector}=:none,
     plot_freezing=true, abbreviate=false,
     color_by=false, debug::Integer=0, kwargs...)
     # This test might be useful if further customization is needed for a future version
@@ -295,12 +296,12 @@ export plot_TS!
 
 
 """
-    plot_TS_sigma0_contours!(ax; levels=[],
+    plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
         color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
 
 Add contours of density to an existing TS plot.  This is used by
-[`plot_TS`](@ref), but can also be used separately, if the TS data
-have been drawn by other means.
+[`plot_TS`](@ref), but can also be used separately, if the TS data have been
+drawn by other means.
 
 # Arguments
 
@@ -326,12 +327,12 @@ have been drawn by other means.
 - `debug` an integer controlling the amount of information printed during
    processing.
 """
-function plot_TS_sigma0_contours!(ax; levels=[],
+function plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
     color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours!() START")
     oad(debug, "  levels: ", levels)
-    if levels == 0
-        oad(debug, "    not contouring, since levels=0")
+    if levels == :none
+        oad(debug, "    not contouring, since levels=:none")
         oad(debug, "END plot_TS_sigma_contours!()")
         return
     end
@@ -345,8 +346,8 @@ function plot_TS_sigma0_contours!(ax; levels=[],
     SAc = range(SAmin, SAmax, length=300)
     CTc = range(CTmin, CTmax, length=300)
     sigma0c = gsw_sigma0.(SAc, CTc') |> fix_gsw_bad_code!
-    if length(levels) == 0
-        oad(debug, "    case 1: levels is empty, so auto-select contour levels")
+    if levels == :auto
+        oad(debug, "    case 1: auto-selecting contour levels")
         levels = pretty(sigma0c) # returns [] if min=max
     elseif length(levels) == 1 && isa(levels, Integer)
         oad(debug, "    case 2: auto-selecting $levels sigma0 levels to contour")
@@ -354,17 +355,17 @@ function plot_TS_sigma0_contours!(ax; levels=[],
     else
         oad(debug, "    case 3: levels is a vector of sigma0 values to be contoured")
     end
-    if length(levels) > 0
-        oad(debug, "    contouring sigma0")
-        Makie.contour!(ax, SAc, CTc, sigma0c, levels=levels, labels=true,
-            linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
-    end
+    #if length(levels) > 0
+    oad(debug, "    contouring sigma0")
+    Makie.contour!(ax, SAc, CTc, sigma0c, levels=levels, labels=true,
+        linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
+    #end
     oad(debug, "END plot_TS_sigma0_contours!()")
 end
 export plot_TS_sigma0_contours!
 
 """
-    plot_TS_spiciness0_contours!(ax; levels=[],
+    plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:none,
         color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
 
 Add contours of spiciness0 to an existing TS plot.  This is used by
@@ -373,12 +374,12 @@ have been drawn by other means.  For the meanings of the
 arguments and keywords, see the documentation for
 [`plot_TS_sigma0_contours!`](@ref).
 """
-function plot_TS_spiciness0_contours!(ax; levels=[],
+function plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:none,
     color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
     oad(debug, "plot_TS_spiciness0_contours!() START")
     oad(debug, "    levels: ", levels)
-    if levels == 0
-        oad(debug, "    not contouring, since levels=0")
+    if levels == :none
+        oad(debug, "    not contouring, since levels=:none")
         oad(debug, "END plot_TS_sigma0_contours!()")
         return
     end
@@ -392,20 +393,20 @@ function plot_TS_spiciness0_contours!(ax; levels=[],
     SAc = range(SAmin, SAmax, length=100)
     CTc = range(CTmin, CTmax, length=300)
     spiciness0c = gsw_spiciness0.(SAc, CTc') |> fix_gsw_bad_code!
-    if length(levels) == 0
-        oad(debug, "  case 1: levels is empty, so auto-select contour levels")
+    if levels == :auto
+        oad(debug, "    case 1: auto-selecting contour levels")
         levels = pretty(spiciness0c) # returns [] if min=max
     elseif length(levels) == 1 && isa(levels, Integer)
-        oad(debug, "  case 2: auto-selecting $levels spiciness0 levels to contour")
+        oad(debug, "    case 2: auto-selecting $levels spiciness0 levels to contour")
         levels = pretty(spiciness0c, levels)
     else
-        oad(debug, "  case 3: levels is a vector of spiciness0 values to be contoured")
+        oad(debug, "    case 3: levels is a vector of spiciness0 values to be contoured")
     end
-    if length(levels) > 0
-        oad(debug, "    contouring spiciness0")
-        Makie.contour!(ax, SAc, CTc, spiciness0c, levels=levels, labels=true,
-            linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
-    end
+    #if length(levels) > 0
+    oad(debug, "    contouring spiciness0")
+    Makie.contour!(ax, SAc, CTc, spiciness0c, levels=levels, labels=true,
+        linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
+    #end
     oad(debug, "END plot_TS_spiciness0_contours!()")
 end
 export plot_TS_spiciness0_contours!

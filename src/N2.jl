@@ -88,7 +88,7 @@ user-specified `bc` to control behaviour near top and bottom, along with `s`
 
 # Keywords
 
-- `s` either a Float64 value or a symbol. In the first case, it is the value of
+- `s` either a Float64 value or a Symbol. In the first case, it is the value of
   `s` supplied to `Dierckx::Spline1D()`, which is used to smooth the density
   curve as a function of pressure.  According to the documentation for the
   Fortran code behind this function (see
@@ -157,7 +157,7 @@ function N2_spline(ctd::Ctd; s::Union{Float64,Symbol}=:auto, delta::Real=0.025, 
         elseif s == :rough
             s = 0.707 * length(pressure) * delta^2
         else
-            throw(ArgumentError("if s is a symbol, it must be :auto, :smooth or :rough, not :$s"))
+            throw(ArgumentError("if s is a Symbol, it must be :auto, :smooth or :rough, not :$s"))
         end
         oad(debug, "  converted s=:$sorig to s=$(round(s,digits=4))")
     else

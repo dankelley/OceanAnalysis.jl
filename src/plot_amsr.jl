@@ -41,7 +41,7 @@ item, and a NamedTuple as the second. The latter contains an element named
   after that, and finally add the coastline yourself (e.g. via a
   Makie-based `plot_coastline!` equivalent) so that it is drawn on top.
 
-- `draw_contours`: either a symbol or a numeric vector that controls contours
+- `draw_contours`: either a Symbol or a numeric vector that controls contours
   that may be added to the heatmap. If this is `:none` (which is the default),
   then no contours are drawn. If it is `:auto` then contours are drawn at 5°C
   increments. And, finally, if it is a vector of numeric elements, then

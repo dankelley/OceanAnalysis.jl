@@ -226,7 +226,7 @@ the value exceeds the maximum pressure in `ctd`.
 
 # Keywords
 
-- `method`: a symbol indicating the gridding method; this must be `:interpolate`, indicating linear interpolation to the specified pressure grid.
+- `method`: a Symbol indicating the gridding method; this must be `:interpolate`, indicating linear interpolation to the specified pressure grid.
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
 

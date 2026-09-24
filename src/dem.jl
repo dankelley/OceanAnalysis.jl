@@ -151,7 +151,7 @@ by the value of `by`.
 
 - `dem` a Dem object, as read with [`read_dem`](@ref).
 
-- `by` a symbol indicating the variable by which differentiation
+- `by` a Symbol indicating the variable by which differentiation
   is done.  If this is `:x` then differentiation is done with
   respect to the easting coordinate, with analogous results for
   `:y`. Note that the first row or column is duplicated, in
@@ -177,7 +177,7 @@ end
 function differentiate_dem(dem::Dem, by::Symbol=:x; debug=0)
     oad(debug, "differentiate_dem() START")
     oad(debug, "    by=:$by")
-    isa(by, Symbol) || error("by must be a symbol")
+    isa(by, Symbol) || error("by must be a Symbol")
     D = 1.0
     if "dx" in keys(dem.metadata)
         dx = dem.metadata["dx"]
