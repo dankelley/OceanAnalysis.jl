@@ -187,7 +187,6 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
             "marker, markercolor, markersize, seriestype, title, ",
             "xlabel and ylabel")
     end
-
     oad(debug, "    drawing the data")
     using_color_by = false
     if color_by !== false
