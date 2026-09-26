@@ -421,10 +421,10 @@ end
 The following code downloads data from a section survey in the North Atlantic
 ocean. (See [https://cchdo.ucsd.edu](https://cchdo.ucsd.edu) for paths to other
 sections, noting that only the data type named 'exchange' is handled by the
-OceanAnalysis package.) Then it reads the data, and isolates a subset that runs
+`OceanAnalysis` package.) Then it reads the data, and isolates a subset that runs
 roughly orthogonal to the mean path of the Gulf Stream. Finally, it plots a
-chart of sampling locations, along with cross-section diagrams of salinity and
-temperature.
+salinity section showing the upper 1500 metres of the water column. Ticks
+at the top indicate station locations.
 
 ```julia
 using OceanAnalysis
@@ -434,8 +434,9 @@ dir = get_section(url);
 s = read_section(dir);
 s.data = s.data[s["longitude"].<(-68.0)];
 # We must grid to get the cross-section diagrams
-sg = grid_section(s);
-fig = plot_section(sg, which="salinity", type=:contourf)
+sg = grid_section(s, 10.0); # grid to 10-m resolution
+fig = plot_section(sg, which="salinity", fontsize=12,
+    levels=20, limits=(nothing, nothing, 0, 1500))
 save("section.png", fig, px_per_unit=2)
 ```
 

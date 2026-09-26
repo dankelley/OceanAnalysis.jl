@@ -13,8 +13,9 @@ Plot an oceanographic section for data contained in `section`, showing how the
 variable named by `which` depends on either pressure or density (as
 dictated by `yvar`) and various lateral coordinates (as dictated by
 `xvar`).  The plot style is set by `which`, with the valid choices being
-`:contour` (plain contours, `:contourf` (colour-filled contours) or
-`:heatmap` (a coloured image).
+`:contour` (plain contours), `:contourf` (colour-filled contours),
+`:contourf_contour` (colour-filled contours with added black contours),
+or `:heatmap` (a coloured image).
 
 The `plot_section()` function creates a single plot, and the
 `plot_section!()` function adds to an existing plot.  See the Examples
@@ -46,8 +47,9 @@ https://github.com/MakieOrg/Makie.jl/issues/5811 for a bug report on this.
 # Keywords
 
 - `type` a Symbol indicating the type of plot. This may be `:contour` for
-  simple contours, `:contourf` (the default) for filled contours, or `:heatmap`
-  for an image.
+  simple contours, `:contourf` for filled contours, `:contourf_contour`
+  (the default) for filled contours with black contourlines,
+  or `:heatmap` for an image.
 
 - `xvar` either a Symbol (which must be one of `:distance`, `:latitude` or
   `:longitude`) or a Tuple with two elements the first being a label for the x
@@ -66,11 +68,15 @@ https://github.com/MakieOrg/Makie.jl/issues/5811 for a bug report on this.
 - `kwargs...` extra arguments that are parsed and handled according
   to the value of `type`. The permitted keywords are: `color`, `colormap`,
   `colorrange`, `fontsize`, `levels`, `limits`, `linewidth`, `xlabel`, `ylabel` and `title`.
-  The first of these is used only if `type=:contour`, while the second
-  and third only apply if `type` is `:contourf` or `:heatmap`. All
-  the others apply to each plot type. Note that if `xlabel` and `ylabel`
-  are not specified, then they will be set automatically based on
-  the values of `xvar` and `yvar`.
+  Not all of these are used for all plot types.  Users familiar with
+  Makie plotting can perhaps guess the possibilities. For example, `color`,
+  `levels` and `linewidth` all relate to contour lines, so their values
+  are only used if `type` is `:contour` or `:contourf_contour`.
+  Simillary, `colormap` and `colorrange` control colour fields, so their
+  values are only used if `type` is `:contourf`, `:contourf_contour` or `:heatmap`.
+  The labelling elements, `xlabel`, `ylabel` and `title` all are given
+  reasonable defaults (depending on `which`, `xvar` and `yvar`) if they are not
+  specified in the function call.
 
 # Return value
 
@@ -79,7 +85,8 @@ displayed directly or saved with the FileIO's `save`.
 
 The `plot_section!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
 item, and a NamedTuple as the second. The latter contains an element named
-`main` that holds the main plot, plus potentially `cb` that holds a Colorbar.
+`main` that holds the main plot, and, in the `:contourf` and `:heatmap` cases,
+an element named `cb` that is a Colorbar.
 
 
 # Examples
@@ -93,11 +100,20 @@ s = read_section(dir);
 s.data = s.data[s["longitude"].< (-68.0)];
 # Note that we must grid to get the cross-section diagrams
 sg = grid_section(s);
-plot_section(sg, which="salinity")
+# Illustrate three styles
+fig = plot_section(sg, which="salinity", fontsize=12, levels=5,
+    type=:contour, limits=(nothing, nothing, 0, 1500))
+#save("0_plot_section_contour.png", fig, px_per_unit=4)
+fig = plot_section(sg, which="salinity", fontsize=12, levels=30,
+    type=:contourf, limits=(nothing, nothing, 0, 1500))
+#save("0_plot_section_contourf.png", fig, px_per_unit=4)
+fig = plot_section(sg, which="salinity", fontsize=12, levels=5,
+    type=:heatmap, limits=(nothing, nothing, 0, 1500))
+#save("0_plot_section_heatmap.png", fig, px_per_unit=4)
 ```
 """
 function plot_section(section::Section; which="salinity",
-    type=:contour, xvar=:latitude, yvar=:pressure, show_stations=true,
+    type=:contourf_contour, xvar=:latitude, yvar=:pressure, show_stations=true,
     debug=0, kwargs...)
     oad(debug, "plot_section() BEGIN")
     fig = Makie.Figure()
@@ -110,7 +126,7 @@ end
 export plot_section
 
 function plot_section!(fig_pos, section::Section; which="salinity",
-    type=:contour, xvar=:longitude, yvar=:pressure, show_stations=true,
+    type=:contourf_contour, xvar=:longitude, yvar=:pressure, show_stations=true,
     debug::Integer=0, kwargs...)
     oad(debug, "plot_section!() BEGIN")
     oad(debug, "    see if section is gridded")
@@ -118,7 +134,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     # assume all CTDs have the same data-column names
     fields = names(section.data[1].data)
     which in fields || error("which=\"$which\" not allowed; try one of the following: ", fields)
-    type in (:contour, :contourf, :heatmap) || throw(ArgumentError("type=$(repr(type)) not allowed; try using :contour, :contourf or :heatmap"))
+    type in (:contour, :contourf, :contourf_contour, :heatmap) || throw(ArgumentError("type=$(repr(type)) not allowed; try using :contour, :contourf, :contourf_contour or :heatmap"))
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     oad(debug, "    inferred the following from kwargs (or from defaults, or from the data):")
     color = pop!(kwargs_dict, :color, :black)
@@ -133,7 +149,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     oad(debug, "      • levels:      $(oad_val(levels))")
     limits = pop!(kwargs_dict, :limits, :auto)
     oad(debug, "      • limits:      $(oad_val(limits))")
-    linewidth = pop!(kwargs_dict, :linewidth, 1)
+    linewidth = pop!(kwargs_dict, :linewidth, 0.75) # thin to avoid mess
     oad(debug, "      • linewidth:   $(oad_val(linewidth))")
     xlabel = pop!(kwargs_dict, :xlabel, :auto)
     oad(debug, "      • xlabel:      $(oad_val(xlabel))")
@@ -199,13 +215,9 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     if limits == :auto
         limits = (extend_extrema(x, 0.0)..., extend_extrema(y, 0.0)...)
     end
-    ax = Makie.Axis(
-        fig_pos[1, 1],
-        xlabel=xlabel,
-        ylabel=ylabel,
-        title=title,
-        limits=limits,
-        yreversed=true,
+    ax = Makie.Axis(fig_pos[1, 1],
+        xlabel=xlabel, ylabel=ylabel, title=title,
+        limits=limits, yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
     oad(debug, "    set x=$(first(x,3)) (+ more) for yvar=$xvar")
@@ -252,25 +264,53 @@ function plot_section!(fig_pos, section::Section; which="salinity",
         oad(debug, "    using contour() length(x)=$(length(x)), length(y)=$(length(y)), size(z)=$(size(z))")
         main = Makie.contour!(ax, x, y, z', color=color, linewidth=linewidth, levels=levels, labels=true)
         if show_stations
-            oad(debug, "    drawing stations")
-            Makie.vlines!(x, color=Makie.RGBA(0.5, 0.5, 0.5, 0.7))
+            oad(debug, "    drawing stations") # FIXME: use a function for this
+            ax_top = Makie.Axis(fig_pos[1, 1], xtickwidth=1.4, xticksize=6,
+                xtickcolor=:black, xaxisposition=:top,
+                xgridvisible=false, xticks=(x, repeat([""], length(x))))
+            Makie.hideydecorations!(ax_top)
+            Makie.hidespines!(ax_top, :l, :r, :b)
+            Makie.linkxaxes!(ax, ax_top)
         end
-    elseif type == :contourf
+    elseif type == :contourf || type == :contourf_contour
         oad(debug, "    FIXME: using contourf()")
         main = Makie.contourf!(ax, x, y, z', levels=levels, colormap=colormap)
-        if show_stations
-            oad(debug, "    drawing stations")
-            Makie.vlines!(x, color=Makie.RGBA(0.5, 0.5, 0.5, 0.7))
+        if type == :contourf_contour
+            Makie.contour!(ax, x, y, z', levels=levels, color=:black, linewidth=linewidth)
         end
+        if show_stations
+            oad(debug, "    drawing stations") # FIXME: use a function for this
+            ax_top = Makie.Axis(fig_pos[1, 1], xtickwidth=1.4, xticksize=5,
+                xtickcolor=:black, xaxisposition=:top,
+                xgridvisible=false, xticks=(x, repeat([""], length(x))))
+            Makie.hideydecorations!(ax_top)
+            Makie.hidespines!(ax_top, :l, :r, :b)
+            Makie.linkxaxes!(ax, ax_top)
+        end
+        cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
+        # Apparently, in the past we could just use Makie.hlines as
+        # below, but no more ... 2026-09-26.
+        #   Makie.hlines!(cb, levels, color=:black, linewidth=1)
+        cb_ax = Makie.Axis(fig_pos[1, 2], limits=(0, 1, minimum(levels), maximum(levels)))
+        Makie.hidedecorations!(cb_ax)
+        Makie.hidespines!(cb_ax)
+        Makie.hlines!(cb_ax, levels, color=:black, linewidth=linewidth)
+        oad(debug, "END plot_section!()")
+        return ax, (main=main, cb=cb)
     elseif type == :heatmap
         oad(debug, "    : using heatmap()")
         main = Makie.heatmap!(ax, x, y, z', colormap=colormap, colorrange=colorrange)
         if show_stations
-            oad(debug, "    drawing stations")
-            Makie.vlines!(ax, x, color=Makie.RGBA(0.5, 0.5, 0.5, 0.7))
+            oad(debug, "    drawing stations") # FIXME: use a function for this
+            ax_top = Makie.Axis(fig_pos[1, 1], xtickwidth=1.4, xticksize=5,
+                xtickcolor=:black, xaxisposition=:top,
+                xgridvisible=false, xticks=(x, repeat([""], length(x))))
+            Makie.hideydecorations!(ax_top)
+            Makie.hidespines!(ax_top, :l, :r, :b)
+            Makie.linkxaxes!(ax, ax_top)
         end
         cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
-        oad(debug, "END plot_amsr!()")
+        oad(debug, "END plot_section!()")
         return ax, (main=main, cb=cb)
     else
         error("type=$(repr(type)) not allowed; try :contour, :contourf or :heatmap")
