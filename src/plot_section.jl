@@ -9,6 +9,26 @@ using FileIO, JLD2
         type=:contour, xvar=:latitude, yvar=:pressure, show_stations=true,
         debug=0, kwargs...)
 
+Plot an oceanographic section for data contained in `section`, showing how the
+variable named by `which` depends on either pressure or density (as
+dictated by `yvar`) and various lateral coordinates (as dictated by
+`xvar`).  The plot style is set by `which`, with the valid choices being
+`:contour` (plain contours, `:contourf` (colour-filled contours) or
+`:heatmap` (a coloured image).
+
+The `plot_section()` function creates a single plot, and the
+`plot_section!()` function adds to an existing plot.  See the Examples
+section for illustrations of both cases.
+
+These functions require a Makie backend to be loaded and activated by
+the caller (e.g. `using CairoMakie` or `using GLMakie`) before they
+are called.
+
+*Note:* as of 2026-09-26, the Makie plotting library has a bug contouring
+matrices that hold NaN values, with the result being that some (or all) contour
+labels have lines running through them; see
+https://github.com/MakieOrg/Makie.jl/issues/5811 for a bug report on this.
+
 # Arguments
 
 - `section` a Section, as created with [`as_section`](@ref) or [`read_section`](@ref).
@@ -52,6 +72,16 @@ using FileIO, JLD2
   are not specified, then they will be set automatically based on
   the values of `xvar` and `yvar`.
 
+# Return value
+
+The `plot_section` form returns a Makie `FigureAxisPlot`, which can be
+displayed directly or saved with the FileIO's `save`.
+
+The `plot_section!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
+item, and a NamedTuple as the second. The latter contains an element named
+`main` that holds the main plot, plus potentially `cb` that holds a Colorbar.
+
+
 # Examples
 
 ```julia
@@ -63,7 +93,7 @@ s = read_section(dir);
 s.data = s.data[s["longitude"].< (-68.0)];
 # Note that we must grid to get the cross-section diagrams
 sg = grid_section(s);
-plot_section(sg, "salinity", ylim=(0, 2000));
+plot_section(sg, which="salinity")
 ```
 """
 function plot_section(section::Section; which="salinity",
@@ -204,46 +234,46 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     ix = sortperm(x)
     iy = sortperm(y)
     x = x[ix]
+    oad(debug, "    set up x (length $(length(x)))")
     y = y[iy]
     z = z[iy, ix]
-    #<old>kw = (; kwargs...)
-    #<old>if haskey(kwargs, :ylim)
-    #<old>    oad(debug, "    avoiding heatmap() error handling ylim together with yflip=true; see")
-    #<old>    oad(debug, "      https://discourse.julialang.org/t/heatmap-how-do-ylim-and-yflip-interact/134804/4")
-    #<old>    oad(debug, "    for discussion.")
-    #<old>    keep_y = kw[:ylim][1] .<= y .<= kw[:ylim][2]
-    #<old>else
-    #<old>    keep_y = y .< Inf
-    #<old>end
     keep_y = y .< Inf
     y = y[keep_y]
-    oad(debug, "    set up y")
+    oad(debug, "    set up y (length $(length(y)))")
     z = z[keep_y, :]
-    oad(debug, "    set up z")
+    oad(debug, "    set up z (size $(size(z)))")
+    @assert size(z) == (length(y), length(x)) "z is $(size(z)), but it ought to be $((length(y), length(x)))"
     if colorrange == :auto && type == :heatmap
         colorrange = extend_extrema(z, 0.0)
+        oad(debug, "    colorrange=:auto automatically converted to colorrange=$colorrange")
     end
     oad(debug, "    about to plot main with type=$(repr(type))")
     if type == :contour
         oad(debug, "    using contour() length(x)=$(length(x)), length(y)=$(length(y)), size(z)=$(size(z))")
         main = Makie.contour!(ax, x, y, z', color=color, linewidth=linewidth, levels=levels, labels=true)
+        if show_stations
+            oad(debug, "    drawing stations")
+            Makie.vlines!(x, color=Makie.RGBA(0.5, 0.5, 0.5, 0.7))
+        end
     elseif type == :contourf
         oad(debug, "    FIXME: using contourf()")
         main = Makie.contourf!(ax, x, y, z', levels=levels, colormap=colormap)
+        if show_stations
+            oad(debug, "    drawing stations")
+            Makie.vlines!(x, color=Makie.RGBA(0.5, 0.5, 0.5, 0.7))
+        end
     elseif type == :heatmap
         oad(debug, "    : using heatmap()")
         main = Makie.heatmap!(ax, x, y, z', colormap=colormap, colorrange=colorrange)
-        #yflip=yvar == :pressure || yvar == :depth ? true : false,
-        #xlab=xlab, ylab=ylab,
-        #color=:turbo,
-        #titlefontsize=8, guidefontsize=8, tickfontsize=8, legendfontsize=8,
-        #kwargs...)
+        if show_stations
+            oad(debug, "    drawing stations")
+            Makie.vlines!(ax, x, color=Makie.RGBA(0.5, 0.5, 0.5, 0.7))
+        end
+        cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
+        oad(debug, "END plot_amsr!()")
+        return ax, (main=main, cb=cb)
     else
         error("type=$(repr(type)) not allowed; try :contour, :contourf or :heatmap")
-    end
-    if show_stations
-        oad(debug, "    drawing stations")
-        #FIXME: vline!(x, color=RGBA(0.5, 0.5, 0.5, 0.7), linewidth=1, linestyle=:dot, label=false)
     end
     oad(debug, "END plot_section!()")
     return ax, (main=main,)

@@ -6,7 +6,7 @@ using GeometryBasics: Polygon
 using GibbsSeaWater
 using GMT: gmtread
 using Interpolations
-#using Makie: Axis, AxisAspect, Colorbar, DataAspect, Figure, FigureAxisPlot, Point2f, Polygon, RGBAf, contour!, contourf!, current_axis, heatmap!, limits!, lines!, poly!, scatter!, scatterlines!, text!, to_colormap
+#using Makie: Axis, AxisAspect, Colorbar, DataAspect, Figure, FigureAxisPlot, Point2f, Polygon, RGBAf, contour!, contourf!, current_axis, heatmap!, hlines!, limits!, lines!, poly!, scatter!, scatterlines!, text!, to_colormap, vlines!
 import Makie
 #using Plots
 using Printf
