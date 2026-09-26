@@ -149,7 +149,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     oad(debug, "      • levels:      $(oad_val(levels))")
     limits = pop!(kwargs_dict, :limits, :auto)
     oad(debug, "      • limits:      $(oad_val(limits))")
-    linewidth = pop!(kwargs_dict, :linewidth, 0.75) # thin to avoid mess
+    linewidth = pop!(kwargs_dict, :linewidth, 0.75)
     oad(debug, "      • linewidth:   $(oad_val(linewidth))")
     xlabel = pop!(kwargs_dict, :xlabel, :auto)
     oad(debug, "      • xlabel:      $(oad_val(xlabel))")
