@@ -87,7 +87,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
     oad(debug, "      • colorrange:  $(oad_val(colorrange))")
     fontsize = pop!(kwargs_dict, :fontsize, 8)
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
-    markersize = pop!(kwargs_dict, :markersize, 4)
+    markersize = pop!(kwargs_dict, :markersize, 6)
     oad(debug, "      • markersize:  $(oad_val(markersize))")
     title = pop!(kwargs_dict, :title, :auto)
     oad(debug, "      • title:       $(oad_val(title))")

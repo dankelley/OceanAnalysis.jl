@@ -271,8 +271,10 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
     if plot_freezing
         plot_freezing_curve!(ax; debug=increment_debug(debug))
     end
-    plot_TS_sigma0_contours!(ax; levels=sigma0_levels, color=sigma0_contour_color, debug=increment_debug(debug))
-    plot_TS_spiciness0_contours!(ax; levels=spiciness0_levels, color=spiciness0_contour_color, debug=increment_debug(debug))
+    plot_TS_sigma0_contours!(ax; levels=sigma0_levels,
+        labelsize=fontsize, color=sigma0_contour_color, debug=increment_debug(debug))
+    plot_TS_spiciness0_contours!(ax; levels=spiciness0_levels,
+        labelsize=fontsize, color=spiciness0_contour_color, debug=increment_debug(debug))
     # Draw colorbar
     cb = nothing
     if using_color_by
@@ -297,7 +299,8 @@ export plot_TS!
 
 """
     plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
-        color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
+        fontsize=9, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
+        debug::Integer=0)
 
 Add contours of density to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data have been
@@ -328,7 +331,8 @@ drawn by other means.
    processing.
 """
 function plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
-    color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid, debug::Integer=0)
+    labelsize=9, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
+    debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours!() START")
     oad(debug, "  levels: ", levels)
     if levels == :none
@@ -355,18 +359,18 @@ function plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVecto
     else
         oad(debug, "    case 3: levels is a vector of sigma0 values to be contoured")
     end
-    #if length(levels) > 0
     oad(debug, "    contouring sigma0")
     Makie.contour!(ax, SAc, CTc, sigma0c, levels=levels, labels=true,
-        linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
-    #end
+        labelsize=labelsize, linewidth=linewidth, linestyle=linestyle,
+        color=color, alpha=alpha)
     oad(debug, "END plot_TS_sigma0_contours!()")
 end
 export plot_TS_sigma0_contours!
 
 """
     plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:none,
-        color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
+        fontsize=8, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense),
+        debug::Integer=0)
 
 Add contours of spiciness0 to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
@@ -375,7 +379,8 @@ arguments and keywords, see the documentation for
 [`plot_TS_sigma0_contours!`](@ref).
 """
 function plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:none,
-    color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense), debug::Integer=0)
+    labelsize=8, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense),
+    debug::Integer=0)
     oad(debug, "plot_TS_spiciness0_contours!() START")
     oad(debug, "    levels: ", levels)
     if levels == :none
@@ -402,11 +407,10 @@ function plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractV
     else
         oad(debug, "    case 3: levels is a vector of spiciness0 values to be contoured")
     end
-    #if length(levels) > 0
     oad(debug, "    contouring spiciness0")
     Makie.contour!(ax, SAc, CTc, spiciness0c, levels=levels, labels=true,
-        linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
-    #end
+        labelsize=labelsize, linewidth=linewidth, linestyle=linestyle,
+        color=color, alpha=alpha)
     oad(debug, "END plot_TS_spiciness0_contours!()")
 end
 export plot_TS_spiciness0_contours!
