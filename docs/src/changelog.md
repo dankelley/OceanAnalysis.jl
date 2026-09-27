@@ -2,33 +2,26 @@
 
 Release notes:
 
-## Changelog from version 0.2.18 to version 0.2.19
-
-### Changed
-
-- non-breaking: None
-
-- breaking: `plot_TS()` handles contouring levels better, with `:none` now
-  replacing the value `0` and with `:auto` replacing the value `[]`.  This
-  addresses issue 106 on the development website. NB. the default actions
-  remain unchanged.
-
-### Added
-
-- `differentiate_dem()` to differentiate digital-elevation-model data.
-
-
 ## Changelog from version 0.2.17 to version 0.2.18
 
 ### Changed
 
 - All plotting functions (and documentation) has been moved from `Plots` to
   `Makie`, to increase usability for some important Oceanographic tasks,
--
+  such as adding depth contours to a heatmap of ocean properties. Partly
+  this is to provide new features, but another prime goal is to make
+  the functions simpler to understand, by moving some parameters
+  to a `kwargs` position.
+
+- `plot_TS()` handles contouring levels better, with `:none` now replacing the
+  value `0` and with `:auto` replacing the value `[]`.  This addresses issue
+  106 on the development website. Note that the default actions remain
+  unchanged.
 
 ### Added
 
--
+- `differentiate_dem()` to form spatial derivatives of digital-elevation-model
+  data.
 
 
 
