@@ -11,7 +11,7 @@ DataFrame holding the columnar data read from the file. If `rename=true`, then
 [`rename_data`](@ref) is used to rename some of the columns in `data` to better
 match oceanographic conventions (e.g. `"pr"` becomes `"pressure"`). If the data
 file indicates temperature is on the T68 scale, then this is converted to the
-standard modern scale, T90, before saving as `temperature`. 
+standard modern scale, T90, before saving as `temperature`.
 
 A message is printed if no data in the file are labelled with names that are
 recognized as salinity, temperature, or pressure, because these quantities are
@@ -65,15 +65,13 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
     lines = readlines(stream)
     #oad(debug, "  $(length(lines)) lines in file")
     data_names = Vector{String}()
-    oad(debug, "  assembling metadata (a Dict)")
+    oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}()
     time_format = DateFormat("u d yyy HH:MM:SS")
     # set defaults
     header = ""
     data_start = 0
     time = nothing
-    latitude = NaN
-    longitude = NaN
     names_found = false
     data_start = 0
     latitude = NaN # to catch case where file lacks this info
@@ -93,13 +91,13 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
             # Do this step by step, to make it easier to find problems if we
             # encounter files in formats that are not currently handled.
             time_string = split(line, " = ")[2]
-            oad(debug, "  time_string '", time_string, "'")
+            oad(debug, "    time_string '", time_string, "'")
             time_string = replace(time_string, r" \[.*$" => "")
             #oad(debug, "time_string '", time_string, "'")
             time_string = strip(time_string)
             #oad(debug, "time_string '", time_string, "'")
             time = DateTime(time_string, time_format)
-            oad(debug, "  inferred time=", time)
+            oad(debug, "    inferred time=", time)
         elseif occursin(r"^\*.* [Ll]atitude:", line) # e.g. "** Latitude: 74 15.88 N"
             #println("try to decode latitude in ** : format")
             #println("1. line=", line)
@@ -113,7 +111,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
             ss = split(s, r"[ ]+")
             #println("5. ss= ", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
-            oad(debug, "  inferred latitude=", latitude)
+            oad(debug, "    inferred latitude=", latitude)
         elseif occursin(r"^\*.* [Ll]atitude[ ]*=", line) # e.g. "* NMEA Latitude = 70 33.09 N"
             #println("lat= case")
             #println(line)
@@ -126,7 +124,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
             ss = split(s, r"[ ]+")
             #println("after split, ss=", ss)
             latitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
-            oad(debug, "  inferred latitude=", latitude)
+            oad(debug, "    inferred latitude=", latitude)
         elseif occursin(r"^\*.* [Ll]ongitude:", line)
             #println("1. line=", line)
             sign = occursin(r"[Ww]", line) ? -1 : 1
@@ -139,7 +137,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
             ss = split(s, r"[ ]+")
             #println("5. ss= ", ss)
             longitude = sign * (parse(Float64, ss[1]) + parse(Float64, ss[2]) / 60.0)
-            oad(debug, "  inferred longitude=", longitude)
+            oad(debug, "    inferred longitude=", longitude)
         elseif occursin(r"^\*.* [Ll]ongitude[ ]*=", line) # e.g. "* NMEA Longitude = 132 40.03 W"
             #println(line)
             s = split(line, " = ")[2]
@@ -158,7 +156,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
             metadata[item] = value
         elseif occursin(r"\*END\*", line)
             data_start = i + 1
-            oad(debug, "  NOTE: the data columns start at line ", data_start)
+            oad(debug, "    NOTE: the data columns start at line ", data_start)
             header = lines[1:i]
             break
         end
@@ -174,7 +172,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
         error("ncols=$ncols does not match length(data_names)=$(length(data_names))")
     end
     nrows = length(lines) - data_start + 1
-    oad(debug, "  reading nrows=$(nrows), ncols=$(ncols)")
+    oad(debug, "    reading nrows=$(nrows), ncols=$(ncols)")
     data = Array{Float64,2}(undef, nrows, ncols)
     irow = 1
     for i in data_start:length(lines)
@@ -183,7 +181,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
         irow = irow + 1
     end
     metadata["header"] = header
-    oad(debug, "  assembling data (a DataFrame)")
+    oad(debug, "    assembling data (a DataFrame)")
     data = DataFrame(data, data_names, makeunique=true)
     data_names = names(data)
     data_names_orig = data_names
@@ -192,70 +190,39 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
         changed = data_names_new .!== data_names
         if sum(changed) > 0
             data_names = data_names_new
-            oad(debug, "  renamed $(sum(changed)) data columns, as follows")
-            oad(debug, "  $(data_names_orig .=> data_names)")
+            oad(debug, "    renamed $(sum(changed)) data columns, as follows")
+            oad(debug, "    $(data_names_orig .=> data_names)")
         else
-            oad(debug, "  no columns were renamed")
+            oad(debug, "    no columns were renamed")
         end
     end
-    # FIXME: rename also prdM prDM prSM depSM
-    # if "pr" in data_names
-    #     data.pressure = data.pr
-    # elseif "prdM" in data_names
-    #     data.pressure = data.prdM
-    # elseif "prDM" in data_names
-    #     data.pressure = data.prDM
-    # elseif "prSM" in data_names
-    #     data.pressure = data.prSM
-    # elseif "depSM" in data_names
-    #     data.pressure = pressure_from_depth.(data.depSM)
-    # else
-    #     error("No 'pr', 'prdM', 'prDM', 'prSM' or 'depSM' in CNV file; found ", names(data))
-    # end
-    #if "c0mS/cm" in data_names # FIXME: allow S/m etc; convert here to store mS/cm for gsw
-    #    data.conductivity = data[:, "c0mS/cm"]
-    #elseif "c1mS/cm" in data_names
-    #    data.conductivity = data[:, "c1mS/cm"]
-    #end
-    if "t068" in data_names
+    if !("temperature" in data_names) && ("t068" in data_names)
         data.temperature = T90_from_T68.(data.t068)
-        oad(debug, "  converted T068 temperature (e.g. $(first(data.t068, 2))) to T90 (e.g. $(first(data.temperature, 2)))")
-    elseif "t090" in data_names
-        data.temperature = data.t090
-    elseif "t090C" in data_names
-        data.temperature = data.t090C
-    elseif "t190C" in data_names
-        data.temperature = data.t190C
-    elseif "tv290C" in data_names
-        data.temperature = data.tv290C
-    elseif "tv268C" in data_names
-        data.temperature = data.tv268C
-    else
-        error("No 't068', 't090', 't090C', 't190C', 't290C', 'tv268C' in CNV file; found ", names(data))
+        oad(debug, "    converted T068 temperature to T90")
     end
-    #println(first(data, 3))
+
     rename!(data, data_names_orig .=> data_names)
-    #println(first(data, 3))
     if !("salinity" in data_names) && (("conductivity" in data_names) && ("temperature" in data_names) && ("pressure" in data_names))
         data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
     end
-    #if "sal00" in data_names
-    #    data.salinity = data.sal00
-    #else
-    #    if "conductivity" in names(data)
-    #        data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
-    #    else
-    #        error("No 'sal00' column in CNV file and no conductivity either; found ", names(data))
-    #    end
-    #end
     oad(debug, "  calling as_ctd() to create a Ctd object, as the skeleton of the return value")
     if isnan(latitude) || isnan(longitude)
+        oad(debug, "    case 1: either longitude or latitude is NaN")
+        oad(debug, "    data.salinity starts $(first(data.salinity,3))")
+        oad(debug, "    data.temperature starts $(first(data.temperature,3))")
+        oad(debug, "    data.pressure starts $(first(data.pressure,3))")
+        oad(debug, "    data.salinity starts $(first(data.salinity,3))")
+        oad(debug, "    data.time starts $(first(data.time,3))")
+        oad(debug, "    add_teos: $add_teos")
+        oad(debug, "    debug: $(increment_debug(debug))")
         rval = as_ctd(data.salinity, data.temperature, data.pressure,
             time=time, add_teos=add_teos, debug=increment_debug(debug))
     else
+        oad(debug, "    case 2: neither longitude or latitude is NaN")
         rval = as_ctd(data.salinity, data.temperature, data.pressure, longitude=longitude, latitude=latitude,
             time=time, add_teos=add_teos, debug=increment_debug(debug))
     end
+    oad(debug, "    Add some non-standard columns (i.e. not salinity, temperature, pressure or conductivity)")
     standard_items = ["salinity", "temperature", "pressure", "conductivity"]
     for name in names(data)
         if !(name in standard_items)

@@ -6,7 +6,7 @@ Release notes:
 
 ### Changed
 
--
+- `read_ctd_cnv` understands some more names for variables
 
 ### Added
 

@@ -48,10 +48,16 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
         "_FLAG_W" => "_flag",
         "_FLAG" => "_flag",
         "_QC" => "_qc",
+        "c0S/m" => "conductivity", # but note the unit
         "c0mS/cm" => "conductivity",
         "c1mS/cm" => "conductivity",
+        "dz/dtM" => "dz/dt",
+        "flSP" => "fluorescence",
+        "prdM" => "pressure", # must put before 'pr'
         "pr" => "pressure",
+        "pressuredM" => "pressure",
         "sal00" => "salinity",
+        "sbeox0ML/L" => "oxygen",
         "timeS" => "time_seconds",
         "t090" => "temperature",
         "t090" => "temperature",
