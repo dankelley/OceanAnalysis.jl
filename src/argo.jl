@@ -109,7 +109,7 @@ function summarize_argo_data_tests(filename::String)
                     result_bits = collect(string(parse(Int, result, base=16), base=2))
                     println("    Tests performed (based on HISTORY_ACTION value 0x$result, interpreted as $(join(result_bits))):")
                     i = 1
-                    for bit in result_bits[end-1:-1:1]
+                    for bit in result_bits[(end-1):-1:1]
                         if bit == '1'
                             println("      test $i: $(argo_test_meaning(i))")
                         end
@@ -120,7 +120,7 @@ function summarize_argo_data_tests(filename::String)
                     println("    Tests failed (based on HISTORY_QCTEST value 0x$result, interpreted as $(join(result_bits))):")
                     i = 1
                     some_failed = false
-                    for bit in result_bits[end-1:-1:1]
+                    for bit in result_bits[(end-1):-1:1]
                         if bit == '1'
                             println("      test $(i): $(argo_test_meaning(i))")
                             some_failed = true
@@ -209,11 +209,12 @@ function read_argo(filename::String; profile::Integer=1, debug::Integer=0)::Argo
         metadata = Dict()
         # Find names of the data columns (see https://github.com/dankelley/OceanAnalysis.jl/issues/60)
         data_names_original = [v for v in keys(d) if "N_LEVELS" in dimnames(d[v])]
-        data_names = rename_data(data_names_original)
+        data_names_dict = rename_data(data_names_original)
+        data_names = values(data_names_dict)
         # Insist that salinity, temperature and pressure are found.
         3 == sum(in.(data_names, (Set(["salinity", "temperature", "pressure"]),))) ||
             error("Cannot find salinity, temperature or pressure in $(filename)")
-        name_changes = Dict(data_names .=> data_names_original)
+        name_changes = Dict(data_names .=> data_names_original) # FIXME: old way
         for key in keys(name_changes) # revised 2026-08-14 (DRY, maybe speed)
             orig = name_changes[key]
             col = d[orig][:, profile]

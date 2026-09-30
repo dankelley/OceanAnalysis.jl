@@ -334,7 +334,7 @@ function plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVecto
     labelsize=9, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
     debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours!() START")
-    oad(debug, "  levels: ", levels)
+    oad(debug, "    levels: ", levels)
     if levels == :none
         oad(debug, "    not contouring, since levels=:none")
         oad(debug, "END plot_TS_sigma_contours!()")

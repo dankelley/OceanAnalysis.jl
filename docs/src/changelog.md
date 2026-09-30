@@ -7,6 +7,9 @@ Release notes:
 ### Changed
 
 - `read_ctd_cnv` understands some more names for variables
+- `read_ctd_cnv` sets up a metadata dictionary so that elements can be
+  retrieved with either the name in the data file, or the name in the returned
+  `Ctd` value.
 
 ### Added
 

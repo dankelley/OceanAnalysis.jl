@@ -126,18 +126,24 @@ function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
         oad(debug, "    convert element from a Symbol to the String \"$element\"")
     end
     # If element is in metadata, return that
-    oad(debug, "    check whether it is in metadata")
     if element in keys(x.metadata)
-        oad(debug, "    return value from metadata")
+        oad(debug, "    return element from x.metadata")
         oad(debug, "END get_element()")
         return x.metadata[element]
     end
-    oad(debug, "    not in metadata, so check whether it is in data")
     # If element is in data (and if data is a DataFrame), return that
     if isa(x.data, DataFrame) && element in names(x.data)
-        oad(debug, "    return value from data")
+        oad(debug, "    returning value named directly in x.data")
         oad(debug, "END get_element()")
         return copy(x.data[:, element])
+    end
+    if "data_names_dict" in keys(x.metadata)
+        if element in keys(x.metadata["data_names_dict"])
+            dname = x.metadata["data_names_dict"][element]
+            oad(debug, "    returning value which was renamed to $dname in x.data")
+            oad(debug, "END get_element()")
+            return copy(x.data[:, dname])
+        end
     end
     # If this is a Ctd object, we can return certain computed things
     oad(debug, "    not metadata or in data, so check whether it is computable")

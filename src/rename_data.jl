@@ -1,5 +1,6 @@
 """
-    rename_data(names)
+    rename_data(names::Union{String,Vector{String}};
+        number_replicates::Bool=true, debug::Integer=0)
 
 Rename data items from labels used in files to names used in code.
 
@@ -27,9 +28,11 @@ rename_data(["CTDPRS", "CTDTMP"]) # 2-element Vector{String}: "pressure" "temper
 
 rename_data(["CTDPRS", "CTDTMP", "CTDTMP_FLAG"]) # 3-element Vector{String}: "pressure" "temperature" "temperature_flag"
 ```
-
 """
-function rename_data(names::Union{String,Vector{String}}; number_replicates::Bool=true)::Vector{String}
+function rename_data(names::Union{String,Vector{String}};
+    number_replicates::Bool=true, debug::Integer=0)
+    oad(debug, "rename_data() START")
+    oad(debug, "    names: $names")
     # FIXME: add new items to the following
     rval = replace.(names,
         "CTDPRS" => "pressure",
@@ -66,7 +69,7 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
         "tv290C" => "temperature"
     )
     # Optionally, handle replicates
-    if number_replicates && (rval isa Vector)
+    if number_replicates > 0 && (rval isa Vector)
         tally = Dict{String,Int}()
         RVAL = String[]
         for s in rval
@@ -80,6 +83,8 @@ function rename_data(names::Union{String,Vector{String}}; number_replicates::Boo
         end
         rval = RVAL
     end
-    rval
+    oad(debug, "    rval: $rval")
+    oad(debug, "END rename_data()")
+    return rval
 end
 export rename_data

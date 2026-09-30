@@ -116,18 +116,18 @@ function as_ctd(salinity::Union{AbstractVector,AbstractRange},
     nsamp = length(salinity)
     length(temperature) == nsamp || error("salinity and temperature have differing lengths ($nsamp and $(length(temperature)), respectively)")
     length(pressure) == nsamp || error("salinity and pressure have differing lengths ($nsamp and $(length(pressure)), respectively)")
-    oad(debug, "  assembling data as a DataFrame with $nsamp rows")
-    data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
-    oad(debug, "  assembling metadata (a Dict)")
+    oad(debug, "    assembling metadata (a Dict)")
     metadata = Dict{String,Any}(
         "filename" => nothing,
         "longitude" => longitude,
         "latitude" => latitude,
         "time" => time)
-    oad(debug, "  passing metadata and data to Ctd()")
+    oad(debug, "    assembling data as a DataFrame with $nsamp rows")
+    data = DataFrame(salinity=salinity, temperature=temperature, pressure=pressure)
+    oad(debug, "    passing metadata and data to Ctd()")
     rval = Ctd(metadata, data)
     if add_teos
-        oad(debug, "  inserting TEOS-10 values into data")
+        oad(debug, "    inserting TEOS-10 values into data")
         rval = set_teos(rval, debug=increment_debug(debug))
     end
     oad(debug, "END as_ctd(salinity, ...)")
@@ -156,20 +156,20 @@ Any `longitude` values that are NaN are converted to -30.0, while any
 to the mid-Atlantic.
 """
 function set_teos(x::OA; debug::Integer=0)::Ctd
-    oad(debug, "set_teos START")
+    oad(debug, "set_teos() START")
     metadata = copy(x.metadata)
     data = copy(x.data)
     metadata_names = keys(metadata)
-    oad(debug, "  metadata_names: ", metadata_names)
+    oad(debug, "    metadata_names: ", metadata_names)
     data_names = string.(names(data))
-    oad(debug, "  data_names: ", data_names)
+    oad(debug, "    data_names: ", data_names)
     required_cols = ("salinity", "temperature", "pressure")
     missing_cols = filter(c -> !(c in data_names), required_cols)
     isempty(missing_cols) || error("lacking required data columns: $(missing_cols)")
     required_metadata = ("longitude", "latitude")
     missing_metadata = filter(k -> !(k in keys(metadata)), required_metadata)
     isempty(missing_metadata) || error("lacking required metadata: $(missing_metadata)")
-    oad(debug, "  have requisite hydrographic and location data, so can set TEOS-10 variables")
+    oad(debug, "    have requisite hydrographic and location data, so can set TEOS-10 variables")
     S = data.salinity
     T = data.temperature
     p = data.pressure
@@ -204,7 +204,7 @@ function set_teos(x::OA; debug::Integer=0)::Ctd
     data.sigma0 = gsw_sigma0.(data.SA, data.CT) |> fix_gsw_bad_code!
     data.spiciness0 = gsw_spiciness0.(data.SA, data.CT) |> fix_gsw_bad_code!
     rval = Ctd(metadata, data)
-    oad(debug, "END set_teos")
+    oad(debug, "END set_teos()")
     rval
 end
 export set_teos

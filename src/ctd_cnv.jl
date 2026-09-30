@@ -7,11 +7,17 @@ Returns a [`Ctd`](@ref) object that holds `metadata` and `data`. The `metadata`
 item is a Dict that holds `header` (a vector of strings, one per line from the
 start down to a line containing `#END`), plus some particular items scanned
 from that header, e.g. `"longitude"` and `"latitude"`. The `data` item is a
-DataFrame holding the columnar data read from the file. If `rename=true`, then
-[`rename_data`](@ref) is used to rename some of the columns in `data` to better
-match oceanographic conventions (e.g. `"pr"` becomes `"pressure"`). If the data
-file indicates temperature is on the T68 scale, then this is converted to the
-standard modern scale, T90, before saving as `temperature`.
+DataFrame holding the columnar data read from the file.
+
+If `rename=true`, then [`rename_data`](@ref) will be used to (possibly) rename
+some of the columns in `data` to better match oceanographic conventions, for
+exampling renaming `"pr"` as `"pressure"`. Still, it should be noted that
+the original name can also be used for data extraction, e.g. `ctd["pr"]`
+and `ctd["pressure"]` will be equal, if the name in the file was `"pr"`.
+If the data file holds temperature measured on the T68 scale, then the values
+are converted to the standard modern scale, T90, before saving as
+`temperature`, and the original column is also saved (without changing the
+name).
 
 A message is printed if no data in the file are labelled with names that are
 recognized as salinity, temperature, or pressure, because these quantities are
@@ -82,7 +88,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
         if occursin(r"^# name ", line)
             if !names_found
                 names_found = true
-                oad(debug, "  NOTE: the names of data columns start at line ", i)
+                oad(debug, "    NOTE: the names of data columns start at line ", i)
             end
             tokens = split(line)
             name = replace(tokens[5], ":" => "")
@@ -185,8 +191,10 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
     data = DataFrame(data, data_names, makeunique=true)
     data_names = names(data)
     data_names_orig = data_names
+    data_names_dict = Dict()
     if rename
-        data_names_new = rename_data(data_names)
+        data_names_new = rename_data(data_names, debug=increment_debug(debug))
+        data_names_dict = Dict(zip(data_names, data_names_new))
         changed = data_names_new .!== data_names
         if sum(changed) > 0
             data_names = data_names_new
@@ -205,7 +213,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
     if !("salinity" in data_names) && (("conductivity" in data_names) && ("temperature" in data_names) && ("pressure" in data_names))
         data.salinity = salinity_from_conductivity.(data.conductivity, data.temperature, data.pressure)
     end
-    oad(debug, "  calling as_ctd() to create a Ctd object, as the skeleton of the return value")
+    oad(debug, "    calling as_ctd() to create a Ctd object, as the skeleton of the return value")
     if isnan(latitude) || isnan(longitude)
         oad(debug, "    case 1: either longitude or latitude is NaN")
         oad(debug, "    data.salinity starts $(first(data.salinity,3))")
@@ -234,6 +242,7 @@ function read_ctd_cnv(stream::IOStream, filename::String=""; rename::Bool=true, 
     oad(debug, "  adding header and filename to metadata")
     rval.metadata["header"] = header
     rval.metadata["filename"] = filename
+    rval.metadata["data_names_dict"] = data_names_dict
     oad(debug, "END read_ctd_cnv()")
     rval
 end

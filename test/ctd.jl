@@ -2,6 +2,10 @@ using OceanAnalysis, DataFrames, Test
 filename = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv")
 ctd = read_ctd_cnv(filename);
 
+@testset "original variable names" begin
+    @assert ctd["pressure"] == ctd["pr"]
+end
+
 @testset "mixed-layer depth" begin
     MLDpressure = MLD_CF(ctd)
     @test MLDpressure == 4.292
@@ -12,6 +16,4 @@ end
     @test ctd.metadata["latitude"] ≈ 44.684266666666666 atol = 1e-13
     @test 42 == length(ctd.metadata["header"])
 end
-
-
 
