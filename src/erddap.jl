@@ -8,7 +8,7 @@ import Base.parse
 
 Find URLs listed on an ERDDAP website. There are three ways to do this.
 
-1. If both `server` and `dri` are given (as in the default), then URL of the
+1. If both `server` and `dir` are given (as in the default), then URL of the
    website is constructed as `"\$(server)/erddap/files/\$(dir)/.json"`.
 
 2. If `server` ends in the string `"/.json"`, then the URL is simply set to
