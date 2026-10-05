@@ -58,27 +58,27 @@ save(&quot;argo_profile_2.png&quot;, fig, px_per_unit=2)</code></pre><p><img src
 using OceanAnalysis
 using GLMakie # or CairoMakie
 f = joinpath(pkgdir(OceanAnalysis), &quot;data&quot;, &quot;D4901076_139.nc&quot;)
-argo = read_argo(f);
-ctd = as_ctd(argo);
-ctd_clean = handle_qc(ctd);
+ctd = f |&gt; read_argo |&gt; as_ctd
 summarize(ctd)
+ctd_clean = handle_qc(ctd);
 summarize(ctd_clean)
 
 fig = Figure() # will fill with 4 panels
+fs = 11 # larger font than default
 
-plot_profile!(fig[1, 1], ctd; which=&quot;salinity&quot;)
+plot_profile!(fig[1, 1], ctd; which=&quot;salinity&quot;, fontsize=fs)
 badS = ctd[&quot;salinity_qc&quot;] .!= &#39;1&#39;;
-scatter!(ctd[&quot;salinity&quot;][badS], ctd[&quot;pressure&quot;][badS], color=:red, markersize=2)
+scatter!(ctd[&quot;salinity&quot;][badS], ctd[&quot;pressure&quot;][badS], color=:red, markersize=14, marker=:xcross)
 
-plot_profile!(fig[1, 2], ctd; which=&quot;temperature&quot;)
+plot_profile!(fig[1, 2], ctd; which=&quot;temperature&quot;, fontsize=fs)
 badT = ctd[&quot;temperature_qc&quot;] .!= &#39;1&#39;;
-scatter!(ctd[&quot;temperature&quot;][badT], ctd[&quot;pressure&quot;][badT], color=:red, markersize=2)
+scatter!(ctd[&quot;temperature&quot;][badT], ctd[&quot;pressure&quot;][badT], color=:red, markersize=14, marker=:xcross)
 
-plot_TS!(fig[2, 1], ctd)
+plot_TS!(fig[2, 1], ctd, fontsize=fs)
 bad = badS .| badT;
-scatter!(ctd[&quot;SA&quot;][bad], ctd[&quot;CT&quot;][bad], color=:red, markersize=2)
+scatter!(ctd[&quot;SA&quot;][bad], ctd[&quot;CT&quot;][bad], color=:red, markersize=14, marker=:xcross)
 
-plot_TS!(fig[2, 2], ctd_clean)
+plot_TS!(fig[2, 2], ctd_clean, fontsize=fs)
 
 save(&quot;argo_qc.png&quot;, fig, px_per_unit=2)</code></pre><p><img src="../argo_qc.png" alt="Argo search results"/></p><h3 id="Argo-Search"><a class="docs-heading-anchor" href="#Argo-Search">Argo Search</a><a id="Argo-Search-1"></a><a class="docs-heading-anchor-permalink" href="#Argo-Search" title="Permalink"></a></h3><p>The following shows how to map Argo profile locations made within 200 km of Sable Island, during the past year.</p><pre><code class="language-julia hljs"># Show Argo profiles within 200 km of Sable Island in last 5 years
 using OceanAnalysis, CSV, DataFrames, Dates, Printf
@@ -245,4 +245,4 @@ fig = Figure()
 ax = Axis(fig[1, 1], ylabel=&quot;Elevation [m]&quot;, title=&quot;Sea Level at $name&quot;)
 lines!(data.time, data.value)
 
-save(&quot;tide_gauge_timeseries.png&quot;, fig, px_per_unit=5)</code></pre><p><img src="../tide_gauge_timeseries.png" alt="Tide gauge timeseries"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Monday 5 October 2026 11:45">Monday 5 October 2026</span>. Using Julia version 1.13.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+save(&quot;tide_gauge_timeseries.png&quot;, fig, px_per_unit=5)</code></pre><p><img src="../tide_gauge_timeseries.png" alt="Tide gauge timeseries"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../data_types/">Data Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Monday 5 October 2026 12:48">Monday 5 October 2026</span>. Using Julia version 1.13.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
