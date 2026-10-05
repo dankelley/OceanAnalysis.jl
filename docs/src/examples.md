@@ -375,11 +375,12 @@ is provided in making this plot, to increase the contrast enough reveal
 features of the Fort and surrounding roads and buildings.
 
 ```julia
+# Differentiated view of Halifax's Citadel Fort
 using OceanAnalysis
 using GLMakie # or CairoMakie
 
-file = "/Users/kelley/data/lidar" *
-       "/1044600063500_201901_DEM/1044600063500_201901_DEM.tif"
+dem_id = "1044600063500_201901_DEM"
+file = expanduser("~/data/lidar/$dem_id/$dem_id.tif")
 if isfile(file)
     dem = read_dem(file)
     lims = (-63.587, -63.575, 44.6426, 44.655)
