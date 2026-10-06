@@ -1,7 +1,9 @@
 """
-    plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
+    plot_adp(adp::Adp; which=:velocity1, time_format=:datetime,
+        debug::Integer=0, kwargs...)
 
-    plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs...)
+    plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime,
+        debug::Integer=0, kwargs...)
 
 Plot aspects of the data stored in an [`Adp`](@ref) object.
 
@@ -23,6 +25,14 @@ profiler ([`Adp`](@ref)) object.
   versus the Eastward velocity component.
 
 # Keywords
+
+- `time_format`: a Symbol indicating how to represent time, if that is
+  on the x-axis of the chosen (heatmap) plot. The default, `:datetime`,
+  indicates to use DateTime for the axis. Note that this is done with
+  a kludge (as of October 2026), because Makie has a bug on heatmaps
+  with time axes (see https://github.com/MakieOrg/Makie.jl/issues/5193).
+  The other alternative is `:interval`, which will select hours, days
+  or months, depending on the time span.
 
 - `debug`: an optional integer value that, if it exceeds 0, indicates that
   debugging output should be printed during processing.
@@ -66,17 +76,21 @@ plot_adp!(fig[2,1], enu, which=:velocity3, colorrange=cr, title="Upward Velocity
 plot_adp!(fig[2,2], enu, which=:velocity4, colorrange=cr, title="Error Velocity [m/s]")
 ```
 """
-function plot_adp(adp::Adp; which=:velocities, debug::Integer=0, kwargs...)
+function plot_adp(adp::Adp; which=:velocity1, time_format=:datetime, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp() START")
     fig = Makie.Figure()
-    ax, plot = plot_adp!(fig[1, 1], adp; which=which, debug=increment_debug(debug), kwargs...)
+    ax, plot = plot_adp!(fig[1, 1], adp;
+        which=which, time_format=time_format, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_adp()")
     return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_adp
 
-function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs...)
+function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp!() START")
+    oad(debug, "    which=$(repr(which))")
+    oad(debug, "    time_format=$(repr(time_format))")
+    time_format in [:datetime, :interval] || error("time_format must be :datetime or :interval")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     oad(debug, "    inferred the following from kwargs (or from defaults):")
     color = pop!(kwargs_dict, :color, :black)
@@ -116,36 +130,44 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
     if which in (:echo_intensity1, :echo_intensity2, :echo_intensity3, :echo_intensity4,
         :velocity1, :velocity2, :velocity3, :velocity4)
         oad(debug, "    handling which=$(repr(which))")
-        beam = parse(Int, string(which)[end])
-        is_echo = occursin(r"echo", String(which))
-        is_velo = occursin(r"velocity", String(which))
-        oad(debug, "    is_echo=$is_echo")
-        oad(debug, "    is_velo=$is_velo")
-        (is_echo || is_velo) || error("which must be of the form :velocityN or :echo_intensityN, where N is an integer in 1:nbeam")
-        beam = parse(Int, string(which)[end])
         y = adp["distance"]
-        if is_echo
+        beam = parse(Int, string(which)[end])
+        if occursin(r"echo", String(which))
             z = adp["echo_intensity"][:, :, beam]
-        elseif is_velo
-            z = adp["velocity"][:, :, beam]
-        else
-            error("FIXME: handle more than :velocityN and :echo_intensityN")
-        end
-        if colorrange == :auto
-            if is_echo
+            if colorrange == :auto
                 colorrange = extrema(abs.(z[.!isnan.(z)]))
-            elseif is_velo
+            end
+        elseif occursin(r"velocity", String(which))
+            z = adp["velocity"][:, :, beam]
+            if colorrange == :auto
                 colorrange = (-1.0, 1.0) .* maximum(abs.(z[.!isnan.(z)])) # centre colours on z=0
             end
+        else
+            error("programming error: should not be able to reach this point")
         end
         @assert size(z) == (length(t), length(y)) "z is $(size(z)), expected $((length(t), length(y)))"
-        # FIXME: do a trick to plot elapsed time on the x axis, but labelling it with DateTime
-        # values.  I'll write a code to do that, since we may want this elsewhere ... and
-        # since I imagine Makie will do this in a few weeks, given the active work
-        # on a bug at https://github.com/MakieOrg/Makie.jl/issues/5193
-        hour = (t .- t[1]) / Dates.Millisecond(1000) / 3600.0
-        oad(debug, "    changing x name to \"Time [hour]\"")
-        ax.xlabel = "Time [hour]"
+        # Handle time axis for heatmap (sidestep a Makie bug)
+        if time_format==:interval
+            tstart, tend = extrema(t)
+            interval = (tend - tstart) / Dates.Millisecond(1000)
+            # Display by hours up to 2 days, and by days beyond that.
+            # For larger time intervals, it makes sense to use the :datetime
+            # method, for clarity of presentation.
+            if interval <= 2 * 86400.0
+                x = (t .- t[1]) / Dates.Millisecond(1000) / 3600.0
+                oad(debug, "    changing x name to \"Time [hour]\"")
+                ax.xlabel = "Time [hour]"
+            else
+                x = (t .- t[1]) / Dates.Millisecond(1000) / 86400.0
+                oad(debug, "    changing x name to \"Time [day]\"")
+                ax.xlabel = "Time [day]"
+            end
+        else
+            # FIXME: solve Makie bug here
+            # bug at https://github.com/MakieOrg/Makie.jl/issues/5193
+            oad(debug, "   FIXME: expect an error here, owing to a Makie bug (https://github.com/MakieOrg/Makie.jl/issues/5193)")
+            x = t
+        end
         ax.ylabel = "Distance [m]"
         oad(debug, "    changing y name to \"Distance [m]\"")
         if title == :auto
@@ -154,20 +176,10 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         else
             ax.title = title
         end
-        main = Makie.heatmap!(ax, hour, y, z, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
+        main = Makie.heatmap!(ax, x, y, z, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
         cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main, cb=cb)
-    elseif which == :velocities
-        oad(debug, "  handling which=$(repr(which))")
-        error("FIXME: deprecate :velocities")
-        #<> p1 = plot_adp(adp; which=:velocity1, debug=increment_debug(debug), kwargs...)
-        #<> p2 = plot_adp(adp; which=:velocity2, debug=increment_debug(debug), kwargs...)
-        #<> p3 = plot_adp(adp; which=:velocity3, debug=increment_debug(debug), kwargs...)
-        #<> p4 = plot_adp(adp; which=:velocity4, debug=increment_debug(debug), kwargs...)
-        #<> rval = plot(p1, p2, p3, p4, layout=@layout[a; b; c; d])
-        #<> oad(debug, "END plot_adp()")
-        #<> return (rval)
     elseif which == :heading
         oad(debug, "    handling the which=:heading case")
         main = Makie.scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
@@ -183,15 +195,6 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, debug::Integer=0, kwargs
         main = Makie.scatter!(ax, t, adp["roll"], ylab="Roll [°]", color=color, markersize=markersize)
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
-    elseif which == :angles
-        oad(debug, "    handling the which=:angles case")
-        error("FIXME: handle :angles")
-        #<> p1 = plot_adp(adp; which=:heading, debug=increment_debug(debug), kwargs...)
-        #<> p2 = plot_adp(adp; which=:pitch, debug=increment_debug(debug), kwargs...)
-        #<> p3 = plot_adp(adp; which=:roll, debug=increment_debug(debug), kwargs...)
-        #<> rval = plot(p1, p2, p3, layout=@layout[a; b; c])
-        #<> oad(debug, "END plot_adp()")
-        #<> return (rval)
     elseif which == :uv
         oad(debug, "    handling the which=:uv case (showing all data)")
         adp["coordinate_system"] == :enu || error("plot with which=:$(which) requires :enu coordinates")
