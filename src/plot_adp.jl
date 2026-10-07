@@ -39,8 +39,9 @@ profiler ([`Adp`](@ref)) object.
   debugging output should be printed during processing.
 
 - `kwargs`: optional items, used variously.  The possibilities are
-  `"colormap"`, `colorrange"`, `"fontsize"`, `"markersize"`, `"title"`,
-  `"xlabel"`, and `"ylabel"`.
+  `"colormap"`, `colorrange"`, `"fontsize"`, `"markersize"`,
+  `"seriestype"` (only for `which` equal to `:heading`, `:pitch`
+   or `:roll`), `"title"`, `"xlabel"`, and `"ylabel"`.
 
 # Return value
 
@@ -116,12 +117,14 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
     oad(debug, "      • xlabel:      $(oad_val(xlabel))")
     ylabel = pop!(kwargs_dict, :ylabel, "y")
     oad(debug, "      • ylabel:      $(oad_val(ylabel))")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatter)
+    oad(debug, "      • seriestype:  $(oad_val(seriestype))")
     # Check for unhandled keywords
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: colormap, colorrange, fontsize, ",
-            "markersize, title, xlabel, and ylabel")
+            "markersize, seriestype, title, xlabel, and ylabel")
     end
     ax = Makie.Axis(fig_pos[1, 1], xlabel=xlabel, ylabel=ylabel,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
@@ -199,19 +202,46 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
         end
     elseif which == :heading
         oad(debug, "    handling the which=:heading case")
-        main = Makie.scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
+        if seriestype == :scatter
+            main = Makie.scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
+        elseif seriestype == :lines
+            main = Makie.lines!(ax, t, adp["heading"], color=color)
+        elseif seriestype == :scatterlines
+            main = Makie.scatterlines!(ax, t, adp["heading"], color=color, markersize=markersize)
+        else
+            error("For which=:heading, seriestype must be :scatter, :lines or :scatterlines")
+        end
+        ax.xlabel = ""
         ax.ylabel = "Heading [°]"
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :pitch
         oad(debug, "    handling the which=:pitch case")
-        main = Makie.scatter!(ax, t, adp["pitch"], color=color, markersize=markersize)
+        if seriestype == :scatter
+            main = Makie.scatter!(ax, t, adp["pitch"], color=color, markersize=markersize)
+        elseif seriestype == :lines
+            main = Makie.lines!(ax, t, adp["pitch"], color=color)
+        elseif seriestype == :scatterlines
+            main = Makie.scatterlines!(ax, t, adp["pitch"], color=color, markersize=markersize)
+        else
+            error("For which=:pitch, seriestype must be :scatter, :lines or :scatterlines")
+        end
+        ax.xlabel = ""
         ax.ylabel = "Pitch [°]"
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :roll
         oad(debug, "    handling the which=:roll case")
-        main = Makie.scatter!(ax, t, adp["roll"], color=color, markersize=markersize)
+        if seriestype == :scatter
+            main = Makie.scatter!(ax, t, adp["roll"], color=color, markersize=markersize)
+        elseif seriestype == :lines
+            main = Makie.lines!(ax, t, adp["roll"], color=color)
+        elseif seriestype == :scatterlines
+            main = Makie.scatterlines!(ax, t, adp["roll"], color=color, markersize=markersize)
+        else
+            error("For which=:roll, seriestype must be :scatter, :lines or :scatterlines")
+        end
+        ax.xlabel = ""
         ax.ylabel = "Roll [°]"
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
