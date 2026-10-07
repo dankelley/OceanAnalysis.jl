@@ -127,6 +127,9 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime, d
         titles = ["u", "v", "w", "e"]
     end
     t = adp["time"]
+    which_permitted = [:echo_intensity1, :echo_intensity2, :echo_intensity3, :echo_intensity4,
+        :velocity1, :velocity2, :velocity3, :velocity4, :uv, :pitch, :roll, :heading]
+    (which in which_permitted) || error("which=$(repr(which)) is not handled; try one of the following $(which_permitted)")
     if which in (:echo_intensity1, :echo_intensity2, :echo_intensity3, :echo_intensity4,
         :velocity1, :velocity2, :velocity3, :velocity4)
         oad(debug, "    handling which=$(repr(which))")
@@ -152,34 +155,41 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime, d
             interval = (tend - tstart) / Dates.Millisecond(1000)
             # Display by hours up to 2 days, and by days beyond that.
             # For larger time intervals, it makes sense to use the :datetime
-            # method, for clarity of presentation.
+            # method, for clarity of presentation ... BUT Makie has an
+            # error on that.
             if interval <= 2 * 86400.0
                 x = (t .- t[1]) / Dates.Millisecond(1000) / 3600.0
-                oad(debug, "    changing x name to \"Time [hour]\"")
                 ax.xlabel = "Time [hour]"
             else
                 x = (t .- t[1]) / Dates.Millisecond(1000) / 86400.0
-                oad(debug, "    changing x name to \"Time [day]\"")
                 ax.xlabel = "Time [day]"
             end
+            oad(debug, "    changing x name to \"$(ax.xlabel)\"")
         else
-            # FIXME: solve Makie bug here
-            # bug at https://github.com/MakieOrg/Makie.jl/issues/5193
-            oad(debug, "   FIXME: expect an error here, owing to a Makie bug (https://github.com/MakieOrg/Makie.jl/issues/5193)")
-            x = t
+            @warn "using a DateTime axis with a heatmap will yield a Makie error (as of 2026-10-07)"
+            x = t # see below for error detection of this case (owing to a Makie bug)
         end
         ax.ylabel = "Distance [m]"
-        oad(debug, "    changing y name to \"Distance [m]\"")
+        oad(debug, "    changing y name to \"$(ax.ylabel)\"")
         if title == :auto
             ax.title = "Beam $beam"
-            oad(debug, "    changing title to \"Beam $beam\"")
+            oad(debug, "    changing title to \"$(ax.title)\"")
         else
             ax.title = title
         end
-        main = Makie.heatmap!(ax, x, y, z, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
-        cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
-        oad(debug, "END plot_adp!()")
-        return ax, (main=main, cb=cb)
+        try
+            oad(debug, "    about to draw a heatmap")
+            main = Makie.heatmap!(ax, x, y, z, colormap=colormap, colorrange=colorrange, nan_color=:gray70)
+            cb = Makie.Colorbar(fig_pos[1, 2], main, ticklabelsize=fontsize)
+            oad(debug, "END plot_adp!()")
+            return ax, (main=main, cb=cb)
+        catch e
+            if typeof(e) == StackOverflowError
+                error("Makie cannot plot a heatmap with a DateTime axis (see https://github.com/MakieOrg/Makie.jl/issues/5193)")
+            else
+                error("Error in drawing a heatmap: \"$e\"")
+            end
+        end
     elseif which == :heading
         oad(debug, "    handling the which=:heading case")
         main = Makie.scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
@@ -210,7 +220,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime, d
         oad(debug, "END plot_adp()")
         return ax, (main=main,)
     else
-        error("unrecognized value of which ($(repr(which)))")
+        error("programming error: unhandled which value ($(repr(which))); please report this as an issue")
     end
 end
 export plot_adp!
