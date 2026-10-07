@@ -1,8 +1,8 @@
 """
-    plot_adp(adp::Adp; which=:velocity1, time_format=:datetime,
+    plot_adp(adp::Adp; which=:velocity1, time_format=:interval,
         debug::Integer=0, kwargs...)
 
-    plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime,
+    plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval,
         debug::Integer=0, kwargs...)
 
 Plot aspects of the data stored in an [`Adp`](@ref) object.
@@ -19,20 +19,21 @@ profiler ([`Adp`](@ref)) object.
   entitled `"Beam 1"` or similar, according to the coordinate system
   (as stored in `adp["coordinate_system"]`).  A similar pattern
   holds for the other beams.  It also holds for `echo_intensity1`
-  and so forth. There are also scatterplot diagrams, provided
-  with `which` set to `:heading`, `:pitch`, `:roll` for instrument
-  angles, and `:uv` for the Northward velocity component
-  versus the Eastward velocity component.
+  and so forth. There are also scatterplot timeseries diagrams,
+  provided with `which` set to `:heading`, `:pitch`, `:roll` for
+  instrument angles, as well as a velocity-velocity scatterplot,
+  with `which=:uv`.
 
 # Keywords
 
 - `time_format`: a Symbol indicating how to represent time, if that is
-  on the x-axis of the chosen (heatmap) plot. The default, `:datetime`,
-  indicates to use DateTime for the axis. Note that this is done with
-  a kludge (as of October 2026), because Makie has a bug on heatmaps
-  with time axes (see https://github.com/MakieOrg/Makie.jl/issues/5193).
-  The other alternative is `:interval`, which will select hours, days
-  or months, depending on the time span.
+  on the x-axis of the chosen (heatmap) plot. The default, `:interval`,
+  will select hours or days, depending on the time span. The
+  other choice (which does not work as of October 2026 owing to
+  a bug in Makie) is `:datetime`, which indicates to use DateTime
+  for the axis. If you try to use `:datetime`, a warning will
+  be issued about the Makie bug ... the author will
+  remove that warning when/if Makie solves its bug.
 
 - `debug`: an optional integer value that, if it exceeds 0, indicates that
   debugging output should be printed during processing.
@@ -61,13 +62,19 @@ beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
 
-# Single panel (beam 1)
+# Beam 1 heatmap
 plot_adp(beam, which=:velocity1)
 
-# Single panel (east-north velocity)
+# East-north scatterplot
 plot_adp(enu, which=:uv)
 
-# Four panel (uniform colourscale)
+# Instrument angles in 3 panels
+fig = Figure()
+plot_adp!(fig[1,1], enu, which=:heading)
+plot_adp!(fig[2,1], enu, which=:pitch)
+plot_adp!(fig[3,1], enu, which=:roll)
+
+# Four panel velocity plots, with uniform colourrange
 fig = Makie.Figure()
 cr = (-1.5, 1.5)
 plot_adp!(fig[1,1], enu, which=:velocity1, colorrange=cr, title="Eastward Upward Velocitym/s]")
@@ -76,7 +83,7 @@ plot_adp!(fig[2,1], enu, which=:velocity3, colorrange=cr, title="Upward Velocity
 plot_adp!(fig[2,2], enu, which=:velocity4, colorrange=cr, title="Error Velocity [m/s]")
 ```
 """
-function plot_adp(adp::Adp; which=:velocity1, time_format=:datetime, debug::Integer=0, kwargs...)
+function plot_adp(adp::Adp; which=:velocity1, time_format=:interval, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp() START")
     fig = Makie.Figure()
     ax, plot = plot_adp!(fig[1, 1], adp;
@@ -86,7 +93,7 @@ function plot_adp(adp::Adp; which=:velocity1, time_format=:datetime, debug::Inte
 end
 export plot_adp
 
-function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime, debug::Integer=0, kwargs...)
+function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp!() START")
     oad(debug, "    which=$(repr(which))")
     oad(debug, "    time_format=$(repr(time_format))")
@@ -193,16 +200,19 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:datetime, d
     elseif which == :heading
         oad(debug, "    handling the which=:heading case")
         main = Makie.scatter!(ax, t, adp["heading"], color=color, markersize=markersize)
+        ax.ylabel = "Heading [°]"
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :pitch
         oad(debug, "    handling the which=:pitch case")
-        main = Makie.scatter!(ax, t, adp["pitch"], ylab="Pitch [°]", color=color, markersize=markersize)
+        main = Makie.scatter!(ax, t, adp["pitch"], color=color, markersize=markersize)
+        ax.ylabel = "Pitch [°]"
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :roll
         oad(debug, "    handling the which=:roll case")
-        main = Makie.scatter!(ax, t, adp["roll"], ylab="Roll [°]", color=color, markersize=markersize)
+        main = Makie.scatter!(ax, t, adp["roll"], color=color, markersize=markersize)
+        ax.ylabel = "Roll [°]"
         oad(debug, "END plot_adp!()")
         return ax, (main=main,)
     elseif which == :uv
