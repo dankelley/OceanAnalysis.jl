@@ -30,15 +30,9 @@ plot_adp!(fig[3, 1], enu; which=:velocity3, title="Upward velocity [m/s]", KW...
 save("adp_rdi_velocity.png", fig)
 ```
 
-<figure>
-  <img src="adp_rdi_uv.png" alt="U-V plot for adp data" width="400">
-  <figcaption>Scatterplot of eastward and northward velocity measurements for a built-in Acoustic-Doppler Profiler dataset.</figcaption>
-</figure>
+![Acoustic-Doppler Profiler plot](adp_rdi_uv.png)
 
-<figure>
-  <img src="adp_rdi_velocity.png" alt="Velocity panels adp data" width="400">
-  <figcaption>Time-distance variations of eastward, northward and upward velocity components for a built-in Acoustic-Doppler Profile dataset.</figcaption>
-</figure>
+![Acoustic-Doppler Profiler plot](adp_rdi_velocity.png)
 
 ## AMSR Satellite Data
 
