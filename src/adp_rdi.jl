@@ -30,7 +30,7 @@ function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Integer=0)
             end
             break
         end
-        local bytes_to_check = reinterpret(Int16, buf[start.+(2:3)])[1]
+        local bytes_to_check = reinterpret(Int16, buf[start .+ (2:3)])[1]
         ntypes = buf[start+5]
         if ntypes < 1 | ntypes > 200
             throw(FormatException("Invalid ntypes ($ntypes); expecting an integer from 1 to 200"))
@@ -45,7 +45,7 @@ function find_adp_rdi_ensembles(buf::Vector{UInt8}; debug::Integer=0)
         for i in range(start, length=bytes_to_check)
             checksum += buf[i] # relies on overflow wrapping around zero
         end
-        local desired_checksum = reinterpret(UInt16, buf[(bytes_to_check+start).+(0:1)])[1]
+        local desired_checksum = reinterpret(UInt16, buf[(bytes_to_check+start) .+ (0:1)])[1]
         if checksum == desired_checksum
             push!(starts, start)
         else
@@ -68,7 +68,7 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     # FIXME: is it ok to read this just once per file?
     for i in 1:ntypes
         tmp = start + 4 + 2 * i
-        data_offsets[i] = reinterpret(UInt16, buf[(tmp).+(0:1)])[1]
+        data_offsets[i] = reinterpret(UInt16, buf[(tmp) .+ (0:1)])[1]
     end
     metadata["data_offsets"] = data_offsets
     # Now look past 'header' to 'fixed leader', but just for things that will
@@ -129,7 +129,7 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     metadata["nbeams"] = nbeams
     ncells = Int(buf[start_fl+10])
     metadata["ncells"] = ncells
-    depth_cell_length = 0.01 * reinterpret(Int16, buf[(start_fl).+(13:14)])[1]
+    depth_cell_length = 0.01 * reinterpret(Int16, buf[(start_fl) .+ (13:14)])[1]
     metadata["depth_cell_length"] = depth_cell_length
     # Coordinate system
     cs_bits = reverse(digits(buf[start_fl+26], base=2, pad=8))
@@ -145,7 +145,7 @@ function read_adp_rdi_header(buf::Vector{UInt8}, start::Int64=1)
     end
     metadata["coordinate_system"] = coordinate_system
     # cell geometry
-    bin1_distance = 0.01 * reinterpret(UInt16, buf[(start_fl).+(33:34)])[1]
+    bin1_distance = 0.01 * reinterpret(UInt16, buf[(start_fl) .+ (33:34)])[1]
     metadata["bin1_distance"] = bin1_distance
     metadata["distance"] = range(bin1_distance, step=depth_cell_length, length=ncells)
     metadata
@@ -230,7 +230,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     filename = expanduser(filename)
     buf = read(filename)
     # H_ holds pointers to the starts of ensembles.
-    oad(debug, "  About to determine the ensemble indices.")
+    oad(debug, "    About to determine the ensemble indices.")
     E_ = find_adp_rdi_ensembles(buf)
     nE_ = length(E_)
     # interpret ensembles, possibly subsetting H_
@@ -239,14 +239,14 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
         if ensembles != 0
             E_ = E_[1:min(nE_, ensembles)]
         end
-        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file.")
+        oad(debug, "    Using $(length(E_)) of the $nE_ ensembles in the file.")
     else
         ensembles = ensembles[1 .< ensembles .< nE_]
         E_ = E_[ensembles]
-        oad(debug, "  Using $(length(E_)) of the $nE_ ensembles in the file.")
+        oad(debug, "    Using $(length(E_)) of the $nE_ ensembles in the file.")
     end
     nE_ = length(E_)
-    oad(debug, "  About to read header information in first ensemble.")
+    oad(debug, "    About to read header information in first ensemble.")
     metadata = read_adp_rdi_header(buf, E_[1])
     data_offsets = metadata["data_offsets"]
     metadata["filename"] = filename
@@ -260,18 +260,21 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     VL_ = FL_ .+ 59 # (see Figure 8 of [1])
     0x80 == buf[VL_[1]] || throw(FormatException("problem w/ VL_starts[1]"))
     0x00 == buf[VL_[1]+1]
-    # comb is used for getting two-byte entries
+    # comb2 and comb4 are pointers to 2 and 4-byte elements of bug
     comb2 = sort([VL_; VL_ .+ 1])
+    oad(debug, "    first 4 comb2: $(first(comb2,4))")
+    comb4 = sort([VL_; VL_ .+ 1; VL_ .+ 2; VL_ .+ 3])
+    oad(debug, "    first 8 comb4: $(first(comb4,8))")
     #println("time of ensemble creation step 1")
     #@time buf2 = buf[comb2.+2] # sort([VL_ .+ 2; VL_ .+ 3])]
     #println("time of ensemble creation step 2")
     #?@time int16_2 = ltoh.(reinterpret(Int16, buf2)) #[sort([VL_ .+ 2; VL_ .+ 3])]))
-    oad(debug, "  Inferring ensemble.")
+    oad(debug, "    Inferring ensemble.")
     #@time data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2.+2]))
-    data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2.+2]))
+    data["ensemble"] = convert(Array{Int64}, reinterpret(Int16, buf[comb2 .+ 2]))
     #println("time of ensemble creation step 3")
     #@time data["ensemble"] = copy(int16_2)
-    oad(debug, "  Inferring time-series information.")
+    oad(debug, "    Inferring time-series information.")
     #<testing timing> year = 2000 .+ convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+4]))
     #<testing timing> month = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+5]))
     #<testing timing> day = convert(Array{Int64}, reinterpret(UInt8, buf[VL_.+6]))
@@ -287,35 +290,52 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     #<testing timing> println("typeof(second): $(typeof(second))")
     #<testing timing> println("inferring time:")
     #<testing timing> @time data["time"] = DateTime.(year, month, day, hour, minute, second + 0.01 * second100)
-    year = 2000.0 .+ reinterpret(UInt8, buf[VL_.+4])
-    month = reinterpret(UInt8, buf[VL_.+5])
-    day = reinterpret(UInt8, buf[VL_.+6])
-    hour = reinterpret(UInt8, buf[VL_.+7])
-    minute = reinterpret(UInt8, buf[VL_.+8])
-    second = reinterpret(UInt8, buf[VL_.+9]) .+ 0.01 * reinterpret(UInt8, buf[VL_.+10])
+    year = 2000.0 .+ reinterpret(UInt8, buf[VL_ .+ 4])
+    month = reinterpret(UInt8, buf[VL_ .+ 5])
+    day = reinterpret(UInt8, buf[VL_ .+ 6])
+    hour = reinterpret(UInt8, buf[VL_ .+ 7])
+    minute = reinterpret(UInt8, buf[VL_ .+ 8])
+    second = reinterpret(UInt8, buf[VL_ .+ 9]) .+ 0.01 * reinterpret(UInt8, buf[VL_ .+ 10])
     data["time"] = DateTime.(year, month, day, hour, minute, second)
+    oad(debug, "    first 3 times: $(first(data["time"],3))")
     # sound_speed: RDI p139 says bytes 15,16 so use 14,15 here, i.e. comb2.+14
-    data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb2.+14]))
+    data["sound_speed"] = convert(Array{Float64}, reinterpret(Int16, buf[comb2 .+ 14]))
+    oad(debug, "    first 3 sound speeds: $(first(data["sound_speed"],3))")
     # heading: RDI p139 says bytes 19,20 -- use 18,19 here, i.e. comb.+18
     # Using convert() takes 14 allocations and 1.3 KiB.
     # Using Float64.() takes 174.38 k allocations and 8.772 MiB
-    data["heading"] = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+18]))
+    data["heading"] = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2 .+ 18]))
+    oad(debug, "    first 3 headings: $(first(data["heading"], 3))")
     # pitch RDI p139 says bytes 21,22 -- use 20,21 here
     # NOTE: pitch is 'corrected' in a few lines
-    pitch = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+20]))
+    pitch = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2 .+ 20]))
+    oad(debug, "    first 3 pitches (before correction): $(first(pitch,3))")
+    #R/oce roll <- 0.01 * readBin(buf[profileStart2 + 22], "integer", n = profilesToRead, size = 2, endian = "little", signed = TRUE)
     # roll RDI p139 says bytes 23,24 -- use 22,23 here
-    roll = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2.+22]))
+    roll = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2 .+ 22]))
     data["roll"] = roll
+    oad(debug, "    first 3 rolls: $(first(data["roll"],3))")
     # Pitch correction. See page 14 of 'adcp coordinate transformation.pdf
     #println("save new pitch")
     #@time data["pitch"] = atand.(tand.(pitch) ./ cosd.(roll))
     data["pitch"] = atand.(tand.(pitch) ./ cosd.(roll))
+    oad(debug, "    first 3 pitches (after correction): $(first(data["pitch"],3))")
+    #R/oce salinity <- readBin(buf[profileStart2 + 24], "integer", n = profilesToRead, size = 2, endian = "little", signed = TRUE)
+    data["salinity"] = convert(Array{Float64}, reinterpret(Int16, buf[comb2 .+ 24]))
+    oad(debug, "    first 3 salinities: $(first(data["salinity"],3))")
+    #R/oce temperature <- 0.01 * readBin(buf[profileStart2 + 26], "integer", n = profilesToRead, size = 2, endian = "little", signed = TRUE)
+    data["temperature"] = 0.01 * convert(Array{Float64}, reinterpret(Int16, buf[comb2 .+ 26]))
+    oad(debug, "    first 3 temperatures: $(first(data["temperature"],3))")
+    #R/oce pressure <- 0.001 * readBin(buf[profileStart4 + 48], "integer", n = profilesToRead, size = 4, endian = "little")
+    data["pressure"] = 0.001 * convert(Array{Float64}, reinterpret(Int32, buf[comb4 .+ 48]))
+    oad(debug, "    first 3 pressures: $(first(data["pressure"],3))")
+
     codes = Array{UInt8,2}(undef, metadata["ntypes"], 2)
-    oad(debug, "  Determining data types (using data_offsets=$data_offsets).")
+    oad(debug, "    Determining data types (using data_offsets=$data_offsets).")
     data_types = Symbol[]
     for t in 1:metadata["ntypes"]
-        codes[t, 1] = buf[metadata["data_offsets"][t].+1]
-        codes[t, 2] = buf[metadata["data_offsets"][t].+2]
+        codes[t, 1] = buf[metadata["data_offsets"][t] .+ 1]
+        codes[t, 2] = buf[metadata["data_offsets"][t] .+ 2]
         if codes[t, :] == [0x00, 0x01]
             push!(data_types, :velocity)
         elseif codes[t, :] == [0x00, 0x02]
@@ -343,19 +363,19 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
     # Set up storage that we fill as we read through the ensembles
     # FIXME: add other array-allocation here
     if :velocity in data_types
-        oad(debug, "  Setting up storage for 'velocity' (a $(ne)×$(nc)×$(nb) Float64 array).")
+        oad(debug, "    Setting up storage for 'velocity' (a $(ne)×$(nc)×$(nb) Float64 array).")
         velocity = Array{Float64,3}(undef, ne, nc, nb)
     end
     if :correlation_magnitude in data_types
-        oad(debug, "  Setting up storage for 'correlation_magnitude' (a $(ne)×$(nc)×$(nb) UInt8 array).")
+        oad(debug, "    Setting up storage for 'correlation_magnitude' (a $(ne)×$(nc)×$(nb) UInt8 array).")
         correlation_magnitude = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :echo_intensity in data_types
-        oad(debug, "  Setting up storage for 'echo_intensity' (a $(ne)×$(nc)×$(nb) UInt8 array).")
+        oad(debug, "    Setting up storage for 'echo_intensity' (a $(ne)×$(nc)×$(nb) UInt8 array).")
         echo_intensity = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :percent_good in data_types
-        oad(debug, "  Setting up storage for 'percent_good' (a $(ne)×$(nc)×$(nb) UInt8 array).")
+        oad(debug, "    Setting up storage for 'percent_good' (a $(ne)×$(nc)×$(nb) UInt8 array).")
         percent_good = Array{UInt8,3}(undef, ne, nc, nb)
     end
     if :status in data_types
@@ -374,7 +394,7 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
         ISM_mag = Array{Int16,2}(undef, ne, 3)
     end
     data_offsets = metadata["data_offsets"]
-    oad(debug, "  About to read $ne ensembles, each with $nc cells and $nb beams.")
+    oad(debug, "    About to read $ne ensembles, each with $nc cells and $nb beams.")
     unhandled_data_types = Dict()
     unknown_byte_sequences = Dict()
     #println("fill in arrays")
@@ -403,12 +423,12 @@ function read_adp_rdi(filename::String, ensembles::Union{Int64,StepRange{Int64,I
             elseif buf[p] == 0x01 && buf[p+1] == 0x59
                 # ISM See (the confusing) Table 41 on page 144 of Reference 1.
                 ISM_valid[e] = buf[p+2]
-                ISM_acc[e, 1] = reinterpret(Int32, buf[(p).+(3:6)])[1]
-                ISM_acc[e, 2] = reinterpret(Int32, buf[(p).+(7:10)])[1]
-                ISM_acc[e, 3] = reinterpret(Int32, buf[(p).+(11:14)])[1]
-                ISM_mag[e, 1] = reinterpret(Int16, buf[(p).+(15:16)])[1]
-                ISM_mag[e, 2] = reinterpret(Int16, buf[(p).+(17:18)])[1]
-                ISM_mag[e, 3] = reinterpret(Int16, buf[(p).+(19:20)])[1]
+                ISM_acc[e, 1] = reinterpret(Int32, buf[(p) .+ (3:6)])[1]
+                ISM_acc[e, 2] = reinterpret(Int32, buf[(p) .+ (7:10)])[1]
+                ISM_acc[e, 3] = reinterpret(Int32, buf[(p) .+ (11:14)])[1]
+                ISM_mag[e, 1] = reinterpret(Int16, buf[(p) .+ (15:16)])[1]
+                ISM_mag[e, 2] = reinterpret(Int16, buf[(p) .+ (17:18)])[1]
+                ISM_mag[e, 3] = reinterpret(Int16, buf[(p) .+ (19:20)])[1]
             elseif buf[p] == 0x00 && buf[p+1] == 0x05
                 key_insert(unhandled_data_types, "status")
             elseif buf[p] == 0x00 && buf[p+1] == 0x06

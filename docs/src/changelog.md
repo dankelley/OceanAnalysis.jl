@@ -10,6 +10,7 @@ Release notes:
 - `read_ctd_cnv` sets up a metadata dictionary so that elements can be
   retrieved with either the name in the data file, or the name in the returned
   `Ctd` value.
+- `read_adp_rdi` now also reads temperature, salinity and pressure.
 
 ### Added
 
