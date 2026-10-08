@@ -40,8 +40,10 @@ profiler ([`Adp`](@ref)) object.
   debugging output should be printed during processing.
 
 - `kwargs`: optional items, used variously.  The possibilities are
-  `"colormap"`, `colorrange"`, `"fontsize"`, `"markersize"`,
-  `"seriestype"` (only for `which` equal to `:salinity`,
+  `"colormap"` (defaulting to `:vik`), `colorrange"` (defaulting to
+  data range), `"fontsize"` (defaulting to 8), `"markersize"`
+  (defaulting to 6), `"seriestype"` (defaulting to `:scatter`, and
+  only used if `which` equals `:salinity`,
    `:temperature`, `:pressure`, `:heading`, `:pitch`
    or `:roll`), `"title"`, `"xlabel"`, and `"ylabel"`.
 
@@ -105,7 +107,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
     oad(debug, "    inferred the following from kwargs (or from defaults):")
     color = pop!(kwargs_dict, :color, :black)
     oad(debug, "      • color:       $(oad_val(color))")
-    colormap = pop!(kwargs_dict, :colormap, :balance)
+    colormap = pop!(kwargs_dict, :colormap, :vik)# was :balance
     oad(debug, "      • colormap:    $(oad_val(colormap))")
     colorrange = pop!(kwargs_dict, :colorrange, :auto)
     oad(debug, "      • colorrange:  $(oad_val(colorrange))")
@@ -113,14 +115,14 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
     markersize = pop!(kwargs_dict, :markersize, 6)
     oad(debug, "      • markersize:  $(oad_val(markersize))")
+    seriestype = pop!(kwargs_dict, :seriestype, :scatter)
+    oad(debug, "      • seriestype:  $(oad_val(seriestype))")
     title = pop!(kwargs_dict, :title, :auto)
     oad(debug, "      • title:       $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, "x")
     oad(debug, "      • xlabel:      $(oad_val(xlabel))")
     ylabel = pop!(kwargs_dict, :ylabel, "y")
     oad(debug, "      • ylabel:      $(oad_val(ylabel))")
-    seriestype = pop!(kwargs_dict, :seriestype, :scatter)
-    oad(debug, "      • seriestype:  $(oad_val(seriestype))")
     # Check for unhandled keywords
     if !isempty(kwargs_dict)
         error("plot_profile!() does not recognize keywords: ",
