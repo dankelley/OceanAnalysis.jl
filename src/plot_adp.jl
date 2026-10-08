@@ -19,10 +19,11 @@ profiler ([`Adp`](@ref)) object.
   entitled `"Beam 1"` or similar, according to the coordinate system
   (as stored in `adp["coordinate_system"]`).  A similar pattern
   holds for the other beams.  It also holds for `echo_intensity1`
-  and so forth. There are also scatterplot timeseries diagrams,
-  provided with `which` set to `:heading`, `:pitch`, `:roll` for
-  instrument angles, as well as a velocity-velocity scatterplot,
-  with `which=:uv`.
+  and so forth. In addition, there are a variety of time-series
+  plots available, using `which` values of `:salinity`, `:temperature`,
+  `:pressure`, `:heading`, `:pitch`, and `:roll`. And, finally,
+  plot of the two horizontal velocity components may be created
+  by setting `which=:uv`.
 
 # Keywords
 
@@ -40,7 +41,8 @@ profiler ([`Adp`](@ref)) object.
 
 - `kwargs`: optional items, used variously.  The possibilities are
   `"colormap"`, `colorrange"`, `"fontsize"`, `"markersize"`,
-  `"seriestype"` (only for `which` equal to `:heading`, `:pitch`
+  `"seriestype"` (only for `which` equal to `:salinity`,
+   `:temperature`, `:pressure`, `:heading`, `:pitch`
    or `:roll`), `"title"`, `"xlabel"`, and `"ylabel"`.
 
 # Return value
@@ -138,7 +140,8 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
     end
     t = adp["time"]
     which_permitted = [:echo_intensity1, :echo_intensity2, :echo_intensity3, :echo_intensity4,
-        :velocity1, :velocity2, :velocity3, :velocity4, :uv, :pitch, :roll, :heading]
+        :velocity1, :velocity2, :velocity3, :velocity4, :uv,
+        :salinity, :temperature, :pressure, :pitch, :roll, :heading]
     (which in which_permitted) || error("which=$(repr(which)) is not handled; try one of the following $(which_permitted)")
     if which in (:echo_intensity1, :echo_intensity2, :echo_intensity3, :echo_intensity4,
         :velocity1, :velocity2, :velocity3, :velocity4)
@@ -200,6 +203,51 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
                 error("Error in drawing a heatmap: \"$e\"")
             end
         end
+    elseif which == :salinity
+        oad(debug, "    handling the which=:salinity case")
+        if seriestype == :scatter
+            main = Makie.scatter!(ax, t, adp["salinity"], color=color, markersize=markersize)
+        elseif seriestype == :lines
+            main = Makie.lines!(ax, t, adp["salinity"], color=color)
+        elseif seriestype == :scatterlines
+            main = Makie.scatterlines!(ax, t, adp["salinity"], color=color, markersize=markersize)
+        else
+            error("For which=:salinity, seriestype must be :scatter, :lines or :scatterlines")
+        end
+        ax.xlabel = ""
+        ax.ylabel = "Salinity"
+        oad(debug, "END plot_adp!()")
+        return ax, (main=main,)
+    elseif which == :temperature
+        oad(debug, "    handling the which=:temperature case")
+        if seriestype == :scatter
+            main = Makie.scatter!(ax, t, adp["temperature"], color=color, markersize=markersize)
+        elseif seriestype == :lines
+            main = Makie.lines!(ax, t, adp["temperature"], color=color)
+        elseif seriestype == :scatterlines
+            main = Makie.scatterlines!(ax, t, adp["temperature"], color=color, markersize=markersize)
+        else
+            error("For which=:temperature, seriestype must be :scatter, :lines or :scatterlines")
+        end
+        ax.xlabel = ""
+        ax.ylabel = "Temperature [°C]"
+        oad(debug, "END plot_adp!()")
+        return ax, (main=main,)
+    elseif which == :pressure
+        oad(debug, "    handling the which=:pressure case")
+        if seriestype == :scatter
+            main = Makie.scatter!(ax, t, adp["pressure"], color=color, markersize=markersize)
+        elseif seriestype == :lines
+            main = Makie.lines!(ax, t, adp["pressure"], color=color)
+        elseif seriestype == :scatterlines
+            main = Makie.scatterlines!(ax, t, adp["pressure"], color=color, markersize=markersize)
+        else
+            error("For which=:pressure, seriestype must be :scatter, :lines or :scatterlines")
+        end
+        ax.xlabel = ""
+        ax.ylabel = "pressure [dbar]"
+        oad(debug, "END plot_adp!()")
+        return ax, (main=main,)
     elseif which == :heading
         oad(debug, "    handling the which=:heading case")
         if seriestype == :scatter
