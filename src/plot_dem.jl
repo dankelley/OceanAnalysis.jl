@@ -22,7 +22,7 @@ using GMT: gmtread, xy2lonlat, grdproject
   permitted keywords are: `colormap` (which defaults to `:inferno`
   if not supplied), `colorrange` (which defaults to the extrema
   of the elevation, if not supplied), `fontsize` (which defaults
-  to 8 if not supplied), and `title` (which defaults to `""`, if
+  to 12 if not supplied), and `title` (which defaults to `""`, if
   not supplied).
 """
 function plot_dem(dem::Dem; coordinates::Symbol=:distance, debug=0, kwargs...)
@@ -47,7 +47,7 @@ function plot_dem!(fig_pos, dem::Dem; coordinates::Symbol=:distance, debug=0, kw
     oad(debug, "      • colormap:    $(oad_val(colormap))")
     colorrange = pop!(kwargs_dict, :colorrange, :auto)
     oad(debug, "      • colorrange:  $(colorrange)")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:       $(oad_val(title))")

@@ -8,21 +8,20 @@ ctd_clean = handle_qc(ctd);
 summarize(ctd_clean)
 
 fig = Figure() # will fill with 4 panels
-fs = 11 # larger font than default
 
-plot_profile!(fig[1, 1], ctd; which="salinity", fontsize=fs)
+plot_profile!(fig[1, 1], ctd; which="salinity")
 badS = ctd["salinity_qc"] .!= '1';
 scatter!(ctd["salinity"][badS], ctd["pressure"][badS], color=:red, markersize=14, marker=:xcross)
 
-plot_profile!(fig[1, 2], ctd; which="temperature", fontsize=fs)
+plot_profile!(fig[1, 2], ctd; which="temperature")
 badT = ctd["temperature_qc"] .!= '1';
 scatter!(ctd["temperature"][badT], ctd["pressure"][badT], color=:red, markersize=14, marker=:xcross)
 
-plot_TS!(fig[2, 1], ctd, fontsize=fs)
+plot_TS!(fig[2, 1], ctd)
 bad = badS .| badT;
 scatter!(ctd["SA"][bad], ctd["CT"][bad], color=:red, markersize=14, marker=:xcross)
 
-plot_TS!(fig[2, 2], ctd_clean, fontsize=fs)
+plot_TS!(fig[2, 2], ctd_clean)
 
 save("argo_qc.png", fig, px_per_unit=2)
 

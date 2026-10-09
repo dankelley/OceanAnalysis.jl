@@ -18,10 +18,10 @@ function plot_coastline_polygons!(ax, longitude, latitude; linewidth=0.5,
     n = length(longitude)
     oad(debug, "    length(longitude): $n")
     oad(debug, "    assembling polygons")
-    for i in 1:n+1
+    for i in 1:(n+1)
         if i == n + 1 || isnan(longitude[i]) || isnan(latitude[i])
             if i - start >= 3
-                ring = Makie.Point2f.(longitude[start:i-1], latitude[start:i-1])
+                ring = Makie.Point2f.(longitude[start:(i-1)], latitude[start:(i-1)])
                 push!(polygons, Polygon(ring))
             end
             start = i + 1
@@ -82,7 +82,7 @@ central latitude of the plot view.
   default `(-180.0,180.0,-90.0,90.0)` to show the whole world.  Use `color` to
   set the land color (with default `bisque3`). Use `linewidth` (default 1) to
   set the width of coastlines). Use `xlabel`, `ylabel` and `title` in the usual
-  way for Makie plots. Use `fontsize` (which defaults to 8) to set the font
+  way for Makie plots. Use `fontsize` (which defaults to 12) to set the font
   size for axes and titles.
 
 # Return value
@@ -147,7 +147,7 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     color = pop!(kwargs_dict, :color, :bisque3)
     oad(debug, "      • color:     $(oad_val(color))")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize: $(oad_val(fontsize))")
     linewidth = pop!(kwargs_dict, :linewidth, 0.5)
     oad(debug, "      • linewidth: $(oad_val(linewidth))")

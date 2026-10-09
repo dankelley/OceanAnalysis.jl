@@ -1,11 +1,9 @@
 """
     plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
-        color_by=false, abbreviate::Symbol=:long, fontsize=8,
-        debug::Integer=0, kwargs...)
+        color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
 
     plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressure,
-        color_by=false, abbreviate::Symbol=:long, fontsize=8,
-        debug::Integer=0, kwargs...)
+        color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
 
 Plot an oceanographic profile for data contained in `d`, showing how the
 variable named by `which` depends on either pressure or density.  The variable
@@ -156,7 +154,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     oad(debug, "      • color:       $(oad_val(color))")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     oad(debug, "      • colormap:    $(oad_val(colormap))")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     oad(debug, "      • linewidth:   $(oad_val(linewidth))")

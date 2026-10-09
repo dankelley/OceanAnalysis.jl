@@ -1,8 +1,8 @@
 """
-    plot_adp(adp::Adp; which=:velocity1, time_format=:interval,
+    plot_adp(adp::Adp; which=:velocity1, time_format=:elapsed,
         debug::Integer=0, kwargs...)
 
-    plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval,
+    plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:elapsed,
         debug::Integer=0, kwargs...)
 
 Plot aspects of the data stored in an [`Adp`](@ref) object.
@@ -27,21 +27,21 @@ profiler ([`Adp`](@ref)) object.
 
 # Keywords
 
-- `time_format`: a Symbol indicating how to represent time, if that is
-  on the x-axis of the chosen (heatmap) plot. The default, `:interval`,
-  will select hours or days, depending on the time span. The
-  other choice (which does not work as of October 2026 owing to
-  a bug in Makie) is `:datetime`, which indicates to use DateTime
-  for the axis. If you try to use `:datetime`, a warning will
-  be issued about the Makie bug ... the author will
-  remove that warning when/if Makie solves its bug.
+- `time_format`: a Symbol indicating how to represent time, for
+  heatmap plots that have time on the x-axis. The default,
+  `:elapsed`, will show elapsed time in either hours or days,
+  depending on the time span. The other choice is `:datetime`,
+  which indicates to use DateTime for the axis. NOTE:
+  the `:datetime` method does not work as of October 2026,
+  owing to a bug in Makie version 0.24; see
+  https://github.com/MakieOrg/Makie.jl/issues/5193.
 
 - `debug`: an optional integer value that, if it exceeds 0, indicates that
   debugging output should be printed during processing.
 
 - `kwargs`: optional items, used variously.  The possibilities are
   `"colormap"` (defaulting to `:vik`), `colorrange"` (defaulting to
-  data range), `"fontsize"` (defaulting to 8), `"markersize"`
+  data range), `"fontsize"` (defaulting to 12), `"markersize"`
   (defaulting to 6), `"seriestype"` (defaulting to `:scatter`, and
   only used if `which` equals `:salinity`,
    `:temperature`, `:pressure`, `:heading`, `:pitch`
@@ -88,7 +88,7 @@ plot_adp!(fig[2,1], enu, which=:velocity3, colorrange=cr, title="Upward Velocity
 plot_adp!(fig[2,2], enu, which=:velocity4, colorrange=cr, title="Error Velocity [m/s]")
 ```
 """
-function plot_adp(adp::Adp; which=:velocity1, time_format=:interval, debug::Integer=0, kwargs...)
+function plot_adp(adp::Adp; which=:velocity1, time_format=:elapsed, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp() START")
     fig = Makie.Figure()
     ax, plot = plot_adp!(fig[1, 1], adp;
@@ -98,11 +98,11 @@ function plot_adp(adp::Adp; which=:velocity1, time_format=:interval, debug::Inte
 end
 export plot_adp
 
-function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, debug::Integer=0, kwargs...)
+function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:elapsed, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp!() START")
     oad(debug, "    which=$(repr(which))")
     oad(debug, "    time_format=$(repr(time_format))")
-    time_format in [:datetime, :interval] || error("time_format must be :datetime or :interval")
+    time_format in [:datetime, :elapsed] || error("time_format must be :datetime or :elapsed")
     kwargs_dict = Dict{Symbol,Any}(kwargs)
     oad(debug, "    inferred the following from kwargs (or from defaults):")
     color = pop!(kwargs_dict, :color, :black)
@@ -111,7 +111,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
     oad(debug, "      • colormap:    $(oad_val(colormap))")
     colorrange = pop!(kwargs_dict, :colorrange, :auto)
     oad(debug, "      • colorrange:  $(oad_val(colorrange))")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
     markersize = pop!(kwargs_dict, :markersize, 6)
     oad(debug, "      • markersize:  $(oad_val(markersize))")
@@ -165,14 +165,14 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
         end
         @assert size(z) == (length(t), length(y)) "z is $(size(z)), expected $((length(t), length(y)))"
         # Handle time axis for heatmap (sidestep a Makie bug)
-        if time_format==:interval
+        if time_format==:elapsed
             tstart, tend = extrema(t)
-            interval = (tend - tstart) / Dates.Millisecond(1000)
+            elapsed = (tend - tstart) / Dates.Millisecond(1000)
             # Display by hours up to 2 days, and by days beyond that.
             # For larger time intervals, it makes sense to use the :datetime
             # method, for clarity of presentation ... BUT Makie has an
             # error on that.
-            if interval <= 2 * 86400.0
+            if elapsed <= 2 * 86400.0
                 x = (t .- t[1]) / Dates.Millisecond(1000) / 3600.0
                 ax.xlabel = "Time [hour]"
             else
@@ -200,7 +200,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:interval, d
             return ax, (main=main, cb=cb)
         catch e
             if typeof(e) == StackOverflowError
-                error("Makie cannot plot a heatmap with a DateTime axis (see https://github.com/MakieOrg/Makie.jl/issues/5193)")
+                error("Makie (e.g. version 0.24) cannot plot a heatmap with a DateTime axis (see https://github.com/MakieOrg/Makie.jl/issues/5193)")
             else
                 error("Error in drawing a heatmap: \"$e\"")
             end

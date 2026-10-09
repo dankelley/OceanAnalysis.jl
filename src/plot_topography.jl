@@ -31,7 +31,7 @@ Draw a `heatmap` image of topography.
 
   - `kwargs` Other keyword arguments. You may use `colorrange` to set the range
   for the values being coloured (which defaults to the data range). Use
-  `fontsize` (which defaults to 8) to set the font size for axes and
+  `fontsize` (which defaults to 12) to set the font size for axes and
   titles. Use `title` (which defaults to an empty string) to set the
   title of the plot.
 
@@ -75,7 +75,7 @@ function plot_topography!(fig_pos, topo::Topography;
     else
         oad(debug, "        • colorrange=$colorrange")
     end
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "        • fontsize=$fontsize")
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "        • title=\"$title\"")
@@ -101,15 +101,15 @@ function plot_topography!(fig_pos, topo::Topography;
     oad(debug, "    data extrema: ", extrema(filter(!isnan, data)))
     if domain == :sea
         oad(debug, "    setting land values to NaN")
-        data[data.>0.0] .= NaN
+        data[data .> 0.0] .= NaN
         data .= -data
         oad(debug, "    setting colorscheme to reversed first half of ColorSchemes.topo")
-        colormap = [get(ColorSchemes.topo, i) for i in 0.5:-0.6/1000:0.0]
+        colormap = [get(ColorSchemes.topo, i) for i in 0.5:(-0.6/1000):0.0]
     elseif domain == :land
         oad(debug, "    setting sea values to NaN")
-        data[data.<0.0] .= NaN
+        data[data .< 0.0] .= NaN
         oad(debug, "    setting colorscheme to second half of ColorSchemes.topo")
-        colormap = [get(ColorSchemes.topo, i) for i in 0.5:0.6/1000:1.0]
+        colormap = [get(ColorSchemes.topo, i) for i in 0.5:(0.6/1000):1.0]
     elseif domain == :land_and_sea
         oad(debug, "    setting colorscheme to ColorSchemes.topo")
         colormap = ColorSchemes.topo

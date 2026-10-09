@@ -143,7 +143,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     oad(debug, "      • colormap:    $(oad_val(colormap))")
     colorrange = pop!(kwargs_dict, :colorrange, :auto)
     oad(debug, "      • colorrange:  $(oad_val(colorrange))")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
     levels = pop!(kwargs_dict, :levels, :auto)
     oad(debug, "      • levels:      $(oad_val(levels))")

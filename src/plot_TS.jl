@@ -90,7 +90,7 @@ Information about the analysis is printed if `debug` exceeds 0.
   `:lines` and `:scatterlines`. Each of these is handled in a
   different way, and may be customized by specifying other
   `kwargs...` entries. As with other functions in the package, you may use
-  `fontsize` to set the sizes of text being displayed. To see the possible
+  `fontsize` (default 12) to set the sizes of text being displayed. To see the possible
   elements provided within `kwargs`, call this function
   with `debug=1`, which will cause it will print out entries as they
   are extracted from `kwargs` or set up as defaults, in addition
@@ -182,7 +182,7 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
     oad(debug, "      • color:                    $(oad_val(color))")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     oad(debug, "      • colormap:                 $(oad_val(colormap))")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize:                 $(oad_val(fontsize))")
     linewidth = pop!(kwargs_dict, :linewidth, 1.0)
     oad(debug, "      • linewidth:                $(oad_val(linewidth))")
@@ -299,7 +299,7 @@ export plot_TS!
 
 """
     plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
-        fontsize=9, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
+        labelsize=12, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
         debug::Integer=0)
 
 Add contours of density to an existing TS plot.  This is used by
@@ -331,7 +331,7 @@ drawn by other means.
    processing.
 """
 function plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
-    labelsize=9, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
+    labelsize=12, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,
     debug::Integer=0)
     oad(debug, "plot_TS_sigma0_contours!() START")
     oad(debug, "    levels: ", levels)
@@ -369,8 +369,7 @@ export plot_TS_sigma0_contours!
 
 """
     plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:none,
-        fontsize=8, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense),
-        debug::Integer=0)
+        labelsize=12, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense),
 
 Add contours of spiciness0 to an existing TS plot.  This is used by
 [`plot_TS`](@ref), but can also be used separately, if the TS data
@@ -379,7 +378,7 @@ arguments and keywords, see the documentation for
 [`plot_TS_sigma0_contours!`](@ref).
 """
 function plot_TS_spiciness0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:none,
-    labelsize=8, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense),
+    labelsize=12, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=(:dot, :dense),
     debug::Integer=0)
     oad(debug, "plot_TS_spiciness0_contours!() START")
     oad(debug, "    levels: ", levels)

@@ -10,19 +10,18 @@ orientation.
 
 ```julia
 using OceanAnalysis
-using GLMakie
+using GLMakie # or CairoMakie
 file = joinpath(pkgdir(OceanAnalysis), "data", "adp_rdi.000")
 beam = read_adp_rdi(file);
 xyz = beam_to_xyz(beam);
 enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
 
 # 1. Scatterplot of u vs v
-KW = (fontsize=11, markersize=2)
-fig = plot_adp(enu; which=:uv, title="uv", KW...)
+fig = plot_adp(enu; which=:uv, title="uv", markersize=2)
 save("adp_rdi_uv.png", fig)
 
 # 1. Heatmap of u, v and w
-KW = (fontsize=11, colorrange=(-1.5, 1.5))
+KW = (colorrange=(-1.5, 1.5), ) # note the comma
 fig = Figure()
 plot_adp!(fig[1, 1], enu; which=:velocity1, title="Eastward velocity [m/s]", KW...)
 plot_adp!(fig[2, 1], enu; which=:velocity2, title="Northward velocity [m/s]", KW...)
@@ -122,21 +121,20 @@ ctd_clean = handle_qc(ctd);
 summarize(ctd_clean)
 
 fig = Figure() # will fill with 4 panels
-fs = 11 # larger font than default
 
-plot_profile!(fig[1, 1], ctd; which="salinity", fontsize=fs)
+plot_profile!(fig[1, 1], ctd; which="salinity")
 badS = ctd["salinity_qc"] .!= '1';
 scatter!(ctd["salinity"][badS], ctd["pressure"][badS], color=:red, markersize=14, marker=:xcross)
 
-plot_profile!(fig[1, 2], ctd; which="temperature", fontsize=fs)
+plot_profile!(fig[1, 2], ctd; which="temperature")
 badT = ctd["temperature_qc"] .!= '1';
 scatter!(ctd["temperature"][badT], ctd["pressure"][badT], color=:red, markersize=14, marker=:xcross)
 
-plot_TS!(fig[2, 1], ctd, fontsize=fs)
+plot_TS!(fig[2, 1], ctd)
 bad = badS .| badT;
 scatter!(ctd["SA"][bad], ctd["CT"][bad], color=:red, markersize=14, marker=:xcross)
 
-plot_TS!(fig[2, 2], ctd_clean, fontsize=fs)
+plot_TS!(fig[2, 2], ctd_clean)
 
 save("argo_qc.png", fig, px_per_unit=2)
 ```
@@ -433,10 +431,10 @@ using GLMakie # or CairoMakie
 url = "https://cchdo.ucsd.edu/data/41926/90CT40_1_ct1.zip"; # exchange format
 dir = get_section(url);
 s = read_section(dir);
-s.data = s.data[s["longitude"].<(-68.0)];
+s.data = s.data[s["longitude"] .< (-68.0)];
 # We must grid to get the cross-section diagrams
 sg = grid_section(s, 10.0); # grid to 10-m resolution
-fig = plot_section(sg, which="salinity", fontsize=12,
+fig = plot_section(sg, which="salinity",
     levels=20, limits=(nothing, nothing, 0, 1500))
 save("section.png", fig, px_per_unit=2)
 ```

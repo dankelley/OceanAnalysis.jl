@@ -28,7 +28,7 @@ This function provides some basic plots of the contents of an
 - `kwargs`: other named arguments. The possibilities are: `colormap` to set the
   colormap (which defaults to `:inferno`), `colorrange` to set the color range
   (which defaults tothe full range of data), `fontsize` to set the fontsize
-  (which defaults to 8). and `title` to set the plot title (which defaults to
+  (which defaults to 12). and `title` to set the plot title (which defaults to
   a statement of the start time).
 
 # Return value
@@ -67,7 +67,7 @@ function plot_echosounder!(fig_pos, e::Echosounder; which=:log_amplitude, debug:
     oad(debug, "    colormap=$colormap")
     colorrange = pop!(kwargs_dict, :colorrange, (nothing, nothing))
     oad(debug, "    colorrange=$colorrange (initial)")
-    fontsize = pop!(kwargs_dict, :fontsize, 8)
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "    fontsize=$fontsize")
     title = pop!(kwargs_dict, :title, "Start time $(e.metadata["time"][1])")
     oad(debug, "    title=$title")

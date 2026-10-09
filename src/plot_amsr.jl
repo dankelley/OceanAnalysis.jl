@@ -1,11 +1,9 @@
 """
     plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
-        draw_coastline=true, draw_contours=:none,
-        fontsize=8, debug::Integer=0, kwargs...)
+        draw_coastline=true, draw_contours=:none, debug::Integer=0, kwargs...)
 
-    plot_amsr!(fig_posamsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
-        draw_coastline=true, draw_contours=:none,
-        fontsize=8, debug::Integer=0, kwargs...)
+    plot_amsr!(fig_pos, amsr::Amsr;
+        draw_coastline=true, draw_contours=:none, debug::Integer=0, kwargs...)
 
 Plot a heatmap of a field in an [`Amsr`](@ref) object, using Makie.jl. By
 default, SST is shown using the `:turbo` colorscheme, and the view is of the
@@ -47,15 +45,14 @@ item, and a NamedTuple as the second. The latter contains an element named
   increments. And, finally, if it is a vector of numeric elements, then
   contours are drawn (unlabelled) at those values.
 
-- `fontsize`: size of fonts used for tick labels, axis labels, and the title.
-
 - `debug`: An integer controlling whether to print information during
   processing. The default is to work silently; use any positive value to get
   some printing.
 
 - `kwargs...` optional other arguments to customize the heatmap plot, passed
   through to `Makie.heatmap!`, e.g. set `colormap` and/or
-  `colorrange` to control the palette; set `limits` to control the plot
+  `colorrange` to control the palette; set `fontsize` (default 12)
+  to set the font size; set `limits` to control the plot
   longitude and latitude limits; set `title` for the title, and set
   `xlab` and `ylab` to specify axis names.
 
@@ -91,39 +88,35 @@ contour!(360.0 .+ t["longitude"], t["latitude"], t.data',
 ```
 """
 function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
-    draw_coastline=true, draw_contours=:none,
-    fontsize=8, debug::Integer=0, kwargs...)
+    draw_coastline=true, draw_contours=:none, debug::Integer=0, kwargs...)
     oad(debug, "plot_amsr() BEGIN")
     fig = Makie.Figure()
     ax, plot = plot_amsr!(fig[1, 1], amsr; limits=limits,
         draw_coastline=draw_coastline, draw_contours=draw_contours,
-        fontsize=fontsize, debug=increment_debug(debug), kwargs...)
+        debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_amsr()")
     return Makie.FigureAxisPlot(fig, ax, plot.main)
 end
 export plot_amsr
 
 function plot_amsr!(fig_pos, amsr::Amsr;
-    draw_coastline=true, draw_contours=:none,
-    fontsize=8, debug::Integer=0, kwargs...)
+    draw_coastline=true, draw_contours=:none, debug::Integer=0, kwargs...)
     oad(debug, "plot_amsr!() START")
-    kwargs_dict = Dict{Symbol,Any}(kwargs)
-    limits = pop!(kwargs_dict, :limits, (0.0, 360, -90.0, 90.0))
-    oad(debug, "    limits: $limits")
-    # Set the aspect ratio (different in Makie compared with Plots)
-    aspect_ratio = 1.0 / cos(pi * 0.5 * (limits[3] + limits[4]) / 180.0)
-    box_aspect = (limits[2] - limits[1]) / ((limits[4] - limits[3]) * aspect_ratio)
-    oad(debug, "    aspect_ratio=$aspect_ratio, box_aspect=$box_aspect")
     # get the data
     longitude = amsr.metadata["longitude"]
     latitude = amsr.metadata["latitude"]
     z = amsr.data'
-    # Finally, get remaining keywords
+    # parse kwargs
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    limits = pop!(kwargs_dict, :limits, (0.0, 360, -90.0, 90.0))
+    oad(debug, "    limits: $limits")
     colormap = pop!(kwargs_dict, :colormap, :turbo)
     oad(debug, "    colormap: $colormap")
     colorrange = pop!(kwargs_dict, :colorrange,
         extrema(zz for zz in skipmissing(z) if !isnan(zz)))
     oad(debug, "    colorrange: $colorrange")
+    fontsize = pop!(kwargs_dict, :fontsize, 12)
+    oad(debug, "    fontsize: $fontsize")
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "    title: $title")
     xlab = pop!(kwargs_dict, :xlab, "")
@@ -134,8 +127,13 @@ function plot_amsr!(fig_pos, amsr::Amsr;
         error("plot_profile!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: colormap, colorrange, ",
-            "limits, title, xlab, and ylab.")
+            "fontsize, limits, title, xlab, and ylab.")
     end
+
+    # Set the aspect ratio (different in Makie compared with Plots)
+    aspect_ratio = 1.0 / cos(pi * 0.5 * (limits[3] + limits[4]) / 180.0)
+    box_aspect = (limits[2] - limits[1]) / ((limits[4] - limits[3]) * aspect_ratio)
+    oad(debug, "    aspect_ratio=$aspect_ratio, box_aspect=$box_aspect")
     ax = Makie.Axis(fig_pos[1, 1],
         title=title,
         xlabel=xlab,
