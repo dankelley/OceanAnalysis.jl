@@ -9,9 +9,9 @@ if isfile(file)
     lims = (-63.587, -63.575, 44.6426, 44.655)
     dem = subset_dem(dem, lonlim=lims[1:2], latlim=lims[3:4])
     fig = plot_dem(dem, coordinates=:geographic)
-    save("dem_1.png", fig, px_per_unit=4)
+    save("dem_1.png", fig, px_per_unit=2)
     dem_slope = differentiate_dem(dem)
     fig = plot_dem(dem_slope, coordinates=:geographic, colorrange=(-0.5, 0.5))
-    save("dem_2.png", fig, px_per_unit=4)
+    save("dem_2.png", fig, px_per_unit=2)
 end
 

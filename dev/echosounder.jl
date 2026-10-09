@@ -4,5 +4,5 @@ f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/
 if isfile(f)
     e = read_echosounder(f)
     fig = plot_echosounder(e)
-    save("echosounder.png", fig)
+    save("echosounder.png", fig, px_per_unit=2)
 end
