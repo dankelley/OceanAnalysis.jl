@@ -5,5 +5,5 @@ if isfile(filename)
     n = read_nonna(filename)
     fig = heatmap(n["longitude"], n["latitude"], permutedims(n.data), colormap=:turbo,
         axis=(aspect=DataAspect(),))
-    save("nonna.png", fig)
+    save("nonna.png", fig, px_per_unit=2)
 end

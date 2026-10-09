@@ -18,15 +18,15 @@ enu = xyz_to_enu(xyz, declination=-18.1); # decl for local region
 
 # 1. Scatterplot of u vs v
 fig = plot_adp(enu; which=:uv, title="uv", markersize=2)
-save("adp_rdi_uv.png", fig)
+save("adp_rdi_uv.png", fig, px_per_unit=2)
 
 # 1. Heatmap of u, v and w
-KW = (colorrange=(-1.5, 1.5), ) # note the comma
+KW = (colorrange=(-1.5, 1.5),) # note the comma
 fig = Figure()
 plot_adp!(fig[1, 1], enu; which=:velocity1, title="Eastward velocity [m/s]", KW...)
 plot_adp!(fig[2, 1], enu; which=:velocity2, title="Northward velocity [m/s]", KW...)
 plot_adp!(fig[3, 1], enu; which=:velocity3, title="Upward velocity [m/s]", KW...)
-save("adp_rdi_velocity.png", fig)
+save("adp_rdi_velocity.png", fig, px_per_unit=2)
 ```
 
 ![Acoustic-Doppler Profiler plot](adp_rdi_uv.png)
@@ -227,7 +227,7 @@ if isfile(filename)
     n = read_nonna(filename)
     fig = heatmap(n["longitude"], n["latitude"], permutedims(n.data), colormap=:turbo,
         axis=(aspect=DataAspect(),))
-    save("nonna.png", fig)
+    save("nonna.png", fig, px_per_unit=2)
 end
 ```
 
@@ -280,7 +280,7 @@ lines!([l[1], l[1], l[2], l[2], l[1]], [l[3], l[4], l[4], l[3], l[3]], color=:re
 # Right panel
 plot_coastline!(fig[1, 2], cl, limits=l, scalebar=true)
 
-save("coastline.png", fig, px_per_unit=5)
+save("coastline.png", fig, px_per_unit=2)
 ```
 
 ![Coastline diagram](coastline.png)
@@ -384,10 +384,10 @@ if isfile(file)
     lims = (-63.587, -63.575, 44.6426, 44.655)
     dem = subset_dem(dem, lonlim=lims[1:2], latlim=lims[3:4])
     fig = plot_dem(dem, coordinates=:geographic)
-    save("dem_1.png", fig, px_per_unit=4)
+    save("dem_1.png", fig, px_per_unit=2)
     dem_slope = differentiate_dem(dem)
     fig = plot_dem(dem_slope, coordinates=:geographic, colorrange=(-0.5, 0.5))
-    save("dem_2.png", fig, px_per_unit=4)
+    save("dem_2.png", fig, px_per_unit=2)
 end
 ```
 
@@ -408,7 +408,7 @@ f = "/Users/kelley/Dropbox/data/archive/sleiwex/2008/fielddata/2008-07-01/Merlu/
 if isfile(f)
     e = read_echosounder(f)
     fig = plot_echosounder(e)
-    save("echosounder.png", fig)
+    save("echosounder.png", fig, px_per_unit=2)
 end
 ```
 
@@ -464,7 +464,7 @@ scatter!(i.longitude, i.latitude, color=:blue, markersize=8)
 look = i.type .== "PERMANENT"
 scatter!(i.longitude[look], i.latitude[look], color=:red, markersize=18)
 
-save("tide_gauge_locations.png", fig, px_per_unit=5)
+save("tide_gauge_locations.png", fig, px_per_unit=2)
 ```
 
 ![Tide gauge locations](tide_gauge_locations.png)
@@ -490,7 +490,7 @@ fig = Figure()
 ax = Axis(fig[1, 1], ylabel="Elevation [m]", title="Sea Level at $name")
 lines!(data.time, data.value)
 
-save("tide_gauge_timeseries.png", fig, px_per_unit=5)
+save("tide_gauge_timeseries.png", fig, px_per_unit=2)
 ```
 
 ![Tide gauge timeseries](tide_gauge_timeseries.png)

@@ -11,5 +11,4 @@ lines!([l[1], l[1], l[2], l[2], l[1]], [l[3], l[4], l[4], l[3], l[3]], color=:re
 # Right panel
 plot_coastline!(fig[1, 2], cl, limits=l, scalebar=true)
 
-save("coastline.png", fig, px_per_unit=5)
-
+save("coastline.png", fig, px_per_unit=2)

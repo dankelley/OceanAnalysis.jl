@@ -9,5 +9,5 @@ fig = Figure()
 ax = Axis(fig[1, 1], ylabel="Elevation [m]", title="Sea Level at $name")
 lines!(data.time, data.value)
 
-save("tide_gauge_timeseries.png", fig, px_per_unit=5)
+save("tide_gauge_timeseries.png", fig, px_per_unit=2)
 
