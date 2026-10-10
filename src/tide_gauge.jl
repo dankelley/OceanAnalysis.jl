@@ -49,9 +49,10 @@ lines(time, d."Water Level"; axis=(ylabel="Water Level [m]",))
 1. https://api.tidesandcurrents.noaa.gov/api/
 """
 function noaa_tide_gauge_url(station=8729840, product="water_level",
-    begin_date=Dates.today()-Dates.Month(1),
-    end_date=Dates.today())
+    times=[Dates.today()-Dates.Month(1), Dates.today()])
     base = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+    begin_date = Dates.format(times[1], "yyyymmdd")
+    end_date = Dates.format(times[2], "yyyymmdd")
     return "$(base)?" *
            "begin_date=$(begin_date)&" *
            "end_date=$(end_date)&" *
@@ -147,8 +148,9 @@ export get_tide_gauge_index
 
 
 """
-    get_tide_gauge_file(station; agency=:CHS, variable=:default,
-        times=:default, resolution=:default, debug::Integer=0)
+    get_tide_gauge_file(station; agency="CHS", variable="wlo",
+        times=:default, resolution=:default, filename=:default,
+        debug::Integer=0)
 
 Get a tide-gauge datafile from the Canadian Hydrographic Service (CHS).
 
@@ -187,6 +189,9 @@ see if the data format (or URL/API structure) had changed since autum
   The CHS server may report errors if an attempt is made to download
   long records at high resolution.
 
+- `filename` either a String naming the output file or the Symbol `:default`,
+  indicating that a file name is to be constructed from the data request.
+
 # Keywords
 
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging
@@ -219,7 +224,8 @@ https://api.tidesandcurrents.noaa.gov/api/
 
 """
 function get_tide_gauge_file(station; agency="CHS", variable="wlo",
-    times=:default, resolution=:default, debug::Integer=0)
+    times=:default, resolution=:default, filename=:default,
+    debug::Integer=0)
     oad(debug, "get_tide_gauge_file() START")
     agency in ("CHS", "NOAA") || error("agency=$(repr(agency)) not understood; try \"CHS\" or \"NOAA\"")
     if agency == "CHS"
@@ -240,6 +246,7 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
         rdict = Dict(1 => "ONE_MINUTE", 2 => "TWO_MINUTES", 3 => "THREE_MINUTES", 5 => "FIVE_MINUTES", 15 => "FIFTEEN_MINUTES", 60 => "SIXTY_MINUTES")
         resolution_string = rdict[resolution]
         if times == :default
+            oad(debug, "    will set times automatically")
             time_end = now()
             if resolution == 1
                 time_start = time_end - Week(1)
@@ -253,6 +260,7 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
         if length(times) != 2
             error("length of times (", length(times), ") is not 2, as is required")
         end
+        oad(debug, "    times: $times")
         oad(debug, "    Given resolution=$resolution, using \"$resolution_string\" for download URL")
         oad(debug, "    Seeking data from $time_start <= time <= $time_end")
         oad(debug, "    Using get_tide_gauge_index() to find the hash-code needed to download the data")
@@ -270,12 +278,14 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
         fmt = "yyyy-mm-ddTHH%3AMM%3A00Z"
         url = @sprintf("https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/%s/data?time-series-code=%s&from=%s&to=%s&resolution=%s", i[1, :id], String(variable), Dates.format(times[1], fmt), Dates.format(times[2], fmt), resolution_string)
         oad(debug, "    Source url: $url")
-        filename =
-            "tide_gauge_" * i[1, :code] * "_" *
-            Dates.format(times[1], "yyyymmddTHHMM") * "_" *
-            Dates.format(times[2], "yyyymmddTHHMM") * "_" *
-            String(variable) * "_" *
-            resolution_string * ".csv"
+        if filename == :default
+            filename =
+                "tide_gauge_" * i[1, :code] * "_" *
+                Dates.format(times[1], "yyyymmddTHHMM") * "_" *
+                Dates.format(times[2], "yyyymmddTHHMM") * "_" *
+                String(variable) * "_" *
+                resolution_string * ".csv"
+        end
         # Save JSON file to a temporary location, then decode it
         # and save time,value to a CSV file.
         data = mktemp() do tmp_path, tmp_io
@@ -300,24 +310,46 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
         oad(debug, "END get_tide_gauge_file()")
         return rval
     else
-        oad(debug, "    About to try retrieving a NOAA file")
-        url = noaa_tide_gauge_url(station)
+        oad(debug, "    about to try retrieving a NOAA file")
+        # variable can be water_level, predictions, air_pressure or wind.
+        url = noaa_tide_gauge_url(station, variable, times)
+        oad(debug, "    url: $url")
+        if filename == :default
+            filename =
+                "tide_gauge_" * i[1, :code] * "_" *
+                Dates.format(times[1], "yyyymmddTHHMM") * "_" *
+                Dates.format(times[2], "yyyymmddTHHMM") * "_" *
+                String(variable) * "_" *
+                resolution_string * ".csv"
+        end
+        oad(debug, "    filename: $filename")
         data = mktemp() do tmp_path, tmp_io
             close(tmp_io)
             Downloads.download(url, tmp_path)
             open(tmp_path) do io
-                d = CSV.read(io, DataFrame, missingstring="-")
+                d = CSV.read(io, DataFrame, missingstring=["", "-"], stripwhitespace=true)
                 rename!(strip, d) # remove leading and trailing spaces
                 return d
             end
         end
         oad(debug, "    the downloaded file has $(nrow(data)) lines")
+        oad(debug, "    column names in file: $(names(data))")
         time = DateTime.(data."Date Time", dateformat"yyyy-mm-dd HH:MM")
         #oad(debug, "    first(time,3): $(first(time, 3))")
-        value = data."Water Level"
+        if variable == "water_level"
+            vname = "Water Level"
+        elseif variable == "predictions"
+            vname = "Prediction"
+        elseif variable == "wind"
+            vname = "Speed"
+        elseif variable == "air_pressure"
+            vname = "Pressure"
+        else
+            vname=2 # guess that it's in column 2
+        end
+        value = data[:, vname]
         #oad(debug, "    first(value,3): $(first(value, 3))")
         df = DataFrame(time=time, value=value)
-        filename="DANNY.csv"
         oad(debug, "    saving data in $filename")
         CSV.write(filename, df)
         rval = (station_name=station, file=filename)
