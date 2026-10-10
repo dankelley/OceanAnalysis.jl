@@ -14,6 +14,9 @@ Release notes:
 
 ### Added
 
+- `noaa_tide_gauge_url` returns a URL for downloading NOAA tide-gauge
+  data. FIXME: I may combine this into the existing similar function
+  used for CHS data, so use this with caution.
 -
 
 

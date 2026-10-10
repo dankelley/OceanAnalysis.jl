@@ -4,6 +4,63 @@ using Dates
 using Printf
 using Downloads
 
+
+"""
+    noaa_tide_gauge_url(station=8729840, product="water_level",
+        begin_date=Dates.today(), end_date=Dates.today()-Dates.Month(1))
+
+Construct a URL for a CSV file that can be downloaded from the NOAA webserver
+(see Ref 1) that provides information relating to tide gauges (and related things).
+
+# Arguments
+
+- `station` a station number (defaults to 8729840, for Pensacola, FL).
+
+- `product` desired product. This may be `"water_level"` (the default),
+  `"predictions"`, `"air_pressure"` or `"wind"`.  (Other items are
+  available from the webserver, too ... check Ref 1 for more on this.)
+
+- `begin_date` and `end_date` are DateTime values specifying the time range.
+  These default to a one-month interval up to today's date.
+
+# Return value
+
+This returns a String with a Url that holds the data in CSV format. See
+the Examples (and note the trick to fix up column names).
+
+# Examples
+
+```julia
+using OceanAnalysis, Downloads, CSV, DataFrames, Dates
+using GLMakie # or CairoMakie
+# Download and read data
+url = noaa_tide_gauge_url()
+file = Downloads.download(url, "water_level.csv")
+d = CSV.read(file, DataFrame)
+# Remove leading/trailing spaces from column names
+rename!(strip, d) # remove leading and trailing spaces
+# Plot time-series
+time = DateTime.(d."Date Time", "yyyy-mm-dd HH:MM")
+lines(time, d."Water Level"; axis=(ylabel="Water Level [m]",))
+```
+
+# References
+1. https://api.tidesandcurrents.noaa.gov/api/
+"""
+function noaa_tide_gauge_url(station=8729840, product="water_level",
+    begin_date=Dates.today()-Dates.Month(1),
+    end_date=Dates.today())
+    base = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+    return "$(base)?" *
+           "begin_date=$(begin_date)&" *
+           "end_date=$(end_date)&" *
+           "station=$(station)&" *
+           "product=$(product)&" *
+           "datum=STND&time_zone=gmt&units=metric&format=csv"
+end
+export noaa_tide_gauge_url
+
+
 """
     get_tide_gauge_index(search=:all; debug::Integer=0)
 

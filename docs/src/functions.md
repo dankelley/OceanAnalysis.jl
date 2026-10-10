@@ -54,6 +54,7 @@ OceanAnalysis.MLD_KRH
 OceanAnalysis.N2
 OceanAnalysis.N2_spline
 OceanAnalysis.N2_first_difference
+OceanAnalysis.noaa_tide_gauge_url
 OceanAnalysis.oad
 OceanAnalysis.OceanAnalysis
 OceanAnalysis.plot_adp
