@@ -11,7 +11,11 @@ import CSV
         begin_date=Dates.today(), end_date=Dates.today()-Dates.Month(1))
 
 Construct a URL for a CSV file that can be downloaded from the NOAA webserver
-(see Ref 1) that provides information relating to tide gauges (and related things).
+(see References 1 and 2) that provides information relating to tide gauges
+(and related things).
+
+This is used by [`get_tide_gauge_file`](@ref), but can also be used directly,
+as in the Example.
 
 # Arguments
 
@@ -23,6 +27,11 @@ Construct a URL for a CSV file that can be downloaded from the NOAA webserver
 
 - `begin_date` and `end_date` are DateTime values specifying the time range.
   These default to a one-month interval up to today's date.
+
+- `datum` a String indicating the datum to be used. The default is `"MLLW"`,
+  for "mean lower low water". The other choices are listed at Reference 2,
+  although the related online tool lists only the default, plus
+  `"STND"`, `"MHHW"`. `"MHW"`, `"MTL"`, `"MLW"`, `"MSL"`, and `"NAVD"`.
 
 # Return value
 
@@ -37,19 +46,21 @@ using GLMakie # or CairoMakie
 # Download and read data
 url = noaa_tide_gauge_url()
 file = Downloads.download(url, "water_level.csv")
-d = CSV.read(file, DataFrame)
-# Remove leading/trailing spaces from column names
-rename!(strip, d) # remove leading and trailing spaces
+d = CSV.read(file, DataFrame, missingstring=["", "-"], stripwhitespace=true)
 # Plot time-series
 time = DateTime.(d."Date Time", "yyyy-mm-dd HH:MM")
 lines(time, d."Water Level"; axis=(ylabel="Water Level [m]",))
 ```
 
 # References
-1. https://api.tidesandcurrents.noaa.gov/api/
+
+1. https://api.tidesandcurrents.noaa.gov/api/prod/
+
+2. https://api.tidesandcurrents.noaa.gov/api/prod/#datum
 """
 function noaa_tide_gauge_url(station=8729840, product="water_level",
-    times=[Dates.today()-Dates.Month(1), Dates.today()])
+    times=[Dates.today()-Dates.Month(1), Dates.today()],
+    datum="MLLW")
     base = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
     begin_date = Dates.format(times[1], "yyyymmdd")
     end_date = Dates.format(times[2], "yyyymmdd")
@@ -58,7 +69,8 @@ function noaa_tide_gauge_url(station=8729840, product="water_level",
            "end_date=$(end_date)&" *
            "station=$(station)&" *
            "product=$(product)&" *
-           "datum=STND&time_zone=gmt&units=metric&format=csv"
+           "datum=$(datum)&" *
+           "time_zone=gmt&units=metric&format=csv"
 end
 export noaa_tide_gauge_url
 
