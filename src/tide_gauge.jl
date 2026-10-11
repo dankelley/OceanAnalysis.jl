@@ -195,7 +195,8 @@ which the data download is being attempted.
   `"wlp"` for water-level predictions, or `"metadata"` for metadata. If
   `agency=:NOAA` the common choices are `"water_level"` for observed
   water-level observations, `"predictions"` for water-level predictions,
-  `"air_pressure"` for air pressure or `"wind"` for wind speed.
+  `"air_pressure"` for air pressure, `"wind"` for wind speed,
+  or `"direction"` for wind direction.
 
 - `times` an indication of the start and end times for which data are sought.
   This may be either a Tuple holding two DateTime values or the Symbol
@@ -335,16 +336,18 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
         return rval
     else
         oad(debug, "    about to try retrieving a NOAA file")
-        # variable can be water_level, predictions, air_pressure or wind.
-        url = noaa_tide_gauge_url(station, variable, times, datum)
+        # variable: water_level, predictions, air_pressure, wind, or direction
+        if variable == "direction" # special-case
+            url = noaa_tide_gauge_url(station, "wind", times, datum)
+        else
+            url = noaa_tide_gauge_url(station, variable, times, datum)
+        end
         oad(debug, "    url: $url")
         if filename == :default
             filename =
-                "tide_gauge_" * i[1, :code] * "_" *
+                "tide_gauge_$(station)_$(variable)_" *
                 Dates.format(times[1], "yyyymmddTHHMM") * "_" *
-                Dates.format(times[2], "yyyymmddTHHMM") * "_" *
-                String(variable) * "_" *
-                resolution_string * ".csv"
+                Dates.format(times[2], "yyyymmddTHHMM") * ".csv"
         end
         oad(debug, "    filename: $filename")
         data = mktemp() do tmp_path, tmp_io
@@ -366,6 +369,8 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
             vname = "Prediction"
         elseif variable == "wind"
             vname = "Speed"
+        elseif variable == "direction"
+            vname = "Direction"
         elseif variable == "air_pressure"
             vname = "Pressure"
         else
