@@ -34,6 +34,12 @@ as in the Example.
   `"MHHW"`. `"MHW"`, `"MTL"`, `"MLW"`, `"MLLW"`, `"MSL"`, `"NAVD"`
   and `"STND"`. See Reference 2 for details.
 
+# Keywords
+
+- `debug` an Integer with 0 indicating to work quietly and any
+  positive integer to indicate that some debugging information
+  should be printed.
+
 # Return value
 
 This returns a String with a Url that holds the data in CSV format. See
@@ -59,19 +65,30 @@ lines(time, d."Water Level"; axis=(ylabel="Water Level [m]",))
 
 2. https://api.tidesandcurrents.noaa.gov/api/prod/#datum
 """
-function noaa_tide_gauge_url(station=8729840, product="water_level",
+function noaa_tide_gauge_url(station=8729840, variable="water_level",
     times=[Dates.today()-Dates.Month(1), Dates.today()],
-    datum="MLLW")
+    datum="MLLW"; debug=0)
+    oad(debug, "noaa_tide_gauge_url() START")
+    oad(debug, "    called with arguments:")
+    oad(debug, "      ° station=$(repr(station))")
+    oad(debug, "      ° variable=$variable")
+    oad(debug, "      ° times=$times")
+    oad(debug, "      ° datum=$datum")
     base = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+    oad(debug, "    using base=$(repr(base))")
     begin_date = Dates.format(times[1], "yyyymmdd")
     end_date = Dates.format(times[2], "yyyymmdd")
-    return "$(base)?" *
+    oad(debug, "    set begin_date=$(begin_date)")
+    oad(debug, "    set end_date=$(end_date)")
+    rval = "$(base)?" *
            "begin_date=$(begin_date)&" *
            "end_date=$(end_date)&" *
            "station=$(station)&" *
-           "product=$(product)&" *
+           "product=$(variable)&" *
            "datum=$(datum)&" *
            "time_zone=gmt&units=metric&format=csv"
+    oad(debug, "END noaa_tide_gauge_url()")
+    return rval
 end
 export noaa_tide_gauge_url
 
@@ -161,7 +178,7 @@ export get_tide_gauge_index
 
 
 """
-    get_tide_gauge_file(station; agency="CHS", variable="wlo",
+    get_tide_gauge_file(station; agency="CHS", variable=:default,
         times=:default, resolution=:default, filename=:default,
         datum="MLLW", debug::Integer=0)
 
@@ -248,20 +265,26 @@ lines(data.time, data.value; axis=(ylabel="Sea Level [m]", title="NOAA station "
 https://api.tidesandcurrents.noaa.gov/api/
 
 """
-function get_tide_gauge_file(station; agency="CHS", variable="wlo",
+function get_tide_gauge_file(station; agency="CHS", variable=:default,
     times=:default, resolution=:default, filename=:default,
     datum="MLLW", debug::Integer=0)
     oad(debug, "get_tide_gauge_file() START")
     agency in ("CHS", "NOAA") || error("agency=$(repr(agency)) not understood; try \"CHS\" or \"NOAA\"")
     if agency == "CHS"
+        if variable == :default
+            variable = "wlo"
+            oad(debug, "    set variable=$variable (the default for NOAA)")
+        end
         variable in ("wlo", "wlp", "metadata") || error("variable $(repr(variable)) not handled")
-    end
-    if agency == "CHS"
         if resolution == :default
             resolution = 5
         end
         resolution in (1, 3, 5, 15, 60) || error("for agency=\"CHS\", resolution must be 1, 3, 5, 15 or 60, but it is $(repr(resolution))")
     else
+        if variable == :default
+            variable = "water_level"
+            oad(debug, "    set variable=$variable (the default for NOAA)")
+        end
         if resolution == :default
             resolution = 6
         end
@@ -335,12 +358,17 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
         oad(debug, "END get_tide_gauge_file()")
         return rval
     else
-        oad(debug, "    about to try retrieving a NOAA file")
+        if times == :default
+            n = Dates.now()
+            times = [n - Month(1), n]
+            oad(debug, "    set times=$times")
+        end
+        oad(debug, "    about to call noaa_tide_gauge_url() to find URL")
         # variable: water_level, predictions, air_pressure, wind, or direction
         if variable == "direction" # special-case
-            url = noaa_tide_gauge_url(station, "wind", times, datum)
+            url = noaa_tide_gauge_url(station, "wind", times, datum, debug=increment_debug(debug))
         else
-            url = noaa_tide_gauge_url(station, variable, times, datum)
+            url = noaa_tide_gauge_url(station, variable, times, datum, debug=increment_debug(debug))
         end
         oad(debug, "    url: $url")
         if filename == :default
