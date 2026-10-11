@@ -2,21 +2,31 @@
 
 Release notes:
 
+## Changelog from version 0.2.19 to version 0.2.20
+
+### Changed
+
+- `get_tide_gauge_file` can now download NOAA data as well as CHS data.
+
+### Added
+
+- `noaa_tide_gauge_url` returns a URL for NOAA tide-gauge data.
+
+
 ## Changelog from version 0.2.18 to version 0.2.19
 
 ### Changed
 
 - `read_ctd_cnv` understands some more names for variables
 - `read_ctd_cnv` sets up a metadata dictionary so that elements can be
-  retrieved with either the name in the data file, or the name in the returned
+-  retrieved with either the name in the data file, or the name in the returned
   `Ctd` value.
 - `read_adp_rdi` now also reads temperature, salinity and pressure.
 
 ### Added
 
-- `noaa_tide_gauge_url` returns a URL for downloading NOAA tide-gauge
-  data.
-- `get_tide_gauge_file` can now download NOAA data as well as CHS data.
+-
+
 
 
 ## Changelog from version 0.2.17 to version 0.2.18
