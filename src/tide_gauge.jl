@@ -8,7 +8,8 @@ import CSV
 
 """
     noaa_tide_gauge_url(station=8729840, product="water_level",
-        begin_date=Dates.today(), end_date=Dates.today()-Dates.Month(1))
+        times=[Dates.today()-Dates.Month(1), Dates.today()],
+        datum="MLLW")
 
 Construct a URL for a CSV file that can be downloaded from the NOAA webserver
 (see References 1 and 2) that provides information relating to tide gauges
@@ -28,10 +29,10 @@ as in the Example.
 - `begin_date` and `end_date` are DateTime values specifying the time range.
   These default to a one-month interval up to today's date.
 
-- `datum` a String indicating the datum to be used. The default is `"MLLW"`,
-  for "mean lower low water". The other choices are listed at Reference 2,
-  although the related online tool lists only the default, plus
-  `"STND"`, `"MHHW"`. `"MHW"`, `"MTL"`, `"MLW"`, `"MSL"`, and `"NAVD"`.
+- `datum` a String indicating the datum to be used.  The choices are
+  `"MLLW"` (the default, which stands for mean-lowest-low-water),
+  `"MHHW"`. `"MHW"`, `"MTL"`, `"MLW"`, `"MLLW"`, `"MSL"`, `"NAVD"`
+  and `"STND"`. See Reference 2 for details.
 
 # Return value
 
@@ -162,7 +163,7 @@ export get_tide_gauge_index
 """
     get_tide_gauge_file(station; agency="CHS", variable="wlo",
         times=:default, resolution=:default, filename=:default,
-        debug::Integer=0)
+        datum="MLLW", debug::Integer=0)
 
 Get a tide-gauge datafile from the Canadian Hydrographic Service (CHS).
 
@@ -213,6 +214,10 @@ which the data download is being attempted.
 
 # Keywords
 
+- `datum`: a String indicating the desired datum.  This is used only
+  for `agency="NOAA"`, and is passed to [`noaa_tide_gauge_url`](@ref)
+  when the latter is used to determine the URL from which to download.
+
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging
    output should be printed during processing.
 
@@ -244,7 +249,7 @@ https://api.tidesandcurrents.noaa.gov/api/
 """
 function get_tide_gauge_file(station; agency="CHS", variable="wlo",
     times=:default, resolution=:default, filename=:default,
-    debug::Integer=0)
+    datum="MLLW", debug::Integer=0)
     oad(debug, "get_tide_gauge_file() START")
     agency in ("CHS", "NOAA") || error("agency=$(repr(agency)) not understood; try \"CHS\" or \"NOAA\"")
     if agency == "CHS"
@@ -331,7 +336,7 @@ function get_tide_gauge_file(station; agency="CHS", variable="wlo",
     else
         oad(debug, "    about to try retrieving a NOAA file")
         # variable can be water_level, predictions, air_pressure or wind.
-        url = noaa_tide_gauge_url(station, variable, times)
+        url = noaa_tide_gauge_url(station, variable, times, datum)
         oad(debug, "    url: $url")
         if filename == :default
             filename =
