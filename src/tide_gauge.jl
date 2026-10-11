@@ -154,10 +154,17 @@ export get_tide_gauge_index
 
 Get a tide-gauge datafile from the Canadian Hydrographic Service (CHS).
 
-This function depends on information provided at References 1 and 2, and so if
-it stops working, a good plan would be to consult these references to
+This function downloads a temporary file that holds data
+on the indicated tide-gauge `station`, reads its contents to extract
+time and the requested `variable`, and then creates a new CSV file
+with columns named `time` and `value`.
+
+The method depends on information provided at References 1 and 2, and so if
+this function stops working, a good plan would be to consult these references to
 see if the data format (or URL/API structure) had changed since autum
-2026, when the function was written.
+2026, when the function was written.  Calling the function with `debug=1`
+will reveal the steps of processing and, in particular, the URL from
+which the data download is being attempted.
 
 # Arguments
 
