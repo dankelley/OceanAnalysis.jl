@@ -8,12 +8,10 @@ food" method, in which additions and changes are guided by the author's
 everyday work. Some of the changes may break existing code, so the development
 status ought to be considered "alpha".
 
-The initial version of this package used the `Plots` package for graphics,
-but a switch to `Makie` was made in the autumn of 2026 to
-overcome some limitations of `Plots` for the author's applications,
-and to let users employ the very wide possibilities offered
-by `Makie`.  See the documentation for `plot_profile()` for
-examples of how to plot multiple panels with the `Makie` system
+The initial version of this package used the `Plots` package for graphics, but
+a switch to `Makie` was made in September-October 2026 to overcome some
+limitations of `Plots` and to let users employ the wider possibilities
+offered by `Makie`.
 
 This README file is just a landing page for GitHub perusal. The full
 documentation is available
