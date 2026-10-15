@@ -109,7 +109,10 @@ plot_profile!(fig[1,2], ctd; which="CT", color_by="SA")
 function plot_profile(d; which::String="CT", vertical::Symbol=:pressure,
     color_by=false, abbreviate::Symbol=:long, debug::Integer=0, kwargs...)
     oad(debug, "plot_profile() BEGIN")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     ax, plot = plot_profile!(fig[1, 1], d; which=which, vertical=vertical,
         color_by=color_by, abbreviate=abbreviate,
         debug=increment_debug(debug), kwargs...)
@@ -170,6 +173,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     oad(debug, "      • markersize:  $markersize")
     seriestype = pop!(kwargs_dict, :seriestype, :scatter)
     oad(debug, "      • seriestype:  $(oad_val(seriestype))")
+    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:       $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, label_from_varname(which))
