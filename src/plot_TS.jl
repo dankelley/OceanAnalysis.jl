@@ -90,6 +90,8 @@ Information about the analysis is printed if `debug` exceeds 0.
   `:lines` and `:scatterlines`. Each of these is handled in a
   different way, and may be customized by specifying other
   `kwargs...` entries. As with other functions in the package, you may use
+  `size` (default (800,600)), which is used by `plot_TS()` but not by
+  `plot_TS!()`, to set the size of the plot area and
   `fontsize` (default 12) to set the sizes of text being displayed. To see the possible
   elements provided within `kwargs`, call this function
   with `debug=1`, which will cause it will print out entries as they
@@ -134,7 +136,10 @@ function plot_TS(d;
     spiciness0_levels::Union{Symbol,Integer,AbstractVector}=:none,
     plot_freezing=true, abbreviate=false, color_by=false, debug::Integer=0, kwargs...)
     oad(debug, "plot_TS() START")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     ax, plot = plot_TS!(fig[1, 1], d;
         sigma0_levels=sigma0_levels, spiciness0_levels=spiciness0_levels,
         plot_freezing=plot_freezing,
@@ -200,6 +205,8 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
     oad(debug, "      • sigma0_contour_color:     $(oad_val(sigma0_contour_color))")
     spiciness0_contour_color = pop!(kwargs_dict, :spiciness0_contour_color, :darkgray)
     oad(debug, "      • spiciness0_contour_color: $(oad_val(spiciness0_contour_color))")
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "      • size:                     $size")
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:                    $(oad_val(title))")
     # Check for unhandled keywords
@@ -208,7 +215,7 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: color, colormap, fontsize, ",
             "linewidth, limits, ",
-            "marker, markercolor, markersize, seriestype, and title")
+            "marker, markercolor, markersize, seriestype, size and title")
     end
     # Draw the data.
     oad(debug, "    drawing the data")
