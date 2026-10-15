@@ -6,7 +6,8 @@ Release notes:
 
 ### Changed
 
--
+- Several `plot_*()` functions gain a `size` keyword argument (but not the
+  corresponding mutating functions).
 
 ### Added
 
