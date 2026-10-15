@@ -65,15 +65,15 @@ are called.
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
   `seriestype` is supplied, it controls how the data are illustrated. The
   possible values for `seriestype` are `:scatter` (the default), `:lines` and
-  `:scatterlines`. As with other functions in the package, you may use
-  `fontsize` to set the sizes of text being displayed.  The other entries for
-  `kwargs` follow Makie conventions, apart from a slight variation to
-  `limits`, which here defaults to showing a little whitespace around the
-  data span. To learn about `kwargs` entries that apply to the plot
-  you're trying to make, call the functions with `debug=1`, which will
-  cause it to print out entries as they are extracted from `kwargs`
-  or set up as defaults, in addition to the arguments
-  that are being passed to the Makie functions `scatter!`,
+  `:scatterlines`.  You may use `size` (default (800,600)), which is used by
+  `plot_TS()` but not by `plot_TS!()`, to set the size of the plot area and
+  `fontsize` (default 12) to set the sizes of text being displayed. The other
+  entries for `kwargs` follow Makie conventions, apart from a slight variation to
+  `limits`, which here defaults to showing a little whitespace around the data
+  span. To learn about `kwargs` entries that apply to the plot you're trying to
+  make, call the functions with `debug=1`, which will cause it to print out
+  entries as they are extracted from `kwargs` or set up as defaults, in addition
+  to the arguments that are being passed to the Makie functions `scatter!`,
   `lines!` or `scatterlines!`.
 
 # Return value

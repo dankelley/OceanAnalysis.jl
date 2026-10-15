@@ -80,10 +80,11 @@ central latitude of the plot view.
 
 - `kwargs...` other named arguments. Use `limits` to set the plot domain (with
   default `(-180.0,180.0,-90.0,90.0)` to show the whole world.  Use `color` to
-  set the land color (with default `bisque3`). Use `linewidth` (default 1) to
-  set the width of coastlines). Use `xlabel`, `ylabel` and `title` in the usual
-  way for Makie plots. Use `fontsize` (which defaults to 12) to set the font
-  size for axes and titles.
+  set the land color (with default `bisque3`). Use `linewidth` (default 1) to set
+  the width of coastlines). Use `xlabel`, `ylabel` and `title` in the usual way
+  for Makie plots. You may use `size` (default (800,600)), which is used by
+  `plot_TS()` but not by `plot_TS!()`, to set the size of the plot area and
+  `fontsize` (default 12) to set the sizes of text being displayed.
 
 # Return value
 

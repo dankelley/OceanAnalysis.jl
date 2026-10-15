@@ -86,21 +86,18 @@ Information about the analysis is printed if `debug` exceeds 0.
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
   `seriestype` is supplied, it controls how the data are indicated.  The
-  permitted values for `seriestype` are `:scatter` (the default),
-  `:lines` and `:scatterlines`. Each of these is handled in a
-  different way, and may be customized by specifying other
-  `kwargs...` entries. As with other functions in the package, you may use
-  `size` (default (800,600)), which is used by `plot_TS()` but not by
-  `plot_TS!()`, to set the size of the plot area and
-  `fontsize` (default 12) to set the sizes of text being displayed. To see the possible
-  elements provided within `kwargs`, call this function
-  with `debug=1`, which will cause it will print out entries as they
-  are extracted from `kwargs` or set up as defaults, in addition
-  to the arguments that are being passed to the
-  Makie functions `scatter!`, `lines!` or `scatterlines!`.
-  The colors of the (optional) density and spiciness contour
-  lines are set by `sigma0_contour_color` and
-  `spiciness0_contour_color`, respectively.
+  permitted values for `seriestype` are `:scatter` (the default), `:lines` and
+  `:scatterlines`. Each of these is handled in a different way, and may be
+  customized by specifying other `kwargs...` entries. You may use `size`
+  (default (800,600)), which is used by `plot_TS()` but not by `plot_TS!()`,
+  to set the size of the plot area and `fontsize` (default 12) to set the
+  sizes of text being displayed. To see the possible elements provided within
+  `kwargs`, call this function with `debug=1`, which will cause it will print
+  out entries as they are extracted from `kwargs` or set up as defaults,
+  in addition to the arguments that are being passed to the Makie
+  functions `scatter!`, `lines!` or `scatterlines!`. The colors of the
+  (optional) density and spiciness contour lines are set by
+  `sigma0_contour_color` and `spiciness0_contour_color`, respectively.
 
 
 # Return value
