@@ -28,8 +28,9 @@ This function provides some basic plots of the contents of an
 - `kwargs`: other named arguments. The possibilities are: `colormap` to set the
   colormap (which defaults to `:inferno`), `colorrange` to set the color range
   (which defaults tothe full range of data), `fontsize` to set the fontsize
-  (which defaults to 12). and `title` to set the plot title (which defaults to
-  a statement of the start time).
+  (which defaults to 12), `size` to set plot size (used by `plot_echosounder()`,
+  but not by `plot_echosounder!()`) and `title` to set the plot title
+  (which defaults to a statement of the start time).
 
 # Return value
 
@@ -52,7 +53,10 @@ end
 """
 function plot_echosounder(e::Echosounder; which=:log_amplitude, debug::Integer=0, kwargs...)
     oad(debug, "plot_echosounder() BEGIN")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     plot_echosounder!(fig[1, 1], e; which=which, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_echosounder()")
     return fig
@@ -69,6 +73,7 @@ function plot_echosounder!(fig_pos, e::Echosounder; which=:log_amplitude, debug:
     oad(debug, "    colorrange=$colorrange (initial)")
     fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "    fontsize=$fontsize")
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "Start time $(e.metadata["time"][1])")
     oad(debug, "    title=$title")
     if !isempty(kwargs_dict)
