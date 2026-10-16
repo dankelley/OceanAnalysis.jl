@@ -53,7 +53,9 @@ item, and a NamedTuple as the second. The latter contains an element named
   through to `Makie.heatmap!`, e.g. set `colormap` and/or
   `colorrange` to control the palette; set `fontsize` (default 12)
   to set the font size; set `limits` to control the plot
-  longitude and latitude limits; set `title` for the title, and set
+  longitude and latitude limits; set `size` to set the plot size of
+  the non-mutating form (`plot_amsr()`) but not the mutating
+  form (`plot_amsr!()`), set `title` for the title, and set
   `xlab` and `ylab` to specify axis names.
 
 # Return value
@@ -90,7 +92,10 @@ contour!(360.0 .+ t["longitude"], t["latitude"], t.data',
 function plot_amsr(amsr::Amsr; limits=(0.0, 360, -90.0, 90.0),
     draw_coastline=true, draw_contours=:none, debug::Integer=0, kwargs...)
     oad(debug, "plot_amsr() BEGIN")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     ax, plot = plot_amsr!(fig[1, 1], amsr; limits=limits,
         draw_coastline=draw_coastline, draw_contours=draw_contours,
         debug=increment_debug(debug), kwargs...)
@@ -117,6 +122,7 @@ function plot_amsr!(fig_pos, amsr::Amsr;
     oad(debug, "    colorrange: $colorrange")
     fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "    fontsize: $fontsize")
+    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "    title: $title")
     xlab = pop!(kwargs_dict, :xlab, "")
