@@ -65,18 +65,19 @@ https://github.com/MakieOrg/Makie.jl/issues/5811 for a bug report on this.
 - `debug`: an optional integer value that, if it exceeds 0, indicates that
   debugging output should be printed during processing.
 
-- `kwargs...` extra arguments that are parsed and handled according
-  to the value of `type`. The permitted keywords are: `color`, `colormap`,
-  `colorrange`, `fontsize`, `levels`, `limits`, `linewidth`, `xlabel`, `ylabel` and `title`.
-  Not all of these are used for all plot types.  Users familiar with
-  Makie plotting can perhaps guess the possibilities. For example, `color`,
-  `levels` and `linewidth` all relate to contour lines, so their values
-  are only used if `type` is `:contour` or `:contourf_contour`.
-  Simillary, `colormap` and `colorrange` control colour fields, so their
-  values are only used if `type` is `:contourf`, `:contourf_contour` or `:heatmap`.
-  The labelling elements, `xlabel`, `ylabel` and `title` all are given
-  reasonable defaults (depending on `which`, `xvar` and `yvar`) if they are not
-  specified in the function call.
+- `kwargs...` extra arguments that are parsed and handled according to the
+  value of `type`. The permitted keywords are: `color`, `colormap`, `colorrange`,
+  `fontsize`, `levels`, `limits`, `linewidth`, `xlabel`, `ylabel`, `size` (for
+  the non-mutating version, `plot_section()`, only) and `title`. Not all of
+  these are used for all plot types.  Users familiar with Makie plotting can
+  perhaps guess the possibilities. For example, `color`, `levels` and
+  `linewidth` all relate to contour lines, so their values are only used
+  if `type` is `:contour` or `:contourf_contour`. Simillary, `colormap`
+  and `colorrange` control colour fields, so their values are only
+  used if `type` is `:contourf`, `:contourf_contour` or `:heatmap`.
+  The labelling elements, `xlabel`, `ylabel` and `title` all are
+  given reasonable defaults (depending on `which`, `xvar` and
+  `yvar`) if they are not specified in the function call.
 
 # Return value
 
@@ -116,7 +117,10 @@ function plot_section(section::Section; which="salinity",
     type=:contourf_contour, xvar=:latitude, yvar=:pressure, show_stations=true,
     debug=0, kwargs...)
     oad(debug, "plot_section() BEGIN")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     ax, plot = plot_section!(fig[1, 1], section; which=which,
         type=type, xvar=xvar, yvar=yvar, show_stations=show_stations,
         debug=increment_debug(debug), kwargs...)
@@ -155,6 +159,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     oad(debug, "      • xlabel:      $(oad_val(xlabel))")
     ylabel = pop!(kwargs_dict, :ylabel, :auto)
     oad(debug, "      • ylabel:      $(oad_val(ylabel))")
+    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:       $(oad_val(title))")
     # Check for unhandled keywords
