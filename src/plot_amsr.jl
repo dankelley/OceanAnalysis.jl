@@ -122,7 +122,7 @@ function plot_amsr!(fig_pos, amsr::Amsr;
     oad(debug, "    colorrange: $colorrange")
     fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "    fontsize: $fontsize")
-    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "    title: $title")
     xlab = pop!(kwargs_dict, :xlab, "")

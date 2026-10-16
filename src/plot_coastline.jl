@@ -157,7 +157,7 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     oad(debug, "      • linewidth: $(oad_val(linewidth))")
     lims = pop!(kwargs_dict, :limits, (-180.0, 180.0, -90.0, 90.0))
     oad(debug, "      • limits:    $(oad_val(lims))")
-    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:     $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, "")

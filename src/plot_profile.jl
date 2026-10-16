@@ -173,7 +173,7 @@ function plot_profile!(fig_pos, d; which::String="CT", vertical::Symbol=:pressur
     oad(debug, "      • markersize:  $markersize")
     seriestype = pop!(kwargs_dict, :seriestype, :scatter)
     oad(debug, "      • seriestype:  $(oad_val(seriestype))")
-    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:       $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, label_from_varname(which))

@@ -159,7 +159,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     oad(debug, "      • xlabel:      $(oad_val(xlabel))")
     ylabel = pop!(kwargs_dict, :ylabel, :auto)
     oad(debug, "      • ylabel:      $(oad_val(ylabel))")
-    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:       $(oad_val(title))")
     # Check for unhandled keywords

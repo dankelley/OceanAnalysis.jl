@@ -202,7 +202,7 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
     oad(debug, "      • sigma0_contour_color:     $(oad_val(sigma0_contour_color))")
     spiciness0_contour_color = pop!(kwargs_dict, :spiciness0_contour_color, :darkgray)
     oad(debug, "      • spiciness0_contour_color: $(oad_val(spiciness0_contour_color))")
-    pop!(kwargs_dict, :size, nothing) # remove, since already use in unmutating version
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:                    $(oad_val(title))")
     # Check for unhandled keywords

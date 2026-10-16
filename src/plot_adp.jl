@@ -40,12 +40,12 @@ profiler ([`Adp`](@ref)) object.
   debugging output should be printed during processing.
 
 - `kwargs`: optional items, used variously.  The possibilities are
-  `"colormap"` (defaulting to `:vik`), `colorrange"` (defaulting to
-  data range), `"fontsize"` (defaulting to 12), `"markersize"`
-  (defaulting to 6), `"seriestype"` (defaulting to `:scatter`, and
-  only used if `which` equals `:salinity`,
-   `:temperature`, `:pressure`, `:heading`, `:pitch`
-   or `:roll`), `"title"`, `"xlabel"`, and `"ylabel"`.
+  `colormap` (defaulting to `:vik`), `colorrange` (defaulting to
+  data range), `fontsize` (defaulting to 12), `markersize`
+  (defaulting to 6), `seriestype` (defaulting to `:scatter`, and
+  only used if `which` equals `:salinity`, `:temperature`, `:pressure`,
+  `:heading`, `:pitch` or `:roll`), `size` (size of plotting area, used
+   by `plot_adp()` but not by `plot_adp!()`), `title`, `xlabel`, and `ylabel`.
 
 # Return value
 
@@ -90,7 +90,10 @@ plot_adp!(fig[2,2], enu, which=:velocity4, colorrange=cr, title="Error Velocity 
 """
 function plot_adp(adp::Adp; which=:velocity1, time_format=:elapsed, debug::Integer=0, kwargs...)
     oad(debug, "plot_adp() START")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     ax, plot = plot_adp!(fig[1, 1], adp;
         which=which, time_format=time_format, debug=increment_debug(debug), kwargs...)
     oad(debug, "END plot_adp()")
@@ -117,6 +120,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:elapsed, de
     oad(debug, "      • markersize:  $(oad_val(markersize))")
     seriestype = pop!(kwargs_dict, :seriestype, :scatter)
     oad(debug, "      • seriestype:  $(oad_val(seriestype))")
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, :auto)
     oad(debug, "      • title:       $(oad_val(title))")
     xlabel = pop!(kwargs_dict, :xlabel, "x")
