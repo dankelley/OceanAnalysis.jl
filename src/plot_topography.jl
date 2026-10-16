@@ -32,8 +32,9 @@ Draw a `heatmap` image of topography.
   - `kwargs` Other keyword arguments. You may use `colorrange` to set the range
   for the values being coloured (which defaults to the data range). Use
   `fontsize` (which defaults to 12) to set the font size for axes and
-  titles. Use `title` (which defaults to an empty string) to set the
-  title of the plot.
+  titles. Use `size` to set the size of the plot (used only with
+  `plot_topography()`, not by `plot_topography!()`). Use `title` (which
+  defaults to an empty string) to set the title of the plot.
 
 # Examples
 
@@ -48,7 +49,10 @@ plot_topography(topo)
 function plot_topography(topo::Topography;
     domain=:sea, land_color=:bisque3, sea_color=:lightblue,
     draw_coastline=true, debug::Integer=0, kwargs...)
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     plot_topography!(fig[1, 1], topo;
         domain=domain, land_color=land_color, sea_color=sea_color,
         draw_coastline=draw_coastline, debug=increment_debug(debug), kwargs...)
@@ -77,6 +81,7 @@ function plot_topography!(fig_pos, topo::Topography;
     end
     fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "        • fontsize=$fontsize")
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "        • title=\"$title\"")
     if !isempty(kwargs_dict)
