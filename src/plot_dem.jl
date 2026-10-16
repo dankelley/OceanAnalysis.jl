@@ -22,12 +22,16 @@ using GMT: gmtread, xy2lonlat, grdproject
   permitted keywords are: `colormap` (which defaults to `:inferno`
   if not supplied), `colorrange` (which defaults to the extrema
   of the elevation, if not supplied), `fontsize` (which defaults
-  to 12 if not supplied), and `title` (which defaults to `""`, if
-  not supplied).
+  to 12 if not supplied), `size` to set plot area (used only
+  by `plot_dem()`, not by `plot_dem!()`) and `title` (which
+  defaults to `""`, if not supplied).
 """
 function plot_dem(dem::Dem; coordinates::Symbol=:distance, debug=0, kwargs...)
     oad(debug, "plot_dem() START")
-    fig = Makie.Figure()
+    kwargs_dict = Dict{Symbol,Any}(kwargs)
+    size = pop!(kwargs_dict, :size, (800, 600))
+    oad(debug, "    calling Makie.Figure with size=$size")
+    fig = Makie.Figure(size=size)
     ax, plot = plot_dem!(fig[1, 1], dem;
         coordinates=coordinates, debug=increment_debug(debug), kwargs...)
     rval = Makie.FigureAxisPlot(fig, ax, plot.main)
@@ -49,6 +53,7 @@ function plot_dem!(fig_pos, dem::Dem; coordinates::Symbol=:distance, debug=0, kw
     oad(debug, "      • colorrange:  $(colorrange)")
     fontsize = pop!(kwargs_dict, :fontsize, 12)
     oad(debug, "      • fontsize:    $(oad_val(fontsize))")
+    pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:       $(oad_val(title))")
     # Check for unhandled keywords
