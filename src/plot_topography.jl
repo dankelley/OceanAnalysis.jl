@@ -29,7 +29,7 @@ Draw a `heatmap` image of topography.
   The default value of 0 means to work quietly, and any larger integer indicates
   to print some information.
 
-  - `kwargs` Other keyword arguments. You may use `colorrange` to set the range
+- `kwargs` Other keyword arguments. You may use `colorrange` to set the range
   for the values being coloured (which defaults to the data range). Use
   `fontsize` (which defaults to 12) to set the font size for axes and
   titles. Use `size` to set the size of the plot (used only with
