@@ -20,6 +20,7 @@ OceanAnalysis.decode_color_by
 OceanAnalysis.depth_from_pressure
 OceanAnalysis.despike
 OceanAnalysis.differentiate_dem
+OceanAnalysis.downcast_sbe
 OceanAnalysis.drop_qc
 OceanAnalysis.fix_gsw_bad_code
 OceanAnalysis.fix_gsw_bad_code!
@@ -84,6 +85,7 @@ OceanAnalysis.read_dem
 OceanAnalysis.read_echosounder
 OceanAnalysis.read_glider
 OceanAnalysis.read_nonna
+OceanAnalysis.read_rsk
 OceanAnalysis.read_section
 OceanAnalysis.read_topography
 OceanAnalysis.rename_data

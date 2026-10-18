@@ -1,3 +1,5 @@
+import Loess
+
 """
     increment_debug(debug::Integer=0)::Integer
 
@@ -229,7 +231,7 @@ See [`fix_gsw_bad_code!`](@ref) for an in-place version.
 """
 function fix_gsw_bad_code(x)
     rval = copy(x)
-    rval[rval.>=GSW_INVALID_THRESHOLD] .= NaN
+    rval[rval .>= GSW_INVALID_THRESHOLD] .= NaN
     rval
 end
 export fix_gsw_bad_code
@@ -240,7 +242,7 @@ export fix_gsw_bad_code
 As [`fix_gsw_bad_code`](@ref), but making changes directly in `x`.
 """
 function fix_gsw_bad_code!(x)
-    @inbounds x[x.>=GSW_INVALID_THRESHOLD] .= NaN
+    @inbounds x[x .>= GSW_INVALID_THRESHOLD] .= NaN
     x
 end
 export fix_gsw_bad_code!
@@ -461,3 +463,71 @@ function oad_val(x)
     end
 end
 export oad_val
+
+"""
+    downcast_sbe(pressure; span=0.05, min_soak=1.0, max_soak=20.0, debug=0)
+
+Find the indices of a pressure vector that correspond to the start and
+end of the downcast, using a method similar to that used by SeaBird
+software.
+
+The method starts by smoothing `pressure` using `Loess.loess` with the
+indicated smoothing parameter, `span`.  The index at the end of the downcast is
+determined as the index of the peak of this smoothed pressure, and this is set
+as the second value of the Tuple to be returned by this function. Then the
+smoothed pressure was trimmed to remove all values past this index (i.e. to
+remove the upcast). Then the indices of at which this new pressure is in
+the range from `min_soak` to `max_soak` are found. The first and last of
+these indices is taken to represent a "soaking" interval, and the index of
+the lowest pressure in this interval is determined, and this is returned in
+the first element of the returned Tuple value.
+
+# Arguments
+
+- `pressure` a Vector holding pressure data.
+
+# Keywords
+
+- `span` the "span" for a Loess smoothing action applied to `pressure`.
+
+- `min_soak` a pressure taken to be the minimum of a "soaking" interval.
+
+- `max_soak` a pressure taken to be the maximum of a "soaking" interval.
+
+- `debug` an Integer that controls the printed output of the function. If
+  this is 0, the function works quietly. If it is a positive value,
+  then some information is printed about the processing.
+"""
+function downcast_sbe(pressure; span=0.05, min_soak=1.0, max_soak=20.0, debug=0)
+    oad(debug, "downcast_sbe() START with span=$span, min_soak=$min_soak and max_soak=$max_soak")
+    # Find iend, the index of highest (smoothed) pressure
+    npressure = length(pressure)
+    npressure > 1 || error("cannot find the downcast given just 1 pressure")
+    i = 1:npressure
+    model = Loess.loess(i, pressure, span=span)
+    pressure_smoothed = Loess.predict(model, i)
+    iend = argmax(pressure_smoothed)
+    oad(debug, "    set iend=$iend based on maximum (smoothed) pressure")
+    not_upcast = repeat([true], length(pressure))
+    not_upcast[iend:end] .= false
+    oad(debug, "    after discarding ascent, length reduced by factor ",
+        round(sum(not_upcast)/length(not_upcast), digits=4))
+    pressure_smoothed_not_upcast = pressure_smoothed[not_upcast]
+    soaking = min_soak .<= pressure_smoothed_not_upcast .<= max_soak
+    if sum(soaking) > 0
+        imin = findfirst(soaking)
+        imax = findfirst(pressure_smoothed_not_upcast .> max_soak)
+        istart = findfirst(pressure .== minimum(pressure[imin:imax]))
+        oad(debug, "    set istart=$istart based on minimum pressure between index $imin and $imax")
+    else
+        istart = 1
+        @warn "cannot find any 'soaking' data, so setting istart=$istart"
+    end
+    rval = istart, iend
+    oad(debug, "    rval: $rval")
+    oad(debug, "END downcast_sbe()")
+    return rval
+end
+export downcast_sbe
+
+

@@ -10,7 +10,10 @@ Release notes:
 
 ### Added
 
--
+- `read_rsk()` to read RBR "Ruskin" files.
+
+` `downcast_sbe()` to find indices of a pressure vector that correspond to the
+  downcast.
 
 
 

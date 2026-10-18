@@ -49,20 +49,27 @@ function summarize_data(x)
         if "time" in data_names
             val = x.data.time
             if eltype(val) <: Union{Missing,DateTime} || eltype(val) <: DateTime
-                println(@sprintf "\nTime ranges from %s to %s with mean step %.1f s and median step %.1f s" minimum(val) maximum(val) mean(diff(datetime2unix.(val))) median(diff(datetime2unix.(val))))
-                println("\nData summary (skipping the time data):")
+                println(@sprintf("Time range: %s to %s",
+                    minimum(val), maximum(val)))
+                println(@sprintf("Mean time step: %.3f s; median time step: %.3f s",
+                    mean(diff(datetime2unix.(val))), median(diff(datetime2unix.(val)))))
+                println("Data summary (skipping the time data):")
             end
         else
-            println("\nData summary:")
+            println("Data summary:")
         end
         df = DataFrame("name" => String[],
             "min" => Float64[], "mean" => Float64[], "max" => Float64[],
             "number" => Int64[], "number_missing" => Int64[], "number_NaN" => Int64[])
         for name in data_names[.!occursin.(r"_qc$", data_names)]
-            val = x[name]
-            # Skip DateTime columns (need Union because there are often some missing values)
-            if !(eltype(val) <: Union{Missing,DateTime}) && !(eltype(val) <: DateTime)
+            #println("DAN name='$name'")
+            if name != "time"
+                val = x[name]
+                #println("DEBUG eltype(val): $(eltype(val))")
+                # Skip DateTime columns (need Union because there are often some missing values)
+                #if !(eltype(val) <: Union{Missing,DateTime}) && !(eltype(val) <: DateTime)
                 push!(df, six_num(val, name))
+                #end
             end
         end
         indent = "  "
@@ -95,6 +102,7 @@ function summarize_data(x)
                 end
             end
         end
+        print("\n")
     elseif x.data isa Matrix
         sn = six_num(x.data, "")
         nrow, ncol = size(x.data)
@@ -182,16 +190,30 @@ function summarize(x::Ctd)
     else
         println("Metadata: a Dict with ", length(x.metadata), " keys, including the following")
         if "filename" in k && !isnothing(x.metadata["filename"])
-            println("  filename:  \"", x.metadata["filename"], "\"")
+            println("  filename:    \"", x.metadata["filename"], "\"")
         end
         if "latitude" in k
-            println(@sprintf("  latitude:  %8.3f N", x.metadata["latitude"]))
+            println(@sprintf("  latitude:    %8.3f N", x.metadata["latitude"]))
         end
         if "longitude" in k
-            println(@sprintf("  longitude: %8.3f E", x.metadata["longitude"]))
+            println(@sprintf("  longitude:   %8.3f E", x.metadata["longitude"]))
+        end
+        if "patm" in k
+            println(@sprintf("  patm:        %8.3f dbar", x.metadata["patm"]))
+        end
+        if "serial_number" in k
+            println(@sprintf("  serial:        %s", x.metadata["serial_number"]))
+        end
+        if "instrument" in k
+            println(@sprintf("  instrument:    %s", x.metadata["instrument"]))
         end
         if "time" in k && !isnothing(x.metadata["time"])
-            println("  time:      ", x.metadata["time"])
+            time = x.metadata["time"]
+            if length(time) == 1
+                println("  time:        ", time)
+            else
+                println("  time:          $(length(time)) values, from $(time[1]) to $(time[end])")
+            end
         end
         if "header" in keys(x.metadata)
             if isa(x.metadata["header"], Vector)
