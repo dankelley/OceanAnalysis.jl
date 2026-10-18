@@ -2,8 +2,6 @@ using SQLite
 using Dates: unix2datetime
 using DataFrames
 using GibbsSeaWater
-using OceanAnalysis
-using GLMakie # or CairoMakie
 
 """
     read_rsk(file; debug=0)
