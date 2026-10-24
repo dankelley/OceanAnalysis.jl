@@ -6,7 +6,7 @@ ip = i[i.type .== "PERMANENT", :] # permanent stations
 
 limits = (-67, -59, 43.3, 47.2)
 fig = plot_coastline(cl, limits=limits, scalebar=true, fontsize=12,
-    title="Tide gauges (red for permanent stations)")
+    title="Tide gauges (circled and labelled for permanent stations)")
 scatter!(i.longitude, i.latitude, markersize=8, marker=:circle, color=:red)
 scatter!(ip.longitude, ip.latitude, markersize=14, marker=:circle, strokecolor=:blue, color=:transparent, strokewidth=2)
 text!(ip.longitude, ip.latitude; text=ip.name, fontsize=14, color=:blue)
