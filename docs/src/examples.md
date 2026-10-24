@@ -211,7 +211,7 @@ save("argo_trajectory.png", fig, px_per_unit=2)
 
 
 
-## Bathymetry (high-resolution) Data
+## Bathymetry Data
 
 ### High-resolution bathymetry data
 
@@ -442,29 +442,43 @@ save("section.png", fig, px_per_unit=2)
 ![Section diagram](section.png)
 
 
-## Tide Gauge (sealevel) Data
+## Tide Gauge Data
 
 ### Map of stations
 
-This the locations of tide gauges in the Maritimes region of Canada.  Blue dots
-represent non-permanent tide gauges, while red dots represent permanent tide
-gauges.  (As an exercise, restrict `i` according to latitude and longitude
-criteria, and then examine `i.name` to see the tide gauges in that region.)
+Show the locations of tide gauges in the Maritimes region of Canada using red
+dots for all sampling locations, with blue circles for those designated as
+having permanent status. (Note that this designation is not fully reliable;
+some stations marked in that way stopped recording a few years before I wrote
+this.) In addition to the map, tabulate stations that are within a specified
+distance of the Bedford Institute station.
+
+
 
 ```julia
 using OceanAnalysis
 using GLMakie # or CairoMakie
 cl = coastline()
 i = get_tide_gauge_index(:all); # requires internet access
+ip = i[i.type .== "PERMANENT", :] # permanent stations
 
 limits = (-67, -59, 43.3, 47.2)
 fig = plot_coastline(cl, limits=limits, scalebar=true, fontsize=12,
     title="Tide gauges (red for permanent stations)")
-scatter!(i.longitude, i.latitude, color=:blue, markersize=8)
-look = i.type .== "PERMANENT"
-scatter!(i.longitude[look], i.latitude[look], color=:red, markersize=18)
-
+scatter!(i.longitude, i.latitude, markersize=8, marker=:circle, color=:red)
+scatter!(ip.longitude, ip.latitude, markersize=14, marker=:circle, strokecolor=:blue, color=:transparent, strokewidth=2)
+text!(ip.longitude, ip.latitude; text=ip.name, fontsize=14, color=:blue)
 save("tide_gauge_locations.png", fig, px_per_unit=2)
+
+# Tabulate permanent stations within 400km of Bedford Institute, sorted
+# by distance to the Bedford Institute station.
+range = 400.0
+bi = i[i.name .== "Bedford Institute", :]
+distance = geod_distance.(bi.longitude, bi.latitude, i.longitude, i.latitude)
+i[:, :distance] = distance
+look = (distance .< range) .& (i.type .== "PERMANENT")
+ilook = i[look, :]
+println(sort(ilook, :distance))
 ```
 
 ![Tide gauge locations](tide_gauge_locations.png)
@@ -472,11 +486,12 @@ save("tide_gauge_locations.png", fig, px_per_unit=2)
 
 ### Plot elevation record
 
-This shows how to download a week's worth of data for the Bedford Institute
-tide gauge, and plot it as a timeseries. (As an exercise, repeat the call to
+Download a month of data recorded at the Bedford Institute tide gauge, and
+represent the variation as a timeseries. (As an exercise, repeat the call to
 `get_tide_gauge_file()` with a specific `times` value. If you ask for too long
 an interval, the CHS server may report an error, in which case you ought to try
-increasing the value of `resolution`.)
+increasing the value of `resolution`, or downloading a series of datasets and
+combining them.)
 
 ```julia
 using OceanAnalysis, CSV, DataFrames
@@ -486,9 +501,8 @@ search = "Bedford" # full name is "Bedford Institute"
 name, csv = get_tide_gauge_file(search)
 data = CSV.read(csv, DataFrame)
 
-fig = Figure()
-ax = Axis(fig[1, 1], ylabel="Elevation [m]", title="Sea Level at $name")
-lines!(data.time, data.value)
+fig = lines(data.time, data.value;
+    axis=(ylabel="Elevation [m]", title="Sea Level at $name"))
 
 save("tide_gauge_timeseries.png", fig, px_per_unit=2)
 ```
