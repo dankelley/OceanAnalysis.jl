@@ -294,7 +294,7 @@ function get_tide_gauge_file(station; agency="CHS", variable=:default,
         rdict = Dict(1 => "ONE_MINUTE", 2 => "TWO_MINUTES", 3 => "THREE_MINUTES", 5 => "FIVE_MINUTES", 15 => "FIFTEEN_MINUTES", 60 => "SIXTY_MINUTES")
         resolution_string = rdict[resolution]
         if times == :default
-            oad(debug, "    will set times automatically")
+            oad(debug, "    setting times automatically, based on resolution")
             time_end = now()
             if resolution == 1
                 time_start = time_end - Week(1)
@@ -310,7 +310,7 @@ function get_tide_gauge_file(station; agency="CHS", variable=:default,
         end
         oad(debug, "    times: $times")
         oad(debug, "    Given resolution=$resolution, using \"$resolution_string\" for download URL")
-        oad(debug, "    Seeking data from $time_start <= time <= $time_end")
+        oad(debug, "    Seeking data from $(times[1]) <= time <= $(times[2])")
         oad(debug, "    Using get_tide_gauge_index() to find the hash-code needed to download the data")
         i = get_tide_gauge_index(station, debug=increment_debug(debug))
         nr = nrow(i)
