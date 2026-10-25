@@ -6,13 +6,15 @@ Release notes:
 
 ### Changed
 
--
+- `get_tide_gauge_file()` no longer returns the ID, which is of limited utility
+
+- `get_tide_gauge_file()` gains a new argument, `use_cache`, to prevent unneeded downloads
 
 ### Added
 
 - `read_rsk()` to read RBR "Ruskin" files.
 
-` `downcast_sbe()` to find indices of a pressure vector that correspond to the
+- `downcast_sbe()` to find indices of a pressure vector that correspond to the
   downcast.
 
 

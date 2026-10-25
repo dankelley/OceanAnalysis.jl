@@ -180,9 +180,10 @@ export get_tide_gauge_index
 """
     get_tide_gauge_file(station; agency="CHS", variable=:default,
         times=:default, resolution=:default, filename=:default,
-        datum="MLLW", debug::Integer=0)
+        datum="MLLW", use_cache=true, debug::Integer=0)
 
-Get a tide-gauge datafile from the Canadian Hydrographic Service (CHS).
+Get a tide-gauge datafile from the either the Canadian Hydrographic Service
+(CHS) or the Naational Oceanographic and Atmospheric Administration (NOAA).
 
 This function downloads a temporary file that holds data
 on the indicated tide-gauge `station`, reads its contents to extract
@@ -230,14 +231,23 @@ which the data download is being attempted.
 - `filename` either a String naming the output file or the Symbol `:default`,
   indicating that a file name is to be constructed from the data request.
 
+# Return value
+
+This returns a String naming the downloaded (or cached) file.
+
 # Keywords
 
 - `datum`: a String indicating the desired datum.  This is used only
   for `agency="NOAA"`, and is passed to [`noaa_tide_gauge_url`](@ref)
   when the latter is used to determine the URL from which to download.
 
+- `use_cache`: a Bool indicating whether to skip the download if a file is
+  present that matches the name of the file that would otherwise be created.
+  This is true by default, to avoid pressure on the server, on the assumption
+  that the source files never change.
+
 - `debug`: an optional value that, if it exceeds 0, indicates that debugging
-   output should be printed during processing.
+  output should be printed during processing.
 
 # Examples
 
@@ -245,29 +255,29 @@ which the data download is being attempted.
 using OceanAnalysis, CSV, DataFrames
 using GLMakie # or CairoMakie
 # 1. CHS station for Bedford Basin, NS
-id, file = get_tide_gauge_file("Bedford")
+file = get_tide_gauge_file("Bedford")
 data = CSV.read(file, DataFrame)
-lines(data.time, data.value; axis=(ylabel="Sea Level [m]", title="CHS station "*id))
+lines(data.time, data.value; axis=(ylabel="Sea Level [m]")
 # 2. NOAA station 8729840 at Pensacola FL
-id, file = get_tide_gauge_file("8729840"; agency="NOAA")
+file = get_tide_gauge_file("8729840"; agency="NOAA")
 data = CSV.read(file, DataFrame)
-lines(data.time, data.value; axis=(ylabel="Sea Level [m]", title="NOAA station "* id))
+lines(data.time, data.value; axis=(ylabel="Sea Level [m]")
 ```
 
 # References
 
 1. The API used by the CHS server is described at
-  https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
-  and general information about the data provided by CHS is given at
-  https://www.tides.gc.ca/en/web-services-offered-canadian-hydrographic-service
+   https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/swagger-ui/index.html
+   and general information about the data provided by CHS is given at
+   https://www.tides.gc.ca/en/web-services-offered-canadian-hydrographic-service
 
 2. The API used by the NOAA server is described at
-https://api.tidesandcurrents.noaa.gov/api/
+   https://api.tidesandcurrents.noaa.gov/api/
 
 """
 function get_tide_gauge_file(station; agency="CHS", variable=:default,
     times=:default, resolution=:default, filename=:default,
-    datum="MLLW", debug::Integer=0)
+    datum="MLLW", use_cache=true, debug::Integer=0)
     oad(debug, "get_tide_gauge_file() START")
     agency in ("CHS", "NOAA") || error("agency=$(repr(agency)) not understood; try \"CHS\" or \"NOAA\"")
     if agency == "CHS"
@@ -334,30 +344,38 @@ function get_tide_gauge_file(station; agency="CHS", variable=:default,
                 String(variable) * "_" *
                 resolution_string * ".csv"
         end
-        # Save JSON file to a temporary location, then decode it
-        # and save time,value to a CSV file.
-        data = mktemp() do tmp_path, tmp_io
-            close(tmp_io)
-            Downloads.download(url, tmp_path)
-            open(tmp_path) do io
-                return JSON3.read(io)
+        #println("filename '$filename'")
+        #println("exists? $(isfile(filename))")
+        oad(debug, "    filename: $filename")
+        if use_cache && isfile(filename)
+            oad(debug, "    this file already exists, so no data will be downloaded")
+            oad(debug, "END get_tide_gauge_file()")
+            return filename
+        else
+            # Save JSON file to a temporary location, then decode it
+            # and save time,value to a CSV file.
+            data = mktemp() do tmp_path, tmp_io
+                close(tmp_io)
+                Downloads.download(url, tmp_path)
+                open(tmp_path) do io
+                    return JSON3.read(io)
+                end
             end
+            n = length(data)
+            values = Vector{Float64}(undef, n)
+            times = Vector{DateTime}(undef, n)
+            oad(debug, "    Downloaded $n lines of data")
+            for i in eachindex(data)
+                times[i] = DateTime(data[i]["eventDate"], "yyyy-mm-ddTHH:MM:SSZ")
+                values[i] = data[i]["value"]
+            end
+            df = DataFrame(time=times, value=values)
+            oad(debug, "    Saving data in $filename")
+            CSV.write(filename, df)
+            oad(debug, "END get_tide_gauge_file()")
+            return filename
         end
-        n = length(data)
-        values = Vector{Float64}(undef, n)
-        times = Vector{DateTime}(undef, n)
-        oad(debug, "    Downloaded $n lines of data")
-        for i in eachindex(data)
-            times[i] = DateTime(data[i]["eventDate"], "yyyy-mm-ddTHH:MM:SSZ")
-            values[i] = data[i]["value"]
-        end
-        df = DataFrame(time=times, value=values)
-        oad(debug, "    Saving data in $filename")
-        CSV.write(filename, df)
-        rval = (station_name=i[1, :name], file=filename)
-        oad(debug, "END get_tide_gauge_file()")
-        return rval
-    else
+    else # must be NOAA
         if times == :default
             n = Dates.now()
             times = [n - Month(1), n]
@@ -378,40 +396,45 @@ function get_tide_gauge_file(station; agency="CHS", variable=:default,
                 Dates.format(times[2], "yyyymmddTHHMM") * ".csv"
         end
         oad(debug, "    filename: $filename")
-        data = mktemp() do tmp_path, tmp_io
-            close(tmp_io)
-            Downloads.download(url, tmp_path)
-            open(tmp_path) do io
-                d = CSV.read(io, DataFrame, missingstring=["", "-"], stripwhitespace=true)
-                rename!(strip, d) # remove leading and trailing spaces
-                return d
-            end
-        end
-        oad(debug, "    the downloaded file has $(nrow(data)) lines")
-        oad(debug, "    column names in file: $(names(data))")
-        time = DateTime.(data."Date Time", dateformat"yyyy-mm-dd HH:MM")
-        #oad(debug, "    first(time,3): $(first(time, 3))")
-        if variable == "water_level"
-            vname = "Water Level"
-        elseif variable == "predictions"
-            vname = "Prediction"
-        elseif variable == "wind"
-            vname = "Speed"
-        elseif variable == "direction"
-            vname = "Direction"
-        elseif variable == "air_pressure"
-            vname = "Pressure"
+        if use_cache && isfile(filename)
+            oad(debug, "    this file already exists, so no data will be downloaded")
+            oad(debug, "END get_tide_gauge_file()")
+            return filename
         else
-            vname=2 # guess that it's in column 2
+            data = mktemp() do tmp_path, tmp_io
+                close(tmp_io)
+                Downloads.download(url, tmp_path)
+                open(tmp_path) do io
+                    d = CSV.read(io, DataFrame, missingstring=["", "-"], stripwhitespace=true)
+                    rename!(strip, d) # remove leading and trailing spaces
+                    return d
+                end
+            end
+            oad(debug, "    the downloaded file has $(nrow(data)) lines")
+            oad(debug, "    column names in file: $(names(data))")
+            time = DateTime.(data."Date Time", dateformat"yyyy-mm-dd HH:MM")
+            #oad(debug, "    first(time,3): $(first(time, 3))")
+            if variable == "water_level"
+                vname = "Water Level"
+            elseif variable == "predictions"
+                vname = "Prediction"
+            elseif variable == "wind"
+                vname = "Speed"
+            elseif variable == "direction"
+                vname = "Direction"
+            elseif variable == "air_pressure"
+                vname = "Pressure"
+            else
+                vname=2 # guess that it's in column 2
+            end
+            value = data[:, vname]
+            #oad(debug, "    first(value,3): $(first(value, 3))")
+            df = DataFrame(time=time, value=value)
+            oad(debug, "    saving data in $filename")
+            CSV.write(filename, df)
+            oad(debug, "END get_tide_gauge_file()")
+            return filename
         end
-        value = data[:, vname]
-        #oad(debug, "    first(value,3): $(first(value, 3))")
-        df = DataFrame(time=time, value=value)
-        oad(debug, "    saving data in $filename")
-        CSV.write(filename, df)
-        rval = (station_name=station, file=filename)
-        oad(debug, "END get_tide_gauge_file()")
-        return rval
     end
 end
 export get_tide_gauge_file
