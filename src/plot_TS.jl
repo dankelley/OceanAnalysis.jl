@@ -202,16 +202,20 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
     oad(debug, "      • sigma0_contour_color:     $(oad_val(sigma0_contour_color))")
     spiciness0_contour_color = pop!(kwargs_dict, :spiciness0_contour_color, :darkgray)
     oad(debug, "      • spiciness0_contour_color: $(oad_val(spiciness0_contour_color))")
+    strokecolor = pop!(kwargs_dict, :strokecolor, :darkgray)
+    oad(debug, "      • strokecolor:              $(oad_val(strokecolor))")
+    strokewidth = pop!(kwargs_dict, :strokewidth, 1.0)
+    oad(debug, "      • strokewidth:              $(oad_val(strokewidth))")
     pop!(kwargs_dict, :size, nothing) # remove item, already handled in non-mutating version
     title = pop!(kwargs_dict, :title, "")
     oad(debug, "      • title:                    $(oad_val(title))")
     # Check for unhandled keywords
     if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
+        error("plot_TS!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: color, colormap, fontsize, ",
             "linewidth, limits, ",
-            "marker, markercolor, markersize, seriestype, size and title")
+            "marker, markercolor, markersize, seriestype, size, strokecolor, strokewidth, and title")
     end
     # Draw the data.
     oad(debug, "    drawing the data")
@@ -257,8 +261,10 @@ function plot_TS!(fig_pos, d; sigma0_levels::Union{Symbol,Integer,AbstractVector
         oad(debug, "      • color:       $(oad_val(markercolor)) (set by color_by)")
         oad(debug, "      • marker:      $(oad_val(marker))")
         oad(debug, "      • markersize:  $(oad_val(markersize))")
+        oad(debug, "      • strokecolor: $(oad_val(strokecolor))")
+        oad(debug, "      • strokewidth: $(oad_val(strokewidth))")
         main = Makie.scatter!(ax, SA, CT;
-            color=markercolor, marker=marker, markersize=markersize)
+            color=markercolor, marker=marker, markersize=markersize, strokecolor=strokecolor, strokewidth=strokewidth)
     elseif seriestype == :scatterlines
         oad(debug, "    calling scatterlines!() with extra arguments as follows")
         oad(debug, "      • color:       $(oad_val(color))")
