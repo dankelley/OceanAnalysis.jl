@@ -231,7 +231,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
         oad(debug, "    since limits=:auto, setting up limits $limits from data")
     end
     ax = Makie.Axis(fig_pos[1, 1],
-        xlabel=xlabel, ylabel=ylabel, title=title,
+        xlabel=xlabel, ylabel=ylabel, title=title, titlegap=14,
         limits=limits, yreversed=true,
         xlabelsize=fontsize, ylabelsize=fontsize, titlesize=fontsize,
         xticklabelsize=fontsize, yticklabelsize=fontsize)
@@ -280,7 +280,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
         main = Makie.contour!(ax, x, y, z', color=color, linewidth=linewidth, levels=levels, labels=true)
         if show_stations
             oad(debug, "    drawing stations") # FIXME: use a function for this
-            ax_top = Makie.Axis(fig_pos[1, 1], xtickwidth=1.4, xticksize=6,
+            ax_top = Makie.Axis(fig_pos[1, 1], xtickwidth=3.0, xticksize=4,
                 xtickcolor=:black, xaxisposition=:top,
                 xgridvisible=false, xticks=(x, repeat([""], length(x))))
             Makie.hideydecorations!(ax_top)

@@ -73,6 +73,8 @@ using [`as_section`](@ref).
 
 # Keywords
 
+- `expo_code`: a String giving the expedition code
+
 - `add_teos`: a Bool indicating, passed to [`read_ctd_exchange`](@ref), that
   indicates whether to add TEOS10 variables such as Absolute Salinity,
   Conservative Temperature and sigma0.
@@ -90,7 +92,7 @@ display(section.metadata)
 println("Section contains ", length(section.data), " CTD profiles")
 ```
 """
-function read_section(dir::String; add_teos=true, debug::Integer=0)
+function read_section(dir::String; expo_code="", add_teos=true, debug::Integer=0)
     oad(debug, "read_section() START")
     files = readdir(dir)
     length(files) > 0 || throw(ArgumentError("no ctd files found in $dir"))
@@ -109,6 +111,7 @@ function read_section(dir::String; add_teos=true, debug::Integer=0)
             oad(debug, "  inserted $transfer into section.metadata")
         end
     end
+    rval.metadata["expo_code"] = expo_code
     rval.metadata["source"] = abspath(dir)
     oad(debug, "END read_section()")
     rval
