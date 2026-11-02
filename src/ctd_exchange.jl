@@ -55,7 +55,7 @@ export read_ctd_exchange
 function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true, debug::Integer=0)
     oad(debug, "read_ctd_exchange(\"", filename, "\", ...) START")
     lines = readlines(stream)
-    # ensure the file is in the right format FIXME: maybe just warn?
+    # ensure the file is in the right format
     if !occursin(r"^CTD,[0-9a-zA-Z]+$", lines[1])
         if occursin(r"^EXPOCODE", lines[1])
             error("This is an 'exchange' file, which is not handled. Try working with \"woce\" files instead.")
@@ -85,20 +85,36 @@ function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true,
         end
     end
     # Change from strings to numeric, and also rename
-    metadata["longitude"] = parse(Float64, metadata["LONGITUDE"])
-    delete!(metadata, "LONGITUDE")
-    metadata["latitude"] = parse(Float64, metadata["LATITUDE"])
-    delete!(metadata, "LATITUDE")
-    metadata["bottom_depth"] = parse(Float64, metadata["DEPTH"])
-    delete!(metadata, "DEPTH")
-    metadata["section_id"] = metadata["SECT_ID"]
-    delete!(metadata, "SECT_ID")
-    metadata["station"] = metadata["STNNBR"]
-    delete!(metadata, "STNNBR")
-    metadata["cast"] = metadata["CASTNO"]
-    delete!(metadata, "CASTNO")
-    metadata["expocode"] = metadata["EXPOCODE"]
-    delete!(metadata, "EXPOCODE")
+    mkeys = keys(metadata)
+    oad(debug, "    keys gleaned from file header: $(mkeys)")
+    if "LONGITUDE" in mkeys
+        metadata["longitude"] = parse(Float64, metadata["LONGITUDE"])
+        delete!(metadata, "LONGITUDE")
+    end
+    if "LATITUDE" in mkeys
+        metadata["latitude"] = parse(Float64, metadata["LATITUDE"])
+        delete!(metadata, "LATITUDE")
+    end
+    if "DEPTH" in mkeys
+        metadata["bottom_depth"] = parse(Float64, metadata["DEPTH"])
+        delete!(metadata, "DEPTH")
+    end
+    if "SECT_ID" in mkeys
+        metadata["section_id"] = metadata["SECT_ID"]
+        delete!(metadata, "SECT_ID")
+    end
+    if "STNNBR" in mkeys
+        metadata["station"] = metadata["STNNBR"]
+        delete!(metadata, "STNNBR")
+    end
+    if "CASTNO" in mkeys
+        metadata["cast"] = metadata["CASTNO"]
+        delete!(metadata, "CASTNO")
+    end
+    if "EXPOCODE" in mkeys
+        metadata["expocode"] = metadata["EXPOCODE"]
+        delete!(metadata, "EXPOCODE")
+    end
     # FIXME DATE AND TIME
     time_string = metadata["DATE"] * metadata["TIME"]
     time = DateTime(time_string, "yyyymmddHHMM")
@@ -124,6 +140,9 @@ function read_ctd_exchange(stream::IOStream, filename::String=""; add_teos=true,
     rows, cols = size(data)
     oad(debug, "  read $rows of data, each with $cols columns")
     rval = Ctd(metadata, data)
+    if add_teos
+        rval = set_teos(rval, debug=increment_debug(debug))
+    end
     oad(debug, "END read_ctd_exchange()")
     rval
 end

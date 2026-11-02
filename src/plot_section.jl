@@ -133,9 +133,10 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     type=:contourf_contour, xvar=:longitude, yvar=:pressure, show_stations=true,
     debug::Integer=0, kwargs...)
     oad(debug, "plot_section!() BEGIN")
-    oad(debug, "    see if section is gridded")
+    oad(debug, "    ensure that section is gridded")
     section_is_gridded(section) || error("must use grid_section() on the section before plotting it")
     # assume all CTDs have the same data-column names
+    # FIXME: permit calculated fields, especially sigma0
     fields = names(section.data[1].data)
     which in fields || error("which=\"$which\" not allowed; try one of the following: ", fields)
     type in (:contour, :contourf, :contourf_contour, :heatmap) || throw(ArgumentError("type=$(repr(type)) not allowed; try using :contour, :contourf, :contourf_contour or :heatmap"))
@@ -171,7 +172,7 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     end
     oad(debug, "    drawing the data")
     if xvar isa Symbol
-        oad(debug, "    xvar is a Symbol")
+        oad(debug, "    xvar is a Symbol (:$xvar)")
         if xvar == :longitude
             if xlabel == :auto
                 xlabel = "Longitude [°E]"
@@ -199,6 +200,10 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     else
         error("xvar must be a Symbol or a Tuple")
     end
+    xok = .!isnothing.(x) .& .!isnan.(x)
+    oad(debug, @sprintf("    %.4g%% of x data are bad",
+        100.0 * (1.0 - sum(xok)/length(xok))))
+    any(xok) || error("all x data are missing or NaN")
     if yvar == :depth
         if ylabel == :auto
             ylabel = "Depth [m]"
@@ -217,8 +222,13 @@ function plot_section!(fig_pos, section::Section; which="salinity",
     else
         error("yvar=$(repr(yvar)) not allowed; try :depth, :pressure or :z")
     end
+    yok = .!isnothing.(y) .& .!isnan.(y)
+    oad(debug, @sprintf("    %.4g%% of y data are bad",
+        100.0 * (1.0 - sum(yok)/length(yok))))
+    any(yok) || error("all y data are missing or NaN")
     if limits == :auto
         limits = (extend_extrema(x, 0.0)..., extend_extrema(y, 0.0)...)
+        oad(debug, "    since limits=:auto, setting up limits $limits from data")
     end
     ax = Makie.Axis(fig_pos[1, 1],
         xlabel=xlabel, ylabel=ylabel, title=title,

@@ -1,5 +1,5 @@
 """
-    as_section(ctds::Vector{Ctd}; name::String="", source::String="", debug::Integer=0)
+    as_section(ctds::Vector{Ctd}; add_teos=true, debug::Integer=0)
 
 Construct a Section object, which olds one or more Ctd objects.
 
@@ -13,38 +13,43 @@ the `name` of the section and the `source` of the data.
 
 # Keywords
 
-- `name`: the name of the section, often an 'EXPOCODE'.
+- `name`: a String value naming the section.
 
-- `source`: an indication of the data source, often a URL.
+- `add_teos`: a Bool value that indicates whether to add TEOS10 variables such
+  as `SA`, `CT` and `sigma0`, if they are not already present in the `ctds`
+  values.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
 # Examples
 ```julia
-julia> using OceanAnalysis
-julia> # Create fake data
-julia> f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
-julia> a = read_ctd_cnv(f, add_teos=false);
-julia> b = read_ctd_cnv(f, add_teos=false);
-julia> b.data.salinity = 1.0 .+ b.data.salinity;
-julia> s = as_section([a; b], name="Test");
-julia> println("Section '"* s.metadata["name"] * "' has entries with salinities starting:")
-Section 'Test' has entries with salinities starting:
-julia> for i in 1:length(s.data)
-           println(first(s.data[i].data.salinity,3))
-       end
-[29.921, 29.9205, 29.9206]
-[30.921, 30.9205, 30.9206]
+using OceanAnalysis
+# Create fake data
+f = joinpath(pkgdir(OceanAnalysis), "data", "ctd.cnv");
+a = read_ctd_cnv(f);
+b = read_ctd_cnv(f);
+b.data.salinity = 1.0 .+ b.data.salinity;
+s = as_section([a; b]);
+for i in 1:length(s.data)
+    println(first(s.data[i].data.salinity,3))
+end
 ```
 """
-function as_section(ctds::Vector{Ctd}; debug::Integer=0)
+function as_section(ctds::Vector{Ctd}; name="", add_teos=true, debug::Integer=0)
     oad(debug, "as_section() START")
     nctds = length(ctds)
     nctds > 0 || throw(ArgumentError("ctds is empty"))
     metadata = Dict()
+    metadata["name"] = name
     data = Vector{Ctd}(undef, nctds)
     for i in 1:nctds
         oad(debug, "  save $i-th entry") # FIXME: maybe use a progress bar instead
+        if add_teos
+            ctd = set_teos(ctds[i], debug=increment_debug(debug))
+        else
+            ctd = ctds[i]
+        end
         data[i] = ctds[i]
     end
     oad(debug, "END as_section()")
@@ -68,7 +73,12 @@ using [`as_section`](@ref).
 
 # Keywords
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+- `add_teos`: a Bool indicating, passed to [`read_ctd_exchange`](@ref), that
+  indicates whether to add TEOS10 variables such as Absolute Salinity,
+  Conservative Temperature and sigma0.
+
+- `debug`: an optional value that, if it exceeds 0, indicates that debugging
+  output should be printed during processing.
 
 # Examples
 ```julia
@@ -80,14 +90,18 @@ display(section.metadata)
 println("Section contains ", length(section.data), " CTD profiles")
 ```
 """
-function read_section(dir::String; debug::Integer=0)
+function read_section(dir::String; add_teos=true, debug::Integer=0)
     oad(debug, "read_section() START")
     files = readdir(dir)
     length(files) > 0 || throw(ArgumentError("no ctd files found in $dir"))
+    oad(debug, "    got $(length(files)) files in directory $dir")
+    oad(debug, "    add_teos=$(add_teos)")
     # Reading typically takes about 7 ms per file
-    ctds = map((file) -> read_ctd_exchange(joinpath(dir, file), debug=increment_debug(debug)), files)
-    oad(debug, "  read $(length(ctds)) CTD files")
-    rval = as_section(ctds)
+    ctds = map((file) -> read_ctd_exchange(joinpath(dir, file);
+            add_teos=add_teos, debug=increment_debug(debug)), files)
+    oad(debug, "  read_ctd_exchange() read $(length(ctds)) CTD files")
+    rval = as_section(ctds, add_teos=add_teos)
+    oad(debug, "  as_section() completed")
     meta = ctds[1].metadata
     for transfer in ["section_id", "expocode"]
         if transfer in keys(meta)

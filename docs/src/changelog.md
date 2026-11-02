@@ -10,6 +10,9 @@ Release notes:
 
 - `get_tide_gauge_file()` gains a new argument, `use_cache`, to prevent unneeded downloads
 
+- improve several functions related to section data, to handle wider formats
+  and to allow for insertion of TEOS10 variables.
+
 ### Added
 
 - `read_rsk()` to read RBR "Ruskin" files.

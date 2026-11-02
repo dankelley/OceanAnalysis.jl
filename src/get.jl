@@ -126,12 +126,13 @@ function get_element(x::OA, element::Union{String,Symbol}; debug::Integer=0)
         oad(debug, "    convert element from a Symbol to the String \"$element\"")
     end
     # If element is in metadata, return that
+    oad(debug, "    element: $element")
+    oad(debug, "    keys(x.metadata): $(keys(x.metadata))")
     if element in keys(x.metadata)
-        if isnothing(element) # will look in data instead
-            oad(debug, "    return element from x.metadata")
-            oad(debug, "END get_element()")
-            return x.metadata[element]
-        end
+        rval = x.metadata[element]
+        oad(debug, "    returning $rval from x.metadata")
+        oad(debug, "END get_element()")
+        return rval
     end
     # If element is in data (and if data is a DataFrame), return that
     if isa(x.data, DataFrame) && element in names(x.data)
