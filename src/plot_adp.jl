@@ -129,7 +129,7 @@ function plot_adp!(fig_pos, adp::Adp; which=:velocity1, time_format=:elapsed, de
     oad(debug, "      • ylabel:      $(oad_val(ylabel))")
     # Check for unhandled keywords
     if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
+        error("plot_adp!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: colormap, colorrange, fontsize, ",
             "markersize, seriestype, title, xlabel, and ylabel")

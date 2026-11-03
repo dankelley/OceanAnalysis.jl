@@ -130,7 +130,7 @@ function plot_amsr!(fig_pos, amsr::Amsr;
     ylab = pop!(kwargs_dict, :ylab, "")
     oad(debug, "    ylab: $ylab")
     if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
+        error("plot_amsr!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: colormap, colorrange, ",
             "fontsize, limits, title, xlab, and ylab.")

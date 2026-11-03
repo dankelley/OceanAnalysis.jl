@@ -77,7 +77,7 @@ function plot_echosounder!(fig_pos, e::Echosounder; which=:log_amplitude, debug:
     title = pop!(kwargs_dict, :title, "Start time $(e.metadata["time"][1])")
     oad(debug, "    title=$title")
     if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
+        error("plot_echosounder!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: color, colormap, fontsize, ",
             "and title")

@@ -165,7 +165,7 @@ function plot_coastline!(fig_pos, coastline::Coastline; scalebar=false,
     ylabel = pop!(kwargs_dict, :ylabel, "")
     oad(debug, "      • ylabel:    $(oad_val(ylabel))")
     if !isempty(kwargs_dict)
-        error("plot_profile!() does not recognize keywords: ",
+        error("plot_coastline!() does not recognize keywords: ",
             join(string.(keys(kwargs_dict)), ", "),
             ". The permitted keywords are: color, fontsize, linewidth, ",
             "limits, title, xlabel, and ylabel")
