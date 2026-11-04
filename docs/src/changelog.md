@@ -2,9 +2,21 @@
 
 Release notes:
 
+## Changelog from version 0.2.22 to version 0.2.23
+
+### Changed
+
 ## Changelog from version 0.2.21 to version 0.2.22
 
 ### Changed
+
+- FIXME: add content here
+
+### Added
+
+- FIXME: add content here
+
+
 
 - `get_tide_gauge_file()` no longer returns the ID, which is of limited utility
 
