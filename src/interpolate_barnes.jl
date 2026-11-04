@@ -75,9 +75,7 @@ that of the `interp_barnes` function in the R `oce` package.
 
 - `iterations` number of iterations to perform (2 by default).
 
-- `debug` integer indicating whether to print information during
-  processing. The default value of 0 means to work quietly, and any larger
-  integer indicates to print some information.
+$DEBUG_TEMPLATE
 
 # Value
 

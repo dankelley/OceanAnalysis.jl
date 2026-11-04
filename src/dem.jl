@@ -19,8 +19,7 @@ Read a digital-elevation-model file.  See also [`subset_dem`](@ref) and
   all the points in the grid are projected. The two methods disagreed in a test
   by at most the equivalent of 0.5 m distance.
 
-- `debug` an integer that, if it exceeds 0, indicates that the function is to
-  print out some intermediate steps.
+$DEBUG_TEMPLATE
 
 # Return
 
@@ -109,7 +108,7 @@ Subset a Dem object.
 
 - `latlim` a tuple holding the minimum and maximum latitude to be retained.
 
-- `debug` an integer that, if it exceeds 0, indicates that the function is to print out some intermediate steps.
+$DEBUG_TEMPLATE
 
 """
 function subset_dem(dem::Dem; lonlim::Tuple{Real,Real}, latlim::Tuple{Real,Real}, debug::Int=0)
@@ -159,8 +158,7 @@ by the value of `by`.
 
 # Keywords
 
-- `debug` an integer that, if it exceeds 0, indicates that the function is to
-  print out some intermediate steps.
+$DEBUG_TEMPLATE
 
 # Examples
 

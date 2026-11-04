@@ -45,9 +45,7 @@ item, and a NamedTuple as the second. The latter contains an element named
   increments. And, finally, if it is a vector of numeric elements, then
   contours are drawn (unlabelled) at those values.
 
-- `debug`: An integer controlling whether to print information during
-  processing. The default is to work silently; use any positive value to get
-  some printing.
+$DEBUG_TEMPLATE
 
 - `kwargs...` optional other arguments to customize the heatmap plot, passed
   through to `Makie.heatmap!`, e.g. set `colormap` and/or

@@ -178,7 +178,7 @@ downloaded with [`get_argo`](@ref).
 
 - `profile` an integer, indicating which profile to read from the file.
 
-- `debug` indicator of debugging level. If this exceeds 0, some information is printed during processing.
+$DEBUG_TEMPLATE
 
 # Return value
 
@@ -316,8 +316,7 @@ Download an Argo profile file, if an existing copy is less than `age` days old.
 
 - `server`: base URL for the server (it is very unlikely that users will set this
 
-- `debug`: integer indicating whether to print information during processing.
-  The default value of 0 means to work silently.
+$DEBUG_TEMPLATE
 
 # Return value
 

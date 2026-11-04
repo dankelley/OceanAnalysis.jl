@@ -36,9 +36,8 @@ For examples, see the documentation for [`plot_amsr`](@ref).
   that dataset.
 
 # Keywords
-- `debug`: An indication of whether to print information during processing. The
-  default value of 0 means to work quietly, and any larger integer indicates to
-  print some information.
+
+$DEBUG_TEMPLATE
 """
 function read_amsr(filename::String, field::String="SST"; debug=0)
     filename = expanduser(filename)
@@ -122,6 +121,7 @@ the four possible values of `type`:
   available after the month is finished.
 
 # Keywords
+
 - `type`: The type of data requested, with default `"3day"`.
   If `type="daily"` then data from a single day are acquired, and
   this will typically leave quite a few gaps for clouds, as well
@@ -135,16 +135,17 @@ the four possible values of `type`:
   many time-varying features will be smeared with these averages.
   Also, note that for `"weekly"` data, the date is always
   a Sunday.
+
 - `destdir`: Path to the destination directory. The author usually sets
   `destdir="~/data/amsr"`, so that the file will be in a central location for use
   by other analysis procedures.
+
 - `server`: The base of the server location. The default value ought to be used
   unless the data provider changes their web scheme, although the likelihood of
   the query working in such a case is slim, since changes tend to be sweeping.
   Users are asked to report an issue, if they encounter failed server responses.
-- `debug`: An indication of whether to print information during processing. The
-  default value of 0 means to work quietly, and any larger integer indicates to
-  print some information.
+
+$DEBUG_TEMPLATE
 
 # Return value
 `get_amsr` returns a String that is the full pathname of the downloaded file,
@@ -222,10 +223,16 @@ export get_amsr
 Subset an [`Amsr`](@ref) object to a specified longitude and latitude range.
 
 # Arguments
+
 - `a`: an [`Amsr`](@ref) object.
-- `lonlims`: A numeric tuple of length 2 specifying the minimum and maximum longitude values to be retained.
-- `latlims`: A numeric tuple of length 2 specifying the minimum and maximum latitude values to be retained.
-- `debug`: An indication of whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+
+- `lonlims`: A numeric tuple of length 2 specifying the minimum and maximum
+  longitude values to be retained.
+
+- `latlims`: A numeric tuple of length 2 specifying the minimum and maximum
+  latitude values to be retained.
+
+$DEBUG_TEMPLATE
 """
 function subset_amsr(a::Amsr, lonlims, latlims; debug::Integer=0)
     oad(debug, "subset_amsr BEGIN")

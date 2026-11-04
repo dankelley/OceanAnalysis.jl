@@ -22,8 +22,7 @@ This function provides some basic plots of the contents of an
 
 # Keywords
 
-- `debug`: an optional integer value that, if it exceeds 0, indicates that
-  debugging output should be printed during processing.
+$DEBUG_TEMPLATE
 
 - `kwargs`: other named arguments. The possibilities are: `colormap` to set the
   colormap (which defaults to `:inferno`), `colorrange` to set the color range

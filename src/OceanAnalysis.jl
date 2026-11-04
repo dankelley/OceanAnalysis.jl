@@ -50,6 +50,9 @@ provided in Ref 3.
 """
 module OceanAnalysis
 
+# Documentation strings
+include("documentation_strings.jl")
+
 # Constants
 include("constants.jl")
 

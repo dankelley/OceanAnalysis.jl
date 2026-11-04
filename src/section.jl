@@ -19,8 +19,7 @@ the `name` of the section and the `source` of the data.
   as `SA`, `CT` and `sigma0`, if they are not already present in the `ctds`
   values.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Examples
 ```julia
@@ -79,8 +78,7 @@ using [`as_section`](@ref).
   indicates whether to add TEOS10 variables such as Absolute Salinity,
   Conservative Temperature and sigma0.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Examples
 ```julia
@@ -172,7 +170,7 @@ any given CTD.
 
 # Keywords
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Examples
 

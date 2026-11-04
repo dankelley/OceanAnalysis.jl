@@ -81,8 +81,7 @@ Information about the analysis is printed if `debug` exceeds 0.
   palette is drawn, but space set aside to the right of the plot,
   where a palette would otherwise go.
 
-- `debug` indicator of debugging level. If this exceeds 0, some information is
-  printed during processing.
+$DEBUG_TEMPLATE
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
   `seriestype` is supplied, it controls how the data are indicated.  The
@@ -336,8 +335,7 @@ drawn by other means.
 
 - `linestyle` the style of the contour lines.
 
-- `debug` an integer controlling the amount of information printed during
-   processing.
+$DEBUG_TEMPLATE
 """
 function plot_TS_sigma0_contours!(ax; levels::Union{Symbol,Integer,AbstractVector}=:auto,
     labelsize=12, color=:darkgray, alpha=0.5, linewidth=2.0, linestyle=:solid,

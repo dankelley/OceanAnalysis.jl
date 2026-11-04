@@ -187,9 +187,7 @@ function cannot handle.
 
 # Keywords
 
-- `debug` an integer indicating whether to print information during processing.
-  The default value of 0 means to work quietly, and any larger integer indicates
-  to print some information.
+$DEBUG_TEMPLATE
 
 # Examples
 

@@ -18,8 +18,7 @@ Reference 1.
 - `byte_per_sample` either 2 (for single-beam pings) or 4.  The latter case has
   not been checked with sample data.
 
-- `debug` indicator of debugging level. If this exceeds 0, some information is
-  printed during processing.
+$DEBUG_TEMPLATE
 
 # References
 
@@ -132,7 +131,7 @@ function biosonic_float(buf::Vector{UInt8})
     nrval = Int64(floor(nbuf / 2))
     rval = Vector{UInt16}(undef, nrval)
     while i < nbuf
-        b = reinterpret(UInt16, buf[(i).+(0:1)])[1]
+        b = reinterpret(UInt16, buf[(i) .+ (0:1)])[1]
         mantissa = b & 0x0FFF
         exponent = (b & 0xF000) >> 12
         if exponent == 0
@@ -176,8 +175,7 @@ Biosonics document (Reference 1) that describes the file format.
   pressure 30 dbar.  (Sound speed is also stored in the files, but Reference 1
   says that they ought not to be used.)
 
-- `debug` an Int64 value indicating whether to print messages during
-  processing. By default, this is 0, meaning to work quietly.
+$DEBUG_TEMPLATE
 
 
 # Examples
@@ -215,12 +213,12 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
     ib = 0
     first_time = nothing
     while offset < file_size
-        N = Int64(reinterpret(UInt16, buf[(offset).+(1:2)])[1])
-        code = reinterpret(UInt16, buf[(offset).+(3:4)])[1]
+        N = Int64(reinterpret(UInt16, buf[(offset) .+ (1:2)])[1])
+        code = reinterpret(UInt16, buf[(offset) .+ (3:4)])[1]
         oad(debug, "  tuple: $tuple, offset: $offset, N: $N, code: $(repr(code))")
         if code == 0xFFFF
             oad(debug, "    Signature (start of file)")
-            check = reinterpret(UInt16, buf[(offset).+(5:6)])[1]
+            check = reinterpret(UInt16, buf[(offset) .+ (5:6)])[1]
             if check == 0xadff
                 oad(debug, "      File passes first of 2 checks")
             else
@@ -249,16 +247,16 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
             # From the sample file:
             # number=1 blankedSamples=57 dt=2.4e-05 pingsInFile=780 samplesPerPing=3399
             # number=2 blankedSamples=57 dt=2.4e-05 pingsInFile=780 samplesPerPing=3399
-            channel_number = convert(Int64, reinterpret(UInt16, buf[(offset).+(5:6)])[1])
+            channel_number = convert(Int64, reinterpret(UInt16, buf[(offset) .+ (5:6)])[1])
             oad(debug, "      channel $channel")
             # number of pings
-            np_overall = convert(Int64, reinterpret(UInt32, buf[(offset).+(7:10)])[1])
+            np_overall = convert(Int64, reinterpret(UInt32, buf[(offset) .+ (7:10)])[1])
             oad(debug, "      np_overall $np_overall")
-            spp_overall = convert(Int64, reinterpret(UInt16, buf[(offset).+(11:12)])[1])
+            spp_overall = convert(Int64, reinterpret(UInt16, buf[(offset) .+ (11:12)])[1])
             oad(debug, "      spp_overall $spp_overall")
-            sp = 1e-9 * convert(Int64, reinterpret(UInt16, buf[(offset).+(13:14)])[1])
+            sp = 1e-9 * convert(Int64, reinterpret(UInt16, buf[(offset) .+ (13:14)])[1])
             oad(debug, "      sp: $sp (sample delta-t, used for range: Sec 4.5,5.2 of Ref 1)")
-            ib = convert(Int64, reinterpret(UInt16, buf[(offset).+(21:22)])[1])
+            ib = convert(Int64, reinterpret(UInt16, buf[(offset) .+ (21:22)])[1])
             oad(debug, "      ib: $ib (initial blanking, used for range: Sec 4.4,5.2 of Ref 1)")
             push!(channels, (channel_number=channel_number, np=np_overall, spp=spp_overall))
             if nrow(channels) > 2
@@ -276,15 +274,15 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
             channel_number = reinterpret(UInt8, buf[offset+5])[1]
             if channel_number == channel
                 oad(debug, "      channel_number: $channel_number")
-                ping_number = reinterpret(UInt32, buf[(offset).+(7:10)])[1]
+                ping_number = reinterpret(UInt32, buf[(offset) .+ (7:10)])[1]
                 oad(debug, "      ping_number: $ping_number")
-                ptm = reinterpret(UInt32, buf[(offset).+(11:14)])[1]
+                ptm = reinterpret(UInt32, buf[(offset) .+ (11:14)])[1]
                 push!(elapsed_time_ms, ptm)
                 oad(debug, "      ptm: $ptm (msec since start)")
-                ns = reinterpret(UInt16, buf[(offset).+(15:16)])[1]
+                ns = reinterpret(UInt16, buf[(offset) .+ (15:16)])[1]
                 oad(debug, "      ns: $ns")
                 spp = channels[firstindex(channels.channel_number == channel), :spp]
-                ping_buf = buf[(offset+16).+(1:(2*ns))]
+                ping_buf = buf[(offset+16) .+ (1:(2*ns))]
                 tmp = Array{UInt8}(undef, 2 * spp) # should do just once
                 biosonic_expand_rle!(ping_buf, tmp)
                 val = biosonic_float(tmp)
@@ -303,7 +301,7 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
             # [3] "2008-07-01 16:39:41.389 UTC" "2008-07-01 16:39:41.630 UTC"
             # [5] "2008-07-01 16:39:41.880 UTC" "2008-07-01 16:39:42.119 UTC"
             if isnothing(first_time)
-                seconds = reinterpret(UInt32, buf[(offset).+(5:8)])[1]
+                seconds = reinterpret(UInt32, buf[(offset) .+ (5:8)])[1]
                 subseconds = 0.01 * reinterpret(UInt8, buf[offset+9])[1]
                 first_time = unix2datetime(seconds + subseconds)
                 oad(debug, "      first_time: $first_time")
@@ -325,7 +323,7 @@ function read_echosounder(filename::String; channel::Int64=1, beam::Symbol=:sing
         else
             oad(debug, "    UNRECOGNIZED CODE $(repr(code))")
         end
-        N6 = convert(Int64, reinterpret(UInt16, buf[(offset+4+N).+(1:2)])[1])
+        N6 = convert(Int64, reinterpret(UInt16, buf[(offset+4+N) .+ (1:2)])[1])
         N6 == N + 6 || error("tuple does not end correctly")
         offset += 6 + N
         tuple += 1

@@ -24,7 +24,7 @@ functions, to control the details of processing.
 
 # Keywords
 
-- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+$DEBUG_TEMPLATE
 
 - `kwargs` optional items passed by name to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), depending on the value of `:method`.
 
@@ -113,7 +113,7 @@ user-specified `bc` to control behaviour near top and bottom, along with `s`
 
 - `bc` a string, passed to `Dierckx::Spline1D()`, that indicates what to do near boundaries. The default is `"nearest"`.
 
-- `debug` an integer indicating whether to print information during processing. The default value of 0 means to work quietly, and any larger integer indicates to print some information.
+$DEBUG_TEMPLATE
 
 # References
 
@@ -203,9 +203,7 @@ first-differences of smoothed density.
 - `order` integer giving the order of the Butterworth filter. An exception is
   thrown if this is less than 1.
 
-- `debug` an integer indicating whether to print information during processing.
-  The default value of 0 means to work quietly, and any larger integer indicates
-  to print some information.
+$DEBUG_TEMPLATE
 
 # Return value
 

@@ -47,7 +47,7 @@ with [`get_topography`](@ref).
 
 # Keywords
 
-- `debug` an integer value indicating whether to print messages during processing. By default, this is 0, meaning to work quietly.
+$DEBUG_TEMPLATE
 
 # Examples
 
@@ -129,8 +129,7 @@ data file; thus, the function can both download and cache topographic data.
   `"https://gis.ngdc.noaa.gov"`, which is (as of writing) the only server that
   provides such files
 
-- `debug` an integer value indicating whether to print messages during
-  processing. By default, this is 0, meaning to work quietly.
+$DEBUG_TEMPLATE
 
 # Return
 

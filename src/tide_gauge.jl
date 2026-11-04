@@ -36,9 +36,7 @@ as in the Example.
 
 # Keywords
 
-- `debug` an Integer with 0 indicating to work quietly and any
-  positive integer to indicate that some debugging information
-  should be printed.
+$DEBUG_TEMPLATE
 
 # Return value
 
@@ -113,8 +111,7 @@ see if the data format (or URL/API structure) had changed since autum
 
 # Keywords
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Return
 
@@ -246,8 +243,7 @@ This returns a String naming the downloaded (or cached) file.
   This is true by default, to avoid pressure on the server, on the assumption
   that the source files never change.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Examples
 
@@ -457,8 +453,7 @@ This returns a Dict that holds information about the tide gauge.
 
 # Keywords
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # References
 

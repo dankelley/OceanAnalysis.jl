@@ -30,9 +30,7 @@ the returned value.
 
 - `latitude` as with `longitude`, but for latitude in -90 to +90 convention.
 
-- `debug` an Integer controlling the verbosity of the function. If set to 0,
-  the function works silently.  If it is a positive number, some information
-  is printed during processing.
+$DEBUG_TEMPLATE
 
 # Return value
 

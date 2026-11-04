@@ -21,8 +21,7 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
   `SA`) to the `data` portion of the return value. The default
   is to add these.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 """
 function as_ctd(a::Argo; add_teos::Bool=true, debug::Integer=0)
@@ -82,8 +81,7 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 - `add_teos`: an optional indication of whether to add `SA`, `CT`,
   `sigma0` and `spiciness0` to the `data` component of the return value.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that
-  debugging output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Examples
 ```julia
@@ -228,7 +226,7 @@ the value exceeds the maximum pressure in `ctd`.
 
 - `method`: a Symbol indicating the gridding method; this must be `:interpolate`, indicating linear interpolation to the specified pressure grid.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Example
 

@@ -62,8 +62,7 @@ https://github.com/MakieOrg/Makie.jl/issues/5811 for a bug report on this.
 - `show_stations` a Bool value indicating whether to draw vertical gray dotted
   lines to indicate station locations on cross-section diagrams.
 
-- `debug`: an optional integer value that, if it exceeds 0, indicates that
-  debugging output should be printed during processing.
+$DEBUG_TEMPLATE
 
 - `kwargs...` extra arguments that are parsed and handled according to the
   value of `type`. The permitted keywords are: `color`, `colormap`, `colorrange`,

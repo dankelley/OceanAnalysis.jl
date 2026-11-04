@@ -33,9 +33,7 @@ A Vector of String values that specify URLs for the files in the index.
 
 # Keywords
 
-- `debug`: An indication of whether to print information during processing. The
-  default value of 0 means to work quietly, and any larger integer indicates to
-  print some information.
+$DEBUG_TEMPLATE
 
 # Examples
 

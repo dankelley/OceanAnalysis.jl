@@ -36,8 +36,8 @@ profiler ([`Adp`](@ref)) object.
   owing to a bug in Makie version 0.24; see
   https://github.com/MakieOrg/Makie.jl/issues/5193.
 
-- `debug`: an optional integer value that, if it exceeds 0, indicates that
-  debugging output should be printed during processing.
+
+$DEBUG_TEMPLATE
 
 - `kwargs`: optional items, used variously.  The possibilities are
   `colormap` (defaulting to `:vik`), `colorrange` (defaulting to

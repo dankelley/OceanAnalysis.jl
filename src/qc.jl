@@ -16,8 +16,7 @@ columns in such objects are of a one-byte type.
   backslash, to "protect" the dollar sign.  Note that this default is suitable
   for [`Argo`](@ref) objects acquired from standard data servers.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # Return value
 
@@ -86,8 +85,7 @@ means "estimated value" and `"9"` means "missing value".
   where either `"salinity"`, `"temperature"` or `"pressure"` is not to be
   retained.
 
-- `debug`: an optional value that, if it exceeds 0, indicates that debugging
-  output should be printed during processing.
+$DEBUG_TEMPLATE
 
 # References
 

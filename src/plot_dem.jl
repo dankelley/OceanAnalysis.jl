@@ -15,8 +15,7 @@ using GMT: gmtread, xy2lonlat, grdproject
   if it is `:geographic` then longitude and latitude are used (with aspect ratio
   set for the middle latitude).
 
-- `debug` indicator of debugging level. If this exceeds 0, some information is
-  printed during processing.
+$DEBUG_TEMPLATE
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. The
   permitted keywords are: `colormap` (which defaults to `:inferno`

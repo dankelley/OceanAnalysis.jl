@@ -74,9 +74,7 @@ central latitude of the plot view.
   value specifying latitude); `linewidth` (which defaults to 1.8); and
   `style` (which in this version must be `:Ibeam`).
 
-- `debug` an integer indicating whether to print information during processing.
-  The default value of 0 means to work quietly, and any larger integer indicates
-  to print some information.
+$DEBUG_TEMPLATE
 
 - `kwargs...` other named arguments. Use `limits` to set the plot domain (with
   default `(-180.0,180.0,-90.0,90.0)` to show the whole world.  Use `color` to

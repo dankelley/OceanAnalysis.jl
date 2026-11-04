@@ -25,9 +25,7 @@ Draw a `heatmap` image of topography.
 
 - `sea_color` color used to fill the land -- FIXME, as not coded yet.
 
-- `debug` an integer indicating whether to print information during processing.
-  The default value of 0 means to work quietly, and any larger integer indicates
-  to print some information.
+$DEBUG_TEMPLATE
 
 - `kwargs` Other keyword arguments. You may use `colorrange` to set the range
   for the values being coloured (which defaults to the data range). Use

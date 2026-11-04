@@ -494,9 +494,7 @@ the first element of the returned Tuple value.
 
 - `max_soak` a pressure taken to be the maximum of a "soaking" interval.
 
-- `debug` an Integer that controls the printed output of the function. If
-  this is 0, the function works quietly. If it is a positive value,
-  then some information is printed about the processing.
+$DEBUG_TEMPLATE
 """
 function downcast_sbe(pressure; span=0.05, min_soak=1.0, max_soak=20.0, debug=0)
     oad(debug, "downcast_sbe() START with span=$span, min_soak=$min_soak and max_soak=$max_soak")

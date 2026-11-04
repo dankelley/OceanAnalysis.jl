@@ -59,8 +59,7 @@ are called.
   determining how to label the axes. The valid choices are `:short`, `:medium`,
   and `:long`.
 
-- `debug` indicator of debugging level. If this exceeds 0, some information is
-  printed during processing.
+$DEBUG_TEMPLATE
 
 - `kwargs...` extra arguments that are parsed and handled accordingly. If
   `seriestype` is supplied, it controls how the data are illustrated. The
