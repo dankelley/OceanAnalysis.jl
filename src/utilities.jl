@@ -4,7 +4,7 @@ import Loess
     increment_debug(debug::Integer=0)::Integer
 
 Increment an integer (if it is positive). This is used in conjunction with
-[`oad`](@ref) in many functions in this library.
+[`oad`](@ref) in many functions in this library, to show debugging output.
 """
 function increment_debug(debug::Integer=0)::Integer
     debug > 0 ? debug + 1 : 0
@@ -207,11 +207,11 @@ export pretty
 """
     oad(debug::Integer=0, args...)
 
-If `debug>0`, then the debugging information in `args...` will be printed to
-the console.  Indentation will be used for `debug` values exceeding
-1. Many functions in the package use [`increment_debug`](@ref) if they call
-other functions, so that the output will be indented to reveal function
-nesting.
+If `debug>0`, then the value of `args...` is printed to the console. This
+function is called by OceanAnalysis functions that have a keyword argument
+named `debug`. The output is indented according to the amount by which
+`debug` exceeds 1, and this fact is used to reveal nested function calls.
+(See also [`increment_debug`](@ref).)
 """
 function oad(debug::Integer=0, args...)
     if debug > 0

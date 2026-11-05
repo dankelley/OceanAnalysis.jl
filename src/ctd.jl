@@ -17,7 +17,7 @@ This returns a `Ctd` object, with `metadata` and `data` copied from `a`, and pos
 
 # Keywords
 
-- `add_teos` a logical value indicating whether to add TEOS-10 items (e.g.
+- `add_teos` a Bool value indicating whether to add TEOS-10 items (e.g.
   `SA`) to the `data` portion of the return value. The default
   is to add these.
 
@@ -78,7 +78,7 @@ NaN, then`SA`, etc. are computed assuming a mid-Atlantic location (-30E and
 
 - `time`: an optional indication of the measurement start time.
 
-- `add_teos`: an optional indication of whether to add `SA`, `CT`,
+- `add_teos`: a Bool value indicating whether to add `SA`, `CT`,
   `sigma0` and `spiciness0` to the `data` component of the return value.
 
 $DEBUG_TEMPLATE
