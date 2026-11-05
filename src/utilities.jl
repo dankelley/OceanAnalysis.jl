@@ -207,11 +207,28 @@ export pretty
 """
     oad(debug::Integer=0, args...)
 
-If `debug>0`, then the value of `args...` is printed to the console. This
-function is called by OceanAnalysis functions that have a keyword argument
-named `debug`. The output is indented according to the amount by which
-`debug` exceeds 1, and this fact is used to reveal nested function calls.
+Print debugging output to show steps in processing. This is used by the
+OceanAnalysis functions that have `debug` as one of their keyword arguments.
 (See also [`increment_debug`](@ref).)
+
+
+# Arguments
+
+- `debug` an Integer that controls printing. If this is zero or negative,
+  then `oad` prints nothing.  Otherwise it prints the value of `args...`
+  to the console, indented by 4 spaces times the value of
+  `debug-1`.
+
+- `args...` other arguments that could be printed.
+
+# Examples
+
+```julia
+using OceanAnalysis
+oad(0, "This prints nothing")
+oad(1, "Left-justified text")
+oad(2, "Text indented by 4 spaces")
+```
 """
 function oad(debug::Integer=0, args...)
     if debug > 0
