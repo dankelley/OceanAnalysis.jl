@@ -207,9 +207,11 @@ export pretty
 """
     oad(debug::Integer=0, args...)
 
-Print debugging information, if `debug`>0. Leading spaces are added in groups
-of 4, for each integer by which `debug` exceeds 1. This is called by most
-functions in this library.  See also [`increment_debug`](@ref).
+If `debug>0`, then the debugging information in `args...` will be printed to
+the console.  Indentation will be used for `debug` values exceeding
+1. Many functions in the package use [`increment_debug`](@ref) if they call
+other functions, so that the output will be indented to reveal function
+nesting.
 """
 function oad(debug::Integer=0, args...)
     if debug > 0

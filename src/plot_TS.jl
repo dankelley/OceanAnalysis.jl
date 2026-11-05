@@ -102,7 +102,7 @@ $DEBUG_TEMPLATE
 # Return value
 
 The `plot_TS` form returns a Makie `FigureAxisPlot`, which can be displayed
-directly or saved with the FileIO's `save`.
+directly or saved with FileIO's `save`.
 
 The `plot_TS!` form returns a Tuple with `ax` (a Makie `Axis`) as the first
 item, and a NamedTuple as the second. The latter contains an element named
