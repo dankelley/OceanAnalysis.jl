@@ -287,18 +287,21 @@ of the `topo` object).
 # Examples
 
 ```julia
+# Plot a cross-section of topography along 45N
 using OceanAnalysis
 using GLMakie # or CairoMakie
 file = joinpath(pkgdir(OceanAnalysis), "data", "topo_180W_180E_90S_90N_30min_netcdf.nc")
 topo = read_topography(file)
-plot_topography(topo)
-vlines!([-63], color=:magenta)
-
-lats = range(extrema(topo["latitude"])..., length=100)
-lons = repeat([-63.0], 100)
+n=100 # number of points in curve to be plotted
+lats = repeat([45.0], n)
+lons = range(extrema(topo["longitude"])..., length=n)
 z = interpolate_topography(lons, lats, topo)
-lines(lats, z, color=:magenta)
-hlines!([0.0])
+lines(lons, z, color=:brown, linewidth=3,
+    axis=(title="Elevation along 45°N",
+        limits=(-180, 180, nothing, nothing),
+        xlabel="Longitude [°E]",
+        ylabel="Height [m]"))
+hlines!([0.0], color=:blue, linewidth=1)
 ```
 """
 function interpolate_topography(longitude, latitude, topo::Topography)
