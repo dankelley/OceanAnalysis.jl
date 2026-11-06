@@ -6,7 +6,7 @@ Rename data items from labels used in files to names used in code.
 
 # Arguments
 
-- `names` a String holding a name to be converted, or a vector of such strings.
+- `names` a String holding a name to be converted, or a vector of such String valuess.
 
 - `number_replicates` a Bool value indicating whether to prevent duplicated
   names by appending numbers to duplicates.  This is true by default. For

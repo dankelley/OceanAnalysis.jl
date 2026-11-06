@@ -104,7 +104,7 @@ see if the data format (or URL/API structure) had changed since autum
 
 # Arguments
 
-- `station` either a string to be used for a search on station name or `:all`
+- `station` either a String to be used for a search on station name or `:all`
   to search for every gauge in the database. If a string, and if it matches
   to several stations, the result will be a data frame with one row per
   tide gauge.

@@ -26,7 +26,8 @@ functions, to control the details of processing.
 
 $DEBUG_TEMPLATE
 
-- `kwargs` optional items passed by name to [`N2_spline`](@ref) or to [`N2_first_difference`](@ref), depending on the value of `:method`.
+- `kwargs` optional items passed by name to [`N2_spline`](@ref) or to
+  [`N2_first_difference`](@ref), depending on the value of `:method`.
 
 # Return value
 
@@ -111,7 +112,7 @@ user-specified `bc` to control behaviour near top and bottom, along with `s`
   initial exploration, although detailed work normally involves specifying `s` as
   a numerical value, in which case `delta` is ignored.
 
-- `bc` a string, passed to `Dierckx::Spline1D()`, that indicates what to do near boundaries. The default is `"nearest"`.
+- `bc` a String, passed to `Dierckx::Spline1D()`, that indicates what to do near boundaries. The default is `"nearest"`.
 
 $DEBUG_TEMPLATE
 

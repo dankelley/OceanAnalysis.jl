@@ -29,8 +29,9 @@ that may be given as `name` values.
 For examples, see the documentation for [`plot_amsr`](@ref).
 
 # Arguments
-- `filename`: a string indicating the location of the local file.
-- `field`: a string used to identify the data field to be extracted. If
+
+- `filename`: a String indicating the location of the local file.
+- `field`: a String used to identify the data field to be extracted. If
   `field="?"` then `read_amsr` returns a vector of strings containing extractable
   data. Otherwise, if `field` names one of those items, then `read_amsr` returns
   that dataset.

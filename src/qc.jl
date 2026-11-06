@@ -11,7 +11,7 @@ columns in such objects are of a one-byte type.
 
 # Keywords
 
-- `pattern` a string that gets converted into a regular expression, so
+- `pattern` a String that gets converted into a regular expression, so
   backslashes are required for special characters. The default value has such a
   backslash, to "protect" the dollar sign.  Note that this default is suitable
   for [`Argo`](@ref) objects acquired from standard data servers.

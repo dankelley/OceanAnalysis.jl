@@ -157,7 +157,7 @@ Biosonics document (Reference 1) that describes the file format.
 
 # Arguments
 
-- `filename` string naming the file to be read.  It must be in Biosonics DT4
+- `filename` a Sstring naming the file to be read.  It must be in Biosonics DT4
   format (reference 1).
 
 # Keywords
